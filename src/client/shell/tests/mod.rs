@@ -262,6 +262,7 @@ mod link_hover;
 mod mobile;
 mod mouse_selection;
 mod popup_focus_projection;
+mod settings_style;
 mod startup_overlays;
 mod team_sidebar;
 mod work_board;

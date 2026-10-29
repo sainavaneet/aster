@@ -39,28 +39,38 @@ pub(crate) struct ChromeRoles {
 
 impl ChromeRoles {
     pub(crate) fn derive(palette: &Palette) -> Self {
-        let backgrounds = [palette.panel_bg, palette.sidebar_bg].map(rgb);
-        let measurable = backgrounds.iter().any(Option::is_some);
+        // Focused rows sit on `active_row_bg`, so colors must read on it too.
+        let backgrounds = [palette.panel_bg, palette.sidebar_bg, palette.active_row_bg].map(rgb);
+        let measurable = backgrounds.iter().all(Option::is_some)
+            && [
+                palette.yellow,
+                palette.red,
+                palette.peach,
+                palette.green,
+                palette.overlay1,
+            ]
+            .into_iter()
+            .all(|color| rgb(color).is_some());
         let fit = |color: Color| ensure_contrast(color, &backgrounds, MIN_STATE_CONTRAST);
         Self {
             state_working: fit(palette.yellow),
             state_blocked: fit(palette.red),
             state_approval: fit(palette.peach),
             state_done: fit(palette.green),
-            state_idle: palette.overlay1,
-            focus: palette.accent,
+            state_idle: fit(palette.overlay1),
+            focus: fit(palette.accent),
             flow: fit(palette.mauve),
             parallel: fit(palette.teal),
             role_tint: [
-                palette.accent,
-                palette.mauve,
-                palette.teal,
-                palette.overlay1,
+                fit(palette.accent),
+                fit(palette.mauve),
+                fit(palette.teal),
+                fit(palette.overlay1),
             ],
-            text_strong: palette.text,
-            text_body: palette.subtext0,
-            text_muted: palette.overlay0,
-            text_subtle: palette.overlay1,
+            text_strong: fit(palette.text),
+            text_body: fit(palette.subtext0),
+            text_muted: fit(palette.overlay0),
+            text_subtle: fit(palette.overlay1),
             rule: match palette.sidebar_bg {
                 Color::Reset => palette.surface1,
                 _ => palette.surface_dim,
@@ -126,8 +136,10 @@ fn mix(from: (u8, u8, u8), to: (u8, u8, u8), amount: f32) -> (u8, u8, u8) {
 }
 
 /// `color` unchanged when it already reaches `minimum` against every
-/// measurable background (or cannot be measured); otherwise mixed toward black
-/// on light backgrounds and white on dark ones in 5% steps until it does.
+/// measurable background (or cannot be measured). Otherwise it is mixed toward
+/// both black and white in 5% steps until a candidate passes every background.
+/// If no candidate passes, retain the best minimum contrast found. Candidates
+/// are compared by actual contrast, never by guessing from luminance: on `#b0b0b0` black reads at 9.7:1 and white at 2.2:1.
 pub(crate) fn ensure_contrast(
     color: Color,
     backgrounds: &[Option<(u8, u8, u8)>],
@@ -136,17 +148,31 @@ pub(crate) fn ensure_contrast(
     let Some(base) = rgb(color) else {
         return color;
     };
+    let measurable = || backgrounds.iter().flatten().copied();
+    let worst = |candidate: (u8, u8, u8)| {
+        measurable()
+            .map(|background| contrast_ratio(candidate, background))
+            .fold(f32::INFINITY, f32::min)
+    };
+    if measurable().next().is_none() || worst(base) >= minimum {
+        return color;
+    }
+    // Test both directions: an intermediate color can work on mixed light/dark
+    // backgrounds even when neither black nor white does. If no candidate can
+    // satisfy all backgrounds, retain the best worst-case contrast found.
     let mut fitted = base;
-    for background in backgrounds.iter().flatten() {
-        let target = if relative_luminance(*background) > 0.5 {
-            (0, 0, 0)
-        } else {
-            (255, 255, 255)
-        };
-        let mut step = 0u8;
-        while contrast_ratio(fitted, *background) < minimum && step < 20 {
-            step += 1;
-            fitted = mix(base, target, f32::from(step) * 0.05);
+    let mut best = worst(base);
+    for step in 1..=20u8 {
+        for target in [(0, 0, 0), (255, 255, 255)] {
+            let candidate = mix(base, target, f32::from(step) * 0.05);
+            let score = worst(candidate);
+            if score >= minimum {
+                return Color::Rgb(candidate.0, candidate.1, candidate.2);
+            }
+            if score > best {
+                fitted = candidate;
+                best = score;
+            }
         }
     }
     Color::Rgb(fitted.0, fitted.1, fitted.2)
@@ -160,36 +186,105 @@ mod tests {
         Palette::from_name(name).unwrap_or_else(|| panic!("theme {name}"))
     }
 
-    #[test]
-    fn every_builtin_theme_meets_the_state_contrast_floor() {
-        for name in crate::config::THEME_NAMES {
-            let palette = palette(name);
-            let roles = ChromeRoles::derive(&palette);
-            for background in [palette.panel_bg, palette.sidebar_bg]
-                .into_iter()
-                .filter_map(rgb)
-            {
-                for color in [
-                    roles.state_working,
-                    roles.state_blocked,
-                    roles.state_approval,
-                    roles.state_done,
-                    roles.flow,
-                    roles.parallel,
-                ] {
-                    let Some(color) = rgb(color) else { continue };
-                    assert!(
-                        contrast_ratio(color, background) >= MIN_STATE_CONTRAST - 0.05,
-                        "{name}: {color:?} on {background:?}"
-                    );
-                }
+    /// Every derived color role that carries meaning (not rules or fills).
+    fn measured_roles(roles: &ChromeRoles) -> Vec<(&'static str, Color)> {
+        let mut measured = vec![
+            ("state_working", roles.state_working),
+            ("state_blocked", roles.state_blocked),
+            ("state_approval", roles.state_approval),
+            ("state_done", roles.state_done),
+            ("state_idle", roles.state_idle),
+            ("focus", roles.focus),
+            ("flow", roles.flow),
+            ("parallel", roles.parallel),
+            ("text_strong", roles.text_strong),
+            ("text_body", roles.text_body),
+            ("text_muted", roles.text_muted),
+            ("text_subtle", roles.text_subtle),
+        ];
+        measured.extend(roles.role_tint.iter().map(|tint| ("role_tint", *tint)));
+        measured
+    }
+
+    fn assert_roles_legible(name: &str, palette: &Palette) {
+        let roles = ChromeRoles::derive(palette);
+        for background in [palette.panel_bg, palette.sidebar_bg, palette.active_row_bg]
+            .into_iter()
+            .filter_map(rgb)
+        {
+            for (role, color) in measured_roles(&roles) {
+                let Some(color) = rgb(color) else { continue };
+                assert!(
+                    contrast_ratio(color, background) >= MIN_STATE_CONTRAST - 0.05,
+                    "{name}: {role} {color:?} on {background:?} = {}",
+                    contrast_ratio(color, background)
+                );
             }
         }
     }
 
     #[test]
+    fn every_builtin_theme_keeps_every_role_legible() {
+        for name in crate::config::THEME_NAMES {
+            assert_roles_legible(name, &palette(name));
+        }
+    }
+
+    #[test]
+    fn custom_mid_grey_backgrounds_keep_every_role_legible() {
+        // Mid greys are where "pick white when luminance < 0.5" fails: #b0b0b0
+        // is below 0.5 relative luminance yet white on it is only ~2.2:1.
+        for level in (0u8..=255).step_by(5).chain([0xb0, 0x77, 0x80, 0x99]) {
+            let grey = Color::Rgb(level, level, level);
+            for base in ["catppuccin", "catppuccin-latte", "nord"] {
+                let mut custom = palette(base);
+                custom.panel_bg = grey;
+                custom.sidebar_bg = grey;
+                custom.active_row_bg = grey;
+                assert_roles_legible(&format!("{base} on #{level:02x}"), &custom);
+            }
+        }
+    }
+
+    #[test]
+    fn latte_idle_and_b0b0b0_working_reach_the_floor() {
+        let latte = palette("catppuccin-latte");
+        let idle = rgb(ChromeRoles::derive(&latte).state_idle).unwrap();
+        assert!(contrast_ratio(idle, rgb(latte.panel_bg).unwrap()) >= MIN_STATE_CONTRAST - 0.05);
+
+        let mut grey = palette("catppuccin");
+        grey.panel_bg = Color::Rgb(0xb0, 0xb0, 0xb0);
+        grey.sidebar_bg = Color::Rgb(0xb0, 0xb0, 0xb0);
+        grey.active_row_bg = Color::Rgb(0xb0, 0xb0, 0xb0);
+        let working = rgb(ChromeRoles::derive(&grey).state_working).unwrap();
+        assert!(contrast_ratio(working, (0xb0, 0xb0, 0xb0)) >= MIN_STATE_CONTRAST - 0.05);
+    }
+
+    #[test]
+    fn mixed_light_and_dark_backgrounds_use_a_readable_intermediate() {
+        let backgrounds = [Some((0, 0, 0)), Some((255, 255, 255))];
+        for base in [Color::Rgb(255, 255, 0), Color::Rgb(0, 0, 255)] {
+            let fitted = rgb(ensure_contrast(base, &backgrounds, MIN_STATE_CONTRAST)).unwrap();
+            for background in backgrounds.into_iter().flatten() {
+                assert!(contrast_ratio(fitted, background) >= MIN_STATE_CONTRAST);
+            }
+        }
+    }
+
+    #[test]
+    fn indexed_state_color_requests_bold_even_with_rgb_backgrounds() {
+        let mut custom = palette("catppuccin");
+        custom.yellow = Color::Indexed(3);
+        let roles = ChromeRoles::derive(&custom);
+        assert_eq!(roles.state_working, Color::Indexed(3));
+        assert!(roles.bold_states);
+    }
+
+    #[test]
     fn colors_that_already_pass_are_left_alone() {
-        let palette = palette("catppuccin");
+        let mut palette = palette("catppuccin");
+        // Make every background measurable; Reset must request the bold fallback.
+        palette.sidebar_bg = palette.panel_bg;
         let roles = ChromeRoles::derive(&palette);
         assert_eq!(roles.state_working, palette.yellow);
         assert_eq!(roles.focus, palette.accent);

@@ -70,17 +70,24 @@ pub(super) fn render_settings_overlay(
             .integrations
             .iter()
             .any(|integration| integration.state == crate::api::schema::IntegrationState::Outdated);
+    let modern = settings.original_style.0.is_modern();
     let mut tab_x = inner.x;
+    let mut tab_y = inner.y + 1;
     let mut tab_hits = Vec::new();
-    for section in ClientSettingsSection::ALL {
+    for section in ClientSettingsSection::available(settings.original_style.0.is_modern()) {
         let badge = *section == ClientSettingsSection::Integrations && integration_badge;
         let label = if badge {
             format!(" ● {} ", section.label())
         } else {
             format!(" {} ", section.label())
         };
-        let width = display_width(&label).min(inner.right().saturating_sub(tab_x));
-        let rect = Rect::new(tab_x, inner.y + 1, width, 1);
+        let label_width = display_width(&label);
+        if modern && tab_x > inner.x && label_width > inner.right().saturating_sub(tab_x) {
+            tab_x = inner.x;
+            tab_y += 1;
+        }
+        let width = label_width.min(inner.right().saturating_sub(tab_x));
+        let rect = Rect::new(tab_x, tab_y, width, 1);
         let active = *section == settings.section;
         let style = if active {
             Style::default()
@@ -107,14 +114,14 @@ pub(super) fn render_settings_overlay(
         }
         tab_hits.push((rect, *section));
         tab_x = tab_x.saturating_add(width.saturating_add(1));
-        if tab_x >= inner.right() {
+        if !modern && tab_x >= inner.right() {
             break;
         }
     }
     put_text(
         buffer,
         inner.x,
-        inner.y + 2,
+        tab_y + 1,
         inner.width,
         &"─".repeat(inner.width as usize),
         Style::default().fg(palette.surface0).bg(palette.panel_bg),
@@ -122,9 +129,11 @@ pub(super) fn render_settings_overlay(
 
     let content = Rect::new(
         inner.x,
-        inner.y + 4,
+        tab_y + 3,
         inner.width,
-        inner.height.saturating_sub(7),
+        inner
+            .height
+            .saturating_sub(7 + tab_y.saturating_sub(inner.y + 1)),
     );
     let mut choice_hits = Vec::new();
     match settings.section {
@@ -185,6 +194,22 @@ pub(super) fn render_settings_overlay(
                 "agent status indicators",
                 "choose color dots or distinct symbols for each state",
                 &["color dots  ● ● ● ○ ·", "distinct symbols  × ◐ ✓ ○ ·"],
+                settings.selected,
+                palette,
+                &mut choice_hits,
+            );
+        }
+        ClientSettingsSection::Style => {
+            render_choice_section(
+                buffer,
+                content,
+                "interface style",
+                "modern uses a shared glyph set; classic is the original look",
+                &[
+                    "modern  ◐ ▲ ✓ ⚑",
+                    "modern, ascii glyphs  * ! + ?",
+                    "classic",
+                ],
                 settings.selected,
                 palette,
                 &mut choice_hits,

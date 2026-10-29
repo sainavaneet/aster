@@ -400,6 +400,7 @@ pub(super) enum ClientSettingsSection {
     Polaris,
     Theme,
     Indicators,
+    Style,
     Sound,
     Toast,
     Integrations,
@@ -414,12 +415,35 @@ impl ClientSettingsSection {
         Self::Integrations,
         Self::Polaris,
     ];
+    /// The classic list plus the `style` tab, last so the Tab-key order of the
+    /// others is unchanged.
+    const WITH_STYLE: &[Self] = &[
+        Self::Theme,
+        Self::Indicators,
+        Self::Sound,
+        Self::Toast,
+        Self::Integrations,
+        Self::Polaris,
+        Self::Style,
+    ];
+
+    /// The tabs to show. `style` appears only under the modern style (classic
+    /// draws the original settings screen); leave classic by editing the config
+    /// file or choosing it here, which closes the overlay.
+    pub(super) fn available(modern: bool) -> &'static [Self] {
+        if modern {
+            Self::WITH_STYLE
+        } else {
+            Self::ALL
+        }
+    }
 
     pub(super) fn label(self) -> &'static str {
         match self {
             Self::Polaris => "Polaris",
             Self::Theme => "theme",
             Self::Indicators => "indicators",
+            Self::Style => "style",
             Self::Sound => "sound",
             Self::Toast => "toasts",
             Self::Integrations => "integrations",
@@ -434,6 +458,7 @@ pub(super) struct ClientSettingsOverlay {
     pub(super) selected: usize,
     pub(super) original_theme_name: String,
     pub(super) original_palette: Palette,
+    pub(super) original_style: (crate::config::UiStyleConfig, crate::config::UiGlyphsConfig),
     pub(super) integrations: Vec<crate::api::schema::IntegrationInfo>,
     pub(super) integration_messages: Vec<String>,
     pub(super) loading_integrations: bool,

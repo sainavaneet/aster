@@ -6,13 +6,16 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CHROME_DIR = PROJECT_ROOT / "src" / "ui" / "chrome"
+MODERN_DIR = PROJECT_ROOT / "src" / "client" / "shell" / "modern"
+SHELL_TESTS_DIR = PROJECT_ROOT / "src" / "client" / "shell" / "tests"
 HOT_PATH_SOURCES = (
     PROJECT_ROOT / "src" / "ui.rs",
     *sorted((PROJECT_ROOT / "src" / "ui").rglob("*.rs")),
+    # Modern chrome models and draw code run inside the shell's frame path.
+    *sorted(MODERN_DIR.rglob("*.rs")),
     PROJECT_ROOT / "src" / "server" / "render_stream.rs",
 )
-CHROME_DIR = PROJECT_ROOT / "src" / "ui" / "chrome"
-MODERN_DIR = PROJECT_ROOT / "src" / "client" / "shell" / "modern"
 # Modern per-frame code: it may only write borrowed text into a buffer.
 DRAW_SOURCES = (
     CHROME_DIR / "draw.rs",
@@ -193,7 +196,10 @@ def find_violations(paths, rules) -> list[str]:
         for pattern, description in rules:
             for match in pattern.finditer(code):
                 line = code.count("\n", 0, match.start()) + 1
-                relative_path = path.relative_to(PROJECT_ROOT)
+                try:
+                    relative_path = path.relative_to(PROJECT_ROOT)
+                except ValueError:
+                    relative_path = path
                 violations.append(f"{relative_path}:{line}: {description}")
     return violations
 
@@ -207,6 +213,8 @@ def style_lookup_violations(paths) -> list[str]:
             relative in STYLE_DISPATCH_FILES
             or path.is_relative_to(CHROME_DIR)
             or path.is_relative_to(MODERN_DIR)
+            # Test fixtures may inspect the resolved style; they never draw.
+            or path.is_relative_to(SHELL_TESTS_DIR)
         ):
             continue
         violations.extend(find_violations([path], STYLE_LOOKUPS))
@@ -234,6 +242,29 @@ class UiHotPathArchitectureTests(unittest.TestCase):
             "App/server code must use narrow terminal-state accessors:\n"
             + "\n".join(violations),
         )
+
+    def test_chrome_and_modern_sources_are_runtime_query_checked(self) -> None:
+        checked = {path.relative_to(PROJECT_ROOT).as_posix() for path in HOT_PATH_SOURCES}
+        for path in (
+            *sorted(CHROME_DIR.rglob("*.rs")),
+            *sorted(MODERN_DIR.rglob("*.rs")),
+        ):
+            self.assertIn(path.relative_to(PROJECT_ROOT).as_posix(), checked)
+
+    def test_runtime_query_check_catches_a_chrome_or_modern_violation(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, call in (
+                ("input_state.rs", "fn draw() { runtime.input_state(); }"),
+                ("job.rs", "fn draw() { foreground_job(pid); }"),
+                ("snapshot.rs", "fn draw() { rt.screen_text_snapshot(); }"),
+            ):
+                path = Path(tmp) / name
+                path.write_text(call)
+                self.assertEqual(
+                    len(find_violations([path], FORBIDDEN_CALLS)), 1, call
+                )
 
     def test_modern_draw_code_does_not_allocate_or_do_io(self) -> None:
         self.assertTrue(all(path.exists() for path in DRAW_SOURCES))

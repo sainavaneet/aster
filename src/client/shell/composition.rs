@@ -174,7 +174,16 @@ impl ClientShellState {
         cols: u16,
         rows: u16,
     ) -> Option<crate::client::frame_output::ComposedFrame> {
-        let now = std::time::Instant::now();
+        self.compose_at(cols, rows, std::time::Instant::now())
+    }
+
+    /// `compose` for the frame's time `now`, so tests can pin animation phases.
+    pub(crate) fn compose_at(
+        &mut self,
+        cols: u16,
+        rows: u16,
+        now: std::time::Instant,
+    ) -> Option<crate::client::frame_output::ComposedFrame> {
         self.last_composed_at = Some(now);
         self.selection_repaint_deadline = None;
         if self.last_composed_size != Some((cols, rows)) && self.mode == ClientShellMode::Navigate {

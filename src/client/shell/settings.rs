@@ -17,6 +17,34 @@ fn indicator_index(style: crate::config::StatusIndicatorStyle) -> usize {
     usize::from(style == crate::config::StatusIndicatorStyle::Symbols)
 }
 
+/// The settings choices of the `style` section: modern with unicode glyphs,
+/// modern with ASCII glyphs, and classic (which leaves `ui.glyphs` alone).
+pub(super) const STYLE_CHOICES: [(
+    crate::config::UiStyleConfig,
+    Option<crate::config::UiGlyphsConfig>,
+); 3] = [
+    (
+        crate::config::UiStyleConfig::Modern,
+        Some(crate::config::UiGlyphsConfig::Unicode),
+    ),
+    (
+        crate::config::UiStyleConfig::Modern,
+        Some(crate::config::UiGlyphsConfig::Ascii),
+    ),
+    (crate::config::UiStyleConfig::Classic, None),
+];
+
+fn style_index(
+    style: crate::config::UiStyleConfig,
+    glyphs: crate::config::UiGlyphsConfig,
+) -> usize {
+    match (style, glyphs) {
+        (crate::config::UiStyleConfig::Classic, _) => 2,
+        (_, crate::config::UiGlyphsConfig::Ascii) => 1,
+        _ => 0,
+    }
+}
+
 fn toast_index(delivery: crate::config::ToastDelivery) -> usize {
     match delivery {
         crate::config::ToastDelivery::Off => 0,
@@ -39,6 +67,7 @@ impl ClientShellState {
             selected: theme_index(&self.config.theme_name),
             original_theme_name: self.config.theme_name.clone(),
             original_palette: self.config.palette.clone(),
+            original_style: (self.config.ui_style, self.config.ui_glyphs),
             integrations: Vec::new(),
             integration_messages: Vec::new(),
             loading_integrations: false,
@@ -51,6 +80,9 @@ impl ClientShellState {
             ClientSettingsSection::Polaris => usize::from(!self.config.polaris.enabled),
             ClientSettingsSection::Theme => theme_index(&self.config.theme_name),
             ClientSettingsSection::Indicators => indicator_index(self.config.status_indicators),
+            ClientSettingsSection::Style => {
+                style_index(self.config.ui_style, self.config.ui_glyphs)
+            }
             ClientSettingsSection::Sound => usize::from(!self.config.sound_enabled),
             ClientSettingsSection::Toast => toast_index(self.config.toast_delivery),
             ClientSettingsSection::Integrations => 0,
@@ -86,13 +118,13 @@ impl ClientShellState {
         let Some(ClientShellOverlay::Settings(settings)) = self.overlay.as_ref() else {
             return;
         };
-        let current = ClientSettingsSection::ALL
+        let sections = ClientSettingsSection::available(settings.original_style.0.is_modern());
+        let current = sections
             .iter()
             .position(|section| *section == settings.section)
             .unwrap_or(0);
-        let next = (current as isize + delta).rem_euclid(ClientSettingsSection::ALL.len() as isize)
-            as usize;
-        self.select_settings_section(ClientSettingsSection::ALL[next], outcome);
+        let next = (current as isize + delta).rem_euclid(sections.len() as isize) as usize;
+        self.select_settings_section(sections[next], outcome);
     }
 
     fn settings_choice_count(&self) -> usize {
@@ -101,6 +133,7 @@ impl ClientShellState {
                 ClientSettingsSection::Theme => crate::config::THEME_NAMES.len(),
                 ClientSettingsSection::Indicators | ClientSettingsSection::Sound => 2,
                 ClientSettingsSection::Polaris => 2,
+                ClientSettingsSection::Style => STYLE_CHOICES.len(),
                 ClientSettingsSection::Toast => 4,
                 ClientSettingsSection::Integrations => settings.integrations.len(),
             },
@@ -119,8 +152,10 @@ impl ClientShellState {
         }
         settings.selected = (settings.selected as isize + delta)
             .clamp(0, count.saturating_sub(1) as isize) as usize;
-        if settings.section == ClientSettingsSection::Theme {
-            self.preview_selected_theme();
+        match settings.section {
+            ClientSettingsSection::Theme => self.preview_selected_theme(),
+            ClientSettingsSection::Style => self.preview_selected_style(),
+            _ => {}
         }
     }
 
@@ -131,15 +166,32 @@ impl ClientShellState {
                 settings.selected = index.min(count - 1);
             }
         }
-        if matches!(
-            self.overlay,
+        match self.overlay {
             Some(ClientShellOverlay::Settings(ClientSettingsOverlay {
                 section: ClientSettingsSection::Theme,
                 ..
-            }))
-        ) {
-            self.preview_selected_theme();
+            })) => self.preview_selected_theme(),
+            Some(ClientShellOverlay::Settings(ClientSettingsOverlay {
+                section: ClientSettingsSection::Style,
+                ..
+            })) => self.preview_selected_style(),
+            _ => {}
         }
+    }
+
+    /// Shows the highlighted style choice without saving it; `cancel` restores.
+    fn preview_selected_style(&mut self) {
+        let Some(ClientShellOverlay::Settings(settings)) = self.overlay.as_ref() else {
+            return;
+        };
+        let Some((style, glyphs)) = STYLE_CHOICES.get(settings.selected).copied() else {
+            return;
+        };
+        self.config.ui_style = style;
+        if let Some(glyphs) = glyphs {
+            self.config.ui_glyphs = glyphs;
+        }
+        self.config.refresh_chrome();
     }
 
     fn preview_selected_theme(&mut self) {
@@ -162,6 +214,7 @@ impl ClientShellState {
             return;
         };
         self.config.theme_name = settings.original_theme_name;
+        (self.config.ui_style, self.config.ui_glyphs) = settings.original_style;
         self.config.set_palette(settings.original_palette);
     }
 
@@ -215,6 +268,26 @@ impl ClientShellState {
                     crate::config::ConfigEdit::StatusIndicators(style),
                     outcome,
                 );
+            }
+            ClientSettingsSection::Style => {
+                let Some((style, glyphs)) = STYLE_CHOICES.get(selected).copied() else {
+                    return;
+                };
+                if self
+                    .save_settings_edit(crate::config::ConfigEdit::UiStyle(style, glyphs), outcome)
+                {
+                    if self.config.ui_style.is_modern() {
+                        // The saved choice is the new baseline `esc` restores.
+                        let saved = (self.config.ui_style, self.config.ui_glyphs);
+                        if let Some(ClientShellOverlay::Settings(settings)) = self.overlay.as_mut()
+                        {
+                            settings.original_style = saved;
+                        }
+                    } else {
+                        // Classic has no `style` tab: close, as saving a theme does.
+                        self.overlay = None;
+                    }
+                }
             }
             ClientSettingsSection::Sound => {
                 self.save_settings_edit(crate::config::ConfigEdit::Sound(selected == 0), outcome);

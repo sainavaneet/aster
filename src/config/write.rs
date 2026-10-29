@@ -5,6 +5,8 @@ pub(crate) enum ConfigEdit<'a> {
     Sound(bool),
     Polaris(bool),
     ToastDelivery(super::ToastDelivery),
+    /// `ui.style`, and `ui.glyphs` when the choice also sets it.
+    UiStyle(super::UiStyleConfig, Option<super::UiGlyphsConfig>),
 }
 
 impl ConfigEdit<'_> {
@@ -15,6 +17,7 @@ impl ConfigEdit<'_> {
             Self::Polaris(_) => "Polaris startup",
             Self::Sound(_) => "sound setting",
             Self::ToastDelivery(_) => "toast setting",
+            Self::UiStyle(..) => "ui style",
         }
     }
 
@@ -36,6 +39,22 @@ impl ConfigEdit<'_> {
             }
             Self::Sound(enabled) => {
                 super::upsert_section_bool(content, "ui.sound", "enabled", enabled)
+            }
+            Self::UiStyle(style, glyphs) => {
+                let value = match style {
+                    super::UiStyleConfig::Modern => "\"modern\"",
+                    super::UiStyleConfig::Classic => "\"classic\"",
+                };
+                let content = super::upsert_section_value(content, "ui", "style", value);
+                match glyphs {
+                    Some(super::UiGlyphsConfig::Unicode) => {
+                        super::upsert_section_value(&content, "ui", "glyphs", "\"unicode\"")
+                    }
+                    Some(super::UiGlyphsConfig::Ascii) => {
+                        super::upsert_section_value(&content, "ui", "glyphs", "\"ascii\"")
+                    }
+                    None => content,
+                }
             }
             Self::ToastDelivery(delivery) => {
                 let value = match delivery {
@@ -82,6 +101,23 @@ pub(crate) fn write_edit(edit: ConfigEdit<'_>) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ui_style_edit_writes_style_and_optionally_glyphs() {
+        use crate::config::{UiGlyphsConfig, UiStyleConfig};
+        let source = "[ui]\nsidebar_width = 30\n";
+        let modern =
+            ConfigEdit::UiStyle(UiStyleConfig::Modern, Some(UiGlyphsConfig::Ascii)).apply(source);
+        let config: crate::config::Config = toml::from_str(&modern).unwrap();
+        assert_eq!(config.ui.style, UiStyleConfig::Modern);
+        assert_eq!(config.ui.glyphs, UiGlyphsConfig::Ascii);
+        assert_eq!(config.ui.sidebar_width, 30);
+
+        let classic = ConfigEdit::UiStyle(UiStyleConfig::Classic, None).apply(&modern);
+        let config: crate::config::Config = toml::from_str(&classic).unwrap();
+        assert_eq!(config.ui.style, UiStyleConfig::Classic);
+        assert_eq!(config.ui.glyphs, UiGlyphsConfig::Ascii, "glyphs untouched");
+    }
 
     #[test]
     fn polaris_toggle_preserves_provider_model_and_other_settings() {
