@@ -17,6 +17,7 @@ mod api_helpers;
 pub(crate) use api_helpers::limit_snapshot_lines;
 pub(crate) use orbit_decisions::Outcome as OrbitDecisionOutcome;
 pub(crate) use orbit_notifications::checks_summary as orbit_checks_summary;
+pub(crate) use orbit_notifications::redact_secrets as orbit_redact_secrets;
 pub(crate) use orbit_notifications::HumanNotice as OrbitHumanNotice;
 pub(crate) use orbit_notifications::{
     read_token_file as orbit_read_token_file, token_dir as orbit_token_dir,

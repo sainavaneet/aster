@@ -11,6 +11,18 @@ use crate::api::schema::{EmptyParams, Method, Request};
 const MAX_ROWS: usize = 20;
 
 /// Keep arbitrary command/output metadata from injecting terminal controls.
+/// Like `cell`, for worker-provided free text: labelled secrets are hidden on
+/// screen. The stored report and the copy delivered to the lead stay verbatim.
+fn redacted_cell(value: Option<&Value>, width: usize) -> String {
+    match value.and_then(Value::as_str) {
+        Some(text) => cell(
+            Some(&Value::String(crate::app::orbit_redact_secrets(text))),
+            width,
+        ),
+        None => cell(value, width),
+    }
+}
+
 fn cell(value: Option<&Value>, width: usize) -> String {
     let text = value
         .and_then(Value::as_str)
@@ -214,13 +226,17 @@ fn render_tasks(out: &mut String, result: &Value, now_ms: u64) {
                 out,
                 "  {}: {}  tests={}{}",
                 cell(report.get("outcome"), 12),
-                cell(report.get("summary"), 120),
+                redacted_cell(report.get("summary"), 120),
                 yes_no(report.get("tests_run")),
                 checks_cell(report),
             );
         }
         if let Some(error) = task.get("error").filter(|error| !error.is_null()) {
-            let _ = writeln!(out, "  Delivery detail: {}", cell(Some(error), 160));
+            let _ = writeln!(
+                out,
+                "  Delivery detail: {}",
+                redacted_cell(Some(error), 160)
+            );
         }
     }
     if tasks.len() > MAX_ROWS {
@@ -581,5 +597,20 @@ mod tests {
         assert!(text.chars().all(|c| !c.is_control()));
         assert_eq!(text.chars().count(), 15);
         assert!(text.ends_with('…'));
+    }
+
+    #[test]
+    fn activity_hides_labelled_secrets_in_report_summaries() {
+        let text = render(
+            &json!({"jobs":[],"agents":[],"tasks":[{
+                "task_id":"task-1","worker_id":"w","submission":"submitted",
+                "delivery":"submitted","attempts":1,"created_at":0,"origin":"worker",
+                "report":{"outcome":"completed","summary":"output was password: hunter2"}
+            }]}),
+            false,
+            0,
+        );
+        assert!(!text.contains("hunter2"), "{text}");
+        assert!(text.contains("password: <redacted>"), "{text}");
     }
 }

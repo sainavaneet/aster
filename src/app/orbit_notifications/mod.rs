@@ -37,6 +37,7 @@ pub(crate) use approvals::{
 pub(crate) use assign::report_allow_args;
 pub(crate) use facts::checks_summary;
 pub(crate) use notify::HumanNotice;
+pub(crate) use redact::redact_secrets;
 pub(crate) use state::Task;
 use state::Tombstone;
 pub(crate) use token::{read_token_file, token_dir, TokenFile};
