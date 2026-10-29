@@ -282,3 +282,10 @@ pub fn read_clipboard_image() -> Option<ClipboardImage> {
 pub fn show_desktop_notification(_title: &str, _body: Option<&str>) -> std::io::Result<bool> {
     Ok(false)
 }
+
+#[cfg(unix)]
+pub(crate) fn service_group_has_members(_leader: u32) -> std::io::Result<bool> {
+    Err(std::io::Error::other(
+        "service groups are unsupported on this platform",
+    ))
+}

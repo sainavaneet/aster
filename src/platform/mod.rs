@@ -1057,3 +1057,19 @@ pub(crate) fn shared_ssh_control_path(
         "interactive SSH recovery requires Unix OpenSSH multiplexing",
     ))
 }
+
+/// Launcher state without releasing the platform's process-group identity.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ServicePhase {
+    Running,
+    LauncherExited,
+    Exited,
+}
+#[cfg(unix)]
+mod service_process_unix;
+#[cfg(unix)]
+pub(crate) use service_process_unix::ServiceProcess;
+#[cfg(windows)]
+mod service_process_windows;
+#[cfg(windows)]
+pub(crate) use service_process_windows::ServiceProcess;

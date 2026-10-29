@@ -6,7 +6,7 @@ use std::time::Duration;
 use serde_json::{json, Value};
 
 const MAX_MESSAGE: u64 = 1024 * 1024;
-const OPERATIONS: &str = "inspect|run|read|split|exec|job-status|job-cancel|agent-start|agent-prompt|agent-assign|agent-status|task-status|task-cancel|diff|activity|agent-approve|agent-deny|agent-stop|pane-resize|pane-zoom|pane-close|team-define|team-remove|team-list|route|decisions [--check]";
+const OPERATIONS: &str = "inspect|run|read|split|service-start|service-stop|service-list|exec|job-status|job-cancel|agent-start|agent-prompt|agent-assign|agent-status|task-status|task-cancel|diff|activity|agent-approve|agent-deny|agent-stop|pane-resize|pane-zoom|pane-close|team-define|team-remove|team-list|route|decisions [--check]";
 static REQUEST_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 /// Report token variable older assignment instructions set; still accepted when
 /// the task has no token file.
@@ -21,6 +21,9 @@ fn catalog() -> Value {
         {"name":"orbit_split","description":"Create a shell pane inside Orbit, preserving user focus.","inputSchema":{"type":"object","properties":{"pane_id":pane,"direction":{"type":"string","enum":["right","down"]}},"additionalProperties":false}}
     ]);
     let extras = [
+        ("orbit_service_start", "Start a server or watcher independently of jobs. Replacing a name stops its old service first. Readiness times out after timeout_ms (default 30000) without stopping the service.", json!({"name":{"type":"string"},"command":{"type":"string"},"cwd":{"type":"string"},"ready_url":{"type":"string"},"ready_log":{"type":"string"},"timeout_ms":{"type":"integer","minimum":1,"maximum":86400000}}), vec!["name","command"]),
+        ("orbit_service_stop", "Stop a named service process group.", json!({"name":{"type":"string"}}), vec!["name"]),
+        ("orbit_service_list", "List services, readiness, pid, uptime and recent output.", json!({}), vec![]),
         ("orbit_exec", "Run a tracked noninteractive command in Orbit's project directory. Returns a job ID; poll orbit_job_status. Captures output separately from terminal scrollback.", json!({"command":{"type":"string"},"timeout_ms":{"type":"integer","minimum":1,"maximum":86400000}}), vec!["command"]),
         ("orbit_job_status", "Read job state, exit code and a page of captured output. Follow next_offset while has_more. Output capture is capped and reports truncation.", json!({"job_id":{"type":"string"},"offset":{"type":"integer","minimum":0},"limit":{"type":"integer","minimum":1,"maximum":65536}}), vec!["job_id"]),
         ("orbit_job_cancel", "Cancel an Orbit-owned job. Process jobs stop their process tree; review tasks finish their bounded operation before cancellation completes.", json!({"job_id":{"type":"string"}}), vec!["job_id"]),
@@ -72,6 +75,9 @@ fn request(name: &str, arguments: Value) -> Result<crate::api::schema::Request, 
         "orbit_run" => "run",
         "orbit_read" => "read",
         "orbit_split" => "split",
+        "orbit_service_start" => "service_start",
+        "orbit_service_stop" => "service_stop",
+        "orbit_service_list" => "service_list",
         "orbit_exec" => "exec",
         "orbit_job_status" => "job_status",
         "orbit_job_cancel" => "job_cancel",
@@ -110,6 +116,16 @@ fn request(name: &str, arguments: Value) -> Result<crate::api::schema::Request, 
         }
         "inspect" => &["role"],
         "activity" => &[],
+        "service_start" => &[
+            "name",
+            "command",
+            "cwd",
+            "ready_url",
+            "ready_log",
+            "timeout_ms",
+        ],
+        "service_stop" => &["name"],
+        "service_list" => &[],
         "exec" => &["command", "timeout_ms"],
         "job_status" => &["job_id", "offset", "limit"],
         "job_cancel" => &["job_id"],
@@ -410,6 +426,9 @@ mod tests {
                 "orbit_run",
                 "orbit_read",
                 "orbit_split",
+                "orbit_service_start",
+                "orbit_service_stop",
+                "orbit_service_list",
                 "orbit_exec",
                 "orbit_job_status",
                 "orbit_job_cancel",
@@ -466,6 +485,28 @@ mod tests {
             assert!(start.contains(text), "{text} missing from {start}");
         }
         assert!(description("orbit_activity").contains("kinds"));
+    }
+    #[test]
+    fn orbit_mcp_maps_services() {
+        for (tool, args, method) in [
+            (
+                "orbit_service_start",
+                json!({"name":"web","command":"serve","ready_log":"listening","cwd":"/tmp","timeout_ms":500}),
+                "orbit.service_start",
+            ),
+            (
+                "orbit_service_stop",
+                json!({"name":"web"}),
+                "orbit.service_stop",
+            ),
+            ("orbit_service_list", json!({}), "orbit.service_list"),
+        ] {
+            let value = serde_json::to_value(request(tool, args.clone()).unwrap()).unwrap();
+            assert_eq!(value["method"], method);
+            for (key, expected) in args.as_object().unwrap() {
+                assert_eq!(&value["params"][key], expected);
+            }
+        }
     }
     #[test]
     fn orbit_mcp_maps_task_tools_and_assignment_timeout() {

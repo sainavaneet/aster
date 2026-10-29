@@ -178,6 +178,9 @@ operations::define_operations! {
     OrbitTeamList(EmptyParams) => "orbit.team_list", false, false;
     OrbitRoute(OrbitRouteParams) => "orbit.route", false, false;
     OrbitDecisions(OrbitDecisionsParams) => "orbit.decisions", false, false;
+    OrbitServiceStart(OrbitServiceStartParams) => "orbit.service_start", false, false;
+    OrbitServiceStop(OrbitServiceStopParams) => "orbit.service_stop", false, false;
+    OrbitServiceList(EmptyParams) => "orbit.service_list", false, false;
 }
 
 #[cfg(test)]

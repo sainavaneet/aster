@@ -1411,6 +1411,25 @@ fn resume_suspended_process(process_id: Option<u32>) -> std::io::Result<()> {
 }
 
 impl StatusCommandGuard {
+    pub(crate) fn has_service_processes(&self) -> std::io::Result<bool> {
+        use windows_sys::Win32::System::JobObjects::{
+            JobObjectBasicAccountingInformation, JOBOBJECT_BASIC_ACCOUNTING_INFORMATION,
+        };
+        let mut info = JOBOBJECT_BASIC_ACCOUNTING_INFORMATION::default();
+        if unsafe {
+            QueryInformationJobObject(
+                self.job as HANDLE,
+                JobObjectBasicAccountingInformation,
+                std::ptr::from_mut(&mut info).cast(),
+                size_of::<JOBOBJECT_BASIC_ACCOUNTING_INFORMATION>() as u32,
+                std::ptr::null_mut(),
+            )
+        } == 0
+        {
+            return Err(std::io::Error::last_os_error());
+        }
+        Ok(info.ActiveProcesses > 0)
+    }
     pub(crate) fn terminate(&mut self) {
         if self.job != 0 {
             // KILL_ON_JOB_CLOSE terminates the shell and every descendant still in

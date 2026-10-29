@@ -33,6 +33,7 @@ pub(crate) mod orbit_files;
 pub(crate) mod orbit_jobs;
 mod orbit_notifications;
 mod orbit_review;
+pub(crate) mod orbit_services;
 mod orbit_team;
 mod orbit_worker_policy;
 mod polaris;
@@ -123,6 +124,7 @@ pub struct App {
     polaris_startup_prepared: bool,
     orbit_binding: Option<api::orbit::OrbitBinding>,
     orbit_jobs: orbit_jobs::JobManager,
+    orbit_services: orbit_services::ServiceManager,
     orbit_notifications: orbit_notifications::Notifications,
     /// `[polaris.decisions]`: rules, provider, and the decision journal.
     orbit_decisions: orbit_decisions::Decisions,
@@ -666,6 +668,7 @@ impl App {
             polaris_startup_prepared: false,
             orbit_binding: None,
             orbit_jobs: orbit_jobs::JobManager::default(),
+            orbit_services: orbit_services::ServiceManager::default(),
             orbit_notifications: orbit_notifications::Notifications::default(),
             orbit_decisions: orbit_decisions::Decisions::default(),
             orbit_review: std::sync::Arc::new(orbit_review::ReviewBaseline::default()),

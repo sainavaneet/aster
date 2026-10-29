@@ -1436,3 +1436,6 @@ printf '%s\n' "$@" > "$ASTER_NOTIFY_ARGS"
         assert!(argv[2].contains("/tmp/aster scrollback.txt"));
     }
 }
+
+mod service;
+pub(crate) use service::service_group_has_members;
