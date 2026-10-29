@@ -17,7 +17,7 @@ fn reply(id: String, result: Result<Value, String>) -> String {
     }
 }
 
-fn assignment_timeout(timeout_ms: Option<u64>) -> Result<u64, String> {
+pub(super) fn assignment_timeout(timeout_ms: Option<u64>) -> Result<u64, String> {
     match timeout_ms {
         None => Ok(DEFAULT_TIMEOUT_MS),
         Some(ms) if (1..=MAX_TIMEOUT_MS).contains(&ms) => Ok(ms),
@@ -36,12 +36,22 @@ fn report_executable() -> Result<std::path::PathBuf, String> {
 /// shell. The command starts with the executable and carries no credentials:
 /// `aster orbit agent-report` reads the task's token and session socket from its
 /// token file, so a permission rule can match the command by prefix.
-pub(super) fn report_command(task_id: &str, worker_id: &str) -> Result<Value, String> {
-    Ok(json!({
+/// `step` is the step of a relayed task the report is for; it binds the report
+/// to that step so a delayed one cannot act on a later step.
+pub(super) fn report_command(
+    task_id: &str,
+    worker_id: &str,
+    step: Option<usize>,
+) -> Result<Value, String> {
+    let mut command = json!({
         "executable": report_executable()?,
         "arguments": ["orbit", "agent-report"],
         "json_argument": {"task_id":task_id,"worker_id":worker_id,"outcome":"completed","summary":"REPLACE with your result summary","tests_run":false}
-    }))
+    });
+    if let Some(step) = step {
+        command["json_argument"]["step"] = json!(step);
+    }
+    Ok(command)
 }
 
 /// The Claude permission rule that pre-allows exactly the report command.
@@ -71,8 +81,16 @@ pub(super) const REPORT_HOW: &str = "Run the executable with the listed argument
 /// The optional structured report keys, shared by the assignment and the reminder.
 pub(super) const REPORT_FIELDS_HINT: &str = "Set tests_run to true only if you ran the project's tests for this task, otherwise false. Optional keys: checks (list of {\"name\", \"status\": passed|failed|skipped, \"detail\"} for tests, lints, builds you ran), changed_files (relative paths you changed), branch (Git branch holding your changes), job_ids (Orbit job IDs you started), blocked_on (what you need to continue; use with outcome blocked).";
 
-fn assignment_instructions(task_id: &str, command: &Value) -> String {
-    format!("\n\n[Aster assignment {task_id}]\nBefore ending this task, explicitly report back to Polaris using your shell tool. {REPORT_HOW} Replace summary with a concise result and outcome with completed, failed, or blocked. Pass task_id and worker_id exactly as given. This reporting command is part of your task, including for read-only reviews. Do not merely print the command. Check that it succeeds; retry the identical report if needed. Do not guess another task or worker ID. {REPORT_FIELDS_HINT}\n{command}\n")
+/// Explains the report `handoff` object to members of a role with other members.
+pub(super) const HANDOFF_HINT: &str = "Your role has other members, so this task can be relayed. When your part is done but more work remains for a different member (for example a review of your change by another agent), add a handoff object to your report instead of finishing the task: done (what you finished, at most 1000 characters), next (what the next member should do, at most 1000), optional changed_files (paths so far, at most 200), known_issues (open problems, at most 500), and to (the name of an idle member of your role; otherwise Aster picks one). To split the remaining work across parallel agents instead, give parallel: a list of {member_or_kind, prompt, files} (files are the paths each part will change; parts that overlap run one after another), and each part runs in its own checkout. Aster then gives the task to that member, and Polaris receives one report when the last member reports without a handoff. Use a handoff only when more work remains; otherwise report normally.";
+
+pub(super) fn assignment_instructions(task_id: &str, command: &Value, relay: bool) -> String {
+    let handoff = if relay {
+        format!(" {HANDOFF_HINT}")
+    } else {
+        String::new()
+    };
+    format!("\n\n[Aster assignment {task_id}]\nBefore ending this task, explicitly report back to Polaris using your shell tool. {REPORT_HOW} Replace summary with a concise result and outcome with completed, failed, or blocked. Pass task_id, worker_id and step (when listed) exactly as given. This reporting command is part of your task, including for read-only reviews. Do not merely print the command. Check that it succeeds; retry the identical report if needed. Do not guess another task or worker ID. {REPORT_FIELDS_HINT}{handoff}\n{command}\n")
 }
 
 impl App {
@@ -102,15 +120,24 @@ impl App {
         if params.prompt.trim().is_empty() {
             return Err(fail("Task prompt must not be empty".into()));
         }
+        if let Some(requests) = params.parallel.clone() {
+            return self.assign_parallel_task(id, params, requests, now);
+        }
         let timeout = assignment_timeout(params.timeout_ms).map_err(fail)?;
         self.orbit_notifications.check_room().map_err(fail)?;
+        // A role pipeline names the kind that starts a task.
+        let kind = params.kind.or_else(|| {
+            let role = params.role.as_deref()?;
+            self.orbit_role_pipeline(role).into_iter().next()
+        });
+        let task_role = params.role.clone();
         let mut prompt = self.orbit_agent_prompt_params(
             id,
             OrbitAgentPromptParams {
                 name: params.name,
                 prompt: params.prompt,
                 role: params.role,
-                kind: params.kind,
+                kind,
             },
             true,
         )?;
@@ -124,10 +151,14 @@ impl App {
         }
         let task_id = self.orbit_notifications.next_task_id();
         let secret = token::generate().map_err(fail)?;
-        let command = report_command(&task_id, &worker_id).map_err(fail)?;
-        prompt
-            .text
-            .push_str(&assignment_instructions(&task_id, &command));
+        let steps = self.initial_orbit_steps(&worker_id, now);
+        let first_step = (!steps.is_empty()).then_some(0);
+        let command = report_command(&task_id, &worker_id, first_step).map_err(fail)?;
+        prompt.text.push_str(&assignment_instructions(
+            &task_id,
+            &command,
+            !steps.is_empty(),
+        ));
         let socket = crate::api::socket_path();
         let token_files = &mut self.orbit_notifications.token_files;
         token_files
@@ -169,6 +200,9 @@ impl App {
             nudged_at: None,
             deadline: Some(now + timeout),
             late: false,
+            steps,
+            timeout_ms: Some(timeout),
+            role: task_role,
             late_from: None,
             extra: Default::default(),
             token_hash,
@@ -222,8 +256,14 @@ impl App {
         self.orbit_notifications.reap_acks(now);
         self.persist_orbit_ledger();
         let notifications = &self.orbit_notifications;
+        let step_line = notifications
+            .find(&params.task_id)
+            .and_then(|index| self.orbit_step_line(&notifications.tasks[index]));
         let result = notifications.status(&params.task_id).map(|mut value| {
             value["ledger_error"] = json!(notifications.ledger_error());
+            if let Some(line) = step_line {
+                value["task"]["step_line"] = json!(line);
+            }
             value
         });
         reply(id, result)

@@ -279,12 +279,24 @@ pub(crate) struct Task {
     /// Unix ms after which an unreported assignment times out.
     #[serde(default)]
     pub(super) deadline: Option<u64>,
+    /// The report timeout the assignment was given, so each relayed step gets
+    /// the full timeout from its own start.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) timeout_ms: Option<u64>,
+    /// The team role the task was given to (or relayed within), which picks the
+    /// integrator of its parallel steps.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) role: Option<String>,
     /// The worker reported after Aster had resolved the assignment itself.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub(super) late: bool,
     /// The state Aster had resolved a late-reported assignment as.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) late_from: Option<Delivery>,
+    /// Ordered steps of a task relayed across the members of a role; empty for
+    /// a task one worker handles.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub(super) steps: Vec<super::steps::Step>,
     /// Absent for legacy tasks and server notices, which accept tokenless reports.
     /// Written to the ledger file by `store`; never exposed through the API.
     #[serde(default, skip_serializing)]
@@ -364,6 +376,9 @@ impl Task {
             nudged_at: None,
             deadline: None,
             late: true,
+            steps: Vec::new(),
+            timeout_ms: None,
+            role: None,
             late_from: Some(tombstone.final_delivery),
             token_hash: tombstone.token_hash.clone(),
             extra: Map::new(),
@@ -387,7 +402,7 @@ impl Task {
 }
 
 /// Report keys this build reads; others, from a newer build, are dropped.
-const REPORT_KEYS: [&str; 11] = [
+const REPORT_KEYS: [&str; 13] = [
     "task_id",
     "worker_id",
     "token",
@@ -399,15 +414,18 @@ const REPORT_KEYS: [&str; 11] = [
     "branch",
     "job_ids",
     "blocked_on",
+    "handoff",
+    "step",
 ];
 /// Structured facts dropped when only they keep a stored report from loading.
-const REPORT_FACT_KEYS: [&str; 6] = [
+const REPORT_FACT_KEYS: [&str; 7] = [
     "tests_run",
     "checks",
     "changed_files",
     "branch",
     "job_ids",
     "blocked_on",
+    "handoff",
 ];
 
 /// A stored report, tolerating a newer build's additions: unknown keys are

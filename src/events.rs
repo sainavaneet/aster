@@ -50,9 +50,24 @@ pub struct OrbitWorktreeResult {
     /// `git worktree add -b` created the branch, so discarding the worktree
     /// also deletes it.
     pub created_branch: bool,
+    /// Set when the checkout is a parallel Orbit step's, not a branch worktree.
+    pub parallel: Option<ParallelLaunch>,
     /// Error code and message when the worktree could not be created.
     pub result: Result<(), (&'static str, String)>,
     pub respond_to: std::sync::mpsc::Sender<String>,
+}
+
+/// A parallel Orbit step's isolated start: the step it belongs to and, once
+/// the background stage made it, its checkout.
+#[derive(Debug, Clone)]
+pub struct ParallelLaunch {
+    pub task_id: String,
+    pub step: usize,
+    /// Names the checkout directory and the step's worker.
+    pub label: String,
+    /// Patches of earlier overlapping steps, applied in order before the step starts.
+    pub apply: Vec<std::path::PathBuf>,
+    pub checkout: Option<crate::parallel_checkout::Checkout>,
 }
 
 #[derive(Debug)]

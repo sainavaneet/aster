@@ -16,15 +16,18 @@ mod deadlines;
 mod deliver;
 mod facts;
 mod gate;
+mod handoff;
 mod lead;
 mod ledger;
 mod lifecycle;
 mod notify;
+mod parallel;
 mod pump;
 mod redact;
 mod report;
 mod shell_view;
 mod state;
+mod steps;
 mod store;
 mod team;
 #[cfg(test)]
@@ -37,6 +40,8 @@ pub(crate) use approvals::{
 pub(crate) use assign::report_allow_args;
 pub(crate) use facts::checks_summary;
 pub(crate) use notify::HumanNotice;
+#[cfg(test)]
+pub(crate) use parallel::FinishedStep;
 pub(crate) use redact::redact_secrets;
 pub(crate) use state::Task;
 use state::Tombstone;
@@ -144,6 +149,8 @@ pub(crate) struct Notifications {
     lead_absent_fail_ms: Option<u64>,
     /// The Orbit sidebar projection published to client shells; see `shell_view`.
     shell_view: shell_view::ShellViewCache,
+    /// Background work of parallel steps; see `parallel`.
+    parallel: parallel::Runtime,
 }
 
 pub(super) fn response_error(id: String, message: impl ToString) -> String {
@@ -202,10 +209,12 @@ impl Notifications {
     /// assignment or delivery acknowledgement is outstanding.
     fn is_quiescent(&self) -> bool {
         self.batches.is_empty()
-            && self
-                .tasks
-                .iter()
-                .all(|task| task.delivery.is_terminal() && task.live.submission_ack.is_none())
+            && self.tasks.iter().all(|task| {
+                task.delivery.is_terminal()
+                    && task.live.submission_ack.is_none()
+                    && !task.holds_parallel_resources()
+                    && !task.integration_in_progress()
+            })
     }
 
     fn instant_at(&self, ms: u64) -> Option<Instant> {
@@ -375,13 +384,33 @@ impl App {
         let lead = self.orbit_lead_activity();
         let blocked_workers = self.orbit_blocked_workers();
         self.persist_orbit_ledger();
+        if self
+            .orbit_notifications
+            .tasks
+            .iter()
+            .any(|t| !t.steps.is_empty())
+        {
+            self.ensure_orbit_team_loaded();
+        }
         let notifications = &self.orbit_notifications;
-        json!({
+        let step_lines: Vec<Option<String>> = notifications
+            .tasks
+            .iter()
+            .map(|task| self.orbit_step_line(task))
+            .collect();
+        let mut activity = json!({
             "tasks": notifications.tasks,
             "ledger_error": notifications.ledger_error(),
             "lead": lead,
             "lead_error": self.polaris_error,
             "blocked_workers": blocked_workers,
-        })
+        });
+        let tasks = activity["tasks"].as_array_mut().into_iter().flatten();
+        for (task, line) in tasks.zip(step_lines) {
+            if let Some(line) = line {
+                task["step_line"] = json!(line);
+            }
+        }
+        activity
     }
 }

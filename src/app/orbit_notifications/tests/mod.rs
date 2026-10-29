@@ -20,6 +20,7 @@ mod human;
 mod late;
 mod lead;
 mod lifecycle;
+mod parallel;
 mod persistence;
 mod reports;
 mod security;
@@ -72,6 +73,7 @@ fn assign_params(timeout_ms: Option<u64>) -> OrbitAgentAssignParams {
         timeout_ms,
         role: None,
         kind: None,
+        parallel: None,
     }
 }
 
@@ -352,6 +354,9 @@ fn server_origin_marker_is_explicit_in_delivered_text() {
         nudged_at: None,
         deadline: None,
         late: false,
+        steps: Vec::new(),
+        timeout_ms: None,
+        role: None,
         late_from: None,
         extra: Default::default(),
         token_hash: None,

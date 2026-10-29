@@ -783,6 +783,148 @@ characters); `polaris` and `orbit` are reserved, and member names are unique
 across the team. At most 8 roles, 4 members per role, and 4096 bytes of role
 prompt.
 
+### Steps, handoffs and parallel work
+
+One task can be split into steps that different team members do, one after
+another or at the same time. Polaris still sees one task and receives one final
+report. This section covers relaying within a role (`pipeline` and `handoff`),
+parallel steps and their checkouts, the integrator, and what happens on a
+conflict.
+
+#### Relaying a task within a role
+
+A role with more than one member can split one task into ordered steps, each
+done by a different member. A member that finishes its part reports with a
+`handoff` note (`done`, `next`, `changed_files`, `known_issues`, and an optional
+`to` naming an idle member of the same role) instead of a final report. Aster
+marks its step `handed_off`, picks the next member, and gives it a follow-up
+built from the task title and the note. Polaris still sees one task and receives
+one report, from the member whose report carries no handoff. Without `to`, the
+next member comes from the role's `pipeline`, then from an idle member of a
+different kind. If no member is free, the task is reported `blocked` with
+`blocked_on` set to `no member available for handoff`. `orbit_task_status` and
+`orbit_activity` list each task's `steps`.
+
+`pipeline` lists the kinds a relayed task passes through. The first kind takes
+the task when it is assigned to the role without a `kind`, and each handoff
+without `to` moves to the next kind:
+
+```toml
+[[polaris.team]]
+name = "builder"
+area = "Implementation and review of the same change"
+pipeline = ["claude", "codex"]
+```
+
+#### Parallel steps in isolated checkouts
+
+Independent parts of one task can run at the same time. Give
+`orbit_agent_assign` a `parallel` list instead of `name` (and `kind`; `role`
+only names the team role whose integrator finishes the job), or add
+`parallel` to a handoff to fan the remaining work out. Each entry has
+`member_or_kind` (a team member, whose kind, model, and permission mode are
+used, or `claude` or `codex`, with an optional `model`), a `prompt`, and the
+`files` (paths or directories relative to the project) the part will change.
+At most four parts run at once.
+
+Aster gives each part its own checkout of the Orbit project, taken from a
+snapshot of the working tree made with `git stash create`, which leaves your
+files and index untouched, so uncommitted tracked edits are included. On macOS
+with APFS the repository directory is cloned copy-on-write, build output such
+as `target/` included, and the clone is moved onto the snapshot; elsewhere
+Aster adds a detached `git worktree` (without untracked files). Checkouts live
+under `[worktrees] directory`. The part's agent starts in a new pane in that
+checkout without taking focus, and is told to work only there.
+
+Parts whose declared paths overlap (the same file, or one inside the other)
+never run together: the later one waits for the earlier one, and the reason is
+written to its step `log` (for example `overlaps step 1 on src/a.rs; runs after
+it`). Its checkout then starts from the earlier part's result (its patch is
+applied before the agent starts), so the later patch builds on the earlier one:
+apply the patches of an overlapping chain in order. A part also waits for a
+running part of another task that overlaps it.
+
+When a part reports, Aster saves everything it changed (edits, new files, binary
+safe) as a patch in `orbit-patches/` in the session data directory, records it
+on the step, stops the part's agent, and removes the checkout. Each part gets
+the task's full timeout from its own start, and cancelling the task stops the
+agents and removes the checkouts. `orbit_task_status` and `orbit_activity` show
+the steps with their phase, files, log, checkout, and patch, and a line such as
+`parallel 1/3 done`.
+
+#### The integrator
+
+When every parallel part has reported, the task gets one more step, done by the
+role's integrator. The integrator is the member named by `integrator` on the
+task's `[[polaris.team]]` role, else the first member of the `reviewer` role,
+else the first member of the task's own role:
+
+```toml
+[[polaris.team]]
+name = "builder"
+integrator = "reviewer-claude"
+```
+
+Aster applies the saved patches to the main tree itself, in step order and
+exactly once each, with `git apply --3way`, one patch at a time on a background
+thread. Only one task integrates into a repository at a time: another task's
+integration waits (its step records `waiting for integration of task ...`) until
+the first integrator has reported, failed, been cancelled, or timed out. Each
+patch's result is recorded as it is applied, and the applying thread also keeps
+a durable journal (`<task>-integrate.journal` in `orbit-patches/`, flushed to
+disk before and after each patch), so after a server restart no patch is applied
+twice, whatever the ledger had time to save. A record that cannot be made
+durable stops the integration there, and a damaged or cut-off journal is never
+guessed at: the integrator is told to inspect the tree. Without a journal Aster
+reads the tree: a patch that reverses cleanly shows that it and the patches it
+was built on (the parts whose declared files it overlaps) are in the tree, and
+the integrator is told those were found and assumed applied. An independent
+patch that neither applies nor reverses is never assumed applied; it stops the
+integration with its files listed. A patch that was already in the tree
+(because the same change had been made some other way) is neither applied nor
+staged; the integrator and the final report say so, and an undo must not
+reverse it. If the tree does not settle whether a patch was applied, the
+integrator is told so and asked to inspect it. That stages
+the changes, and it needs the files a patch touches to match the index. The
+integrator is then prompted with the patches in order (each with what its part
+reported), told whether everything applied, and asked to review the combined
+change and run the full test suite. The task finishes only when the integrator
+reports without a handoff. That is the one report Polaris receives: the
+integrator's outcome and checks, with `changed_files` the union of every patch's
+paths and the integrator's own, and a summary naming the patches. If no
+integrator can be found, or no part left a patch, the task reports its parts
+directly.
+
+#### Conflicts and undo
+
+Aster stops at the first patch that does not apply cleanly and does not try the
+ones after it. For a conflict the markers are left in the files, and the step
+records the patch and the conflicted files (`integrate.stopped` in
+`orbit_task_status`). The integrator is told which patch and files, which
+patches were applied, and which were not, in order; it resolves the conflict,
+applies the rest with `git apply --3way <patch>`, runs the tests, and reports. A
+patch that does not apply at all changes nothing and is handled the same way.
+
+A failed integration keeps what was applied and the saved patches in
+`orbit-patches/`. To undo it, run `git apply -R --index <patch>` for each applied
+patch in reverse order (the reported summary lists them that way); `--index`
+restores both the files and the index, which a plain `git apply -R` would leave
+staged. Nothing is ever applied to your working tree before all parts have
+finished.
+
+Undoing only works while the files still match what the patches left. Edits
+made since (the integrator's conflict resolutions and fixes, or yours) can stop
+`git apply -R --index` from reversing a patch cleanly; it then refuses and
+changes nothing. When that happens, look at `git diff` and `git diff --cached`
+to see what is there, revert the affected files by hand (for example
+`git restore --staged --worktree <file>` for files you did not otherwise
+change), and use the saved patches only as a reference for which lines each
+part added.
+
+The integrator is authorised, for that step only, to resolve the integration
+conflicts and to fix test failures the integration caused, even when its role
+normally forbids editing product code.
+
 ### Orbit jobs and workers
 
 Polaris can use `orbit_exec` to run a tracked, noninteractive command in the

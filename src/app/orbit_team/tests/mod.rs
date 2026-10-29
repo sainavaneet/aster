@@ -9,6 +9,8 @@ use crate::workspace::Workspace;
 
 use super::roster::{self, RoleSpec};
 
+mod handoff;
+mod integrate;
 mod pinned;
 mod roster_tests;
 mod routing;

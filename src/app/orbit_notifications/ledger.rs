@@ -12,7 +12,7 @@ const UNKNOWN_TASK: &str = "Unknown assignment; use the ID supplied by orbit_age
 /// wrong or missing token, so a reporter learns nothing about which was wrong.
 pub(super) const REPORT_REJECTED: &str = "Assignment not found or token invalid; report with the exact task_id, worker_id, and token from your assignment";
 
-const CONFLICTING_REPORT: &str = "Assignment already has a different report";
+pub(super) const CONFLICTING_REPORT: &str = "Assignment already has a different report";
 const CANCELLED: &str =
     "Assignment was cancelled by Polaris; stop this task and do not retry the report";
 
@@ -147,6 +147,9 @@ impl Notifications {
         {
             return Err(REPORT_REJECTED.into());
         }
+        // The integrator's report is the task's one report: it carries every
+        // patch's paths. Merging is deterministic, so retries stay identical.
+        let report = super::parallel::merge_report(task, report);
         if let Some(previous) = &task.report {
             return match Retry::classify(previous, &report) {
                 Retry::Same => Ok(json!(task)),
@@ -180,6 +183,7 @@ impl Notifications {
             );
         }
         task.report = Some(report);
+        task.close_step(now_ms);
         task.origin = Some(ReportOrigin::Worker);
         task.live.idle_since = None;
         let Some(from) = late else {
@@ -307,6 +311,7 @@ impl Notifications {
         // pending assignment write forever; only its delivery is abandoned.
         // A shared delivery ACK stays with its batch; only Submitting members use it.
         task.live.batch = None;
+        task.fail_step(now_ms);
         task.set_delivery(Delivery::Cancelled, now_ms, reason);
     }
 

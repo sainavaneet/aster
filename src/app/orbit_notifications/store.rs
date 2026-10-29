@@ -258,6 +258,9 @@ mod tests {
             nudged_at: Some(4),
             deadline: Some(5),
             late: false,
+            steps: Vec::new(),
+            timeout_ms: None,
+            role: None,
             late_from: None,
             extra: Default::default(),
             token_hash: Some(TokenHash("abc123".into())),
@@ -300,6 +303,62 @@ mod tests {
         assert!(serde_json::to_value(&tombstones[0])
             .unwrap()
             .get("token_hash")
+            .is_none());
+    }
+
+    #[test]
+    fn steps_round_trip_and_a_ledger_from_before_steps_loads_unchanged() {
+        use super::super::steps::{Step, StepState};
+        use crate::api::schema::OrbitHandoff;
+        let path = test_path("steps");
+        let mut relayed = task("relayed");
+        relayed.steps = vec![
+            Step {
+                state: StepState::HandedOff,
+                finished_at: Some(3),
+                handoff: Some(OrbitHandoff {
+                    done: "built".into(),
+                    next: "review".into(),
+                    changed_files: vec!["src/a.rs".into()],
+                    known_issues: Some("none yet".into()),
+                    to: Some("rx".into()),
+                    parallel: None,
+                }),
+                ..Step::active(0, "rc", "claude", 1)
+            },
+            Step::active(1, "rx", "codex", 3),
+        ];
+        let tasks = [relayed, task("plain")];
+        let tombstones = VecDeque::new();
+        let snapshot = Snapshot {
+            lead_terminal_id: None,
+            tasks: &tasks,
+            tombstones: &tombstones,
+        };
+        save(&path, &snapshot).unwrap();
+        let loaded = load(&path, 10).unwrap().unwrap();
+        assert_eq!(loaded.tasks[0].steps, tasks[0].steps);
+        assert!(loaded.tasks[1].steps.is_empty());
+        assert!(serde_json::to_value(&tasks[1])
+            .unwrap()
+            .get("steps")
+            .is_none());
+
+        // A ledger written before steps existed, with a stored report.
+        let old = test_path("steps-old");
+        std::fs::create_dir_all(old.parent().unwrap()).unwrap();
+        std::fs::write(
+            &old,
+            r#"{"version":1,"lead_terminal_id":"lead","tasks":[{"task_id":"t","worker_id":"w","lead_id":"lead","submission":"submitted","delivery":"queued","report":{"task_id":"t","worker_id":"w","outcome":"completed","summary":"done","tests_run":true},"origin":"worker","error":null,"created_at":1,"updated_at":2,"attempts":1}],"tombstones":[]}"#,
+        )
+        .unwrap();
+        let loaded = load(&old, 10).unwrap().unwrap();
+        assert!(loaded.skipped.len() == 0 && loaded.tasks.len() == 1);
+        assert!(loaded.tasks[0].steps.is_empty());
+        assert!(loaded.tasks[0].report.as_ref().unwrap().handoff.is_none());
+        assert!(serde_json::to_value(&loaded.tasks[0])
+            .unwrap()
+            .get("steps")
             .is_none());
     }
 

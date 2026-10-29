@@ -1215,6 +1215,23 @@ pub fn process_exists(pid: u32) -> bool {
     }
 }
 
+/// `cp -c -R`: clones `source` (including build output such as `target/`) to the
+/// new path `destination` through APFS `clonefile`, sharing blocks until written.
+pub(super) fn copy_on_write_clone(source: &Path, destination: &Path) -> std::io::Result<()> {
+    let output = Command::new("cp")
+        .args(["-c", "-R"])
+        .arg(source)
+        .arg(destination)
+        .stdin(Stdio::null())
+        .output()?;
+    if output.status.success() {
+        return Ok(());
+    }
+    Err(std::io::Error::other(
+        String::from_utf8_lossy(&output.stderr).trim().to_owned(),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -225,6 +225,16 @@ fn check_kind(kind: &str) -> Result<(), Rejection> {
     }
 }
 
+/// A role pipeline lists supported agent kinds, at most one per member slot.
+pub(crate) fn check_pipeline(pipeline: &[String]) -> Result<(), Rejection> {
+    if pipeline.len() > MAX_MEMBERS {
+        return Err(invalid(format!(
+            "pipeline allows at most {MAX_MEMBERS} kinds"
+        )));
+    }
+    pipeline.iter().try_for_each(|kind| check_kind(kind))
+}
+
 /// Whether `check_shape` rejects member kinds this build cannot run.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Kinds {
@@ -461,6 +471,10 @@ pub(crate) fn pinned_role(
     prompt: Option<String>,
     policy: &WorkerPolicy,
 ) -> Result<Role, Rejection> {
+    check_pipeline(&config.pipeline)?;
+    if let Some(integrator) = &config.integrator {
+        check_name("Integrator", integrator)?;
+    }
     let configured = |name: &str| config.members.iter().any(|member| member.name == name);
     let mut spec = RoleSpec::from(config);
     spec.members

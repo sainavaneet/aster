@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use serde_json::{json, Value};
 
-use super::assign::{report_command, REPORT_FIELDS_HINT, REPORT_HOW};
+use super::assign::{report_command, HANDOFF_HINT, REPORT_FIELDS_HINT, REPORT_HOW};
 use super::notify::bounded_text;
 use super::redact::redact_secrets;
 use super::state::{Delivery, LiveState, ReportOrigin, Submission, Task};
@@ -59,7 +59,7 @@ fn awaits_worker(task: &Task) -> bool {
     task.awaits_worker()
 }
 
-fn server_notice(
+pub(super) fn server_notice(
     task: &Task,
     task_id: String,
     outcome: OrbitOutcome,
@@ -90,6 +90,9 @@ fn server_notice(
         nudged_at: None,
         deadline: None,
         late: false,
+        steps: Vec::new(),
+        timeout_ms: None,
+        role: None,
         late_from: None,
         extra: Default::default(),
         token_hash: None,
@@ -131,6 +134,9 @@ pub(super) fn worker_notice(
         nudged_at: None,
         deadline: None,
         late: false,
+        steps: Vec::new(),
+        timeout_ms: None,
+        role: None,
         late_from: None,
         extra: Default::default(),
         token_hash: None,
@@ -138,8 +144,13 @@ pub(super) fn worker_notice(
     }
 }
 
-fn nudge_text(task_id: &str, command: &serde_json::Value) -> String {
-    format!("[Aster assignment {task_id} reminder]\nYou appear idle and have not reported this assignment. If it is finished, failed, or blocked, report now using your shell tool, replacing outcome and summary. {REPORT_HOW} Do not merely print the command. {REPORT_FIELDS_HINT}\n{command}\n")
+fn nudge_text(task_id: &str, command: &serde_json::Value, relay: bool) -> String {
+    let handoff = if relay {
+        format!(" {HANDOFF_HINT}")
+    } else {
+        String::new()
+    };
+    format!("[Aster assignment {task_id} reminder]\nYou appear idle and have not reported this assignment. If it is finished, failed, or blocked, report now using your shell tool, replacing outcome and summary. {REPORT_HOW} Do not merely print the command. {REPORT_FIELDS_HINT}{handoff}\n{command}\n")
 }
 
 /// The short reason a human notification gives for a server notice.
@@ -211,6 +222,7 @@ impl App {
                 .terminals
                 .contains_key(self.orbit_notifications.tasks[index].worker_id.as_str());
             let task = self.orbit_notifications.task_mut(index);
+            task.resweep_parallel_checkouts();
             if task.submission == Submission::Pending {
                 task.set_submission(Submission::Uncertain, now, "server restarted before ACK");
             }
@@ -220,12 +232,15 @@ impl App {
                     task.set_delivery(Delivery::Uncertain, now, "server restarted before ACK");
                 }
                 Delivery::Uncertain => task.live.uncertain_since = Some(now),
-                Delivery::AwaitingReport if awaits_worker(task) && !worker_exists => {
+                Delivery::AwaitingReport
+                    if awaits_worker(task) && !task.is_fanout() && !worker_exists =>
+                {
                     missing.push((task.task_id.clone(), task.worker_id.clone()));
                 }
                 _ => {}
             }
         }
+        self.normalize_integration_roots();
         for (task_id, worker_id) in missing {
             let fate = lost(&worker_id, "worker terminal missing after restart");
             self.apply_worker_fate(&task_id, fate, now);
@@ -233,7 +248,7 @@ impl App {
     }
 
     /// `Ok(idle)` while the worker can still report; `Err(reason)` once it cannot.
-    fn observe_worker(&self, worker_id: &str) -> Result<bool, &'static str> {
+    pub(super) fn observe_worker(&self, worker_id: &str) -> Result<bool, &'static str> {
         let Some((key, terminal)) = self.state.terminals.get_key_value(worker_id) else {
             return Err("worker terminal no longer exists");
         };
@@ -296,7 +311,9 @@ impl App {
         }
         let mut fates = Vec::new();
         for index in 0..self.orbit_notifications.tasks.len() {
-            if !awaits_worker(&self.orbit_notifications.tasks[index]) {
+            let task = &self.orbit_notifications.tasks[index];
+            // Parallel steps have their own agents, driven by `parallel`.
+            if !awaits_worker(task) || task.is_fanout() {
                 continue;
             }
             if let Some(fate) = self.worker_fate(index, now) {
@@ -321,7 +338,7 @@ impl App {
 
     /// Terminal state for the assignment plus a server-originated notice for the lead,
     /// delivered through the same queue and states as worker reports.
-    fn resolve_unreported_assignment(
+    pub(super) fn resolve_unreported_assignment(
         &mut self,
         task_id: &str,
         to: Delivery,
@@ -338,6 +355,7 @@ impl App {
         }
         task.error = Some(reason.into());
         task.live = LiveState::default();
+        task.fail_step(now);
         let notice_id = format!("{}/server-notice", task.task_id);
         let notice = server_notice(task, notice_id, OrbitOutcome::Failed, summary, now);
         let worker_id = task.worker_id.clone();
@@ -557,10 +575,14 @@ impl App {
             return;
         };
         let worker_id = self.orbit_notifications.tasks[index].worker_id.clone();
+        let relay = !self.orbit_notifications.tasks[index].steps.is_empty();
         let Some(target) = self.idle_orbit_target(&worker_id, now) else {
             return;
         };
-        let command = match report_command(task_id, &worker_id) {
+        let step = self.orbit_notifications.tasks[index]
+            .current_step()
+            .map(|step| step.index);
+        let command = match report_command(task_id, &worker_id, step) {
             Ok(command) => command,
             Err(error) => {
                 let task = self.orbit_notifications.task_mut(index);
@@ -571,7 +593,7 @@ impl App {
         };
         let prompt = AgentPromptParams {
             target,
-            text: nudge_text(task_id, &command),
+            text: nudge_text(task_id, &command, relay),
             wait: None,
         };
         let result = self.queue_orbit_prompt(task_id.into(), &prompt);

@@ -59,7 +59,7 @@ impl App {
     pub(crate) fn handle_orbit_agent_report(
         &mut self,
         id: String,
-        params: OrbitAgentReportParams,
+        mut params: OrbitAgentReportParams,
     ) -> String {
         if !self.orbit_terminal_in_scope(&params.worker_id) {
             return response_error(id, OUT_OF_SCOPE);
@@ -75,7 +75,14 @@ impl App {
         // Reap the assignment ACK before accepting a fast worker's report.
         self.orbit_notifications.reap_acks(now);
         let worker_id = params.worker_id.clone();
-        let result = self.orbit_notifications.accept_report(params, now);
+        let answered = match self.parallel_step_report(&params, now) {
+            Some(result) => Some(result),
+            None => self.relay_orbit_handoff(&id, &mut params, now),
+        };
+        let result = match answered {
+            Some(result) => result,
+            None => self.orbit_notifications.accept_report(params, now),
+        };
         self.persist_orbit_ledger();
         match result {
             Ok(result) => json!({"id":id,"result":result}).to_string(),

@@ -375,6 +375,16 @@ pub struct PolarisTeamRoleConfig {
     pub prompt: String,
     /// At most four agents that live in the role's tab.
     pub members: Vec<PolarisTeamMemberConfig>,
+    /// Agent kinds a task relayed within the role passes through, for example
+    /// ["claude", "codex"]: the first kind starts, and each handoff without an
+    /// explicit target goes to the next kind.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub pipeline: Vec<String>,
+    /// The team member who integrates the patches of the role's parallel steps
+    /// and runs the full tests. Default: the first member of the `reviewer`
+    /// role, else the first member of this role.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub integrator: Option<String>,
 }
 
 /// A member of a `[[polaris.team]]` role.

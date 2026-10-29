@@ -180,6 +180,11 @@ pub struct OrbitAgentAssignParams {
     /// With `role`, prefer an idle member of this kind.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kind: Option<String>,
+    /// Run the task as parallel steps, each by a new agent in its own checkout
+    /// of the project (instead of `name` or `role`); Polaris gets one report
+    /// when all have finished.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel: Option<Vec<OrbitParallelStep>>,
 }
 /// Identifies an assignment issued by orbit.agent_assign.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
@@ -235,6 +240,57 @@ pub struct OrbitAgentReportParams {
     /// What the worker needs to continue; expected with outcome `blocked`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blocked_on: Option<String>,
+    /// Relays the task to another member of the worker's role instead of
+    /// finishing it: this report ends the worker's step, not the task.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub handoff: Option<OrbitHandoff>,
+    /// The step of a relayed task this report belongs to, as given in the
+    /// assignment; a report for a step already handed off is stale.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub step: Option<usize>,
+}
+
+/// The note one step of a relayed task leaves for the next member.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct OrbitHandoff {
+    /// What this step finished, at most 1000 characters.
+    pub done: String,
+    /// What the next member should do, at most 1000 characters.
+    pub next: String,
+    /// Relative paths changed so far, at most 200.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub changed_files: Vec<String>,
+    /// Open problems the next member should know, at most 500 characters.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub known_issues: Option<String>,
+    /// Name of an idle member of the same role to take over; otherwise the
+    /// role's pipeline, or a member of another kind, is chosen.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to: Option<String>,
+    /// Instead of one next member, run these steps in parallel, each in its own
+    /// checkout; the task finishes when all of them have reported.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel: Option<Vec<OrbitParallelStep>>,
+}
+
+/// One step of a parallel fan-out, run by a new agent in its own checkout of the
+/// Orbit project.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct OrbitParallelStep {
+    /// A team member's name (its kind, model, and permission mode are used) or
+    /// an agent kind such as `claude` or `codex`.
+    pub member_or_kind: String,
+    /// Model for the step's agent, when `member_or_kind` is a kind (a member's
+    /// own model is used otherwise).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    /// What this step should do.
+    pub prompt: String,
+    /// Paths (files or directories, relative to the project) this step will
+    /// change. Steps whose paths overlap run one after another.
+    pub files: Vec<String>,
 }
 
 impl OrbitAgentReportParams {
@@ -252,6 +308,8 @@ impl OrbitAgentReportParams {
             branch: None,
             job_ids: None,
             blocked_on: None,
+            handoff: None,
+            step: None,
         }
     }
 
@@ -309,6 +367,8 @@ impl std::fmt::Debug for OrbitAgentReportParams {
             .field("branch", &self.branch)
             .field("job_ids", &self.job_ids)
             .field("blocked_on", &self.blocked_on)
+            .field("handoff", &self.handoff)
+            .field("step", &self.step)
             .finish()
     }
 }

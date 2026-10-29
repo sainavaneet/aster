@@ -5,7 +5,7 @@ use std::fmt::Write as _;
 use serde_json::{json, Map, Value};
 
 use super::report::DELIVERY_MARKER_PREFIX;
-use crate::api::schema::OrbitAgentReportParams;
+use crate::api::schema::{OrbitAgentReportParams, OrbitHandoff};
 
 const MAX_CHECKS: usize = 20;
 const MAX_CHECK_NAME_BYTES: usize = 120;
@@ -16,13 +16,16 @@ const MAX_BRANCH_BYTES: usize = 200;
 const MAX_JOB_IDS: usize = 20;
 const MAX_JOB_ID_BYTES: usize = 128;
 const MAX_BLOCKED_ON_BYTES: usize = 500;
+const MAX_HANDOFF_DONE_CHARS: usize = 1000;
+const MAX_HANDOFF_NEXT_CHARS: usize = 1000;
+const MAX_HANDOFF_ISSUES_CHARS: usize = 500;
 /// Changed paths listed in a delivery; the count always covers all of them.
 const MAX_RENDERED_FILES: usize = 20;
 
 /// One line of 1..=`max` bytes with no control characters (newlines and tabs
 /// included, so a value cannot add lines to the rendered facts) and no
 /// delivery marker.
-fn check_text(field: &str, text: &str, max: usize) -> Result<(), String> {
+pub(super) fn check_text(field: &str, text: &str, max: usize) -> Result<(), String> {
     if text.trim().is_empty()
         || text.len() > max
         || text.chars().any(char::is_control)
@@ -35,6 +38,49 @@ fn check_text(field: &str, text: &str, max: usize) -> Result<(), String> {
     Ok(())
 }
 
+/// A handoff note: 1..=`max` characters; newlines and tabs are allowed since
+/// the next member reads the note as prose, other control characters and
+/// delivery markers are not.
+pub(super) fn check_note(field: &str, text: &str, max: usize) -> Result<(), String> {
+    if text.trim().is_empty()
+        || text.chars().count() > max
+        || text
+            .chars()
+            .any(|ch| ch.is_control() && ch != '\n' && ch != '\t')
+        || text.contains(DELIVERY_MARKER_PREFIX)
+    {
+        return Err(format!(
+            "{field} must be 1–{max} characters without terminal control characters or delivery markers"
+        ));
+    }
+    Ok(())
+}
+
+fn validate_handoff(handoff: &OrbitHandoff) -> Result<(), String> {
+    check_note("handoff.done", &handoff.done, MAX_HANDOFF_DONE_CHARS)?;
+    check_note("handoff.next", &handoff.next, MAX_HANDOFF_NEXT_CHARS)?;
+    check_count(
+        "handoff.changed_files",
+        &handoff.changed_files,
+        MAX_CHANGED_FILES,
+    )?;
+    for (index, path) in handoff.changed_files.iter().enumerate() {
+        check_path(&format!("handoff.changed_files[{index}]"), path)?;
+    }
+    if let Some(issues) = &handoff.known_issues {
+        check_note("handoff.known_issues", issues, MAX_HANDOFF_ISSUES_CHARS)?;
+    }
+    if let Some(parallel) = &handoff.parallel {
+        super::parallel::check_requests(parallel)?;
+    }
+    if let Some(to) = &handoff.to {
+        if !crate::app::agents::valid_agent_name(to) {
+            return Err("handoff.to must be the name of a member of your role".into());
+        }
+    }
+    Ok(())
+}
+
 fn check_count<T>(field: &str, items: &[T], max: usize) -> Result<(), String> {
     if items.len() > max {
         return Err(format!("{field} must have at most {max} entries"));
@@ -43,7 +89,7 @@ fn check_count<T>(field: &str, items: &[T], max: usize) -> Result<(), String> {
 }
 
 /// Relative to the worker's project: no leading separator, drive prefix, or `..`.
-fn check_path(field: &str, path: &str) -> Result<(), String> {
+pub(super) fn check_path(field: &str, path: &str) -> Result<(), String> {
     check_text(field, path, MAX_PATH_BYTES)?;
     let bytes = path.as_bytes();
     let absolute = path.starts_with(['/', '\\']) || (bytes.len() >= 2 && bytes[1] == b':');
@@ -107,6 +153,9 @@ pub(super) fn validate(report: &OrbitAgentReportParams) -> Result<(), String> {
     }
     if let Some(blocked_on) = &report.blocked_on {
         check_text("blocked_on", blocked_on, MAX_BLOCKED_ON_BYTES)?;
+    }
+    if let Some(handoff) = &report.handoff {
+        validate_handoff(handoff)?;
     }
     Ok(())
 }

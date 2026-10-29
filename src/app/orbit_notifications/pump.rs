@@ -87,6 +87,7 @@ impl App {
         notifications.reap_acks(now);
         self.observe_orbit_idle(now);
         self.check_orbit_workers(now);
+        self.drive_parallel_steps(now);
         self.recover_uncertain_deliveries(now);
         self.deliver_orbit_reports(now);
         self.flush_orbit_notices();

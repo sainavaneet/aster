@@ -574,6 +574,23 @@ pub(crate) fn begin_cli_output() {}
 #[cfg(not(unix))]
 pub(crate) fn end_cli_output() {}
 
+/// Clones the directory tree `source` to the new path `destination` with
+/// copy-on-write sharing where the OS has it (APFS); `Unsupported` elsewhere.
+pub(crate) fn clone_directory_cow(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+) -> std::io::Result<()> {
+    #[cfg(target_os = "macos")]
+    {
+        macos::copy_on_write_clone(source, destination)
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (source, destination);
+        Err(std::io::Error::from(std::io::ErrorKind::Unsupported))
+    }
+}
+
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "linux")]

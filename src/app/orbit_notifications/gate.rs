@@ -33,7 +33,22 @@ impl App {
             .flat_map(|task| {
                 let worker =
                     (task.delivery == Delivery::AwaitingReport).then_some(task.worker_id.as_str());
-                std::iter::once(task.lead_id.as_str()).chain(worker)
+                // Agents of parallel steps waiting for their prompt.
+                let starting = task.steps.iter().filter_map(|step| {
+                    let parallel = step.parallel.as_ref()?;
+                    (parallel.phase == super::parallel::Phase::Starting)
+                        .then_some(parallel.worker_id.as_deref()?)
+                });
+                // The integrator waiting to be prompted.
+                let integrator = task.steps.iter().filter_map(|step| {
+                    let integrate = step.integrate.as_ref()?;
+                    (integrate.phase == super::parallel::IntegratePhase::Ready)
+                        .then_some(integrate.worker_id.as_deref()?)
+                });
+                std::iter::once(task.lead_id.as_str())
+                    .chain(worker)
+                    .chain(starting)
+                    .chain(integrator)
             })
             .collect();
         watched.extend(notifications.lead_terminal_id.as_deref());

@@ -1,0 +1,184 @@
+//! Ending parallel steps: wait for a step's background work, stop its agent,
+//! remove its checkout, and send the task's one report when none is left.
+use std::sync::mpsc::{self, TryRecvError};
+
+use serde_json::{json, Value};
+
+use super::drive::error_text;
+use super::Live;
+use crate::api::schema::{OrbitOutcome, Request};
+use crate::app::orbit_notifications::state::Delivery;
+use crate::app::App;
+use crate::events::ParallelLaunch;
+use crate::parallel_checkout::RemoveError;
+
+/// Removals tried before a step stops (a restart tries again), and the wait between tries.
+const MAX_REMOVAL_TRIES: u32 = 5;
+const REMOVAL_RETRY_MS: u64 = 5_000;
+
+impl App {
+    /// A terminal step: wait for its background work, stop its agent, then
+    /// remove its checkout, trying again until the removal is confirmed.
+    pub(super) fn settle_parallel_step(&mut self, index: usize, step: usize, now: u64) {
+        let task = &self.orbit_notifications.tasks[index];
+        if task.steps[step]
+            .parallel
+            .as_ref()
+            .is_none_or(|parallel| parallel.released)
+        {
+            return;
+        }
+        let key = (task.task_id.clone(), step);
+        let live = &mut self.orbit_notifications.parallel.live;
+        match live.remove(&key) {
+            Some(Live::Launching(response)) => match response.try_recv() {
+                Ok(text) => {
+                    let value: Value = serde_json::from_str(&text).unwrap_or_default();
+                    if let Some(id) = value["result"]["agent"]["terminal_id"].as_str() {
+                        let id = id.to_owned();
+                        self.edit_parallel_step(index, step, |s| s.launched(id));
+                    }
+                }
+                Err(TryRecvError::Empty) => {
+                    let live = &mut self.orbit_notifications.parallel.live;
+                    live.insert(key, Live::Launching(response));
+                    return;
+                }
+                Err(TryRecvError::Disconnected) => {}
+            },
+            Some(Live::Capturing(patch)) => {
+                if let Err(TryRecvError::Empty) = patch.try_recv() {
+                    let live = &mut self.orbit_notifications.parallel.live;
+                    live.insert(key, Live::Capturing(patch));
+                    return;
+                }
+            }
+            Some(applying @ Live::Integrating(_)) => {
+                let live = &mut self.orbit_notifications.parallel.live;
+                live.insert(key, applying);
+                return;
+            }
+            Some(Live::Removing(removal)) => {
+                match removal.try_recv() {
+                    Ok(Ok(())) => {
+                        self.edit_parallel_step(index, step, |s| s.released());
+                    }
+                    Err(TryRecvError::Empty) => {
+                        let live = &mut self.orbit_notifications.parallel.live;
+                        live.insert(key, Live::Removing(removal));
+                    }
+                    Ok(Err(RemoveError::Refused(error))) => {
+                        tracing::warn!(%error, step, "orbit parallel checkout removal refused");
+                        self.edit_parallel_step(index, step, |s| s.removal_refused(&error));
+                    }
+                    Ok(Err(RemoveError::Failed(error))) => {
+                        self.removal_failed(index, step, &error, now);
+                    }
+                    Err(TryRecvError::Disconnected) => {
+                        self.removal_failed(index, step, "the removal stopped early", now);
+                    }
+                }
+                return;
+            }
+            None => {}
+        }
+        // Read after the launch result above, which may have named the agent.
+        let parallel = self.orbit_notifications.tasks[index].steps[step]
+            .parallel
+            .as_ref();
+        let (worker, checkout, tries) = parallel.map_or((None, None, 0), |p| {
+            (p.worker_id.clone(), p.checkout.clone(), p.removals)
+        });
+        if tries == 0 {
+            if let Some(worker) = worker {
+                self.stop_parallel_worker(&worker);
+            }
+        }
+        let Some(checkout) = checkout else {
+            self.edit_parallel_step(index, step, |s| s.released());
+            return;
+        };
+        let retry = self.orbit_notifications.parallel.removal_after.get(&key);
+        if retry.is_some_and(|after| now < *after) {
+            return;
+        }
+        let directory = self.state.worktree_directory.clone();
+        let (send, removal) = mpsc::channel();
+        let spawned = crate::thread_spawn::spawn_named("aster-orbit-checkout-remove", move || {
+            let _ = send.send(crate::parallel_checkout::remove(&checkout, &directory));
+        });
+        self.edit_parallel_step(index, step, |s| s.removal_started());
+        match spawned {
+            Ok(_) => {
+                let live = &mut self.orbit_notifications.parallel.live;
+                live.insert(key, Live::Removing(removal));
+            }
+            Err(error) => self.removal_failed(index, step, &error.to_string(), now),
+        }
+    }
+
+    /// A removal failed: log it and try again shortly, or give up after a few tries.
+    fn removal_failed(&mut self, index: usize, step: usize, error: &str, now: u64) {
+        let key = (self.orbit_notifications.tasks[index].task_id.clone(), step);
+        tracing::warn!(%error, step, "could not remove a parallel step checkout");
+        let gave_up =
+            self.edit_parallel_step(index, step, |s| s.removal_failed(error, MAX_REMOVAL_TRIES));
+        let removal_after = &mut self.orbit_notifications.parallel.removal_after;
+        if gave_up == Some(true) {
+            removal_after.remove(&key);
+        } else {
+            removal_after.insert(key, now + REMOVAL_RETRY_MS);
+        }
+    }
+
+    fn stop_parallel_worker(&mut self, worker_id: &str) {
+        let request = serde_json::from_value::<Request>(json!({
+            "id": "parallel-stop",
+            "method": "orbit.agent_stop",
+            "params": {"name": worker_id, "close_pane": true, "force": true},
+        }));
+        let Ok(request) = request else { return };
+        let response: Value =
+            serde_json::from_str(&self.handle_api_request_after_internal_events_drained(request))
+                .unwrap_or_default();
+        if let Some(message) = error_text(&response) {
+            // Usually the agent is already gone.
+            tracing::info!(worker_id, %message, "orbit parallel agent not stopped");
+        }
+    }
+
+    /// Keeps a step's checkout once its agent exists, even if the step ends
+    /// before the agent starts.
+    pub(crate) fn record_parallel_checkout(&mut self, plan: &ParallelLaunch) {
+        let Some(checkout) = plan.checkout.clone() else {
+            return;
+        };
+        let Some(index) = self.orbit_notifications.find(&plan.task_id) else {
+            return;
+        };
+        self.edit_parallel_step(index, plan.step, |step| step.recorded(checkout));
+    }
+
+    /// One final report once no step is left to run.
+    pub(super) fn finish_fanout_if_done(&mut self, index: usize, now: u64) {
+        let task = &self.orbit_notifications.tasks[index];
+        if task.delivery != Delivery::AwaitingReport || task.has_unfinished_steps() {
+            return;
+        }
+        // The role's integrator takes it from here; without one (or with
+        // nothing to integrate) the task reports its steps directly.
+        if self.begin_integration(index, now) {
+            return;
+        }
+        let report = self.aggregate_report(index);
+        let task = self.orbit_notifications.task_mut(index);
+        task.worker_id = report.worker_id.clone();
+        let outcome = report.outcome.clone();
+        task.report = Some(report);
+        task.origin = Some(crate::app::orbit_notifications::state::ReportOrigin::Worker);
+        task.error =
+            (outcome != OrbitOutcome::Completed).then(|| "a parallel step did not complete".into());
+        task.live = Default::default();
+        task.set_delivery(Delivery::Queued, now, "parallel steps finished");
+    }
+}

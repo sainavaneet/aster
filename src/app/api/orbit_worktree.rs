@@ -15,7 +15,7 @@ use crate::api::schema::{
     Method, OrbitAgentStartParams, PaneSplitParams, PaneTarget, Request, SplitDirection,
 };
 use crate::app::App;
-use crate::events::{AppEvent, OrbitWorktreeResult};
+use crate::events::{AppEvent, OrbitWorktreeResult, ParallelLaunch};
 
 /// How long a new worker pane's shell may take to reach its prompt.
 const SHELL_READY_TIMEOUT: Duration = Duration::from_secs(5);
@@ -75,6 +75,77 @@ fn create_worktree(
     })
 }
 
+/// Hands a finished background stage to the event loop. When the loop is gone
+/// (shutdown), nothing will ever own the checkout the stage created, so it is
+/// removed here, on the background thread.
+fn send_stage(
+    event_tx: &tokio::sync::mpsc::Sender<AppEvent>,
+    directory: &Path,
+    stage: OrbitWorktreeResult,
+) {
+    let Err(error) = event_tx.blocking_send(AppEvent::OrbitWorktreeReady(Box::new(stage))) else {
+        return;
+    };
+    let AppEvent::OrbitWorktreeReady(stage) = error.0 else {
+        return;
+    };
+    // Whenever a checkout exists, whatever happened to the rest of the stage.
+    let created = stage.result.is_ok();
+    match stage
+        .parallel
+        .as_ref()
+        .and_then(|plan| plan.checkout.as_ref())
+    {
+        Some(checkout) => match crate::parallel_checkout::remove(checkout, directory) {
+            Ok(()) => {
+                tracing::info!(path = %checkout.path.display(), "removed an unowned parallel checkout")
+            }
+            Err(error) => {
+                tracing::warn!(%error, path = %checkout.path.display(), "could not remove an unowned parallel checkout")
+            }
+        },
+        None if stage.parallel.is_none() && created => {
+            let worktree = OrbitWorktree {
+                path: stage.path.clone(),
+                branch: Some(stage.branch.clone()),
+                repo_root: stage.repo_root.clone(),
+                recovered: false,
+                created_branch: stage.created_branch,
+            };
+            discard_worktree(&worktree, stage.created_branch);
+        }
+        None => {}
+    }
+}
+
+/// Creates a parallel step's snapshot checkout and records it on `plan`. The
+/// returned path is where the step's pane starts.
+fn create_checkout(
+    project: &Path,
+    directory: &Path,
+    plan: &mut ParallelLaunch,
+) -> Result<CreatedWorktree, (&'static str, String)> {
+    let failed = |error: String| ("worktree_create_failed", error);
+    let space = crate::workspace::git_space_metadata(project)
+        .ok_or(("not_git_worktree", NOT_A_REPOSITORY.to_owned()))?;
+    let checkout = crate::parallel_checkout::create(
+        &space.repo_root,
+        project,
+        directory,
+        &space.repo_name,
+        &plan.label,
+        &plan.apply,
+    )
+    .map_err(failed)?;
+    let created = CreatedWorktree {
+        path: checkout.workdir(),
+        repo_root: space.repo_root,
+        created_branch: false,
+    };
+    plan.checkout = Some(checkout);
+    Ok(created)
+}
+
 /// Best-effort cleanup of a worktree whose worker never started, deleting the
 /// branch only when this start created it.
 fn discard_worktree(worktree: &OrbitWorktree, created_branch: bool) {
@@ -123,7 +194,9 @@ impl App {
         if params.worktree_branch().is_none() {
             return false;
         }
-        if let Err(response) = self.begin_orbit_worktree_start(&request.id, params, &respond_to) {
+        if let Err(response) =
+            self.begin_orbit_worktree_start(&request.id, params, &respond_to, None)
+        {
             let _ = respond_to.send(response);
         }
         true
@@ -143,11 +216,24 @@ impl App {
         }
     }
 
+    /// Starts a parallel Orbit step's worker in a new pane inside a snapshot
+    /// checkout; the response to `respond_to` is the worker start response.
+    pub(crate) fn start_parallel_orbit_worker(
+        &mut self,
+        id: &str,
+        params: OrbitAgentStartParams,
+        plan: ParallelLaunch,
+        respond_to: &Sender<String>,
+    ) -> Result<(), String> {
+        self.begin_orbit_worktree_start(id, params, respond_to, Some(plan))
+    }
+
     fn begin_orbit_worktree_start(
         &mut self,
         id: &str,
         params: OrbitAgentStartParams,
         respond_to: &Sender<String>,
+        parallel: Option<ParallelLaunch>,
     ) -> Result<(), String> {
         let launch = self.admit_orbit_worker(id, &params)?;
         if !crate::app::agents::valid_agent_name(&params.name) {
@@ -159,8 +245,11 @@ impl App {
         self.check_orbit_worker_limit(id, 0)?;
         self.resolve_orbit_pane(params.pane_id.as_deref())
             .map_err(|(code, message)| encode_error(id.into(), code, message))?;
-        let branch = branch_name(params.worktree_branch().flatten())
-            .map_err(|message| encode_error(id.into(), "invalid_params", message))?;
+        let branch = match &parallel {
+            Some(plan) => plan.label.clone(),
+            None => branch_name(params.worktree_branch().flatten())
+                .map_err(|message| encode_error(id.into(), "invalid_params", message))?,
+        };
         let project = self
             .orbit_job_cwd()
             .map_err(|message| encode_error(id.into(), "orbit_missing", message))?;
@@ -176,13 +265,18 @@ impl App {
             pane_id: None,
             terminal_id: None,
             created_branch: false,
+            parallel,
             result: Ok(()),
             respond_to: respond_to.clone(),
         };
         // Counted from admission, so parallel starts cannot pass the limit together.
         self.orbit_starts.in_flight += 1;
         crate::thread_spawn::spawn_named("aster-orbit-worktree-add", move || {
-            match create_worktree(&project, &directory, &stage.branch) {
+            let created = match stage.parallel.as_mut() {
+                Some(plan) => create_checkout(&project, &directory, plan),
+                None => create_worktree(&project, &directory, &stage.branch),
+            };
+            match created {
                 Ok(created) => {
                     stage.path = created.path;
                     stage.repo_root = created.repo_root;
@@ -190,7 +284,7 @@ impl App {
                 }
                 Err(error) => stage.result = Err(error),
             }
-            let _ = event_tx.blocking_send(AppEvent::OrbitWorktreeReady(Box::new(stage)));
+            send_stage(&event_tx, &directory, stage);
         })
         .map(|_| ())
         .map_err(|error| {
@@ -205,6 +299,11 @@ impl App {
 
     /// Resumes an isolated start on the event loop after a background stage.
     pub(crate) fn finish_orbit_worktree_start(&mut self, mut stage: OrbitWorktreeResult) {
+        // A parallel step owns its checkout from here on, whether or not the
+        // worker starts: the step releases it when it ends.
+        if let Some(plan) = &stage.parallel {
+            self.record_parallel_checkout(plan);
+        }
         let worktree = OrbitWorktree {
             path: stage.path.clone(),
             branch: Some(stage.branch.clone()),
@@ -215,6 +314,7 @@ impl App {
         let respond_to = stage.respond_to.clone();
         let id = stage.id.clone();
         let created_branch = stage.created_branch;
+        let is_parallel = stage.parallel.is_some();
         let response = match (stage.result.clone(), stage.pane_id.take()) {
             (Err((code, message)), _) => {
                 self.end_orbit_worktree_start(None);
@@ -223,7 +323,9 @@ impl App {
             (Ok(()), None) => match self.open_orbit_worktree_pane(stage, &worktree) {
                 Ok(()) => return,
                 Err(response) => {
-                    discard_worktree(&worktree, created_branch);
+                    if !is_parallel {
+                        discard_worktree(&worktree, created_branch);
+                    }
                     self.end_orbit_worktree_start(None);
                     response
                 }
@@ -288,6 +390,7 @@ impl App {
         }
         stage.pane_id = Some(pane_id.clone());
         stage.terminal_id = terminal_id.clone();
+        let directory = self.state.worktree_directory.clone();
         let event_tx = self.event_tx.clone();
         let wait = move || {
             let deadline = Instant::now() + SHELL_READY_TIMEOUT;
@@ -299,7 +402,7 @@ impl App {
                 }
                 std::thread::sleep(SHELL_READY_POLL);
             }
-            let _ = event_tx.blocking_send(AppEvent::OrbitWorktreeReady(Box::new(stage)));
+            send_stage(&event_tx, &directory, stage);
         };
         crate::thread_spawn::spawn_named("aster-orbit-worktree-shell", wait)
             .map(|_| ())
@@ -359,8 +462,10 @@ impl App {
             params,
             launch,
             created_branch,
+            parallel,
             ..
         } = stage;
+        let is_parallel = parallel.is_some();
         // Other workers may have started while Git and the shell ran; this
         // start itself is still counted in flight.
         let launched = self.check_orbit_worker_limit(&id, 1).and_then(|()| {
@@ -376,13 +481,20 @@ impl App {
             Ok(response) => response,
             Err(response) => {
                 self.close_failed_orbit_start_pane(&id, pane_id, terminal_id);
-                discard_worktree(&worktree, created_branch);
+                if !is_parallel {
+                    discard_worktree(&worktree, created_branch);
+                }
                 return response;
             }
         };
         let mut value: Value = serde_json::from_str(&response).unwrap_or_default();
         if let Some(terminal_id) = value["result"]["agent"]["terminal_id"].as_str() {
-            if let Some(record) = self.orbit_workers.get_mut(terminal_id) {
+            // A parallel step's checkout is not a Git worktree to stop and remove.
+            if let Some(record) = self
+                .orbit_workers
+                .get_mut(terminal_id)
+                .filter(|_| !is_parallel)
+            {
                 record.worktree = Some(worktree.clone());
             }
             value["result"]["worker"] = json!(self.orbit_worker_json(terminal_id));
@@ -532,6 +644,7 @@ mod tests {
             pane_id: Some(pane.0.clone()),
             terminal_id: Some(pane.1.clone()),
             created_branch: false,
+            parallel: None,
             result: Ok(()),
             respond_to: tx,
         };
@@ -681,6 +794,110 @@ mod tests {
             assert!(app.handle_deferred_orbit_start(request, tx));
             let response: Value = serde_json::from_str(&rx.recv().unwrap()).unwrap();
             assert_eq!(response["error"]["code"], code, "{response}");
+        }
+    }
+
+    fn refuse_clone(_: &Path, _: &Path) -> std::io::Result<()> {
+        Err(std::io::Error::other("no clone"))
+    }
+
+    /// A scratch repository with a parallel checkout in a stage whose result is `result`.
+    fn parallel_stage(
+        name: &str,
+        result: Result<(), (&'static str, String)>,
+    ) -> (
+        OrbitWorktreeResult,
+        crate::parallel_checkout::Checkout,
+        PathBuf,
+    ) {
+        let root =
+            std::env::temp_dir().join(format!("aster-send-stage-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let repo = root.join("repo");
+        std::fs::create_dir_all(&repo).unwrap();
+        for args in [
+            vec!["init", "-q"],
+            vec![
+                "-c",
+                "user.name=T",
+                "-c",
+                "user.email=t@example.invalid",
+                "commit",
+                "-q",
+                "--allow-empty",
+                "-m",
+                "base",
+            ],
+        ] {
+            let status = std::process::Command::new("git")
+                .arg("-C")
+                .arg(&repo)
+                .args(args)
+                .status()
+                .unwrap();
+            assert!(status.success());
+        }
+        let checkout = crate::parallel_checkout::create_with(
+            &repo,
+            &repo,
+            &root.join("checkouts"),
+            "repo",
+            "par-x",
+            &[],
+            refuse_clone,
+        )
+        .unwrap();
+        let (respond_to, _responses) = std::sync::mpsc::channel();
+        let stage = OrbitWorktreeResult {
+            id: "start".into(),
+            params: OrbitAgentStartParams {
+                name: "par-x".into(),
+                kind: "claude".into(),
+                pane_id: None,
+                model: None,
+                reuse: None,
+                worktree: None,
+                permission_mode: None,
+            },
+            launch: Default::default(),
+            branch: "par-x".into(),
+            path: checkout.path.clone(),
+            repo_root: repo.clone(),
+            pane_id: None,
+            terminal_id: None,
+            created_branch: false,
+            parallel: Some(ParallelLaunch {
+                task_id: "task".into(),
+                step: 0,
+                label: "par-x".into(),
+                apply: Vec::new(),
+                checkout: Some(checkout.clone()),
+            }),
+            result,
+            respond_to,
+        };
+        (stage, checkout, root)
+    }
+
+    #[test]
+    fn a_stage_the_event_loop_cannot_receive_has_its_parallel_checkout_removed() {
+        // Whether the stage succeeded or failed after the checkout was made
+        // (for example its shell never became ready).
+        for (name, result) in [
+            ("ok", Ok(())),
+            (
+                "failed",
+                Err(("orbit_unavailable", "shell not ready".to_owned())),
+            ),
+        ] {
+            let (stage, checkout, root) = parallel_stage(name, result);
+            let (events, receiver) = tokio::sync::mpsc::channel(1);
+            drop(receiver);
+
+            send_stage(&events, &root.join("checkouts"), stage);
+
+            assert!(!checkout.path.exists(), "{name}");
+            let _ = std::fs::remove_dir_all(root);
         }
     }
 }

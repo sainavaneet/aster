@@ -2460,6 +2460,16 @@
               "description": "Worker terminal_id, name, or pane ID; empty when `role` picks the worker.",
               "type": "string"
             },
+            "parallel": {
+              "description": "Run the task as parallel steps, each by a new agent in its own checkout\nof the project (instead of `name` or `role`); Polaris gets one report\nwhen all have finished.",
+              "items": {
+                "$ref": "#/schemas/request/$defs/OrbitParallelStep"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
             "prompt": {
               "type": "string"
             },
@@ -2555,6 +2565,17 @@
                 "null"
               ]
             },
+            "handoff": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/request/$defs/OrbitHandoff"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Relays the task to another member of the worker's role instead of\nfinishing it: this report ends the worker's step, not the task."
+            },
             "job_ids": {
               "description": "Orbit job IDs the worker started, at most 20.",
               "items": {
@@ -2567,6 +2588,15 @@
             },
             "outcome": {
               "$ref": "#/schemas/request/$defs/OrbitOutcome"
+            },
+            "step": {
+              "description": "The step of a relayed task this report belongs to, as given in the\nassignment; a report for a step already handed off is stale.",
+              "format": "uint",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
             },
             "summary": {
               "type": "string"
@@ -2759,6 +2789,56 @@
           ],
           "type": "object"
         },
+        "OrbitHandoff": {
+          "additionalProperties": false,
+          "description": "The note one step of a relayed task leaves for the next member.",
+          "properties": {
+            "changed_files": {
+              "description": "Relative paths changed so far, at most 200.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "done": {
+              "description": "What this step finished, at most 1000 characters.",
+              "type": "string"
+            },
+            "known_issues": {
+              "description": "Open problems the next member should know, at most 500 characters.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "next": {
+              "description": "What the next member should do, at most 1000 characters.",
+              "type": "string"
+            },
+            "parallel": {
+              "description": "Instead of one next member, run these steps in parallel, each in its own\ncheckout; the task finishes when all of them have reported.",
+              "items": {
+                "$ref": "#/schemas/request/$defs/OrbitParallelStep"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "to": {
+              "description": "Name of an idle member of the same role to take over; otherwise the\nrole's pipeline, or a member of another kind, is chosen.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "done",
+            "next"
+          ],
+          "type": "object"
+        },
         "OrbitInspectParams": {
           "description": "`orbit.inspect` target: the bound Orbit tab, or a role's tab.",
           "properties": {
@@ -2876,6 +2956,40 @@
           "required": [
             "pane_id",
             "zoomed"
+          ],
+          "type": "object"
+        },
+        "OrbitParallelStep": {
+          "additionalProperties": false,
+          "description": "One step of a parallel fan-out, run by a new agent in its own checkout of the\nOrbit project.",
+          "properties": {
+            "files": {
+              "description": "Paths (files or directories, relative to the project) this step will\nchange. Steps whose paths overlap run one after another.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "member_or_kind": {
+              "description": "A team member's name (its kind, model, and permission mode are used) or\nan agent kind such as `claude` or `codex`.",
+              "type": "string"
+            },
+            "model": {
+              "description": "Model for the step's agent, when `member_or_kind` is a kind (a member's\nown model is used otherwise).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prompt": {
+              "description": "What this step should do.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "member_or_kind",
+            "prompt",
+            "files"
           ],
           "type": "object"
         },
