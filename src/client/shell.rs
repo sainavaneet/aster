@@ -249,6 +249,37 @@ fn panel_contrast_fg(palette: &Palette) -> ratatui::style::Color {
 }
 
 fn blit_pane_surface(target: &mut FrameData, source: &FrameData, area: Rect) {
+    blit_pane_surface_cells(target, source, area, Clone::clone);
+}
+
+/// Uses the existing surface-copy allocation to provision header graphemes;
+/// the painter itself never allocates. Capacity is cached on projection change.
+fn blit_pane_surface_reserved(
+    target: &mut FrameData,
+    source: &FrameData,
+    area: Rect,
+    capacity: usize,
+) {
+    blit_pane_surface_cells(target, source, area, |cell| {
+        let mut symbol = String::with_capacity(cell.symbol.len().max(capacity));
+        symbol.push_str(&cell.symbol);
+        crate::protocol::CellData {
+            symbol,
+            fg: cell.fg,
+            bg: cell.bg,
+            modifier: cell.modifier,
+            skip: cell.skip,
+            hyperlink: cell.hyperlink,
+        }
+    });
+}
+
+fn blit_pane_surface_cells(
+    target: &mut FrameData,
+    source: &FrameData,
+    area: Rect,
+    copy: impl Fn(&crate::protocol::CellData) -> crate::protocol::CellData,
+) {
     let copy_width = source.width.min(area.width);
     let copy_height = source.height.min(area.height);
     let hyperlink_base = target.hyperlinks.len() as u32;
@@ -266,7 +297,7 @@ fn blit_pane_surface(target: &mut FrameData, source: &FrameData, area: Rect) {
             ) else {
                 continue;
             };
-            *target_cell = source_cell.clone();
+            *target_cell = copy(source_cell);
             target_cell.hyperlink = source_cell.hyperlink.and_then(|index| {
                 ((index as usize) < source.hyperlinks.len()).then_some(hyperlink_base + index)
             });

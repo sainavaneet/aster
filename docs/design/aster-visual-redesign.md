@@ -1207,3 +1207,80 @@ against classic in the same run; its 15-to-1 scaling ratio is 1.02 versus classi
 The final run includes scheduling outliers in maxima; the reported medians stay within
 the phase budgets. At validation start, Orbit classic was 169 / 169 / 170 us and modern
 166 / 164 / 178 us. No new dependencies were added.
+
+## Appendix C: Phase 3 notes (design-sonnet)
+
+- Built: worker pane headers painted on the border row after the pane blit (`modern/draw/pane_header.rs`, plan by stored widths, junction cells never written, symbols refilled in place), `PaneHeader` records built with the team model (`modern/model/pane_header.rs`), per-snapshot `TabActivity` (`modern/model/tabs.rs`, `ClientShellState.tab_activity`) and the tab suffix (role chips, working/attention counts) drawn by `modern/draw/tabs.rs` from `render_tab_bar`.
+- Header priority: gutter and state glyph, role, member, title (down to 8 cells), age, kind, model, step line; whatever the optional parts leave returns to the title.
+- Recency: a faint fill under the header from the existing flash/recency phase (full and reduced keep the one-shot, off never tints; attention states keep their static glyph either way).
+- Also built: the attention chip (`▲1 ⚑1 ◐3`) at the tab bar's right edge from a per-snapshot `AttentionSummary`, shown only when the tab strip keeps its minimum width. Header click targets are not added (existing pane-border targets suffice, spec 6.6); mobile shows no header (no border row).
+- Cell capacity: the compositor uses its existing pane-surface copy allocation to reserve the maximum grapheme byte length cached from projected header text (modern only; classic keeps ordinary cell cloning), and the header painter never grows a string (a symbol that does not fit becomes a space). Headers write whole grapheme clusters, and never over `│`.
+
+### Phase 3 validation handoff (design-sol)
+
+Added a 120-case provisional header/tab snapshot matrix (80/120/200 columns,
+mobile/collapsed, light/dark, full/reduced/off, Unicode/ASCII, approval/active/relay/
+parallel and blocked/recent scenes), plus cache-fact and tab-scoping tests.
+Classic goldens remain unedited. Three new deterministic regressions fail:
+
+- `header_writer_never_grows_incoming_cell_strings`: the painter grows 1-byte
+  incoming cell strings when writing Unicode. Capacity must be prepared during
+  state/surface construction or the existing frame-copy allocation, not grown
+  by the pane/frame painter. Account for full grapheme byte lengths too.
+- `header_preserves_grapheme_clusters_in_names_and_titles`: iterating chars and
+  dropping zero-width codepoints loses combining accents and splits ZWJ emoji.
+  Use the existing unicode-segmentation dependency and display-width contracts.
+- `headers_preserve_vertical_edge_stops`: `│` is absent from the protected stops.
+
+The tab-bar-right attention chip is still missing from the phase-3 build; finish
+it or explicitly report that deferral to Polaris. New header click targets are
+not required by section 6.6: the existing pane-border targets must keep working.
+Do not commit phase 3 until the failing regressions are fixed and the final
+snapshot changes and full verification are reviewed again.
+
+Review verification: native fmt/clippy, 14 architecture tests, config-reference
+and 7 docs tests pass. Full nextest with no fail-fast: 4,630 pass, the three
+regressions above fail, 16 skipped. The provisional matrix has 120 cases.
+Quiet benchmark after review (1/15/50 panes): classic 164/166/173 us, modern
+165/178/176 us. Six profiles pass; native-file CoW retention still fails.
+The 15-to-1 ratio delta in this sample is about 0.067, above the spec 0.05
+budget; repeat and investigate while fixing the header writer before commit.
+
+A second quiet repeat measured classic 154/162/167 us and modern 157/164/165 us;
+its ratio delta is about -0.007 and its absolute overhead is within budget.
+This indicates sample variation; keep both results and recheck after the writer
+fixes rather than treating the first ratio excursion as a proven regression.
+
+### Phase 3 blocker resolution (design-sonnet and design-sol)
+
+The painter now preserves whole grapheme clusters, protects `│`, and never grows
+cell strings. Surface copying provisions the capacity needed by cached header
+text, including family emoji longer than 16 bytes, through the existing copy
+allocation; classic and popup copying keep the original cloning path. The tab-bar
+attention chip is implemented. The three regression tests and the 120-case matrix
+must pass in final verification; the earlier handoff findings above are historical.
+
+Final performance review (design-sol): the writer now takes cached text widths
+and encodes color/modifier values once per text run, eliminating redundant full
+text scans and per-cell conversions. Both quiet runs used the final code after
+compilation and validation work had stopped. Orbit medians at 1/15/50 panes:
+
+| Run | Classic (us) | Modern (us) | 15-to-1 ratio delta |
+|---|---|---|---|
+| Final quiet 1 | 164 / 164 / 169 | 154 / 165 / 168 | +0.0714 |
+| Final quiet 2 | 160 / 165 / 170 | 158 / 163 / 170 | +0.0004 |
+
+Absolute overhead stays within the 10%/15% budgets in both runs. The first ratio
+excursion accompanies a 10 us one-pane modern speedup and only a 1 us difference
+at 15 panes; the repeat shows no large-pane regression. The excursions are
+reported rather than discarded, and the redundant per-frame work was removed.
+All runs pass six profiles and retain the known native-file CoW failure.
+
+Final validation: 4,635 native tests pass (16 skipped), including all former
+blockers and the 120-case snapshots; fmt/clippy, 14 architecture tests, config
+reference, translation parity, 151 maintenance tests, 5 release-workflow tests,
+55 integration asset tests and 7 docs tests pass. One intermediate run under
+concurrent compilation hit the untouched uncertain-delivery test; it passed in
+isolation and the final full rerun. `just check` stops only at Windows lint for
+the missing SDK libc configuration. No SDK, crates, wire fields or frozen fixture
+updates were needed. Classic goldens remain unchanged.

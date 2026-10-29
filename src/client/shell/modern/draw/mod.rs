@@ -2,6 +2,8 @@
 //! precomputed models and writes cells; nothing formats, clones or collects.
 
 pub(in crate::client::shell) mod lanes;
+pub(in crate::client::shell) mod pane_header;
+pub(in crate::client::shell) mod tabs;
 pub(in crate::client::shell) mod team;
 
 use ratatui::{

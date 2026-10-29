@@ -31,11 +31,14 @@ pub(in crate::client::shell) struct ModernRole {
 
 #[derive(Debug, PartialEq, Eq)]
 pub(in crate::client::shell) struct ModernTeam {
+    pub(in crate::client::shell) header_symbol_capacity: usize,
     pub(in crate::client::shell) attention: PaneAttention,
     pub(in crate::client::shell) lead: ModernMember,
     /// One per `TeamSidebar::groups` entry: the roles, then `scratch`.
     pub(in crate::client::shell) roles: Vec<ModernRole>,
     pub(in crate::client::shell) lanes: Lanes,
+    /// Worker pane headers by pane id; non-worker panes have none.
+    pub(in crate::client::shell) headers: HashMap<String, super::pane_header::PaneHeader>,
 }
 
 /// The state an open task puts its worker in: waiting on you, blocked, or just
@@ -105,7 +108,8 @@ pub(in crate::client::shell) fn pane_state(
 }
 
 /// An open task of a worker terminal, as far as its member row needs.
-struct Open<'a> {
+pub(super) struct Open<'a> {
+    pub(super) task: &'a crate::protocol::OrbitShellActiveTask,
     title: &'a str,
     state: StateKind,
     created_at_ms: u64,
@@ -171,6 +175,7 @@ impl ModernTeam {
         for task in &orbit.active_tasks {
             let state = task_state(task);
             let candidate = Open {
+                task,
                 title: task.title.as_str(),
                 state,
                 created_at_ms: task.created_at_ms,
@@ -205,11 +210,14 @@ impl ModernTeam {
         if !orbit.scratch.is_empty() {
             roles.push(role(&orbit.scratch, &open));
         }
+        let headers = super::pane_header::build(orbit, &lead, &roles, &open);
         Self {
+            header_symbol_capacity: super::pane_header::symbol_capacity(&headers),
             attention: PaneAttention::build(Some(orbit)),
             lead,
             roles,
             lanes: Lanes::build(orbit),
+            headers,
         }
     }
 }

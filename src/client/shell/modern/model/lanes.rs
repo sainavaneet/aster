@@ -197,7 +197,7 @@ fn window(mut nodes: Vec<StepNode>) -> Vec<StepNode> {
     nodes
 }
 
-fn strip(task: &OrbitShellActiveTask) -> Option<StepStrip> {
+pub(in crate::client::shell) fn strip(task: &OrbitShellActiveTask) -> Option<StepStrip> {
     if task.steps.is_empty() && task.parallel.is_none() {
         return None;
     }

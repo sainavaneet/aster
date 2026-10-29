@@ -78,6 +78,8 @@ impl ClientShellState {
             workspace_scroll: &mut self.workspace_scroll,
             agent_scroll: &mut self.agent_scroll,
             team_sidebar: self.team_sidebar.as_ref(),
+            tab_activity: &self.tab_activity,
+            attention_summary: self.attention_summary,
             frame_unix_ms,
             tab_scroll: &mut self.tab_scroll,
             reveal_focused_workspace: &mut self.reveal_focused_workspace,
@@ -263,6 +265,8 @@ impl ClientShellState {
                 workspace_scroll: &mut self.workspace_scroll,
                 agent_scroll: &mut self.agent_scroll,
                 team_sidebar: self.team_sidebar.as_ref(),
+                tab_activity: &self.tab_activity,
+                attention_summary: self.attention_summary,
                 frame_unix_ms,
                 tab_scroll: &mut self.tab_scroll,
                 reveal_focused_workspace: &mut self.reveal_focused_workspace,
@@ -388,8 +392,42 @@ impl ClientShellState {
             let start = usize::from(bar.y) * usize::from(frame.width) + usize::from(bar.x);
             frame.cells[start..start + usize::from(bar.width)].to_vec()
         });
-        blit_pane_surface(&mut frame, &surface.frame, layout.pane_surface);
+        if let Some(team) = self
+            .team_sidebar
+            .as_ref()
+            .filter(|_| self.config.chrome.is_modern())
+        {
+            blit_pane_surface_reserved(
+                &mut frame,
+                &surface.frame,
+                layout.pane_surface,
+                team.modern.header_symbol_capacity,
+            );
+        } else {
+            blit_pane_surface(&mut frame, &surface.frame, layout.pane_surface);
+        }
         restore_mode_bar(&mut frame, mode_bar, mode_bar_cells.as_deref());
+        // Modern: worker headers go on the border row the surface just brought.
+        if self.config.chrome.is_modern() {
+            if let Some(team) = self.team_sidebar.as_ref() {
+                modern::draw::pane_header::paint(
+                    &mut frame,
+                    &self.hits.panes,
+                    team,
+                    &team_sidebar::TeamRenderContext {
+                        config: &self.config,
+                        endpoint_id: &self.active_endpoint_id,
+                        animation: animation::AnimationFrame::new(
+                            &self.animations,
+                            self.config.animations,
+                            now,
+                        ),
+                        focused_pane_id: snapshot.focused_pane_id.as_deref(),
+                        now_unix_ms: frame_unix_ms,
+                    },
+                );
+            }
+        }
         let mut occlusion = crate::kitty_graphics::surface::Occlusion::default();
         let has_selection = self
             .selection

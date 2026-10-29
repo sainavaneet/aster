@@ -1691,6 +1691,8 @@ fn tui_animations_drive_tab_spinner_in_full_mode_and_stay_static_in_reduced_and_
     config.ui.toast.delivery = crate::config::ToastDelivery::Aster;
     config.ui.toast.delay_seconds = 0;
     config.ui.animations = crate::config::UiAnimationsConfig::Full;
+    // Pins the classic tab spinner glyphs; the modern tab bar has its own tests.
+    config.ui.style = crate::config::UiStyleConfig::Classic;
     let mut state = ClientShellState::new(ClientShellConfig::from_config(&config));
 
     let now = std::time::Instant::now();

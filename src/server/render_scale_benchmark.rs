@@ -47,7 +47,9 @@ impl RenderPipeline {
         let mut pipeline = Self::with_config(workspaces, config);
         let mut snapshot =
             super::client_shell::snapshot(&pipeline.app, "bench-boot", 1, None, None);
-        snapshot.orbit = Some(bench_orbit());
+        let mut orbit = bench_orbit();
+        attach_panes(&pipeline.app, &mut orbit, &mut snapshot);
+        snapshot.orbit = Some(orbit);
         pipeline.client.set_snapshot(Box::new(snapshot));
         pipeline.client.arrange_for_orbit_bench();
         pipeline
@@ -232,6 +234,56 @@ fn print_stage(
     }
 }
 
+/// Puts the lead and the members, in order, on the active tab's real panes and
+/// gives each an agent entry, so worker pane headers and tab activity are drawn
+/// for every pane that has a worker (all of them at 15 panes, the first 17 at 50).
+fn attach_panes(
+    app: &App,
+    orbit: &mut crate::protocol::OrbitShellView,
+    snapshot: &mut crate::protocol::ClientShellSnapshot,
+) {
+    let workspace_index = app.state.active.unwrap_or(0);
+    let workspace = &app.state.workspaces[workspace_index];
+    let tab = &workspace.tabs[workspace.active_tab_index()];
+    let pane_ids = tab
+        .layout
+        .pane_ids()
+        .into_iter()
+        .filter_map(|pane| app.public_pane_id(workspace_index, pane))
+        .collect::<Vec<_>>();
+    let (Some(workspace_id), Some(tab_id)) = (
+        snapshot.workspaces.first().map(|w| w.workspace_id.clone()),
+        snapshot.tabs.first().map(|t| t.tab_id.clone()),
+    ) else {
+        return;
+    };
+    let workers = std::iter::once(&mut orbit.lead.pane_id).chain(
+        orbit
+            .roles
+            .iter_mut()
+            .flat_map(|role| role.members.iter_mut().map(|member| &mut member.pane_id)),
+    );
+    for (slot, pane_id) in workers.zip(pane_ids) {
+        *slot = Some(pane_id.clone());
+        snapshot.agents.push(crate::protocol::ClientShellAgent {
+            pane_id,
+            workspace_id: workspace_id.clone(),
+            tab_id: tab_id.clone(),
+            name: Some("bench".into()),
+            display_agent: None,
+            agent: Some("claude".into()),
+            title: None,
+            terminal_title: None,
+            terminal_title_stripped: None,
+            agent_status: crate::api::schema::AgentStatus::Working,
+            state_change_seq: 1,
+            state_labels: Vec::new(),
+            tokens: Vec::new(),
+            focused: false,
+        });
+    }
+}
+
 /// Four roles of four members and 32 active tasks (relayed, parallel,
 /// approvals, queued) plus recent completions: the widest team the work board
 /// projects.
@@ -347,6 +399,33 @@ async fn orbit_profile_draws_the_work_lanes_in_both_styles() {
                 })
                 .collect::<Vec<_>>()
                 .join("\n");
+            if style == crate::config::UiStyleConfig::Modern {
+                // Worker headers are painted on the panes' top borders, to the
+                // right of the 26-column sidebar, and the tab bar carries the
+                // role chips and counts.
+                let headers = text
+                    .lines()
+                    .flat_map(|line| line.chars().skip(27))
+                    .filter(|ch| *ch == '▌')
+                    .count();
+                // A lone pane has no border row, so no header; split panes do.
+                if count >= 15 {
+                    assert!(
+                        headers >= 3,
+                        "{count} panes drew {headers} worker headers:\n{text}"
+                    );
+                } else {
+                    assert_eq!(headers, 0, "a lone pane has no header");
+                }
+                // With only the lead's pane there is nothing to summarise.
+                if count >= 15 {
+                    let tabs = text.lines().next().unwrap_or_default();
+                    assert!(
+                        tabs.contains('◐') && tabs.contains('▪'),
+                        "no tab activity: {tabs}"
+                    );
+                }
+            }
             for needle in needles {
                 assert!(
                     text.contains(needle),

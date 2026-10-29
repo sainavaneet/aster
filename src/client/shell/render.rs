@@ -240,6 +240,8 @@ pub(super) struct ShellRenderState<'a> {
     pub(super) workspace_scroll: &'a mut usize,
     pub(super) agent_scroll: &'a mut usize,
     pub(super) team_sidebar: Option<&'a super::team_sidebar::TeamSidebar>,
+    pub(super) tab_activity: &'a HashMap<String, super::modern::model::tabs::TabActivity>,
+    pub(super) attention_summary: super::modern::model::tabs::AttentionSummary,
     /// Wall-clock time of this frame in Unix milliseconds, for work board ages.
     pub(super) frame_unix_ms: u64,
     pub(super) tab_scroll: &'a mut usize,
@@ -326,6 +328,10 @@ pub(super) fn render_shell(
             state.animation,
             state.tab_scroll,
             state.reveal_focused_tab,
+            super::modern::model::tabs::TabsView {
+                activity: state.tab_activity,
+                summary: state.attention_summary,
+            },
             state.tab_drag_insert_index,
             &mut hits,
         );

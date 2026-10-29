@@ -13,9 +13,12 @@ pub(crate) fn render_tab_bar(
     animation: super::super::animation::AnimationFrame<'_>,
     tab_scroll: &mut usize,
     reveal_focused_tab: &mut bool,
+    modern_tabs: super::modern::model::tabs::TabsView<'_>,
     tab_drag_insert_index: Option<usize>,
     hits: &mut ShellHitMap,
 ) {
+    let tab_activity = modern_tabs.activity;
+    let attention_summary = modern_tabs.summary;
     let palette = &config.palette;
     buffer.set_style(area, Style::default().bg(palette.panel_bg));
     let tabs = snapshot
@@ -23,14 +26,45 @@ pub(crate) fn render_tab_bar(
         .iter()
         .filter(|tab| Some(tab.workspace_id.as_str()) == snapshot.focused_workspace_id.as_deref())
         .collect::<Vec<_>>();
+    // Modern: each tab grows by its activity suffix (role chips and counts),
+    // read from the per-snapshot cache. Classic tabs never have a suffix.
+    let modern = config.chrome.is_modern();
+    let suffix_width = |tab: &ClientShellTab| {
+        if modern {
+            tab_activity
+                .get(&tab.tab_id)
+                .map_or(0, super::modern::model::tabs::TabActivity::suffix_width)
+        } else {
+            0
+        }
+    };
     let desired_widths = tabs
         .iter()
         .map(|tab| {
             let label = tab_label(tab);
-            display_width(&label).saturating_add(4).max(MIN_TAB_WIDTH)
+            display_width(&label)
+                .saturating_add(4)
+                .max(MIN_TAB_WIDTH)
+                .saturating_add(suffix_width(tab))
         })
         .collect::<Vec<_>>();
     let content = tab_bar_content_area(snapshot, area);
+    // Modern: the attention chip takes the strip's right edge when the tabs
+    // keep room for themselves.
+    let chip_width = attention_summary.width();
+    let (content, chip) = if config.chrome.is_modern()
+        && chip_width > 0
+        && content.width > MIN_TAB_STRIP_WIDTH + chip_width
+    {
+        let chip = Rect::new(content.right() - chip_width, content.y, chip_width, 1);
+        let shrunk = Rect {
+            width: content.width - chip_width - 1,
+            ..content
+        };
+        (shrunk, Some(chip))
+    } else {
+        (content, None)
+    };
     let mouse_chrome = config.mouse_capture;
     let new_tab_width = if mouse_chrome { NEW_TAB_WIDTH } else { 0 };
     let desired_total = desired_widths
@@ -116,7 +150,14 @@ pub(crate) fn render_tab_bar(
         } else {
             Style::default().fg(palette.overlay0).bg(palette.surface0)
         };
-        let padding = width.saturating_sub(display_width(&name));
+        // The suffix only appears on a tab drawn at its full width.
+        let extra = if width >= desired {
+            suffix_width(tab)
+        } else {
+            0
+        };
+        let label_width = width.saturating_sub(extra);
+        let padding = label_width.saturating_sub(display_width(&name));
         let left = padding / 2;
         let text = format!(
             "{empty:left$}{name}{empty:right_padding$}",
@@ -124,18 +165,42 @@ pub(crate) fn render_tab_bar(
             left = left as usize,
             right_padding = padding.saturating_sub(left) as usize,
         );
-        put_text(buffer, rect.x, rect.y, rect.width, &text, style);
+        if extra > 0 {
+            buffer.set_style(rect, style);
+        }
+        put_text(buffer, rect.x, rect.y, label_width, &text, style);
+        let activity = if modern {
+            tab_activity.get(&tab.tab_id)
+        } else {
+            None
+        };
+        if let Some(activity) = activity.filter(|_| extra > 0) {
+            super::modern::draw::tabs::render_suffix(
+                buffer,
+                Rect::new(rect.x + label_width, rect.y, extra, 1),
+                activity,
+                tab.focused,
+                config,
+            );
+        }
         // `off` keeps the tab bar exactly as it was before animations existed.
         let has_working_agent = animation.mode().is_enabled()
             && (tab.agent_status == crate::api::schema::AgentStatus::Working
-                || snapshot.agents.iter().any(|agent| {
-                    agent.tab_id == tab.tab_id
-                        && agent.agent_status == crate::api::schema::AgentStatus::Working
-                }));
+                || if modern {
+                    activity.is_some_and(|activity| activity.working > 0)
+                } else {
+                    snapshot.agents.iter().any(|agent| {
+                        agent.tab_id == tab.tab_id
+                            && agent.agent_status == crate::api::schema::AgentStatus::Working
+                    })
+                });
         if has_working_agent && rect.width >= 3 {
             let spinner = animation.spinner_index();
-            let marker =
-                super::super::animation::working_spinner_glyph(spinner, config.status_indicators);
+            let marker = if modern {
+                config.chrome.glyphs.working_frame(spinner)
+            } else {
+                super::super::animation::working_spinner_glyph(spinner, config.status_indicators)
+            };
             let marker_fg = if tab.focused {
                 panel_contrast_fg(palette)
             } else {
@@ -263,6 +328,9 @@ pub(crate) fn render_tab_bar(
                 Style::default().fg(palette.accent),
             );
         }
+    }
+    if let Some(chip) = chip {
+        super::modern::draw::tabs::render_attention(buffer, chip, &attention_summary, config);
     }
     render_tab_bar_status(buffer, area, snapshot, palette);
 }

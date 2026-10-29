@@ -976,6 +976,10 @@ pub(crate) struct ClientShellState {
     /// Collapsed team groups (`role:<name>`, `scratch`, `other`); never persisted or sent.
     pub(super) collapsed_team_groups: HashSet<String>,
     pub(super) collapsed_lanes: crate::ui::chrome::state::LaneSet,
+    /// Per-tab activity for the modern tab bar, rebuilt with each snapshot.
+    pub(super) tab_activity: HashMap<String, super::modern::model::tabs::TabActivity>,
+    /// Totals for the tab bar's attention chip, rebuilt with each snapshot.
+    pub(super) attention_summary: super::modern::model::tabs::AttentionSummary,
     pub(super) wall_clock: super::work_board::WallClock,
     /// The active endpoint's Orbit clock; ages fall back to `wall_clock` without it.
     pub(super) orbit_clock: Option<super::work_board::WallClock>,
@@ -1159,6 +1163,8 @@ impl ClientShellState {
             team_sidebar: None,
             collapsed_team_groups: HashSet::new(),
             collapsed_lanes: crate::ui::chrome::state::LaneSet::EMPTY,
+            tab_activity: HashMap::new(),
+            attention_summary: Default::default(),
             wall_clock: super::work_board::WallClock::now(),
             orbit_clock: None,
             snapshot_serial: 0,
@@ -1711,6 +1717,14 @@ impl ClientShellState {
         }
         self.snapshot = Some(snapshot);
         self.snapshot_serial = self.snapshot_serial.wrapping_add(1);
+        self.tab_activity = super::modern::model::tabs::build(
+            self.snapshot.as_deref().expect("just set"),
+            self.team_sidebar.as_ref(),
+        );
+        self.attention_summary = super::modern::model::tabs::summarize(
+            self.snapshot.as_deref().expect("just set"),
+            self.team_sidebar.as_ref(),
+        );
         self.reconcile_pending_workspace_highlight();
         let pending_surface = self.pending_pane_surface.take();
         if let Some(surface) = pending_surface {
