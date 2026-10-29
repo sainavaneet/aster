@@ -131,13 +131,17 @@ pub(super) fn hit_panes(state: &ClientShellState) -> Vec<&str> {
         .collect()
 }
 
-pub(super) fn click(state: &mut ClientShellState, rect: Rect) -> ClientShellInput {
-    state.handle_raw_events(vec![RawInputEvent::Mouse(MouseEvent {
+pub(super) fn click_event(rect: Rect) -> RawInputEvent {
+    RawInputEvent::Mouse(MouseEvent {
         kind: MouseEventKind::Down(MouseButton::Left),
         column: rect.x,
         row: rect.y,
         modifiers: KeyModifiers::empty(),
-    })])
+    })
+}
+
+pub(super) fn click(state: &mut ClientShellState, rect: Rect) -> ClientShellInput {
+    state.handle_raw_events(vec![click_event(rect)])
 }
 
 pub(super) fn focused_pane(input: &ClientShellInput) -> Option<&str> {

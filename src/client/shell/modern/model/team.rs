@@ -12,8 +12,9 @@ use crate::ui::chrome::state::{StateCounts, StateKind};
 pub(in crate::client::shell) struct ModernMember {
     pub(in crate::client::shell) state: StateKind,
     pub(in crate::client::shell) kind: String,
-    /// `claude·opus`, or just the kind without a model.
-    pub(in crate::client::shell) kind_model: String,
+    /// The member's model; the draw path joins it to the kind with the active
+    /// glyph set's separator, so no glyph is baked into this model.
+    pub(in crate::client::shell) model: Option<String>,
     /// Why a member without a live agent is not running (`relaunching`).
     pub(in crate::client::shell) phase: String,
     /// The open task's title while the member has one.
@@ -30,10 +31,77 @@ pub(in crate::client::shell) struct ModernRole {
 
 #[derive(Debug, PartialEq, Eq)]
 pub(in crate::client::shell) struct ModernTeam {
+    pub(in crate::client::shell) attention: PaneAttention,
     pub(in crate::client::shell) lead: ModernMember,
     /// One per `TeamSidebar::groups` entry: the roles, then `scratch`.
     pub(in crate::client::shell) roles: Vec<ModernRole>,
     pub(in crate::client::shell) lanes: Lanes,
+}
+
+/// The state an open task puts its worker in: waiting on you, blocked, or just
+/// working.
+fn task_state(task: &crate::protocol::OrbitShellActiveTask) -> StateKind {
+    if task.awaiting_approval {
+        StateKind::Approval
+    } else if task.blocked {
+        StateKind::Blocked
+    } else {
+        StateKind::Working
+    }
+}
+
+/// Client-only attention facts, built once per snapshot/projection change.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(in crate::client::shell) struct PaneAttention(HashMap<String, StateKind>);
+
+impl PaneAttention {
+    pub(in crate::client::shell) fn build(orbit: Option<&OrbitShellView>) -> Self {
+        let Some(orbit) = orbit else {
+            return Self::default();
+        };
+        let terminals: HashMap<&str, &str> = std::iter::once((
+            orbit.lead.terminal_id.as_str(),
+            orbit.lead.pane_id.as_deref(),
+        ))
+        .chain(
+            orbit
+                .roles
+                .iter()
+                .flat_map(|role| &role.members)
+                .chain(&orbit.scratch)
+                .filter_map(|member| {
+                    Some((member.terminal_id.as_deref()?, member.pane_id.as_deref()))
+                }),
+        )
+        .filter_map(|(terminal, pane)| Some((terminal, pane?)))
+        .collect();
+        let mut states = HashMap::new();
+        for task in &orbit.active_tasks {
+            let state = task_state(task);
+            if !matches!(state, StateKind::Approval | StateKind::Blocked) {
+                continue;
+            }
+            if let Some(pane) = terminals.get(task.worker_terminal_id.as_str()) {
+                let current = states.entry((*pane).to_owned()).or_insert(state);
+                if state.priority() > current.priority() {
+                    *current = state;
+                }
+            }
+        }
+        Self(states)
+    }
+}
+
+/// One borrowed lookup; no roster/task walks in pane-scaled rendering.
+pub(in crate::client::shell) fn pane_state(
+    attention: Option<&PaneAttention>,
+    pane_id: &str,
+    status: crate::api::schema::AgentStatus,
+) -> StateKind {
+    attention
+        .and_then(|attention| attention.0.get(pane_id))
+        .copied()
+        .unwrap_or(StateKind::from_status(status))
 }
 
 /// An open task of a worker terminal, as far as its member row needs.
@@ -55,14 +123,10 @@ fn member(member: &OrbitShellMember, open: Option<&Open<'_>>) -> ModernMember {
         Some(state @ (StateKind::Approval | StateKind::Blocked)) => state,
         _ => base,
     };
-    let kind_model = match member.model.as_deref().filter(|model| !model.is_empty()) {
-        Some(model) => format!("{}·{model}", member.kind),
-        None => member.kind.clone(),
-    };
     ModernMember {
         state,
         kind: member.kind.clone(),
-        kind_model,
+        model: member.model.clone().filter(|model| !model.is_empty()),
         phase: if live {
             String::new()
         } else {
@@ -105,13 +169,7 @@ impl ModernTeam {
     pub(in crate::client::shell) fn build(orbit: &OrbitShellView) -> Self {
         let mut open = HashMap::<&str, Open<'_>>::new();
         for task in &orbit.active_tasks {
-            let state = if task.awaiting_approval {
-                StateKind::Approval
-            } else if task.blocked {
-                StateKind::Blocked
-            } else {
-                StateKind::Working
-            };
+            let state = task_state(task);
             let candidate = Open {
                 title: task.title.as_str(),
                 state,
@@ -135,7 +193,7 @@ impl ModernTeam {
         let lead = ModernMember {
             state: StateKind::from_member_state(&orbit.lead.state),
             kind: "lead".to_owned(),
-            kind_model: "lead".to_owned(),
+            model: None,
             phase: String::new(),
             task_title: None,
         };
@@ -148,6 +206,7 @@ impl ModernTeam {
             roles.push(role(&orbit.scratch, &open));
         }
         Self {
+            attention: PaneAttention::build(Some(orbit)),
             lead,
             roles,
             lanes: Lanes::build(orbit),

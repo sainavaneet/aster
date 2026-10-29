@@ -470,3 +470,277 @@ fn task_age_bars_cross_each_bucket_without_rebuilding_rows() {
         );
     }
 }
+
+// ---- review round 1: one approval-aware state model, essential text first,
+// glyph-set separators, and lanes that actually draw.
+
+/// A working agent whose task waits on an approval: the agent screen alone says
+/// `working`, the approval-aware model says `needs you`.
+fn approval_snapshot() -> ClientShellSnapshot {
+    let mut projected = lane_snapshot();
+    for agent in &mut projected.agents {
+        if agent.pane_id == "pane_3" {
+            agent.agent_status = AgentStatus::Working;
+        }
+    }
+    projected.orbit.as_mut().unwrap().roles[0].members[0].state = "working".into();
+    projected
+}
+
+fn frame_text(frame: &FrameData) -> Vec<String> {
+    super::frame_rows(frame)
+}
+
+#[test]
+fn collapsed_sidebar_keeps_the_approval_marker() {
+    let mut state = modern_state(26, approval_snapshot());
+    state.sidebar_collapsed = true;
+    let frame = state.compose(106, 40).unwrap();
+    let rows = frame_text(&frame);
+    let rect = state
+        .hits
+        .agents
+        .iter()
+        .find(|(_, pane_id)| pane_id == "pane_3")
+        .map(|(rect, _)| *rect)
+        .expect("collapsed entry for the approving worker");
+    let row: String = rows[usize::from(rect.y)]
+        .chars()
+        .skip(usize::from(rect.x))
+        .take(6)
+        .collect();
+    assert!(
+        row.contains('⚑'),
+        "collapsed row lost the approval marker: {row:?}"
+    );
+    // A plain working agent next to it keeps the working glyph.
+    let plain = state
+        .hits
+        .agents
+        .iter()
+        .find(|(_, pane_id)| pane_id == "pane_2")
+        .map(|(rect, _)| *rect)
+        .unwrap();
+    let plain_row: String = rows[usize::from(plain.y)]
+        .chars()
+        .skip(usize::from(plain.x))
+        .take(6)
+        .collect();
+    assert!(!plain_row.contains('⚑'), "{plain_row:?}");
+}
+
+#[test]
+fn mobile_switcher_keeps_the_approval_marker() {
+    let mut state = modern_state(26, approval_snapshot());
+    state.compose(44, 30).unwrap();
+    let switch = state.hits.mobile_switch;
+    state.handle_raw_events(vec![super::team_sidebar::click_event(switch)]);
+    let frame = state.compose(44, 40).expect("mobile switcher");
+    let text = frame_text(&frame).join("\n");
+    assert!(
+        text.contains('⚑'),
+        "mobile agent list lost the approval marker:\n{text}"
+    );
+}
+
+fn long_names_snapshot() -> ClientShellSnapshot {
+    let mut projected = team_snapshot();
+    let orbit = projected.orbit.as_mut().unwrap();
+    orbit.roles[0].name = "extraordinarily-long-role-name".into();
+    orbit.roles[0].members[1].name = "a-member-with-a-very-long-name".into();
+    let mut relay = task("relay", "term_pane_2", "working", 720);
+    relay.role = Some("extraordinarily-long-role-name".into());
+    relay.title = "a very long relay task title that cannot fit".into();
+    relay.steps = (0..8u16)
+        .map(|index| {
+            let state = match index {
+                0..=5 => "handed_off",
+                6 => "active",
+                _ => "pending",
+            };
+            step(index, "rev-claude", "claude", state)
+        })
+        .collect();
+    relay.step_total = Some(8);
+    let mut fanned = task("fanout", "term_pane_4", "working", 180);
+    fanned.role = Some("extraordinarily-long-role-name".into());
+    let branch = |index: u16, state: &str| {
+        let mut branch = step(index, "probe", "claude", state);
+        branch.parallel = Some("running".into());
+        branch
+    };
+    fanned.steps = (1..=4)
+        .map(|index| branch(index, if index < 3 { "done" } else { "active" }))
+        .collect();
+    fanned.parallel = Some(OrbitShellParallel { done: 2, total: 4 });
+    orbit.active_tasks = vec![relay, fanned];
+    orbit.recent_tasks.clear();
+    projected
+        .agents
+        .retain(|agent| agent.pane_id != "pane_8" && agent.pane_id != "pane_9");
+    projected
+}
+
+#[test]
+fn essential_text_survives_narrow_widths_and_long_names() {
+    for width in [23u16, 26, 32, 36] {
+        let mut state = modern_state(width, long_names_snapshot());
+        let frame = state.compose(106, TALL).unwrap();
+        let rows = sidebar_rows(&frame, &state);
+        let joined = rows.join("\n");
+        assert!(
+            joined.contains("step 7/8"),
+            "width {width}: relay progress clipped\n{joined}"
+        );
+        assert!(
+            joined.contains("parallel 2/4"),
+            "width {width}: parallel progress clipped\n{joined}"
+        );
+        let card = rows
+            .iter()
+            .find(|row| row.contains("extraordin") && row.trim_end().ends_with("12m"))
+            .unwrap_or_else(|| {
+                panic!("width {width}: the age was suppressed by a long role name\n{joined}")
+            });
+        assert!(card.contains("12m"));
+    }
+    // The narrow tier drops detail rows but still shows who and how long, and a
+    // long role name still leaves its state roll-up.
+    for width in [18u16, 22] {
+        let mut state = modern_state(width, long_names_snapshot());
+        let frame = state.compose(80, TALL).unwrap();
+        let rows = sidebar_rows(&frame, &state);
+        assert!(rows.iter().any(|row| row.contains("12m")), "{rows:#?}");
+        assert!(
+            rows.iter()
+                .any(|row| row.contains("extra") && row.contains('▲')),
+            "width {width}: roll-up lost to a long role name {:#?}",
+            rows.iter()
+                .filter(|row| row.contains('▌'))
+                .collect::<Vec<_>>()
+        );
+    }
+}
+
+#[test]
+fn ascii_mode_draws_only_ascii_in_the_modern_team_and_work_rows() {
+    let mut projected = lane_snapshot();
+    projected
+        .agents
+        .retain(|agent| agent.pane_id != "pane_8" && agent.pane_id != "pane_9");
+    let mut config = Config::default();
+    config.ui.glyphs = crate::config::UiGlyphsConfig::Ascii;
+    config.ui.sidebar_width = 36;
+    config.ui.sidebar_max_width = 36;
+    let mut state = team_state(config, projected);
+    let now = std::time::Instant::now();
+    state.animations = super::super::animation::ClientAnimationClock::new(now);
+    state.wall_clock = super::super::work_board::WallClock::at(now, NOW_MS);
+    state.orbit_clock = None;
+    let frame = state.compose(106, TALL).unwrap();
+    let rows = sidebar_rows(&frame, &state);
+    let start = row_of(&rows, "grouped");
+    // The last row is the shared collapse toggle, drawn by the classic chrome.
+    for row in &rows[start..rows.len() - 1] {
+        assert!(row.is_ascii(), "non-ASCII in ASCII mode: {row:?}");
+    }
+    assert!(
+        rows.iter().any(|row| row.contains("claude.opus")),
+        "{rows:#?}"
+    );
+}
+
+#[test]
+fn switching_glyphs_rebuilds_the_rows_and_redraws_without_stale_unicode() {
+    let mut state = modern_state(36, lane_snapshot());
+    state.compose(106, TALL).unwrap();
+    let first = builds(&state);
+    state.config.ui_glyphs = crate::config::UiGlyphsConfig::Ascii;
+    state.config.refresh_chrome();
+    let frame = state.compose(106, TALL).unwrap();
+    assert_eq!(builds(&state), first + 1);
+    let rows = sidebar_rows(&frame, &state);
+    assert!(rows.iter().any(|row| row.contains("claude.opus")));
+    assert!(!rows
+        .iter()
+        .any(|row| row.contains('·') && row.contains("claude")));
+}
+
+#[test]
+fn large_relay_counts_keep_progress_when_only_one_or_two_node_cells_fit() {
+    let mut projected = lane_snapshot();
+    let mut relay = task("large", "term_pane_2", "working", 120);
+    relay.steps = vec![step(12_344, "rev-claude", "claude", "active")];
+    relay.step_total = Some(u16::MAX);
+    projected.orbit.as_mut().unwrap().active_tasks = vec![relay];
+    for width in [23, 24, 25] {
+        let mut state = modern_state(width, projected.clone());
+        let frame = state.compose(106, TALL).unwrap();
+        assert!(
+            sidebar_rows(&frame, &state)
+                .join("\n")
+                .contains("step 12345/65535"),
+            "width {width}"
+        );
+    }
+}
+
+#[test]
+fn approval_cache_refreshes_and_keeps_endpoint_pane_ids_separate() {
+    use super::super::modern::model::team::{pane_state, PaneAttention};
+    use crate::ui::chrome::state::StateKind;
+    let approved = approval_snapshot();
+    let waiting = PaneAttention::build(approved.orbit.as_ref());
+    let mut other = approved.orbit.clone().unwrap();
+    other.active_tasks.clear();
+    let other_cache = PaneAttention::build(Some(&other));
+    assert_eq!(
+        pane_state(Some(&waiting), "pane_3", AgentStatus::Working),
+        StateKind::Approval
+    );
+    assert_eq!(
+        pane_state(Some(&other_cache), "pane_3", AgentStatus::Working),
+        StateKind::Working
+    );
+    assert_eq!(
+        pane_state(Some(&waiting), "unrelated", AgentStatus::Idle),
+        StateKind::Idle
+    );
+    let mut presentation = super::super::endpoint_agent_state::EndpointAgentPresentation::default();
+    let mut endpoint_snapshot = approved.clone();
+    presentation.project_snapshot(&mut endpoint_snapshot);
+    assert_eq!(
+        pane_state(
+            Some(&presentation.attention),
+            "pane_3",
+            AgentStatus::Working
+        ),
+        StateKind::Approval
+    );
+    endpoint_snapshot.orbit = None;
+    endpoint_snapshot.boot_id = "new-boot".into();
+    presentation.project_snapshot(&mut endpoint_snapshot);
+    assert_eq!(
+        pane_state(
+            Some(&presentation.attention),
+            "pane_3",
+            AgentStatus::Working
+        ),
+        StateKind::Working
+    );
+    let mut state = modern_state(26, approved);
+    state.sidebar_collapsed = true;
+    state.compose(106, 40).unwrap();
+    let mut next = state.snapshot.as_deref().unwrap().clone();
+    next.orbit.as_mut().unwrap().active_tasks.clear();
+    state.set_snapshot(Box::new(next));
+    let frame = state.compose(106, 40).unwrap();
+    let rect = state
+        .hits
+        .agents
+        .iter()
+        .find(|(_, pane)| pane == "pane_3")
+        .unwrap()
+        .0;
+    assert!(!frame_rows(&frame)[usize::from(rect.y)].contains('⚑'));
+}

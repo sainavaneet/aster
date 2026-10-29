@@ -13,6 +13,8 @@ use super::*;
 pub(super) struct AgentRow {
     pub(super) pane_id: String,
     pub(super) status: crate::api::schema::AgentStatus,
+    /// The approval-aware state the modern style draws; classic ignores it.
+    pub(super) state: crate::ui::chrome::state::StateKind,
     pub(super) focused: bool,
     pub(super) rows: Vec<Vec<crate::ui::ResolvedToken>>,
 }
@@ -54,6 +56,7 @@ pub(super) fn render_agent_panel(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    attention: Option<&super::modern::model::team::PaneAttention>,
     endpoint_id: &ClientEndpointId,
     animation: super::animation::AnimationFrame<'_>,
     agent_scroll: &mut usize,
@@ -70,7 +73,7 @@ pub(super) fn render_agent_panel(
         return;
     }
 
-    let rows = agent_rows(snapshot, config, None);
+    let rows = agent_rows(snapshot, config, None, attention);
     render_agent_list(
         buffer,
         area,
@@ -282,10 +285,11 @@ pub(super) fn agent_rows(
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
     machine: Option<&str>,
+    attention: Option<&super::modern::model::team::PaneAttention>,
 ) -> Vec<AgentRow> {
     ordered_agent_pane_ids(snapshot, config.agent_panel_sort)
         .into_iter()
-        .filter_map(|pane_id| agent_row(snapshot, &pane_id, config, machine))
+        .filter_map(|pane_id| agent_row(snapshot, &pane_id, config, machine, attention))
         .collect()
 }
 
@@ -294,6 +298,7 @@ pub(super) fn agent_row(
     pane_id: &str,
     config: &ClientShellConfig,
     machine: Option<&str>,
+    attention: Option<&super::modern::model::team::PaneAttention>,
 ) -> Option<AgentRow> {
     let agent = snapshot
         .agents
@@ -357,6 +362,11 @@ pub(super) fn agent_row(
     Some(AgentRow {
         pane_id: agent.pane_id.clone(),
         status: agent.agent_status,
+        state: super::modern::model::team::pane_state(
+            attention,
+            &agent.pane_id,
+            agent.agent_status,
+        ),
         focused: agent.focused,
         rows,
     })
@@ -439,7 +449,7 @@ pub(super) fn render_agent_row(
     };
     let name_style = Style::default().fg(name_fg).add_modifier(Modifier::BOLD);
     let (icon_glyph, status_fg) = if config.chrome.is_modern() {
-        super::modern::draw::agent_glyph(config, row.status, phase)
+        super::modern::draw::state_glyph_for(config, row.state, phase)
     } else {
         agent_status_icon_and_color(row.status, config.status_indicators, palette, phase)
     };

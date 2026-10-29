@@ -31,6 +31,7 @@ STYLE_DISPATCH_FILES = frozenset(
         "composition.rs",
         "config.rs",
         "endpoint_sidebar.rs",
+        "endpoint_agent_state.rs",  # owns the snapshot-derived pane attention cache
         "global_menu.rs",
         "mobile.rs",
         "notifications.rs",

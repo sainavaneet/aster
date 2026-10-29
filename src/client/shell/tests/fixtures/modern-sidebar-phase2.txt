@@ -63,7 +63,7 @@
  team                       grouped│                                            |
                                    │                                            |
  ○ Polaris                    lead │                                            |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                            |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                            |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                            |
  ▌ ⠼ rev-claude        claude·opus │                                            |
        relay task title            │                                            |
@@ -185,7 +185,7 @@ style=a1c12fcf9352cf66
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  ○ Polaris                    lead │                                                                                    |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                                                                    |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                                                                    |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                                                                    |
  ▌ ⠼ rev-claude        claude·opus │                                                                                    |
        relay task title            │                                                                                    |
@@ -297,7 +297,7 @@ style=c5fd619359e8b55f
    │                                                                            |
 ───│                                                                            |
 1 ○│                                                                            |
-2 ▲│                                                                            |
+2 ⚑│                                                                            |
 3 ⠼│                                                                            |
 4 ○│                                                                            |
 5 ○│                                                                            |
@@ -315,7 +315,7 @@ style=c5fd619359e8b55f
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=204641c8f07c6fdd
+style=630d29148baaa7df
 === catppuccin/full/ascii/desktop-80
  spaces                            │⠼  1      +                                 |
                                    │LIVE                                        |
@@ -381,15 +381,15 @@ style=204641c8f07c6fdd
  team                       grouped│                                            |
                                    │                                            |
  o Polaris                    lead │                                            |
- | reviewer pinned  relay ta ?1 *1 │                                            |
- | ? rev-codex         codex·gpt-5 │                                            |
- | | rev-claude        claude·opus │                                            |
+ | reviewer pinned  relay t~ ?1 *1 │                                            |
+ | ? rev-codex         codex.gpt-5 │                                            |
+ | | rev-claude        claude.opus │                                            |
        relay task title            │                                            |
  | - rev-gone              gave up │                                            |
  | ui                              │                                            |
  | scratch  fanout task title   o1 │                                            |
  | o probe                  claude │                                            |
- ▾ other 2                         │                                            |
+ v other 2                         │                                            |
  o client-shell                    │                                            |
    stray-idle                      │                                            |
  ! client-shell                    │                                            |
@@ -503,15 +503,15 @@ style=a1c12fcf9352cf66
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  o Polaris                    lead │                                                                                    |
- | reviewer pinned  relay ta ?1 *1 │                                                                                    |
- | ? rev-codex         codex·gpt-5 │                                                                                    |
- | | rev-claude        claude·opus │                                                                                    |
+ | reviewer pinned  relay t~ ?1 *1 │                                                                                    |
+ | ? rev-codex         codex.gpt-5 │                                                                                    |
+ | | rev-claude        claude.opus │                                                                                    |
        relay task title            │                                                                                    |
  | - rev-gone              gave up │                                                                                    |
  | ui                              │                                                                                    |
  | scratch  fanout task title   o1 │                                                                                    |
  | o probe                  claude │                                                                                    |
- ▾ other 2                         │                                                                                    |
+ v other 2                         │                                                                                    |
  o client-shell                    │                                                                                    |
    stray-idle                      │                                                                                    |
  ! client-shell                    │                                                                                    |
@@ -615,7 +615,7 @@ style=c5fd619359e8b55f
    │                                                                            |
 ───│                                                                            |
 1 o│                                                                            |
-2 !│                                                                            |
+2 ?│                                                                            |
 3 |│                                                                            |
 4 o│                                                                            |
 5 o│                                                                            |
@@ -633,7 +633,7 @@ style=c5fd619359e8b55f
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=204641c8f07c6fdd
+style=630d29148baaa7df
 === catppuccin/reduced/unicode/desktop-80
  spaces                            │●  1      +                                 |
                                    │LIVE                                        |
@@ -699,7 +699,7 @@ style=204641c8f07c6fdd
  team                       grouped│                                            |
                                    │                                            |
  ○ Polaris                    lead │                                            |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                            |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                            |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                            |
  ▌ ◐ rev-claude        claude·opus │                                            |
        relay task title            │                                            |
@@ -821,7 +821,7 @@ style=b2c54e6f5d389d6a
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  ○ Polaris                    lead │                                                                                    |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                                                                    |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                                                                    |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                                                                    |
  ▌ ◐ rev-claude        claude·opus │                                                                                    |
        relay task title            │                                                                                    |
@@ -933,7 +933,7 @@ style=c5fd619359e8b55f
    │                                                                            |
 ───│                                                                            |
 1 ○│                                                                            |
-2 ▲│                                                                            |
+2 ⚑│                                                                            |
 3 ◐│                                                                            |
 4 ○│                                                                            |
 5 ○│                                                                            |
@@ -951,7 +951,7 @@ style=c5fd619359e8b55f
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=059675c4307316d5
+style=b3f7cb877d0399c1
 === catppuccin/reduced/ascii/desktop-80
  spaces                            │●  1      +                                 |
                                    │LIVE                                        |
@@ -1017,15 +1017,15 @@ style=059675c4307316d5
  team                       grouped│                                            |
                                    │                                            |
  o Polaris                    lead │                                            |
- | reviewer pinned  relay ta ?1 *1 │                                            |
- | ? rev-codex         codex·gpt-5 │                                            |
- | * rev-claude        claude·opus │                                            |
+ | reviewer pinned  relay t~ ?1 *1 │                                            |
+ | ? rev-codex         codex.gpt-5 │                                            |
+ | * rev-claude        claude.opus │                                            |
        relay task title            │                                            |
  | - rev-gone              gave up │                                            |
  | ui                              │                                            |
  | scratch  fanout task title   o1 │                                            |
  | o probe                  claude │                                            |
- ▾ other 2                         │                                            |
+ v other 2                         │                                            |
  o client-shell                    │                                            |
    stray-idle                      │                                            |
  ! client-shell                    │                                            |
@@ -1139,15 +1139,15 @@ style=b2c54e6f5d389d6a
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  o Polaris                    lead │                                                                                    |
- | reviewer pinned  relay ta ?1 *1 │                                                                                    |
- | ? rev-codex         codex·gpt-5 │                                                                                    |
- | * rev-claude        claude·opus │                                                                                    |
+ | reviewer pinned  relay t~ ?1 *1 │                                                                                    |
+ | ? rev-codex         codex.gpt-5 │                                                                                    |
+ | * rev-claude        claude.opus │                                                                                    |
        relay task title            │                                                                                    |
  | - rev-gone              gave up │                                                                                    |
  | ui                              │                                                                                    |
  | scratch  fanout task title   o1 │                                                                                    |
  | o probe                  claude │                                                                                    |
- ▾ other 2                         │                                                                                    |
+ v other 2                         │                                                                                    |
  o client-shell                    │                                                                                    |
    stray-idle                      │                                                                                    |
  ! client-shell                    │                                                                                    |
@@ -1251,7 +1251,7 @@ style=c5fd619359e8b55f
    │                                                                            |
 ───│                                                                            |
 1 o│                                                                            |
-2 !│                                                                            |
+2 ?│                                                                            |
 3 *│                                                                            |
 4 o│                                                                            |
 5 o│                                                                            |
@@ -1269,7 +1269,7 @@ style=c5fd619359e8b55f
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=059675c4307316d5
+style=b3f7cb877d0399c1
 === catppuccin/off/unicode/desktop-80
  spaces                            │   1      +                                 |
                                    │LIVE                                        |
@@ -1335,7 +1335,7 @@ style=059675c4307316d5
  team                       grouped│                                            |
                                    │                                            |
  ○ Polaris                    lead │                                            |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                            |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                            |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                            |
  ▌ ◐ rev-claude        claude·opus │                                            |
        relay task title            │                                            |
@@ -1457,7 +1457,7 @@ style=b2c54e6f5d389d6a
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  ○ Polaris                    lead │                                                                                    |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                                                                    |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                                                                    |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                                                                    |
  ▌ ◐ rev-claude        claude·opus │                                                                                    |
        relay task title            │                                                                                    |
@@ -1569,7 +1569,7 @@ style=c5fd619359e8b55f
    │                                                                            |
 ───│                                                                            |
 1 ○│                                                                            |
-2 ▲│                                                                            |
+2 ⚑│                                                                            |
 3 ◐│                                                                            |
 4 ○│                                                                            |
 5 ○│                                                                            |
@@ -1587,7 +1587,7 @@ style=c5fd619359e8b55f
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=059675c4307316d5
+style=b3f7cb877d0399c1
 === catppuccin/off/ascii/desktop-80
  spaces                            │   1      +                                 |
                                    │LIVE                                        |
@@ -1653,15 +1653,15 @@ style=059675c4307316d5
  team                       grouped│                                            |
                                    │                                            |
  o Polaris                    lead │                                            |
- | reviewer pinned  relay ta ?1 *1 │                                            |
- | ? rev-codex         codex·gpt-5 │                                            |
- | * rev-claude        claude·opus │                                            |
+ | reviewer pinned  relay t~ ?1 *1 │                                            |
+ | ? rev-codex         codex.gpt-5 │                                            |
+ | * rev-claude        claude.opus │                                            |
        relay task title            │                                            |
  | - rev-gone              gave up │                                            |
  | ui                              │                                            |
  | scratch  fanout task title   o1 │                                            |
  | o probe                  claude │                                            |
- ▾ other 2                         │                                            |
+ v other 2                         │                                            |
  o client-shell                    │                                            |
    stray-idle                      │                                            |
  ! client-shell                    │                                            |
@@ -1775,15 +1775,15 @@ style=b2c54e6f5d389d6a
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  o Polaris                    lead │                                                                                    |
- | reviewer pinned  relay ta ?1 *1 │                                                                                    |
- | ? rev-codex         codex·gpt-5 │                                                                                    |
- | * rev-claude        claude·opus │                                                                                    |
+ | reviewer pinned  relay t~ ?1 *1 │                                                                                    |
+ | ? rev-codex         codex.gpt-5 │                                                                                    |
+ | * rev-claude        claude.opus │                                                                                    |
        relay task title            │                                                                                    |
  | - rev-gone              gave up │                                                                                    |
  | ui                              │                                                                                    |
  | scratch  fanout task title   o1 │                                                                                    |
  | o probe                  claude │                                                                                    |
- ▾ other 2                         │                                                                                    |
+ v other 2                         │                                                                                    |
  o client-shell                    │                                                                                    |
    stray-idle                      │                                                                                    |
  ! client-shell                    │                                                                                    |
@@ -1887,7 +1887,7 @@ style=c5fd619359e8b55f
    │                                                                            |
 ───│                                                                            |
 1 o│                                                                            |
-2 !│                                                                            |
+2 ?│                                                                            |
 3 *│                                                                            |
 4 o│                                                                            |
 5 o│                                                                            |
@@ -1905,7 +1905,7 @@ style=c5fd619359e8b55f
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=059675c4307316d5
+style=b3f7cb877d0399c1
 === catppuccin-latte/full/unicode/desktop-80
  spaces                            │⠼  1      +                                 |
                                    │LIVE                                        |
@@ -1971,7 +1971,7 @@ style=059675c4307316d5
  team                       grouped│                                            |
                                    │                                            |
  ○ Polaris                    lead │                                            |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                            |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                            |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                            |
  ▌ ⠼ rev-claude        claude·opus │                                            |
        relay task title            │                                            |
@@ -2027,7 +2027,7 @@ style=059675c4307316d5
                                    │                                            |
                                    │                                            |
                                   «│                                            |
-style=ba9500e2da7ed341
+style=c239ea5999374dbd
 === catppuccin-latte/full/unicode/desktop-120
  spaces                            │⠼  1      +                                                                         |
                                    │LIVE                                                                                |
@@ -2093,7 +2093,7 @@ style=ba9500e2da7ed341
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  ○ Polaris                    lead │                                                                                    |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                                                                    |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                                                                    |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                                                                    |
  ▌ ⠼ rev-claude        claude·opus │                                                                                    |
        relay task title            │                                                                                    |
@@ -2149,7 +2149,7 @@ style=ba9500e2da7ed341
                                    │                                                                                    |
                                    │                                                                                    |
                                   «│                                                                                    |
-style=c4b5b474f7f2f4b1
+style=8e0f9adba1b81d6d
 === catppuccin-latte/full/unicode/mobile
  ● client-shell             tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
@@ -2205,7 +2205,7 @@ style=e88261e212f19451
    │                                                                            |
 ───│                                                                            |
 1 ○│                                                                            |
-2 ▲│                                                                            |
+2 ⚑│                                                                            |
 3 ⠼│                                                                            |
 4 ○│                                                                            |
 5 ○│                                                                            |
@@ -2223,7 +2223,7 @@ style=e88261e212f19451
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=afd563e75a649c22
+style=6f1baf7b77a7cff7
 === catppuccin-latte/full/ascii/desktop-80
  spaces                            │⠼  1      +                                 |
                                    │LIVE                                        |
@@ -2289,15 +2289,15 @@ style=afd563e75a649c22
  team                       grouped│                                            |
                                    │                                            |
  o Polaris                    lead │                                            |
- | reviewer pinned  relay ta ?1 *1 │                                            |
- | ? rev-codex         codex·gpt-5 │                                            |
- | | rev-claude        claude·opus │                                            |
+ | reviewer pinned  relay t~ ?1 *1 │                                            |
+ | ? rev-codex         codex.gpt-5 │                                            |
+ | | rev-claude        claude.opus │                                            |
        relay task title            │                                            |
  | - rev-gone              gave up │                                            |
  | ui                              │                                            |
  | scratch  fanout task title   o1 │                                            |
  | o probe                  claude │                                            |
- ▾ other 2                         │                                            |
+ v other 2                         │                                            |
  o client-shell                    │                                            |
    stray-idle                      │                                            |
  ! client-shell                    │                                            |
@@ -2345,7 +2345,7 @@ style=afd563e75a649c22
                                    │                                            |
                                    │                                            |
                                   «│                                            |
-style=ba9500e2da7ed341
+style=c239ea5999374dbd
 === catppuccin-latte/full/ascii/desktop-120
  spaces                            │⠼  1      +                                                                         |
                                    │LIVE                                                                                |
@@ -2411,15 +2411,15 @@ style=ba9500e2da7ed341
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  o Polaris                    lead │                                                                                    |
- | reviewer pinned  relay ta ?1 *1 │                                                                                    |
- | ? rev-codex         codex·gpt-5 │                                                                                    |
- | | rev-claude        claude·opus │                                                                                    |
+ | reviewer pinned  relay t~ ?1 *1 │                                                                                    |
+ | ? rev-codex         codex.gpt-5 │                                                                                    |
+ | | rev-claude        claude.opus │                                                                                    |
        relay task title            │                                                                                    |
  | - rev-gone              gave up │                                                                                    |
  | ui                              │                                                                                    |
  | scratch  fanout task title   o1 │                                                                                    |
  | o probe                  claude │                                                                                    |
- ▾ other 2                         │                                                                                    |
+ v other 2                         │                                                                                    |
  o client-shell                    │                                                                                    |
    stray-idle                      │                                                                                    |
  ! client-shell                    │                                                                                    |
@@ -2467,7 +2467,7 @@ style=ba9500e2da7ed341
                                    │                                                                                    |
                                    │                                                                                    |
                                   «│                                                                                    |
-style=c4b5b474f7f2f4b1
+style=8e0f9adba1b81d6d
 === catppuccin-latte/full/ascii/mobile
  ● client-shell             tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
@@ -2523,7 +2523,7 @@ style=e88261e212f19451
    │                                                                            |
 ───│                                                                            |
 1 o│                                                                            |
-2 !│                                                                            |
+2 ?│                                                                            |
 3 |│                                                                            |
 4 o│                                                                            |
 5 o│                                                                            |
@@ -2541,7 +2541,7 @@ style=e88261e212f19451
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=afd563e75a649c22
+style=6f1baf7b77a7cff7
 === catppuccin-latte/reduced/unicode/desktop-80
  spaces                            │●  1      +                                 |
                                    │LIVE                                        |
@@ -2607,7 +2607,7 @@ style=afd563e75a649c22
  team                       grouped│                                            |
                                    │                                            |
  ○ Polaris                    lead │                                            |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                            |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                            |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                            |
  ▌ ◐ rev-claude        claude·opus │                                            |
        relay task title            │                                            |
@@ -2663,7 +2663,7 @@ style=afd563e75a649c22
                                    │                                            |
                                    │                                            |
                                   «│                                            |
-style=f327213a077f3eaf
+style=0aefd1112ce56953
 === catppuccin-latte/reduced/unicode/desktop-120
  spaces                            │●  1      +                                                                         |
                                    │LIVE                                                                                |
@@ -2729,7 +2729,7 @@ style=f327213a077f3eaf
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  ○ Polaris                    lead │                                                                                    |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                                                                    |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                                                                    |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                                                                    |
  ▌ ◐ rev-claude        claude·opus │                                                                                    |
        relay task title            │                                                                                    |
@@ -2785,7 +2785,7 @@ style=f327213a077f3eaf
                                    │                                                                                    |
                                    │                                                                                    |
                                   «│                                                                                    |
-style=1dc1c525b07bd61f
+style=4f5ec3610b2c2243
 === catppuccin-latte/reduced/unicode/mobile
  ● client-shell             tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
@@ -2841,7 +2841,7 @@ style=e88261e212f19451
    │                                                                            |
 ───│                                                                            |
 1 ○│                                                                            |
-2 ▲│                                                                            |
+2 ⚑│                                                                            |
 3 ◐│                                                                            |
 4 ○│                                                                            |
 5 ○│                                                                            |
@@ -2859,7 +2859,7 @@ style=e88261e212f19451
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=d243da4592192592
+style=b648ccf628606aca
 === catppuccin-latte/reduced/ascii/desktop-80
  spaces                            │●  1      +                                 |
                                    │LIVE                                        |
@@ -2925,15 +2925,15 @@ style=d243da4592192592
  team                       grouped│                                            |
                                    │                                            |
  o Polaris                    lead │                                            |
- | reviewer pinned  relay ta ?1 *1 │                                            |
- | ? rev-codex         codex·gpt-5 │                                            |
- | * rev-claude        claude·opus │                                            |
+ | reviewer pinned  relay t~ ?1 *1 │                                            |
+ | ? rev-codex         codex.gpt-5 │                                            |
+ | * rev-claude        claude.opus │                                            |
        relay task title            │                                            |
  | - rev-gone              gave up │                                            |
  | ui                              │                                            |
  | scratch  fanout task title   o1 │                                            |
  | o probe                  claude │                                            |
- ▾ other 2                         │                                            |
+ v other 2                         │                                            |
  o client-shell                    │                                            |
    stray-idle                      │                                            |
  ! client-shell                    │                                            |
@@ -2981,7 +2981,7 @@ style=d243da4592192592
                                    │                                            |
                                    │                                            |
                                   «│                                            |
-style=f327213a077f3eaf
+style=0aefd1112ce56953
 === catppuccin-latte/reduced/ascii/desktop-120
  spaces                            │●  1      +                                                                         |
                                    │LIVE                                                                                |
@@ -3047,15 +3047,15 @@ style=f327213a077f3eaf
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  o Polaris                    lead │                                                                                    |
- | reviewer pinned  relay ta ?1 *1 │                                                                                    |
- | ? rev-codex         codex·gpt-5 │                                                                                    |
- | * rev-claude        claude·opus │                                                                                    |
+ | reviewer pinned  relay t~ ?1 *1 │                                                                                    |
+ | ? rev-codex         codex.gpt-5 │                                                                                    |
+ | * rev-claude        claude.opus │                                                                                    |
        relay task title            │                                                                                    |
  | - rev-gone              gave up │                                                                                    |
  | ui                              │                                                                                    |
  | scratch  fanout task title   o1 │                                                                                    |
  | o probe                  claude │                                                                                    |
- ▾ other 2                         │                                                                                    |
+ v other 2                         │                                                                                    |
  o client-shell                    │                                                                                    |
    stray-idle                      │                                                                                    |
  ! client-shell                    │                                                                                    |
@@ -3103,7 +3103,7 @@ style=f327213a077f3eaf
                                    │                                                                                    |
                                    │                                                                                    |
                                   «│                                                                                    |
-style=1dc1c525b07bd61f
+style=4f5ec3610b2c2243
 === catppuccin-latte/reduced/ascii/mobile
  ● client-shell             tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
@@ -3159,7 +3159,7 @@ style=e88261e212f19451
    │                                                                            |
 ───│                                                                            |
 1 o│                                                                            |
-2 !│                                                                            |
+2 ?│                                                                            |
 3 *│                                                                            |
 4 o│                                                                            |
 5 o│                                                                            |
@@ -3177,7 +3177,7 @@ style=e88261e212f19451
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=d243da4592192592
+style=b648ccf628606aca
 === catppuccin-latte/off/unicode/desktop-80
  spaces                            │   1      +                                 |
                                    │LIVE                                        |
@@ -3243,7 +3243,7 @@ style=d243da4592192592
  team                       grouped│                                            |
                                    │                                            |
  ○ Polaris                    lead │                                            |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                            |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                            |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                            |
  ▌ ◐ rev-claude        claude·opus │                                            |
        relay task title            │                                            |
@@ -3299,7 +3299,7 @@ style=d243da4592192592
                                    │                                            |
                                    │                                            |
                                   «│                                            |
-style=f327213a077f3eaf
+style=0aefd1112ce56953
 === catppuccin-latte/off/unicode/desktop-120
  spaces                            │   1      +                                                                         |
                                    │LIVE                                                                                |
@@ -3365,7 +3365,7 @@ style=f327213a077f3eaf
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  ○ Polaris                    lead │                                                                                    |
- ▌ reviewer pinned  relay ta ⚑1 ◐1 │                                                                                    |
+ ▌ reviewer pinned  relay t… ⚑1 ◐1 │                                                                                    |
  ▌ ⚑ rev-codex         codex·gpt-5 │                                                                                    |
  ▌ ◐ rev-claude        claude·opus │                                                                                    |
        relay task title            │                                                                                    |
@@ -3421,7 +3421,7 @@ style=f327213a077f3eaf
                                    │                                                                                    |
                                    │                                                                                    |
                                   «│                                                                                    |
-style=1dc1c525b07bd61f
+style=4f5ec3610b2c2243
 === catppuccin-latte/off/unicode/mobile
  ● client-shell             tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
@@ -3477,7 +3477,7 @@ style=e88261e212f19451
    │                                                                            |
 ───│                                                                            |
 1 ○│                                                                            |
-2 ▲│                                                                            |
+2 ⚑│                                                                            |
 3 ◐│                                                                            |
 4 ○│                                                                            |
 5 ○│                                                                            |
@@ -3495,7 +3495,7 @@ style=e88261e212f19451
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=d243da4592192592
+style=b648ccf628606aca
 === catppuccin-latte/off/ascii/desktop-80
  spaces                            │   1      +                                 |
                                    │LIVE                                        |
@@ -3561,15 +3561,15 @@ style=d243da4592192592
  team                       grouped│                                            |
                                    │                                            |
  o Polaris                    lead │                                            |
- | reviewer pinned  relay ta ?1 *1 │                                            |
- | ? rev-codex         codex·gpt-5 │                                            |
- | * rev-claude        claude·opus │                                            |
+ | reviewer pinned  relay t~ ?1 *1 │                                            |
+ | ? rev-codex         codex.gpt-5 │                                            |
+ | * rev-claude        claude.opus │                                            |
        relay task title            │                                            |
  | - rev-gone              gave up │                                            |
  | ui                              │                                            |
  | scratch  fanout task title   o1 │                                            |
  | o probe                  claude │                                            |
- ▾ other 2                         │                                            |
+ v other 2                         │                                            |
  o client-shell                    │                                            |
    stray-idle                      │                                            |
  ! client-shell                    │                                            |
@@ -3617,7 +3617,7 @@ style=d243da4592192592
                                    │                                            |
                                    │                                            |
                                   «│                                            |
-style=f327213a077f3eaf
+style=0aefd1112ce56953
 === catppuccin-latte/off/ascii/desktop-120
  spaces                            │   1      +                                                                         |
                                    │LIVE                                                                                |
@@ -3683,15 +3683,15 @@ style=f327213a077f3eaf
  team                       grouped│                                                                                    |
                                    │                                                                                    |
  o Polaris                    lead │                                                                                    |
- | reviewer pinned  relay ta ?1 *1 │                                                                                    |
- | ? rev-codex         codex·gpt-5 │                                                                                    |
- | * rev-claude        claude·opus │                                                                                    |
+ | reviewer pinned  relay t~ ?1 *1 │                                                                                    |
+ | ? rev-codex         codex.gpt-5 │                                                                                    |
+ | * rev-claude        claude.opus │                                                                                    |
        relay task title            │                                                                                    |
  | - rev-gone              gave up │                                                                                    |
  | ui                              │                                                                                    |
  | scratch  fanout task title   o1 │                                                                                    |
  | o probe                  claude │                                                                                    |
- ▾ other 2                         │                                                                                    |
+ v other 2                         │                                                                                    |
  o client-shell                    │                                                                                    |
    stray-idle                      │                                                                                    |
  ! client-shell                    │                                                                                    |
@@ -3739,7 +3739,7 @@ style=f327213a077f3eaf
                                    │                                                                                    |
                                    │                                                                                    |
                                   «│                                                                                    |
-style=1dc1c525b07bd61f
+style=4f5ec3610b2c2243
 === catppuccin-latte/off/ascii/mobile
  ● client-shell             tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
@@ -3795,7 +3795,7 @@ style=e88261e212f19451
    │                                                                            |
 ───│                                                                            |
 1 o│                                                                            |
-2 !│                                                                            |
+2 ?│                                                                            |
 3 *│                                                                            |
 4 o│                                                                            |
 5 o│                                                                            |
@@ -3813,4 +3813,4 @@ style=e88261e212f19451
    │                                                                            |
    │                                                                            |
  » │                                                                            |
-style=d243da4592192592
+style=b648ccf628606aca

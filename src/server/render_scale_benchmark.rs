@@ -49,6 +49,7 @@ impl RenderPipeline {
             super::client_shell::snapshot(&pipeline.app, "bench-boot", 1, None, None);
         snapshot.orbit = Some(bench_orbit());
         pipeline.client.set_snapshot(Box::new(snapshot));
+        pipeline.client.arrange_for_orbit_bench();
         pipeline
     }
 
@@ -286,8 +287,8 @@ fn bench_orbit() -> crate::protocol::OrbitShellView {
                 }
                 .into(),
                 created_at_ms: 1_000_000 + u64::from(task as u32) * 1_000,
-                blocked: task % 5 == 0,
-                awaiting_approval: task % 10 == 0,
+                blocked: task % 11 == 0,
+                awaiting_approval: task % 22 == 0,
                 steps: if relayed {
                     vec![step(0, "handed_off"), step(1, "active"), step(2, "pending")]
                 } else {
@@ -318,6 +319,41 @@ fn bench_orbit() -> crate::protocol::OrbitShellView {
             })
             .collect(),
         server_now_ms: Some(1_100_000),
+    }
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn orbit_profile_draws_the_work_lanes_in_both_styles() {
+    for (style, needles) in [
+        (
+            crate::config::UiStyleConfig::Modern,
+            &["needs you", "working", "step", "parallel", "⚑"][..],
+        ),
+        (crate::config::UiStyleConfig::Classic, &["work", "⚑"][..]),
+    ] {
+        let mut config = Config::default();
+        config.ui.style = style;
+        for count in CARDINALITIES {
+            let mut pipeline = RenderPipeline::with_orbit(active_panes(count), &config);
+            let (_, _) = pipeline.render_once();
+            let frame = pipeline.client.compose(COLS, ROWS).expect("frame");
+            let text = frame
+                .cells
+                .chunks(COLS as usize)
+                .map(|row| {
+                    row.iter()
+                        .map(|cell| cell.symbol.as_str())
+                        .collect::<String>()
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            for needle in needles {
+                assert!(
+                    text.contains(needle),
+                    "{style:?} at {count} panes does not draw {needle:?}:\n{text}"
+                );
+            }
+        }
     }
 }
 

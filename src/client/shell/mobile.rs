@@ -685,6 +685,20 @@ fn mobile_items(
             if endpoint.stale() {
                 detail.push(mobile_endpoint_state(endpoint.status).to_owned());
             }
+            // Modern: the same approval-aware state and glyph set as the sidebar.
+            let (agent_icon, agent_color) = if config.chrome.is_modern() {
+                let state = super::modern::model::team::pane_state(
+                    Some(&endpoint.agent_presentation.attention),
+                    &agent.pane_id,
+                    agent.agent_status,
+                );
+                super::modern::draw::state_glyph_for(config, state, Default::default())
+            } else {
+                (
+                    status_icon(agent.agent_status, config.status_indicators),
+                    status_color(agent.agent_status, palette),
+                )
+            };
             let background = if endpoint.endpoint_id == active_endpoint_id && agent.focused {
                 palette.surface_dim
             } else {
@@ -705,12 +719,12 @@ fn mobile_items(
                     Line::from(vec![
                         Span::styled("  ", Style::default().bg(background)),
                         Span::styled(
-                            status_icon(agent.agent_status, config.status_indicators),
+                            agent_icon,
                             Style::default()
                                 .fg(if endpoint.stale() {
                                     palette.overlay0
                                 } else {
-                                    status_color(agent.agent_status, palette)
+                                    agent_color
                                 })
                                 .bg(background)
                                 .add_modifier(dim),

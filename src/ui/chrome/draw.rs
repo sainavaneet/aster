@@ -31,6 +31,33 @@ pub(crate) fn put_segment(
     x.saturating_add(width)
 }
 
+/// Writes `text` clipped at column `right`; when it does not fit, the last
+/// cell is `ellipsis` instead of a hard cut. Returns the next free column.
+pub(crate) fn put_elided(
+    buffer: &mut Buffer,
+    x: u16,
+    y: u16,
+    right: u16,
+    text: &str,
+    ellipsis: &str,
+    style: Style,
+) -> u16 {
+    let available = right.saturating_sub(x);
+    if display_width(text) <= available || available == 0 {
+        return put_segment(buffer, x, y, right, text, style);
+    }
+    let ellipsis_width = display_width(ellipsis).min(available);
+    let next = put_segment(
+        buffer,
+        x,
+        y,
+        right.saturating_sub(ellipsis_width),
+        text,
+        style,
+    );
+    put_segment(buffer, next, y, right, ellipsis, style)
+}
+
 /// Writes `value` in decimal without allocating; returns the next column.
 pub(crate) fn put_number(
     buffer: &mut Buffer,
@@ -102,6 +129,20 @@ mod tests {
             .map(|x| buffer[(x, 0)].symbol().to_owned())
             .collect::<String>();
         assert_eq!(row, "120499");
+    }
+
+    #[test]
+    fn put_elided_marks_a_cut_and_leaves_a_fit_alone() {
+        let mut buffer = Buffer::empty(Rect::new(0, 0, 8, 1));
+        let style = Style::default();
+        let next = put_elided(&mut buffer, 0, 0, 5, "abcdefgh", "~", style);
+        assert_eq!(next, 5);
+        let row = (0..5)
+            .map(|x| buffer[(x, 0)].symbol().to_owned())
+            .collect::<String>();
+        assert_eq!(row, "abcd~");
+        let next = put_elided(&mut buffer, 0, 0, 8, "abc", "~", style);
+        assert_eq!(next, 3);
     }
 
     #[test]

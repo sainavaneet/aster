@@ -138,6 +138,7 @@ pub(crate) fn render_collapsed_sidebar(
         detail_area.width,
         detail_area.height.saturating_sub(1),
     );
+    let attention = team.map(|team| &team.modern.attention);
     let team = super::super::team_sidebar::TeamSidebar::active(team, config, snapshot);
     let entries = match team {
         Some(team) => team.collapsed_entries(snapshot, config.agent_panel_sort),
@@ -151,6 +152,11 @@ pub(crate) fn render_collapsed_sidebar(
                 Some(super::super::team_sidebar::CollapsedEntry {
                     pane_id: agent.pane_id.as_str(),
                     status: agent.agent_status,
+                    state: super::super::modern::model::team::pane_state(
+                        attention,
+                        &agent.pane_id,
+                        agent.agent_status,
+                    ),
                     focused: agent.focused,
                 })
             })
@@ -192,7 +198,7 @@ pub(crate) fn render_collapsed_sidebar(
             }),
         );
         let (icon_glyph, status_fg) = if config.chrome.is_modern() {
-            super::super::modern::draw::agent_glyph(config, entry.status, phase)
+            super::super::modern::draw::state_glyph_for(config, entry.state, phase)
         } else {
             super::super::agent_sidebar::agent_status_icon_and_color(
                 entry.status,
@@ -494,6 +500,7 @@ pub(crate) fn render_sidebar(
             detail_area,
             snapshot,
             config,
+            state.team_sidebar.map(|team| &team.modern.attention),
             state.active_endpoint_id,
             state.animation,
             state.agent_scroll,

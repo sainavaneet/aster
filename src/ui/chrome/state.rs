@@ -60,6 +60,18 @@ impl StateKind {
         }
     }
 
+    /// The state an agent status shows when nothing more is known about it.
+    pub(crate) const fn from_status(status: crate::api::schema::AgentStatus) -> Self {
+        use crate::api::schema::AgentStatus;
+        match status {
+            AgentStatus::Working => Self::Working,
+            AgentStatus::Blocked => Self::Blocked,
+            AgentStatus::Done => Self::Done,
+            AgentStatus::Idle => Self::Idle,
+            AgentStatus::Unknown => Self::Unknown,
+        }
+    }
+
     /// A member's `OrbitShellMember.state`: an agent state, or a supervision
     /// phase for a member without a live agent. Unknown strings stay opaque.
     pub(crate) fn from_member_state(state: &str) -> Self {

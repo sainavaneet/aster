@@ -14,7 +14,7 @@ use crate::client::shell::team_rows::TeamLineRef;
 use crate::client::shell::team_sidebar::{TeamRenderContext, TeamSidebar};
 use crate::client::shell::{ChromeTarget, ShellHitMap};
 use crate::ui::chrome::age::{age_bar_cells, age_text, age_tone, AgeTone, AGE_BUFFER_LEN};
-use crate::ui::chrome::draw::{display_width, put_bar, put_number, put_segment};
+use crate::ui::chrome::draw::{display_width, put_bar, put_elided, put_number, put_segment};
 use crate::ui::chrome::state::{Lane, StateKind};
 
 const LABEL_INDENT: u16 = 1;
@@ -235,6 +235,14 @@ fn task_card(
     } else {
         roles.text_body
     });
+    // Reserved first: the age. Then who, elided to what the age leaves. The
+    // bar and the short id are decoration and only use space left over.
+    let elapsed = ctx.now_unix_ms.saturating_sub(card.created_at_ms);
+    let mut buffer_age = [0u8; AGE_BUFFER_LEN];
+    let age = age_text(elapsed, &mut buffer_age);
+    let age_width = display_width(age);
+    let age_x = right.saturating_sub(age_width + 1);
+    let who_right = age_x.saturating_sub(1);
     let mut x = put_segment(
         buffer,
         rect.x + CARD_INDENT,
@@ -243,52 +251,51 @@ fn task_card(
         glyph,
         glyph_style,
     );
-    x = put_segment(buffer, x, rect.y, right, " ", Style::default());
-    x = put_segment(buffer, x, rect.y, right, &card.who, who);
+    x = put_segment(buffer, x, rect.y, who_right, " ", Style::default());
+    x = put_elided(
+        buffer,
+        x,
+        rect.y,
+        who_right,
+        &card.who,
+        chrome.glyphs.ellipsis,
+        who,
+    );
     if tier == Tier::Wide {
-        x = put_segment(buffer, x, rect.y, right, " ", Style::default());
-        x = put_segment(
-            buffer,
-            x,
-            rect.y,
-            right,
-            &card.short_id,
-            Style::default().fg(roles.text_muted),
-        );
+        let id_width = display_width(&card.short_id);
+        if x + 1 + id_width <= who_right {
+            x = put_segment(buffer, x, rect.y, who_right, " ", Style::default());
+            x = put_segment(
+                buffer,
+                x,
+                rect.y,
+                who_right,
+                &card.short_id,
+                Style::default().fg(roles.text_muted),
+            );
+        }
     }
-    // Right side: age bar and age text, the bar only while there is room.
-    let elapsed = ctx.now_unix_ms.saturating_sub(card.created_at_ms);
-    let mut buffer_age = [0u8; AGE_BUFFER_LEN];
-    let age = age_text(elapsed, &mut buffer_age);
-    let age_width = display_width(age);
-    let bar_width = if tier == Tier::Narrow {
-        0
-    } else {
-        u16::from(AGE_BAR_CELLS) + 1
-    };
-    let mut start = right.saturating_sub(age_width + bar_width + 1);
-    if start <= x {
-        start = right.saturating_sub(age_width + 1);
-    } else if bar_width > 0 {
-        let full = Style::default().fg(age_color(lane, elapsed, ctx));
-        let empty = Style::default().fg(roles.rule);
+    let bar_width = u16::from(AGE_BAR_CELLS) + 1;
+    if tier != Tier::Narrow && age_x > x + bar_width {
         put_bar(
             buffer,
-            start,
+            age_x - bar_width,
             rect.y,
-            right,
+            age_x,
             (age_bar_cells(elapsed), AGE_BAR_CELLS),
             (
-                (chrome.glyphs.bar_full, full),
-                (chrome.glyphs.bar_empty, empty),
+                (
+                    chrome.glyphs.bar_full,
+                    Style::default().fg(age_color(lane, elapsed, ctx)),
+                ),
+                (chrome.glyphs.bar_empty, Style::default().fg(roles.rule)),
             ),
         );
-        start += bar_width;
     }
-    if start > x {
+    if age_x > rect.x + CARD_INDENT {
         put_segment(
             buffer,
-            start,
+            age_x,
             rect.y,
             right,
             age,
@@ -296,12 +303,13 @@ fn task_card(
         );
     }
     if rect.height > 1 {
-        put_segment(
+        put_elided(
             buffer,
             rect.x + DETAIL_INDENT,
             rect.y + 1,
             right,
             &card.title,
+            chrome.glyphs.ellipsis,
             Style::default().fg(roles.text_subtle),
         );
     }
@@ -321,6 +329,10 @@ fn task_card(
 }
 
 /// `●━◐━○  step 2/3 ▶ codex`, `‖ parallel 1/2`, or `⊕ integrating`.
+///
+/// The progress text is essential and is laid out first; the node glyphs are
+/// decoration and shrink (drop their connectors, then show a window around the
+/// active node, then vanish) to whatever width is left.
 fn strip_row(
     buffer: &mut Buffer,
     x: u16,
@@ -333,11 +345,42 @@ fn strip_row(
     let chrome = &ctx.config.chrome;
     let roles = &chrome.roles;
     let muted = Style::default().fg(roles.text_muted);
-    let mut x = x;
+    let available = right.saturating_sub(x);
+    let line_width = display_width(&strip.line);
     match strip.kind {
         StripKind::Relay => {
-            for (position, node) in strip.nodes.iter().enumerate() {
-                if position > 0 {
+            if line_width > available {
+                put_elided(
+                    buffer,
+                    x,
+                    y,
+                    right,
+                    &strip.line,
+                    chrome.glyphs.ellipsis,
+                    muted,
+                );
+                return;
+            }
+            let nodes = strip.nodes.len() as u16;
+            let spare = available - line_width;
+            let gap = if spare > 2 { 2 } else { 0 };
+            let room = spare - gap;
+            let connectors = room >= nodes.saturating_mul(2).saturating_sub(1);
+            let shown = if connectors { nodes } else { room.min(nodes) };
+            let active = strip
+                .nodes
+                .iter()
+                .position(|node| *node == StepNode::Active)
+                .unwrap_or(strip.nodes.len().saturating_sub(1));
+            let first = active
+                .saturating_sub(usize::from(shown) / 2)
+                .min(strip.nodes.len() - usize::from(shown));
+            let mut x = x;
+            for (position, node) in strip.nodes[first..first + usize::from(shown)]
+                .iter()
+                .enumerate()
+            {
+                if connectors && position > 0 {
                     x = put_segment(
                         buffer,
                         x,
@@ -350,21 +393,26 @@ fn strip_row(
                 let (glyph, color) = node_glyph(*node, ctx);
                 x = put_segment(buffer, x, y, right, glyph, state_style(ctx, color));
             }
-            x = put_segment(buffer, x, y, right, "  ", Style::default());
+            if shown > 0 && gap > 0 {
+                x = put_segment(buffer, x, y, right, "  ", Style::default());
+            }
             x = put_segment(buffer, x, y, right, &strip.line, muted);
             if tier == Tier::Wide {
                 if let Some(next) = strip.next.as_deref() {
-                    x = put_segment(buffer, x, y, right, " ", Style::default());
-                    x = put_segment(
-                        buffer,
-                        x,
-                        y,
-                        right,
-                        chrome.glyphs.handoff,
-                        Style::default().fg(roles.flow),
-                    );
-                    x = put_segment(buffer, x, y, right, " ", Style::default());
-                    put_segment(buffer, x, y, right, next, muted);
+                    // ` ▶ next`, only when all of it fits.
+                    if right.saturating_sub(x) >= display_width(next) + 3 {
+                        x = put_segment(buffer, x, y, right, " ", Style::default());
+                        x = put_segment(
+                            buffer,
+                            x,
+                            y,
+                            right,
+                            chrome.glyphs.handoff,
+                            Style::default().fg(roles.flow),
+                        );
+                        x = put_segment(buffer, x, y, right, " ", Style::default());
+                        put_segment(buffer, x, y, right, next, muted);
+                    }
                 }
             }
         }
@@ -374,11 +422,23 @@ fn strip_row(
             } else {
                 chrome.glyphs.integrate
             };
-            x = put_segment(buffer, x, y, right, glyph, state_style(ctx, roles.parallel));
+            let mut x = put_segment(buffer, x, y, right, glyph, state_style(ctx, roles.parallel));
             x = put_segment(buffer, x, y, right, " ", Style::default());
-            x = put_segment(buffer, x, y, right, &strip.line, muted);
+            x = put_elided(
+                buffer,
+                x,
+                y,
+                right,
+                &strip.line,
+                chrome.glyphs.ellipsis,
+                muted,
+            );
             if tier == Tier::Wide {
                 for node in &strip.nodes {
+                    // One branch glyph per node, while a whole one still fits.
+                    if x + 2 > right {
+                        break;
+                    }
                     x = put_segment(buffer, x, y, right, " ", Style::default());
                     let (glyph, color) = node_glyph(*node, ctx);
                     x = put_segment(buffer, x, y, right, glyph, state_style(ctx, color));
@@ -387,7 +447,6 @@ fn strip_row(
         }
     }
 }
-
 fn done_row(
     buffer: &mut Buffer,
     rect: Rect,
@@ -423,12 +482,13 @@ fn done_row(
     let age = age_text(elapsed, &mut buffer_age);
     let age_width = display_width(age);
     let summary_right = right.saturating_sub(age_width + 2).max(x);
-    put_segment(
+    put_elided(
         buffer,
         x,
         rect.y,
         summary_right,
         &card.summary,
+        chrome.glyphs.ellipsis,
         Style::default().fg(roles.text_subtle).add_modifier(dim),
     );
     put_segment(

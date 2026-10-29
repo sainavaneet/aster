@@ -5,6 +5,7 @@ use crate::protocol::{ClientShellAgent, ClientShellSnapshot, PaneSurfaceFrame};
 
 #[derive(Clone, Debug, Default)]
 pub(super) struct EndpointAgentPresentation {
+    pub(super) attention: super::modern::model::team::PaneAttention,
     boot_id: Option<String>,
     acknowledged: HashMap<String, u64>,
     completed: HashMap<String, u64>,
@@ -45,6 +46,7 @@ impl EndpointAgentPresentation {
         snapshot: &mut ClientShellSnapshot,
         generation: Option<u64>,
     ) {
+        self.attention = super::modern::model::team::PaneAttention::build(snapshot.orbit.as_ref());
         if self.boot_id.as_deref() != Some(snapshot.boot_id.as_str()) {
             self.boot_id = Some(snapshot.boot_id.clone());
             self.acknowledged.clear();

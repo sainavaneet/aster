@@ -103,6 +103,8 @@ pub(super) struct TeamRenderContext<'a> {
 pub(super) struct CollapsedEntry<'a> {
     pub(super) pane_id: &'a str,
     pub(super) status: AgentStatus,
+    /// The approval-aware state the modern style draws; classic ignores it.
+    pub(super) state: crate::ui::chrome::state::StateKind,
     pub(super) focused: bool,
 }
 
@@ -266,6 +268,12 @@ impl TeamSidebar {
         model.filter(|_| config.sidebar_team && snapshot.agent_view_label.is_none())
     }
 
+    /// The collapse keys of the role and scratch groups.
+    #[cfg(test)]
+    pub(super) fn group_keys(&self) -> impl Iterator<Item = &str> {
+        self.groups.iter().map(|group| group.key.as_str())
+    }
+
     pub(super) fn group_key(&self, group: usize) -> &str {
         match self.groups.get(group) {
             Some(group) => group.key.as_str(),
@@ -360,9 +368,15 @@ impl TeamSidebar {
         let mut entries = self
             .team_rows()
             .filter_map(|row| {
+                let pane_id = row.pane_id.as_deref()?;
                 Some(CollapsedEntry {
-                    pane_id: row.pane_id.as_deref()?,
+                    pane_id,
                     status: row.status,
+                    state: super::modern::model::team::pane_state(
+                        Some(&self.modern.attention),
+                        pane_id,
+                        row.status,
+                    ),
                     focused: focused_pane_id == row.pane_id.as_deref(),
                 })
             })
@@ -379,6 +393,11 @@ impl TeamSidebar {
             Some(CollapsedEntry {
                 pane_id: agent.pane_id.as_str(),
                 status: agent.agent_status,
+                state: super::modern::model::team::pane_state(
+                    Some(&self.modern.attention),
+                    &agent.pane_id,
+                    agent.agent_status,
+                ),
                 focused: agent.focused,
             })
         }));

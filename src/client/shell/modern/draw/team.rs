@@ -6,12 +6,12 @@ use ratatui::{
     style::{Modifier, Style},
 };
 
-use super::{put_counts, row_background, state_glyph};
+use super::{counts_width, put_counts, row_background, state_glyph};
 use crate::client::shell::modern::model::rows::Tier;
 use crate::client::shell::team_rows::TeamLineRef;
 use crate::client::shell::team_sidebar::{TeamRenderContext, TeamRow, TeamSidebar};
 use crate::client::shell::ShellHitMap;
-use crate::ui::chrome::draw::{display_width, put_segment};
+use crate::ui::chrome::draw::{display_width, put_elided, put_number, put_segment};
 
 const LEAD_INDENT: u16 = 1;
 const GUTTER_X: u16 = 1;
@@ -19,6 +19,10 @@ const GLYPH_X: u16 = 3;
 const NAME_X: u16 = 5;
 const TITLE_X: u16 = 7;
 const PINNED_LABEL: &str = " pinned";
+const LEAD_LABEL: &str = "lead";
+const OTHER_TITLE: &str = "other";
+/// Cells a role name keeps before its roll-up may take the rest.
+const MIN_NAME: u16 = 6;
 
 /// Draws a modern team row; `false` for rows the classic drawer owns (`other`).
 pub(in crate::client::shell) fn render_line(
@@ -48,6 +52,12 @@ pub(in crate::client::shell) fn render_line(
                 hits.team_agents.push((rect, index));
             }
         }
+        TeamLineRef::OtherHeader {
+            count, collapsed, ..
+        } => {
+            other_header(buffer, rect, count, collapsed, ctx);
+            hits.team_groups.push((rect, team.groups.len()));
+        }
         _ => return super::lanes::render_line(buffer, rect, index, line, team, ctx, hits),
     }
     true
@@ -60,7 +70,8 @@ fn focused(row: &TeamRow, ctx: &TeamRenderContext<'_>) -> bool {
 }
 
 fn lead(buffer: &mut Buffer, rect: Rect, team: &TeamSidebar, ctx: &TeamRenderContext<'_>) {
-    let roles = &ctx.config.chrome.roles;
+    let chrome = &ctx.config.chrome;
+    let roles = &chrome.roles;
     let row = &team.lead;
     let state = team.modern.lead.state;
     let (glyph, glyph_style, phase) =
@@ -78,12 +89,25 @@ fn lead(buffer: &mut Buffer, rect: Rect, team: &TeamSidebar, ctx: &TeamRenderCon
         glyph_style,
     );
     x = put_segment(buffer, x, rect.y, right, " ", Style::default());
+    // The label is decoration: the name gets whatever the label leaves, never less.
+    let label_width = display_width(LEAD_LABEL);
+    let name_right = if right.saturating_sub(x) > label_width + 8 {
+        right - label_width - 2
+    } else {
+        right
+    };
     let name = Style::default()
         .fg(roles.text_strong)
         .add_modifier(Modifier::BOLD);
-    x = put_segment(buffer, x, rect.y, right, &row.name, name);
-    let label = &team.modern.lead.kind_model;
-    let label_width = display_width(label);
+    x = put_elided(
+        buffer,
+        x,
+        rect.y,
+        name_right,
+        &row.name,
+        chrome.glyphs.ellipsis,
+        name,
+    );
     let start = right.saturating_sub(label_width + 1);
     if start > x {
         put_segment(
@@ -91,7 +115,7 @@ fn lead(buffer: &mut Buffer, rect: Rect, team: &TeamSidebar, ctx: &TeamRenderCon
             start,
             rect.y,
             right,
-            label,
+            LEAD_LABEL,
             Style::default().fg(roles.text_muted),
         );
     }
@@ -112,30 +136,9 @@ fn role_header(
     let card = &team.modern.roles[group];
     let right = rect.right();
     let tint = Style::default().fg(roles.tint(group));
-    let mut x = put_segment(
-        buffer,
-        rect.x + GUTTER_X,
-        rect.y,
-        right,
-        chrome.glyphs.role_gutter,
-        tint,
-    );
-    x = put_segment(buffer, x, rect.y, right, " ", Style::default());
-    x = put_segment(
-        buffer,
-        x,
-        rect.y,
-        right,
-        &entry.title,
-        Style::default()
-            .fg(roles.text_body)
-            .add_modifier(Modifier::BOLD),
-    );
     let muted = Style::default().fg(roles.text_muted);
-    if entry.pinned && tier == Tier::Wide {
-        x = put_segment(buffer, x, rect.y, right, PINNED_LABEL, muted);
-    }
-    // A collapsed card keeps its roll-up and says it is collapsed.
+    // Reserved first: the collapsed arrow and the state roll-up are the point
+    // of the header; the name shrinks around them.
     let mut limit = right;
     if collapsed {
         limit = right.saturating_sub(2);
@@ -148,22 +151,83 @@ fn role_header(
             muted,
         );
     }
+    let counts_width = counts_width(&card.counts, ctx);
+    let counts_start = limit.saturating_sub(counts_width);
     let counts_rect = Rect::new(rect.x, rect.y, limit.saturating_sub(rect.x), 1);
-    let counts_start = put_counts(buffer, counts_rect, x + 1, &card.counts, ctx);
+    let mut x = put_segment(
+        buffer,
+        rect.x + GUTTER_X,
+        rect.y,
+        right,
+        chrome.glyphs.role_gutter,
+        tint,
+    );
+    x = put_segment(buffer, x, rect.y, right, " ", Style::default());
+    let name_right = if counts_width > 0 && counts_start > x + MIN_NAME {
+        counts_start - 1
+    } else {
+        limit
+    };
+    x = put_elided(
+        buffer,
+        x,
+        rect.y,
+        name_right,
+        &entry.title,
+        chrome.glyphs.ellipsis,
+        Style::default()
+            .fg(roles.text_body)
+            .add_modifier(Modifier::BOLD),
+    );
+    let counts_start = put_counts(buffer, counts_rect, x, &card.counts, ctx);
+    if entry.pinned && tier == Tier::Wide && counts_start > x + 2 + display_width(PINNED_LABEL) {
+        x = put_segment(
+            buffer,
+            x,
+            rect.y,
+            counts_start.saturating_sub(1),
+            PINNED_LABEL,
+            muted,
+        );
+    }
     // Area hint: the role's oldest open task, when there is room after the name.
     if tier != Tier::Narrow && !card.hint.is_empty() {
         let hint_x = x + 2;
         let hint_right = counts_start.saturating_sub(1);
         if hint_right > hint_x + 4 {
-            put_segment(
+            put_elided(
                 buffer,
                 hint_x,
                 rect.y,
                 hint_right,
                 &card.hint,
+                chrome.glyphs.ellipsis,
                 Style::default().fg(roles.text_subtle),
             );
         }
+    }
+}
+
+/// `kind`, or `kind` and `model` joined by the glyph set's separator.
+fn kind_model_width(kind: &str, model: Option<&str>, separator: &str) -> u16 {
+    display_width(kind).saturating_add(model.map_or(0, |model| {
+        display_width(separator).saturating_add(display_width(model))
+    }))
+}
+
+fn put_kind_model(
+    buffer: &mut Buffer,
+    x: u16,
+    y: u16,
+    right: u16,
+    (kind, model): (&str, Option<&str>),
+    separator: &str,
+    style: Style,
+) {
+    let mut x = put_segment(buffer, x, y, right, kind, style);
+    if let Some(model) = model {
+        x = put_segment(buffer, x, y, right, separator, style);
+        put_segment(buffer, x, y, right, model, style);
     }
 }
 
@@ -220,40 +284,82 @@ fn member_row(
             Modifier::empty()
         })
         .add_modifier(dim);
-    let x = put_segment(
-        buffer,
-        rect.x + NAME_X,
-        rect.y,
-        right,
-        &row.name,
-        name_style,
-    );
-    // Right side: kind·model, else kind, else nothing; a member without a live
-    // agent shows its supervision phase instead.
     let meta = Style::default().fg(roles.text_muted).add_modifier(dim);
-    let candidates: [&str; 2] = if row.live {
-        [&extra.kind_model, &extra.kind]
+    let separator = chrome.glyphs.separator;
+    // Right side, best first: kind and model, kind, nothing; a member without a
+    // live agent shows its supervision phase. It is decoration, so the name is
+    // drawn first at its full width and the meta only takes what is left.
+    let name_x = rect.x + NAME_X;
+    let name_width = display_width(&row.name);
+    let x = name_x + name_width.min(right.saturating_sub(name_x));
+    let choices: [(&str, Option<&str>); 2] = if row.live {
+        [(&extra.kind, extra.model.as_deref()), (&extra.kind, None)]
     } else {
-        [&extra.phase, ""]
+        [(&extra.phase, None), ("", None)]
     };
-    for text in candidates {
-        let width = display_width(text);
+    let mut name_right = right;
+    for (kind, model) in choices {
+        let width = kind_model_width(kind, model, separator);
         let start = right.saturating_sub(width + 1);
-        if width > 0 && start > x {
-            put_segment(buffer, start, rect.y, right, text, meta);
+        if width > 0 && start > x + 1 {
+            put_kind_model(buffer, start, rect.y, right, (kind, model), separator, meta);
+            name_right = start.saturating_sub(1);
             break;
         }
     }
+    put_elided(
+        buffer,
+        name_x,
+        rect.y,
+        name_right.max(name_x),
+        &row.name,
+        chrome.glyphs.ellipsis,
+        name_style,
+    );
     if rect.height > 1 && tier == Tier::Wide {
         if let Some(title) = extra.task_title.as_deref() {
-            put_segment(
+            put_elided(
                 buffer,
                 rect.x + TITLE_X,
                 rect.y + 1,
                 right,
                 title,
+                chrome.glyphs.ellipsis,
                 Style::default().fg(roles.text_subtle),
             );
         }
     }
+}
+
+/// The `other` group header, in the active glyph set.
+fn other_header(
+    buffer: &mut Buffer,
+    rect: Rect,
+    count: usize,
+    collapsed: bool,
+    ctx: &TeamRenderContext<'_>,
+) {
+    let chrome = &ctx.config.chrome;
+    let roles = &chrome.roles;
+    let right = rect.right();
+    let glyph = if collapsed {
+        chrome.glyphs.group_closed
+    } else {
+        chrome.glyphs.group_open
+    };
+    let muted = Style::default().fg(roles.text_muted);
+    let mut x = put_segment(buffer, rect.x + LEAD_INDENT, rect.y, right, glyph, muted);
+    x = put_segment(buffer, x, rect.y, right, " ", Style::default());
+    x = put_segment(
+        buffer,
+        x,
+        rect.y,
+        right,
+        OTHER_TITLE,
+        Style::default()
+            .fg(roles.text_body)
+            .add_modifier(Modifier::BOLD),
+    );
+    x = put_segment(buffer, x, rect.y, right, " ", Style::default());
+    put_number(buffer, x, rect.y, right, count, muted);
 }

@@ -274,7 +274,15 @@ impl TeamSidebar {
         let rows = ordered_agent_pane_ids(snapshot, input.config.agent_panel_sort)
             .into_iter()
             .filter(|pane_id| !self.team_panes.contains(pane_id))
-            .filter_map(|pane_id| agent_row(snapshot, &pane_id, input.config, None))
+            .filter_map(|pane_id| {
+                agent_row(
+                    snapshot,
+                    &pane_id,
+                    input.config,
+                    None,
+                    Some(&self.modern.attention),
+                )
+            })
             .collect::<Vec<_>>();
         if rows.is_empty() {
             return rows;
@@ -308,6 +316,19 @@ impl ClientShellState {
     /// else this client's.
     pub(super) fn orbit_frame_unix_ms(&self, now: std::time::Instant) -> u64 {
         self.orbit_clock.unwrap_or(self.wall_clock).unix_ms_at(now)
+    }
+
+    /// The layout the Orbit benchmark measures: the sidebar gives the team panel
+    /// nearly all its height and the role cards are collapsed, so the work lanes
+    /// are drawn rather than scrolled out of view.
+    #[cfg(test)]
+    pub(crate) fn arrange_for_orbit_bench(&mut self) {
+        self.sidebar_section_split = 0.1;
+        self.sidebar_section_split_manual = true;
+        if let Some(team) = self.team_sidebar.as_ref() {
+            self.collapsed_team_groups
+                .extend(team.group_keys().map(str::to_owned));
+        }
     }
 
     /// Height of the sidebar section the team panel is drawn in, the same

@@ -103,6 +103,18 @@ fn digits(value: u16) -> u16 {
     }
 }
 
+/// Width of the roll-up `put_counts` draws, trailing margin included; 0 when
+/// there is nothing to show.
+pub(super) fn counts_width(counts: &StateCounts, ctx: &TeamRenderContext<'_>) -> u16 {
+    let glyphs = ctx.config.chrome.glyphs;
+    ROLLUP
+        .into_iter()
+        .map(|state| (state, counts.get(state)))
+        .filter(|(_, count)| *count > 0)
+        .map(|(state, count)| display_width(glyphs.state(state)) + digits(count) + 1)
+        .sum()
+}
+
 /// The right-aligned roll-up of `counts` (`◐1 ▲1`), ending one cell before the
 /// right edge; returns the column it starts at (`rect.right()` when empty).
 pub(super) fn put_counts(
@@ -140,33 +152,36 @@ pub(super) fn put_counts(
     start
 }
 
-/// A status glyph and color for surfaces that only know an `AgentStatus` (the
-/// flat agent list, the collapsed sidebar), in the modern glyph set and roles.
-pub(in crate::client::shell) fn agent_glyph(
+/// A state's glyph and color for surfaces that do not draw through
+/// `TeamRenderContext` (the flat agent list, the collapsed sidebar, mobile):
+/// the same glyph set and roles, from the same approval-aware `StateKind`.
+pub(in crate::client::shell) fn state_glyph_for(
     config: &crate::client::shell::ClientShellConfig,
-    status: AgentStatus,
+    state: StateKind,
     phase: AgentRowAnimationPhase,
 ) -> (&'static str, Color) {
     let chrome = &config.chrome;
     let palette = &config.palette;
-    let state = match status {
-        AgentStatus::Working => StateKind::Working,
-        AgentStatus::Blocked => StateKind::Blocked,
-        AgentStatus::Done => StateKind::Done,
-        AgentStatus::Idle => StateKind::Idle,
-        AgentStatus::Unknown => StateKind::Unknown,
-    };
     let glyph = if state == StateKind::Working {
         chrome.glyphs.working_frame(phase.spinner_index)
     } else {
         chrome.glyphs.state(state)
     };
     let mut color = chrome.roles.state(state);
-    if state == StateKind::Blocked && phase.blocked_pulse > 0.0 {
+    if matches!(state, StateKind::Blocked | StateKind::Approval) && phase.blocked_pulse > 0.0 {
         color = blend_color(color, palette.surface1, phase.blocked_pulse * 0.65, palette);
     }
     if phase.status_flash > 0.0 {
         color = blend_color(color, palette.text, phase.status_flash * 0.75, palette);
     }
     (glyph, color)
+}
+
+/// `state_glyph_for` for a surface that only knows an `AgentStatus`.
+pub(in crate::client::shell) fn agent_glyph(
+    config: &crate::client::shell::ClientShellConfig,
+    status: AgentStatus,
+    phase: AgentRowAnimationPhase,
+) -> (&'static str, Color) {
+    state_glyph_for(config, StateKind::from_status(status), phase)
 }
