@@ -27,9 +27,7 @@ const TASK_DETAIL_INDENT: u16 = 3;
 const APPROVAL_MARKER: &str = "⚑ ";
 const EXPANDED_GLYPH: &str = "▾";
 const COLLAPSED_GLYPH: &str = "▸";
-/// Longest age label: four digits and a unit.
-const AGE_BUFFER_LEN: usize = 5;
-const MAX_AGE_VALUE: u64 = 9999;
+use crate::ui::chrome::age::AGE_BUFFER_LEN;
 
 pub(super) struct WorkTask {
     short_id: String,
@@ -208,53 +206,8 @@ impl WorkTask {
     }
 }
 
-/// `elapsed_ms` as `45s`, `3m`, `2h` or `4d`, written into `buffer`.
-pub(super) fn age_text(elapsed_ms: u64, buffer: &mut [u8; AGE_BUFFER_LEN]) -> &str {
-    let seconds = elapsed_ms / 1000;
-    let (value, unit) = match seconds {
-        0..=59 => (seconds, b's'),
-        60..=3599 => (seconds / 60, b'm'),
-        3600..=86399 => (seconds / 3600, b'h'),
-        _ => (seconds / 86400, b'd'),
-    };
-    let mut value = value.min(MAX_AGE_VALUE);
-    let mut start = buffer.len() - 1;
-    buffer[start] = unit;
-    loop {
-        start -= 1;
-        buffer[start] = b'0' + (value % 10) as u8;
-        value /= 10;
-        if value == 0 {
-            break;
-        }
-    }
-    std::str::from_utf8(&buffer[start..]).unwrap_or_default()
-}
-
-/// Writes `value` in decimal without allocating; returns the next column.
-pub(super) fn put_number(
-    buffer: &mut Buffer,
-    x: u16,
-    y: u16,
-    right: u16,
-    mut value: usize,
-    style: Style,
-) -> u16 {
-    let mut digits = [0u8; 20];
-    let mut start = digits.len();
-    loop {
-        start -= 1;
-        digits[start] = b'0' + (value % 10) as u8;
-        value /= 10;
-        if value == 0 {
-            break;
-        }
-    }
-    match std::str::from_utf8(&digits[start..]) {
-        Ok(text) => put_segment(buffer, x, y, right, text, style),
-        Err(_) => x,
-    }
-}
+pub(super) use crate::ui::chrome::age::age_text;
+pub(super) use crate::ui::chrome::draw::put_number;
 
 pub(super) fn render_work_header(
     buffer: &mut Buffer,

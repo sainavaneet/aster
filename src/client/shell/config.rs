@@ -78,10 +78,11 @@ impl ClientShellState {
                     &loaded.invalid_sections,
                 );
                 if let Some(appearance) = self.host_appearance {
-                    self.config.palette = crate::app::client_palette_for_appearance(
-                        &self.config.theme_runtime,
-                        appearance,
-                    );
+                    self.config
+                        .set_palette(crate::app::client_palette_for_appearance(
+                            &self.config.theme_runtime,
+                            appearance,
+                        ));
                 }
                 if !self.sidebar_width_manual {
                     self.sidebar_width = self.config.sidebar_width;
@@ -110,8 +111,21 @@ impl ClientShellState {
 }
 
 impl ClientShellConfig {
+    /// Replaces the palette and re-derives the style's color roles from it.
+    pub(crate) fn set_palette(&mut self, palette: Palette) {
+        self.palette = palette;
+        self.refresh_chrome();
+    }
+
+    /// Re-derives `chrome` from the current style, glyph and palette settings.
+    pub(crate) fn refresh_chrome(&mut self) {
+        self.chrome =
+            crate::ui::chrome::Chrome::derive(self.ui_style, self.ui_glyphs, &self.palette);
+    }
+
     pub(crate) fn from_config(config: &Config) -> Self {
         let theme_runtime = crate::app::client_theme_runtime_from_config(config);
+        let palette = crate::app::client_palette_from_config(config);
         Self {
             polaris: config.polaris.clone(),
             sidebar_width: config.ui.sidebar_width,
@@ -138,7 +152,10 @@ impl ClientShellConfig {
             clipboard_toast_position: config.ui.toast.clipboard.position,
             theme_name: theme_runtime.manual_name.clone(),
             theme_runtime,
-            palette: crate::app::client_palette_from_config(config),
+            chrome: crate::ui::chrome::Chrome::derive(config.ui.style, config.ui.glyphs, &palette),
+            ui_style: config.ui.style,
+            ui_glyphs: config.ui.glyphs,
+            palette,
             keybinds: config
                 .live_keybinds_with_diagnostics()
                 .map(|(keybinds, _diagnostics)| keybinds)
@@ -363,6 +380,9 @@ impl ClientShellConfig {
                 self.sidebar_work = ui.sidebar_work;
                 self.status_indicators = ui.status_indicators;
                 self.animations = ui.animations;
+                self.ui_style = ui.style;
+                self.ui_glyphs = ui.glyphs;
+                self.refresh_chrome();
                 self.sound_enabled = ui.sound.enabled;
                 self.toast_delivery = ui.toast.delivery;
                 self.toast_delay_seconds = ui.toast.delay_seconds;
@@ -383,7 +403,7 @@ impl ClientShellConfig {
         if !invalid_section("theme") {
             self.theme_runtime = crate::app::client_theme_runtime_from_config(config);
             self.theme_name = self.theme_runtime.manual_name.clone();
-            self.palette = crate::app::client_palette_from_config(config);
+            self.set_palette(crate::app::client_palette_from_config(config));
         }
         if !invalid_section("experimental") {
             self.switch_ascii_input_source_in_prefix =
@@ -485,6 +505,54 @@ mod tests {
     use crossterm::event::{KeyCode, KeyModifiers};
 
     use super::*;
+
+    #[test]
+    fn theme_preview_and_cancel_refresh_chrome_roles() {
+        let mut state = ClientShellState::new(ClientShellConfig::from_config(&Config::default()));
+        let original = state.config.chrome.clone();
+        state.open_settings_overlay();
+        let light = crate::config::THEME_NAMES
+            .iter()
+            .position(|name| *name == "catppuccin-latte")
+            .unwrap();
+        state.select_settings_choice(light);
+        assert_ne!(state.config.chrome.roles, original.roles);
+        assert_eq!(
+            state.config.chrome.roles,
+            crate::ui::chrome::ChromeRoles::derive(&state.config.palette)
+        );
+        state.cancel_settings_overlay();
+        assert_eq!(state.config.chrome, original);
+    }
+
+    #[test]
+    fn palette_replacement_refreshes_chrome_roles() {
+        let mut shell = ClientShellConfig::from_config(&Config::default());
+        let original = shell.chrome.roles.clone();
+        shell.set_palette(Palette::from_name("catppuccin-latte").unwrap());
+        assert_ne!(shell.chrome.roles, original);
+        assert_eq!(
+            shell.chrome.roles,
+            crate::ui::chrome::ChromeRoles::derive(&shell.palette)
+        );
+        shell.set_palette(Palette::from_name("terminal").unwrap());
+        assert!(shell.chrome.roles.bold_states);
+    }
+
+    #[test]
+    fn live_reload_refreshes_style_glyphs_and_preserves_invalid_ui() {
+        let mut shell = ClientShellConfig::from_config(&Config::default());
+        let next: Config = toml::from_str("[ui]\nstyle = 'classic'\nglyphs = 'ascii'\n").unwrap();
+        assert!(shell.apply_live_config(&next, &[], &[]).is_empty());
+        assert_eq!(shell.chrome.style, crate::config::UiStyleConfig::Classic);
+        assert_eq!(shell.chrome.glyphs, &crate::ui::chrome::glyphs::ASCII);
+        shell.apply_live_config(&Config::default(), &[], &["ui".to_owned()]);
+        assert_eq!(shell.chrome.style, crate::config::UiStyleConfig::Classic);
+        assert_eq!(shell.chrome.glyphs, &crate::ui::chrome::glyphs::ASCII);
+        shell.apply_live_config(&Config::default(), &[], &[]);
+        assert_eq!(shell.chrome.style, crate::config::UiStyleConfig::Modern);
+        assert_eq!(shell.chrome.glyphs, &crate::ui::chrome::glyphs::UNICODE);
+    }
 
     #[test]
     fn live_reload_applies_client_owned_sections() {

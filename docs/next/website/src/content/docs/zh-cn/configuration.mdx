@@ -355,6 +355,14 @@ status_indicators = "symbols"
 
 这些符号是静态的，因此该选项不会启用旋转动画。
 
+`ui.style` 可选 `"modern"`（默认）或 `"classic"`。在此基础阶段，两者的显示相同。`ui.glyphs` 为后续 modern 界面选择 `"unicode"`（默认）或 `"ascii"`。这些设置不会改变窗格尺寸。
+
+```toml
+[ui]
+style = "modern"
+glyphs = "unicode"
+```
+
 ### 侧边栏行布局
 
 展开的桌面侧边栏会将 `rows` 中的每个内层数组渲染为一行。以下是完整的默认布局：

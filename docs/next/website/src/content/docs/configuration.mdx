@@ -364,6 +364,14 @@ animations = "full"
 
 `ui.animations` controls terminal UI motion: `"full"` (the default) cycles a spinner for working agents, pulses blocked agents, sweeps a tab whose agent reports or becomes blocked, flashes and briefly highlights an agent whose status changes, and slides toasts in and fades them out. `"reduced"` keeps only the one-shot flashes, highlights, and toast fades, and shows static status symbols. `"off"` disables all motion. Animations redraw only while an effect is running.
 
+`ui.style` selects `"modern"` (the default) or `"classic"`. In this foundation phase both styles draw the existing interface. `ui.glyphs` selects `"unicode"` (the default) or `"ascii"` for future modern surfaces. These settings never change pane sizes.
+
+```toml
+[ui]
+style = "modern"
+glyphs = "unicode"
+```
+
 ### Sidebar row layouts
 
 The expanded desktop sidebar renders each inner array in `rows` as one line. These are the complete default layouts:

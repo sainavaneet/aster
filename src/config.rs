@@ -32,8 +32,8 @@ pub use self::{
         OrbitNotifyEvent, PaneBordersConfig, PermissionModeError, PolarisConfig,
         PolarisTeamRoleConfig, PolarisWorkersConfig, ShellModeConfig, SidebarCollapsedModeConfig,
         StatusIndicatorStyle, TabBarPositionConfig, ToastAsterPosition, ToastClipboardPosition,
-        ToastConfig, ToastDelivery, UiAnimationsConfig, UpdateChannelConfig,
-        MAX_TOAST_DELAY_SECONDS,
+        ToastConfig, ToastDelivery, UiAnimationsConfig, UiGlyphsConfig, UiStyleConfig,
+        UpdateChannelConfig, MAX_TOAST_DELAY_SECONDS,
     },
     sidebar::{
         AgentSidebarToken, AgentsSidebarConfig, SidebarConfig, SidebarTokenStyle,

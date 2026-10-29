@@ -363,26 +363,4 @@ pub(super) fn put_right_text(buffer: &mut Buffer, area: Rect, y: u16, text: &str
     );
 }
 
-pub(super) fn put_segment(
-    buffer: &mut Buffer,
-    x: u16,
-    y: u16,
-    right: u16,
-    text: &str,
-    style: Style,
-) -> u16 {
-    let width = display_width(text).min(right.saturating_sub(x));
-    put_text(buffer, x, y, width, text, style);
-    x.saturating_add(width)
-}
-
-pub(super) fn put_text(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &str, style: Style) {
-    if width == 0 || y >= buffer.area.bottom() || x >= buffer.area.right() {
-        return;
-    }
-    buffer.set_stringn(x, y, text, width as usize, style);
-}
-
-pub(super) fn display_width(text: &str) -> u16 {
-    UnicodeWidthStr::width(text).min(u16::MAX as usize) as u16
-}
+pub(super) use crate::ui::chrome::draw::{display_width, put_segment, put_text};

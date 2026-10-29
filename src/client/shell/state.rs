@@ -39,6 +39,11 @@ pub(crate) struct ClientShellConfig {
     pub(super) theme_name: String,
     pub(super) theme_runtime: crate::app::state::ThemeRuntimeConfig,
     pub(super) palette: Palette,
+    /// Resolved visual style: `ui.style`, glyph set, and color roles derived from
+    /// `palette`. Rebuilt by `set_palette` / `refresh_chrome`, never per frame.
+    pub(crate) chrome: crate::ui::chrome::Chrome,
+    pub(super) ui_style: crate::config::UiStyleConfig,
+    pub(super) ui_glyphs: crate::config::UiGlyphsConfig,
     pub(super) keybinds: LiveKeybindConfig,
     pub(super) local_keys: crate::config::KeysConfig,
     pub(super) keybinding_source: ClientShellKeybindingSource,

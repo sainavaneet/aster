@@ -1292,6 +1292,26 @@
           ]
         },
         {
+          "key": "ui.style",
+          "type": "enum",
+          "default": "\"modern\"",
+          "description": "Visual style of the terminal UI chrome. modern uses a shared glyph set and theme-derived color roles; classic draws the original look exactly as before the redesign. The style never changes layout or pane sizes.",
+          "values": [
+            "modern",
+            "classic"
+          ]
+        },
+        {
+          "key": "ui.glyphs",
+          "type": "enum",
+          "default": "\"unicode\"",
+          "description": "Glyph repertoire used by the modern style. unicode uses single-cell symbols; ascii swaps each for an ASCII fallback. Has no effect with ui.style = \"classic\".",
+          "values": [
+            "unicode",
+            "ascii"
+          ]
+        },
+        {
           "key": "ui.sidebar.agents.row_gap",
           "type": "integer",
           "default": "0",

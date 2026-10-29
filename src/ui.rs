@@ -1,5 +1,6 @@
 use ratatui::layout::Rect;
 
+pub(crate) mod chrome;
 mod onboarding;
 mod panes;
 mod release_notes;

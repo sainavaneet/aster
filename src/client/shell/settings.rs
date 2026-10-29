@@ -150,8 +150,11 @@ impl ClientShellState {
             return;
         };
         self.config.theme_name = (*name).to_owned();
-        self.config.palette =
-            crate::app::client_palette_for_theme(&self.config.theme_runtime, name);
+        self.config
+            .set_palette(crate::app::client_palette_for_theme(
+                &self.config.theme_runtime,
+                name,
+            ));
     }
 
     pub(super) fn cancel_settings_overlay(&mut self) {
@@ -159,7 +162,7 @@ impl ClientShellState {
             return;
         };
         self.config.theme_name = settings.original_theme_name;
-        self.config.palette = settings.original_palette;
+        self.config.set_palette(settings.original_palette);
     }
 
     fn save_settings_edit(

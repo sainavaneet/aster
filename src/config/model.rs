@@ -137,6 +137,31 @@ pub enum UiAnimationsConfig {
     Off,
 }
 
+/// Whether the terminal UI draws the redesigned chrome or the original one.
+/// `classic` renders exactly what shipped before the redesign.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum UiStyleConfig {
+    #[default]
+    Modern,
+    Classic,
+}
+
+impl UiStyleConfig {
+    pub const fn is_modern(self) -> bool {
+        matches!(self, Self::Modern)
+    }
+}
+
+/// Glyph repertoire for client-drawn chrome of the modern style.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum UiGlyphsConfig {
+    #[default]
+    Unicode,
+    Ascii,
+}
+
 impl UiAnimationsConfig {
     #[cfg(test)]
     pub const fn as_str(self) -> &'static str {
@@ -1298,6 +1323,10 @@ pub struct UiConfig {
     pub status_indicators: StatusIndicatorStyle,
     /// Terminal UI motion level: "full", "reduced", or "off". Default: "full".
     pub animations: UiAnimationsConfig,
+    /// Terminal UI visual style: "modern" or "classic". Default: "modern".
+    pub style: UiStyleConfig,
+    /// Glyph set used by the modern style: "unicode" or "ascii". Default: "unicode".
+    pub glyphs: UiGlyphsConfig,
     /// Expanded sidebar row composition.
     pub sidebar: SidebarConfig,
     /// Accent color for highlights, borders, and navigation UI.
@@ -1529,6 +1558,8 @@ impl Default for UiConfig {
             _legacy_agent_panel_scope: None,
             status_indicators: StatusIndicatorStyle::Dots,
             animations: UiAnimationsConfig::Full,
+            style: UiStyleConfig::Modern,
+            glyphs: UiGlyphsConfig::Unicode,
             sidebar: SidebarConfig::default(),
             accent: "cyan".into(),
             toast: ToastConfig::default(),
@@ -1793,6 +1824,19 @@ status_indicators = "symbols"
         )
         .unwrap();
         assert_eq!(config.ui.status_indicators, StatusIndicatorStyle::Symbols);
+    }
+
+    #[test]
+    fn ui_style_and_glyphs_default_and_parse() {
+        let defaults = Config::default();
+        assert_eq!(defaults.ui.style, UiStyleConfig::Modern);
+        assert_eq!(defaults.ui.glyphs, UiGlyphsConfig::Unicode);
+        let config: Config =
+            toml::from_str("[ui]\nstyle = \"classic\"\nglyphs = \"ascii\"\n").unwrap();
+        assert_eq!(config.ui.style, UiStyleConfig::Classic);
+        assert_eq!(config.ui.glyphs, UiGlyphsConfig::Ascii);
+        assert!(toml::from_str::<Config>("[ui]\nstyle = \"fancy\"").is_err());
+        assert!(toml::from_str::<Config>("[ui]\nglyphs = \"emoji\"").is_err());
     }
 
     #[test]

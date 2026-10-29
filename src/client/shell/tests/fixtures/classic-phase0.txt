@@ -1,0 +1,1464 @@
+catppuccin/full/team
+ spaces                  │⠋  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=d37fe6964a2571d8
+catppuccin/full/work
+ spaces                                        │⠋  1      +                                               |
+                                               │LIVE                                                      |
+ ● client-shell                                │PANE                                                      |
+   main                                        │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+ new                                       menu│                                                          |
+───────────────────────────────────────────────│                                                          |
+ team                                   grouped│                                                          |
+                                               │                                                          |
+ ○ Polaris  lead                               │                                                          |
+ ▾ reviewer 3 pinned                           │                                                          |
+   ● rev-codex  codex                          │                                                          |
+   ⠋ rev-claude  claude                        │                                                          |
+   · rev-gone  claude · gave up                │                                                          |
+ ▾ ui 0                                        │                                                          |
+ ▾ scratch 1                                   │                                                          |
+   ○ probe  claude                             │                                                          |
+ ▾ other 2                                     │                                                          |
+ ○ client-shell                                │                                                          |
+   stray-idle                                  │                                                          |
+ ● client-shell                                │                                                          |
+   stray-blocked                               │                                                          |
+ ▾ work  1 active · 1 blocked                  │                                                          |
+ ● ⚑ -classic reviewer              blocked 2m │                                                          |
+   Review 界  changes                           │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                              «│                                                          |
+style=d5fcb89c721795cd
+catppuccin/full/tabs
+ spaces                  │ < ⠋  1       test 2     test 3     test 4     test 5     test 6   test 7… >  + |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell · 1     ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=9481a76ff99bba5c
+catppuccin/full/mode
+ spaces                  │⠋  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=697dbe6729513abe
+catppuccin/full/toast
+ spaces                  │⠋  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                           ┌───────────────────┐|
+ ○ client-shell         ▕│                                                           │● Review ready     │|
+   stray-idle           ▕│                                                           │  Check 界  output  │|
+                        «│                                                           └───────────────────┘|
+style=e7a497fc21e1339d
+catppuccin/full/collapsed
+1 ●│⠋  1      +                                                                                           |
+   │LIVE                                                                                                  |
+   │PANE                                                                                                  |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+───│                                                                                                      |
+1 ○│                                                                                                      |
+2 ●│                                                                                                      |
+3 ⠋│                                                                                                      |
+4 ○│                                                                                                      |
+5 ○│                                                                                                      |
+6 ●│                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+ » │                                                                                                      |
+style=54f85a4208386735
+catppuccin/full/mobile
+ ● client-shell             tab 1 │        ●|
+ ◉ 2 blocked · 1 working · 3 idle │ switch  |
+LIVE                                        |
+PANE                                        |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+style=c5fd619359e8b55f
+catppuccin/reduced/team
+ spaces                  │●  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=d37fe6964a2571d8
+catppuccin/reduced/work
+ spaces                                        │●  1      +                                               |
+                                               │LIVE                                                      |
+ ● client-shell                                │PANE                                                      |
+   main                                        │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+ new                                       menu│                                                          |
+───────────────────────────────────────────────│                                                          |
+ team                                   grouped│                                                          |
+                                               │                                                          |
+ ○ Polaris  lead                               │                                                          |
+ ▾ reviewer 3 pinned                           │                                                          |
+   ● rev-codex  codex                          │                                                          |
+   ● rev-claude  claude                        │                                                          |
+   · rev-gone  claude · gave up                │                                                          |
+ ▾ ui 0                                        │                                                          |
+ ▾ scratch 1                                   │                                                          |
+   ○ probe  claude                             │                                                          |
+ ▾ other 2                                     │                                                          |
+ ○ client-shell                                │                                                          |
+   stray-idle                                  │                                                          |
+ ● client-shell                                │                                                          |
+   stray-blocked                               │                                                          |
+ ▾ work  1 active · 1 blocked                  │                                                          |
+ ● ⚑ -classic reviewer              blocked 2m │                                                          |
+   Review 界  changes                           │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                              «│                                                          |
+style=d5fcb89c721795cd
+catppuccin/reduced/tabs
+ spaces                  │ < ●  1       test 2     test 3     test 4     test 5     test 6   test 7… >  + |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell · 1     ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=9481a76ff99bba5c
+catppuccin/reduced/mode
+ spaces                  │●  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=697dbe6729513abe
+catppuccin/reduced/toast
+ spaces                  │●  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                           ┌───────────────────┐|
+ ○ client-shell         ▕│                                                           │● Review ready     │|
+   stray-idle           ▕│                                                           │  Check 界  output  │|
+                        «│                                                           └───────────────────┘|
+style=e7a497fc21e1339d
+catppuccin/reduced/collapsed
+1 ●│●  1      +                                                                                           |
+   │LIVE                                                                                                  |
+   │PANE                                                                                                  |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+───│                                                                                                      |
+1 ○│                                                                                                      |
+2 ●│                                                                                                      |
+3 ●│                                                                                                      |
+4 ○│                                                                                                      |
+5 ○│                                                                                                      |
+6 ●│                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+ » │                                                                                                      |
+style=54f85a4208386735
+catppuccin/reduced/mobile
+ ● client-shell             tab 1 │        ●|
+ ◉ 2 blocked · 1 working · 3 idle │ switch  |
+LIVE                                        |
+PANE                                        |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+style=c5fd619359e8b55f
+catppuccin/off/team
+ spaces                  │   1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=d37fe6964a2571d8
+catppuccin/off/work
+ spaces                                        │   1      +                                               |
+                                               │LIVE                                                      |
+ ● client-shell                                │PANE                                                      |
+   main                                        │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+ new                                       menu│                                                          |
+───────────────────────────────────────────────│                                                          |
+ team                                   grouped│                                                          |
+                                               │                                                          |
+ ○ Polaris  lead                               │                                                          |
+ ▾ reviewer 3 pinned                           │                                                          |
+   ● rev-codex  codex                          │                                                          |
+   ● rev-claude  claude                        │                                                          |
+   · rev-gone  claude · gave up                │                                                          |
+ ▾ ui 0                                        │                                                          |
+ ▾ scratch 1                                   │                                                          |
+   ○ probe  claude                             │                                                          |
+ ▾ other 2                                     │                                                          |
+ ○ client-shell                                │                                                          |
+   stray-idle                                  │                                                          |
+ ● client-shell                                │                                                          |
+   stray-blocked                               │                                                          |
+ ▾ work  1 active · 1 blocked                  │                                                          |
+ ● ⚑ -classic reviewer              blocked 2m │                                                          |
+   Review 界  changes                           │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                              «│                                                          |
+style=d5fcb89c721795cd
+catppuccin/off/tabs
+ spaces                  │ <    1       test 2     test 3     test 4     test 5     test 6   test 7… >  + |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell · 1     ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=9481a76ff99bba5c
+catppuccin/off/mode
+ spaces                  │   1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=697dbe6729513abe
+catppuccin/off/toast
+ spaces                  │   1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                           ┌───────────────────┐|
+ ○ client-shell         ▕│                                                           │● Review ready     │|
+   stray-idle           ▕│                                                           │  Check 界  output  │|
+                        «│                                                           └───────────────────┘|
+style=e7a497fc21e1339d
+catppuccin/off/collapsed
+1 ●│   1      +                                                                                           |
+   │LIVE                                                                                                  |
+   │PANE                                                                                                  |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+───│                                                                                                      |
+1 ○│                                                                                                      |
+2 ●│                                                                                                      |
+3 ●│                                                                                                      |
+4 ○│                                                                                                      |
+5 ○│                                                                                                      |
+6 ●│                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+ » │                                                                                                      |
+style=54f85a4208386735
+catppuccin/off/mobile
+ ● client-shell             tab 1 │        ●|
+ ◉ 2 blocked · 1 working · 3 idle │ switch  |
+LIVE                                        |
+PANE                                        |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+style=c5fd619359e8b55f
+catppuccin-latte/full/team
+ spaces                  │⠋  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=2b9d7be456edad89
+catppuccin-latte/full/work
+ spaces                                        │⠋  1      +                                               |
+                                               │LIVE                                                      |
+ ● client-shell                                │PANE                                                      |
+   main                                        │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+ new                                       menu│                                                          |
+───────────────────────────────────────────────│                                                          |
+ team                                   grouped│                                                          |
+                                               │                                                          |
+ ○ Polaris  lead                               │                                                          |
+ ▾ reviewer 3 pinned                           │                                                          |
+   ● rev-codex  codex                          │                                                          |
+   ⠋ rev-claude  claude                        │                                                          |
+   · rev-gone  claude · gave up                │                                                          |
+ ▾ ui 0                                        │                                                          |
+ ▾ scratch 1                                   │                                                          |
+   ○ probe  claude                             │                                                          |
+ ▾ other 2                                     │                                                          |
+ ○ client-shell                                │                                                          |
+   stray-idle                                  │                                                          |
+ ● client-shell                                │                                                          |
+   stray-blocked                               │                                                          |
+ ▾ work  1 active · 1 blocked                  │                                                          |
+ ● ⚑ -classic reviewer              blocked 2m │                                                          |
+   Review 界  changes                           │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                              «│                                                          |
+style=e841c2c48b2fc57c
+catppuccin-latte/full/tabs
+ spaces                  │ < ⠋  1       test 2     test 3     test 4     test 5     test 6   test 7… >  + |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell · 1     ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=25c087fcd7e7e815
+catppuccin-latte/full/mode
+ spaces                  │⠋  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=806fb9f55dca1ff6
+catppuccin-latte/full/toast
+ spaces                  │⠋  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ⠋ rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                           ┌───────────────────┐|
+ ○ client-shell         ▕│                                                           │● Review ready     │|
+   stray-idle           ▕│                                                           │  Check 界  output  │|
+                        «│                                                           └───────────────────┘|
+style=6a45b0deb637d44f
+catppuccin-latte/full/collapsed
+1 ●│⠋  1      +                                                                                           |
+   │LIVE                                                                                                  |
+   │PANE                                                                                                  |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+───│                                                                                                      |
+1 ○│                                                                                                      |
+2 ●│                                                                                                      |
+3 ⠋│                                                                                                      |
+4 ○│                                                                                                      |
+5 ○│                                                                                                      |
+6 ●│                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+ » │                                                                                                      |
+style=dbdacccd30b3abd0
+catppuccin-latte/full/mobile
+ ● client-shell             tab 1 │        ●|
+ ◉ 2 blocked · 1 working · 3 idle │ switch  |
+LIVE                                        |
+PANE                                        |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+style=e88261e212f19451
+catppuccin-latte/reduced/team
+ spaces                  │●  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=2b9d7be456edad89
+catppuccin-latte/reduced/work
+ spaces                                        │●  1      +                                               |
+                                               │LIVE                                                      |
+ ● client-shell                                │PANE                                                      |
+   main                                        │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+ new                                       menu│                                                          |
+───────────────────────────────────────────────│                                                          |
+ team                                   grouped│                                                          |
+                                               │                                                          |
+ ○ Polaris  lead                               │                                                          |
+ ▾ reviewer 3 pinned                           │                                                          |
+   ● rev-codex  codex                          │                                                          |
+   ● rev-claude  claude                        │                                                          |
+   · rev-gone  claude · gave up                │                                                          |
+ ▾ ui 0                                        │                                                          |
+ ▾ scratch 1                                   │                                                          |
+   ○ probe  claude                             │                                                          |
+ ▾ other 2                                     │                                                          |
+ ○ client-shell                                │                                                          |
+   stray-idle                                  │                                                          |
+ ● client-shell                                │                                                          |
+   stray-blocked                               │                                                          |
+ ▾ work  1 active · 1 blocked                  │                                                          |
+ ● ⚑ -classic reviewer              blocked 2m │                                                          |
+   Review 界  changes                           │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                              «│                                                          |
+style=e841c2c48b2fc57c
+catppuccin-latte/reduced/tabs
+ spaces                  │ < ●  1       test 2     test 3     test 4     test 5     test 6   test 7… >  + |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell · 1     ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=25c087fcd7e7e815
+catppuccin-latte/reduced/mode
+ spaces                  │●  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=806fb9f55dca1ff6
+catppuccin-latte/reduced/toast
+ spaces                  │●  1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                           ┌───────────────────┐|
+ ○ client-shell         ▕│                                                           │● Review ready     │|
+   stray-idle           ▕│                                                           │  Check 界  output  │|
+                        «│                                                           └───────────────────┘|
+style=6a45b0deb637d44f
+catppuccin-latte/reduced/collapsed
+1 ●│●  1      +                                                                                           |
+   │LIVE                                                                                                  |
+   │PANE                                                                                                  |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+───│                                                                                                      |
+1 ○│                                                                                                      |
+2 ●│                                                                                                      |
+3 ●│                                                                                                      |
+4 ○│                                                                                                      |
+5 ○│                                                                                                      |
+6 ●│                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+ » │                                                                                                      |
+style=dbdacccd30b3abd0
+catppuccin-latte/reduced/mobile
+ ● client-shell             tab 1 │        ●|
+ ◉ 2 blocked · 1 working · 3 idle │ switch  |
+LIVE                                        |
+PANE                                        |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+style=e88261e212f19451
+catppuccin-latte/off/team
+ spaces                  │   1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=2b9d7be456edad89
+catppuccin-latte/off/work
+ spaces                                        │   1      +                                               |
+                                               │LIVE                                                      |
+ ● client-shell                                │PANE                                                      |
+   main                                        │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+ new                                       menu│                                                          |
+───────────────────────────────────────────────│                                                          |
+ team                                   grouped│                                                          |
+                                               │                                                          |
+ ○ Polaris  lead                               │                                                          |
+ ▾ reviewer 3 pinned                           │                                                          |
+   ● rev-codex  codex                          │                                                          |
+   ● rev-claude  claude                        │                                                          |
+   · rev-gone  claude · gave up                │                                                          |
+ ▾ ui 0                                        │                                                          |
+ ▾ scratch 1                                   │                                                          |
+   ○ probe  claude                             │                                                          |
+ ▾ other 2                                     │                                                          |
+ ○ client-shell                                │                                                          |
+   stray-idle                                  │                                                          |
+ ● client-shell                                │                                                          |
+   stray-blocked                               │                                                          |
+ ▾ work  1 active · 1 blocked                  │                                                          |
+ ● ⚑ -classic reviewer              blocked 2m │                                                          |
+   Review 界  changes                           │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                               │                                                          |
+                                              «│                                                          |
+style=e841c2c48b2fc57c
+catppuccin-latte/off/tabs
+ spaces                  │ <    1       test 2     test 3     test 4     test 5     test 6   test 7… >  + |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell · 1     ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│                                                                                |
+style=25c087fcd7e7e815
+catppuccin-latte/off/mode
+ spaces                  │   1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                                                |
+ ○ client-shell         ▕│                                                                                |
+   stray-idle           ▕│                                                                                |
+                        «│ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=806fb9f55dca1ff6
+catppuccin-latte/off/toast
+ spaces                  │   1      +                                                                     |
+                         │LIVE                                                                            |
+ ● client-shell          │PANE                                                                            |
+   main                  │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+                         │                                                                                |
+ new                 menu│                                                                                |
+─────────────────────────│                                                                                |
+ team             grouped│                                                                                |
+                         │                                                                                |
+ ○ Polaris  lead        ▕│                                                                                |
+ ▾ reviewer 3 pinned    ▕│                                                                                |
+   ● rev-codex  codex   ▕│                                                                                |
+   ● rev-claude  claude ▕│                                                                                |
+   · rev-gone  claude · ▕│                                                                                |
+ ▾ ui 0                 ▕│                                                                                |
+ ▾ scratch 1            ▕│                                                                                |
+   ○ probe  claude      ▕│                                                                                |
+ ▾ other 2              ▕│                                                           ┌───────────────────┐|
+ ○ client-shell         ▕│                                                           │● Review ready     │|
+   stray-idle           ▕│                                                           │  Check 界  output  │|
+                        «│                                                           └───────────────────┘|
+style=6a45b0deb637d44f
+catppuccin-latte/off/collapsed
+1 ●│   1      +                                                                                           |
+   │LIVE                                                                                                  |
+   │PANE                                                                                                  |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+───│                                                                                                      |
+1 ○│                                                                                                      |
+2 ●│                                                                                                      |
+3 ●│                                                                                                      |
+4 ○│                                                                                                      |
+5 ○│                                                                                                      |
+6 ●│                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+   │                                                                                                      |
+ » │                                                                                                      |
+style=dbdacccd30b3abd0
+catppuccin-latte/off/mobile
+ ● client-shell             tab 1 │        ●|
+ ◉ 2 blocked · 1 working · 3 idle │ switch  |
+LIVE                                        |
+PANE                                        |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+                                            |
+style=e88261e212f19451

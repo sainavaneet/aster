@@ -265,3 +265,5 @@ mod popup_focus_projection;
 mod startup_overlays;
 mod team_sidebar;
 mod work_board;
+
+mod visual_classic;
