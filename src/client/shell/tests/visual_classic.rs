@@ -68,6 +68,10 @@ fn work_task() -> crate::protocol::OrbitShellActiveTask {
         created_at_ms: 9_999_880_000,
         blocked: true,
         awaiting_approval: true,
+        steps: Vec::new(),
+        step_total: None,
+        parallel: None,
+        steps_omitted: None,
     }
 }
 
@@ -291,31 +295,21 @@ fn expected_frames() -> Vec<(String, String)> {
 
 #[test]
 fn classic_visual_characterization() {
+    // Classic stays identical to the pre-foundation tree for either glyph
+    // setting; modern redraws the sidebar from phase 2 on and has its own tests.
     let expected = expected_frames();
-    for style in [
-        crate::config::UiStyleConfig::Classic,
-        crate::config::UiStyleConfig::Modern,
+    for glyphs in [
+        crate::config::UiGlyphsConfig::Unicode,
+        crate::config::UiGlyphsConfig::Ascii,
     ] {
-        for glyphs in [
-            crate::config::UiGlyphsConfig::Unicode,
-            crate::config::UiGlyphsConfig::Ascii,
-        ] {
-            let actual = render_matrix(&|config: &mut Config| {
-                config.ui.style = style;
-                config.ui.glyphs = glyphs;
-            });
-            assert_eq!(actual.len(), expected.len());
-            for ((name, text), (expected_name, expected_text)) in actual.iter().zip(&expected) {
-                assert_eq!(name, expected_name);
-                // Settings adds a modern-only style tab; its classic rendering
-                // still has to match the original fixture.
-                if style == crate::config::UiStyleConfig::Modern
-                    && name.ends_with("overlay-settings")
-                {
-                    continue;
-                }
-                assert_eq!(text, expected_text, "{name} style={style:?} {glyphs:?}");
-            }
+        let actual = render_matrix(&|config: &mut Config| {
+            config.ui.style = crate::config::UiStyleConfig::Classic;
+            config.ui.glyphs = glyphs;
+        });
+        assert_eq!(actual.len(), expected.len());
+        for ((name, text), (expected_name, expected_text)) in actual.iter().zip(&expected) {
+            assert_eq!(name, expected_name);
+            assert_eq!(text, expected_text, "{name} {glyphs:?}");
         }
     }
 }

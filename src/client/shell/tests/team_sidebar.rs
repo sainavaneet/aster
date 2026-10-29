@@ -13,6 +13,7 @@ pub(super) fn member(
         terminal_id: pane_id.map(|pane_id| format!("term_{pane_id}")),
         pane_id: pane_id.map(str::to_owned),
         state: state.into(),
+        model: None,
     }
 }
 
@@ -152,6 +153,7 @@ pub(super) fn focused_pane(input: &ClientShellInput) -> Option<&str> {
 #[test]
 fn team_tree_lists_lead_roles_scratch_then_other_agents() {
     let mut config = Config::default();
+    config.ui.style = crate::config::UiStyleConfig::Classic;
     config.ui.sidebar_width = 44;
     config.ui.sidebar_max_width = 60;
     let mut state = team_state(config, team_snapshot());
@@ -234,7 +236,9 @@ fn clicking_a_member_focuses_its_pane_and_a_paneless_member_is_inert() {
 
 #[test]
 fn clicking_a_group_header_collapses_it_without_a_request() {
-    let mut state = team_state(Config::default(), team_snapshot());
+    let mut config = Config::default();
+    config.ui.style = crate::config::UiStyleConfig::Classic;
+    let mut state = team_state(config, team_snapshot());
     let frame = state.compose(106, 40).expect("team sidebar frame");
     let header = row_of(&sidebar_rows(&frame, &state), "reviewer") as u16;
     let rect = state

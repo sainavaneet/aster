@@ -25,6 +25,7 @@ mod parallel;
 mod pump;
 mod redact;
 mod report;
+mod shell_steps;
 mod shell_view;
 mod state;
 mod steps;

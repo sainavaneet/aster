@@ -438,8 +438,11 @@ pub(super) fn render_agent_row(
         palette.subtext0
     };
     let name_style = Style::default().fg(name_fg).add_modifier(Modifier::BOLD);
-    let (icon_glyph, status_fg) =
-        agent_status_icon_and_color(row.status, config.status_indicators, palette, phase);
+    let (icon_glyph, status_fg) = if config.chrome.is_modern() {
+        super::modern::draw::agent_glyph(config, row.status, phase)
+    } else {
+        agent_status_icon_and_color(row.status, config.status_indicators, palette, phase)
+    };
     let status_style = if phase.status_flash > 0.25 {
         Style::default().fg(status_fg).add_modifier(Modifier::BOLD)
     } else {

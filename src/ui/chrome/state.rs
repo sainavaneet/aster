@@ -15,6 +15,36 @@ pub(crate) enum StateKind {
 }
 
 impl StateKind {
+    pub(crate) const COUNT: usize = 9;
+
+    /// Position in a `StateCounts`.
+    pub(crate) const fn index(self) -> usize {
+        match self {
+            Self::Approval => 0,
+            Self::Blocked => 1,
+            Self::Failed => 2,
+            Self::Working => 3,
+            Self::Queued => 4,
+            Self::Done => 5,
+            Self::Idle => 6,
+            Self::Exited => 7,
+            Self::Unknown => 8,
+        }
+    }
+
+    /// States in roll-up order (most urgent first), the inverse of `index`.
+    pub(crate) const ORDER: [StateKind; Self::COUNT] = [
+        Self::Approval,
+        Self::Blocked,
+        Self::Failed,
+        Self::Working,
+        Self::Queued,
+        Self::Done,
+        Self::Idle,
+        Self::Exited,
+        Self::Unknown,
+    ];
+
     /// Importance for roll-ups: the highest wins.
     pub(crate) const fn priority(self) -> u8 {
         match self {
@@ -41,6 +71,47 @@ impl StateKind {
             "exited" | "gave_up" | "unsupervised" | "unsupported" => Self::Exited,
             _ => Self::Unknown,
         }
+    }
+}
+
+/// How many members or tasks are in each state.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct StateCounts([u16; StateKind::COUNT]);
+
+impl StateCounts {
+    pub(crate) fn add(&mut self, state: StateKind) {
+        let slot = &mut self.0[state.index()];
+        *slot = slot.saturating_add(1);
+    }
+
+    pub(crate) fn get(&self, state: StateKind) -> u16 {
+        self.0[state.index()]
+    }
+}
+
+/// A set of work-board lanes, used for the collapsed ones.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct LaneSet(u8);
+
+impl LaneSet {
+    pub(crate) const EMPTY: Self = Self(0);
+
+    const fn bit(lane: Lane) -> u8 {
+        match lane {
+            Lane::NeedsYou => 1,
+            Lane::Working => 2,
+            Lane::Queued => 4,
+            Lane::Done => 8,
+        }
+    }
+
+    pub(crate) fn contains(self, lane: Lane) -> bool {
+        self.0 & Self::bit(lane) != 0
+    }
+
+    /// Collapses an expanded lane and expands a collapsed one.
+    pub(crate) fn toggle(&mut self, lane: Lane) {
+        self.0 ^= Self::bit(lane);
     }
 }
 
@@ -109,6 +180,27 @@ mod tests {
         assert_eq!(Lane::of_active(false, true, "working"), Lane::NeedsYou);
         assert_eq!(Lane::of_active(false, false, "assigning"), Lane::Queued);
         assert_eq!(Lane::of_active(false, false, "idle"), Lane::Working);
+    }
+
+    #[test]
+    fn state_indices_round_trip_and_counts_saturate() {
+        for (position, state) in StateKind::ORDER.into_iter().enumerate() {
+            assert_eq!(state.index(), position);
+        }
+        let mut counts = StateCounts::default();
+        counts.add(StateKind::Working);
+        counts.add(StateKind::Working);
+        assert_eq!(counts.get(StateKind::Working), 2);
+        assert_eq!(counts.get(StateKind::Idle), 0);
+    }
+
+    #[test]
+    fn lane_sets_toggle_independently() {
+        let mut set = LaneSet::EMPTY;
+        set.toggle(Lane::Queued);
+        assert!(set.contains(Lane::Queued) && !set.contains(Lane::Done));
+        set.toggle(Lane::Queued);
+        assert_eq!(set, LaneSet::EMPTY);
     }
 
     #[test]

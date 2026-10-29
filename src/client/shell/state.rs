@@ -105,6 +105,8 @@ pub(super) struct ShellHitMap {
     pub(super) agents: Vec<(Rect, String)>,
     /// Team tree group headers: the group index in the active `TeamSidebar`.
     pub(super) team_groups: Vec<(Rect, usize)>,
+    /// Typed targets of modern chrome (work lane headers); empty while classic.
+    pub(super) chrome_targets: ChromeTargets,
     /// Team tree rows that focus a pane: the line index in the active
     /// `TeamSidebar`'s cached rows, which own the pane id.
     pub(super) team_agents: Vec<(Rect, usize)>,
@@ -393,6 +395,45 @@ pub(super) struct ClientHelpOverlay {
 #[derive(Debug)]
 pub(super) struct ClientGlobalMenuOverlay {
     pub(super) highlighted: usize,
+}
+
+/// At most one header per lane. Inline storage avoids allocating in draw.
+#[derive(Default)]
+pub(super) struct ChromeTargets {
+    entries: [Option<(Rect, ChromeTarget)>; 4],
+    len: usize,
+}
+
+impl ChromeTargets {
+    pub(super) fn push(&mut self, target: (Rect, ChromeTarget)) {
+        if let Some(slot) = self.entries.get_mut(self.len) {
+            *slot = Some(target);
+            self.len += 1;
+        }
+    }
+
+    pub(super) fn iter(&self) -> impl Iterator<Item = &(Rect, ChromeTarget)> {
+        self.entries[..self.len].iter().flatten()
+    }
+
+    pub(super) fn clear(&mut self) {
+        self.len = 0;
+    }
+    #[cfg(test)]
+    pub(super) fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+    #[cfg(test)]
+    pub(super) fn len(&self) -> usize {
+        self.len
+    }
+}
+
+/// A clickable element of the modern chrome that is not a pane or a group.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum ChromeTarget {
+    /// A work lane header: toggles the lane.
+    Lane(crate::ui::chrome::state::Lane),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -934,6 +975,7 @@ pub(crate) struct ClientShellState {
     pub(super) team_sidebar: Option<super::team_sidebar::TeamSidebar>,
     /// Collapsed team groups (`role:<name>`, `scratch`, `other`); never persisted or sent.
     pub(super) collapsed_team_groups: HashSet<String>,
+    pub(super) collapsed_lanes: crate::ui::chrome::state::LaneSet,
     pub(super) wall_clock: super::work_board::WallClock,
     /// The active endpoint's Orbit clock; ages fall back to `wall_clock` without it.
     pub(super) orbit_clock: Option<super::work_board::WallClock>,
@@ -1116,6 +1158,7 @@ impl ClientShellState {
             agent_scroll: 0,
             team_sidebar: None,
             collapsed_team_groups: HashSet::new(),
+            collapsed_lanes: crate::ui::chrome::state::LaneSet::EMPTY,
             wall_clock: super::work_board::WallClock::now(),
             orbit_clock: None,
             snapshot_serial: 0,
@@ -1664,6 +1707,7 @@ impl ClientShellState {
             // Hits index the replaced model's rows.
             self.hits.team_agents.clear();
             self.hits.team_groups.clear();
+            self.hits.chrome_targets.clear();
         }
         self.snapshot = Some(snapshot);
         self.snapshot_serial = self.snapshot_serial.wrapping_add(1);

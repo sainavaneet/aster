@@ -1173,3 +1173,37 @@ source profile requires working CoW retention, not decoded fallback
 test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 4283 filtered out; finished in 8.48s
 EXIT 101
 ```
+
+## Appendix B: Phase 2 notes (design-sonnet)
+
+- Built: modern role cards and lane board (`src/client/shell/modern/{model,draw}`), `ChromeTarget::Lane` with `hits.chrome_targets` and `collapsed_lanes`, `TeamRowsKey` with style, glyphs, collapsed lanes and section height, the additive wire fields of section 7 (`model`, `steps`, `step_total`, `parallel`, `steps_omitted`; server side in `orbit_notifications/shell_steps.rs`), and glyph/role indirection for the flat agent list and the collapsed sidebar.
+- Deviations from the plan: only the done lane truncates to the section height (`+N` on its header); the other lanes scroll as the list always has. Role "area hint" is the title of the role's oldest open task (the wire carries no role description). The modern work header is a label; lanes collapse individually.
+- The modern flat list and collapsed sidebar ignore `ui.status_indicators` (modern always uses distinct shapes). The multi-endpoint sidebar, mobile layout and workspace rows keep classic drawing until phase 6.
+- Benchmark: `just bench-render-scale` now prints an Orbit-populated client composition profile (4 roles x 4 members, 32 tasks) for classic and modern.
+
+### Phase 2 validation additions (design-sol)
+
+- Added 48 deterministic modern snapshots: 80/120 columns, mobile/collapsed, light/dark,
+  full/reduced/off, Unicode/ASCII. The expanded scenes cover relay, parallel, integrating,
+  permission approval and a separate blocked needs-you task. Classic fixtures remain unedited.
+- Lane target storage is inline for the four headers; drawing cannot grow a new hit vector.
+  Added edge/capture-disable/projection-replacement tests, density/glyph cache tests, age-bar
+  bucket rendering and exact expiry tests. Expired done rows and their summary count now agree.
+- Relay strips construct at most eight nodes from original indices, including explicit elision
+  for omitted identities, rather than allocating the full advertised pipeline length. Server
+  notes prioritize active turns, redact the complete report before selecting its first line,
+  and restrict timestamps to the detail window. Indices beyond `u16` are omitted, never aliased.
+- Added nested-fact sensitivity tests for model, step state/note, totals and omitted counts;
+  endpoint generation-1 fixture files are unchanged.
+
+Validation: 4,607 native tests passed (16 skipped); 14 architecture, 151 maintenance,
+55 integration asset, 5 release-workflow and 7 docs contract tests passed, alongside
+formatting, native clippy, config reference and translation parity. `just check`
+stops at Windows lint because this workstation lacks the SDK libc configuration.
+No SDK was downloaded. Both render-scale runs pass six profiles and reproduce the
+known native-file CoW retention failure. Final Orbit medians (1 / 15 / 50 panes):
+classic 167 / 176 / 177 us, modern 173 / 177 / 181 us. Modern adds 3.6% / 0.6% / 2.3%
+against classic in the same run; its 15-to-1 scaling ratio is 1.02 versus classic 1.05.
+The final run includes scheduling outliers in maxima; the reported medians stay within
+the phase budgets. At validation start, Orbit classic was 169 / 169 / 170 us and modern
+166 / 164 / 178 us. No new dependencies were added.

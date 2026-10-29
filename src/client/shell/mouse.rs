@@ -2156,6 +2156,20 @@ impl ClientShellState {
                     outcome.repaint = true;
                     return;
                 }
+                let chrome_target = self
+                    .hits
+                    .chrome_targets
+                    .iter()
+                    .find(|(rect, _)| super::contains(*rect, point))
+                    .map(|(_, target)| *target);
+                match chrome_target {
+                    Some(ChromeTarget::Lane(lane)) => {
+                        self.toggle_lane(lane);
+                        outcome.repaint = true;
+                        return;
+                    }
+                    None => {}
+                }
                 let team_pane_id = self
                     .hits
                     .team_agents

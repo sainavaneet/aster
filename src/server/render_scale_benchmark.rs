@@ -41,6 +41,17 @@ impl RenderPipeline {
         Self::with_config(workspaces, &Config::default())
     }
 
+    /// A pipeline whose snapshots carry an Orbit team, so the sidebar draws the
+    /// team tree and work board.
+    fn with_orbit(workspaces: Vec<Workspace>, config: &Config) -> Self {
+        let mut pipeline = Self::with_config(workspaces, config);
+        let mut snapshot =
+            super::client_shell::snapshot(&pipeline.app, "bench-boot", 1, None, None);
+        snapshot.orbit = Some(bench_orbit());
+        pipeline.client.set_snapshot(Box::new(snapshot));
+        pipeline
+    }
+
     fn with_config(workspaces: Vec<Workspace>, config: &Config) -> Self {
         let (_api_tx, api_rx) = tokio::sync::mpsc::unbounded_channel();
         let mut app = App::new(
@@ -217,6 +228,116 @@ fn print_stage(
             stats.median_us as f64 / baseline.median_us.max(1) as f64,
             stats.p95_us as f64 / baseline.p95_us.max(1) as f64,
         );
+    }
+}
+
+/// Four roles of four members and 32 active tasks (relayed, parallel,
+/// approvals, queued) plus recent completions: the widest team the work board
+/// projects.
+fn bench_orbit() -> crate::protocol::OrbitShellView {
+    use crate::protocol::{
+        OrbitShellActiveTask, OrbitShellLead, OrbitShellMember, OrbitShellParallel,
+        OrbitShellRecentTask, OrbitShellRole, OrbitShellStep, OrbitShellView,
+    };
+    let member = |name: String, state: &str| OrbitShellMember {
+        terminal_id: Some(format!("term_{name}")),
+        name,
+        kind: "claude".into(),
+        pane_id: None,
+        state: state.into(),
+        model: Some("opus".into()),
+    };
+    let roles = (0..4)
+        .map(|role| OrbitShellRole {
+            name: format!("role-{role}"),
+            pinned: role == 0,
+            members: (0..4)
+                .map(|index| {
+                    let state = ["working", "idle", "blocked", "relaunching"][index];
+                    member(format!("m{role}-{index}"), state)
+                })
+                .collect(),
+        })
+        .collect();
+    let step = |index: u16, state: &str| OrbitShellStep {
+        index,
+        member: format!("m0-{index}"),
+        kind: "claude".into(),
+        state: state.into(),
+        note: Some("handoff note".into()),
+        next: None,
+        parallel: None,
+        integrate: None,
+        started_at_ms: None,
+        finished_at_ms: None,
+    };
+    let active_tasks = (0..32)
+        .map(|task| {
+            let relayed = task % 3 == 0;
+            OrbitShellActiveTask {
+                task_id: format!("task-bench-{task:04}"),
+                worker_terminal_id: format!("term_m{}-{}", task % 4, task / 4 % 4),
+                role: Some(format!("role-{}", task % 4)),
+                title: format!("benchmark assignment number {task}"),
+                state: if task % 7 == 0 {
+                    "assigning"
+                } else {
+                    "working"
+                }
+                .into(),
+                created_at_ms: 1_000_000 + u64::from(task as u32) * 1_000,
+                blocked: task % 5 == 0,
+                awaiting_approval: task % 10 == 0,
+                steps: if relayed {
+                    vec![step(0, "handed_off"), step(1, "active"), step(2, "pending")]
+                } else {
+                    Vec::new()
+                },
+                step_total: relayed.then_some(3),
+                parallel: (task % 6 == 1).then_some(OrbitShellParallel { done: 1, total: 2 }),
+                steps_omitted: None,
+            }
+        })
+        .collect();
+    OrbitShellView {
+        lead: OrbitShellLead {
+            name: "Polaris".into(),
+            terminal_id: "term_lead".into(),
+            pane_id: None,
+            state: "idle".into(),
+        },
+        roles,
+        scratch: Vec::new(),
+        active_tasks,
+        recent_tasks: (0..5)
+            .map(|index| OrbitShellRecentTask {
+                task_id: format!("task-done-{index}"),
+                outcome: "completed".into(),
+                summary: "finished a benchmark assignment".into(),
+                finished_at_ms: 1_000_000 + index * 1_000,
+            })
+            .collect(),
+        server_now_ms: Some(1_100_000),
+    }
+}
+
+/// Client composition with the Orbit team on screen, classic against modern,
+/// at the same pane counts as the other profiles.
+fn print_orbit_profiles() {
+    for (label, style) in [
+        ("classic", crate::config::UiStyleConfig::Classic),
+        ("modern", crate::config::UiStyleConfig::Modern),
+    ] {
+        let mut config = Config::default();
+        config.ui.style = style;
+        let rows = CARDINALITIES.map(|count| {
+            (
+                count,
+                profile_pipeline(RenderPipeline::with_orbit(active_panes(count), &config)),
+            )
+        });
+        println!("orbit team (4 roles x 4 members, 32 tasks), {label} style");
+        print_stage("client shell composition", &rows, |stats| stats.client);
     }
 }
 
@@ -610,6 +731,7 @@ async fn render_scale_profile() {
     print_snapshot_encoding_profiles("background workspaces", workspaces);
     print_profiles("active panes (one workspace)", active_panes);
     print_snapshot_encoding_profiles("active panes", active_panes);
+    print_orbit_profiles();
     print_token_rule_profiles();
     print_surface_reuse_profiles();
     print_surface_damage_profiles();

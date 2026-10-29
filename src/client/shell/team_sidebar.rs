@@ -60,6 +60,8 @@ pub(crate) struct TeamSidebar {
     pub(super) team_panes: HashSet<String>,
     pub(super) work: super::work_board::WorkBoard,
     pub(super) rows: super::team_rows::TeamRows,
+    /// Role cards and work lanes of the modern style, built with the rest.
+    pub(super) modern: super::modern::model::team::ModernTeam,
 }
 
 pub(super) enum TeamLine<'a> {
@@ -83,6 +85,8 @@ pub(super) enum TeamLine<'a> {
     },
     Task(&'a super::work_board::WorkTask),
     Recent(&'a super::work_board::WorkRecent),
+    /// A modern-only row; the modern drawer handles it, classic never sees one.
+    Modern,
 }
 
 /// Everything the render loop needs besides the line itself.
@@ -184,6 +188,7 @@ impl TeamSidebar {
             team_panes,
             work: super::work_board::WorkBoard::build(orbit),
             rows: super::team_rows::TeamRows::default(),
+            modern: super::modern::model::team::ModernTeam::build(orbit),
         }
     }
 
@@ -226,16 +231,27 @@ impl TeamSidebar {
             },
             TeamLineRef::Task(index) => TeamLine::Task(self.work.task(index)),
             TeamLineRef::Recent(index) => TeamLine::Recent(self.work.recent(index)),
+            TeamLineRef::WorkLabel
+            | TeamLineRef::LaneHeader { .. }
+            | TeamLineRef::LaneTask { .. }
+            | TeamLineRef::LaneDone(_)
+            | TeamLineRef::Gap => TeamLine::Modern,
         }
     }
 
     /// The pane a cached line focuses when clicked, if any.
     pub(super) fn line_pane_id(&self, index: usize) -> Option<&str> {
+        if let TeamLineRef::LaneTask { lane, index } = *self.rows.lines.get(index)? {
+            return self.modern.lanes.tasks(lane)[index].pane_id.as_deref();
+        }
         match self.line(self.rows.lines.get(index)?) {
             TeamLine::Lead(row) | TeamLine::Member(row) => row.pane_id.as_deref(),
             TeamLine::Agent(row) => Some(row.pane_id.as_str()),
             TeamLine::Task(task) => task.pane_id(),
-            TeamLine::Header { .. } | TeamLine::WorkHeader { .. } | TeamLine::Recent(_) => None,
+            TeamLine::Header { .. }
+            | TeamLine::WorkHeader { .. }
+            | TeamLine::Recent(_)
+            | TeamLine::Modern => None,
         }
     }
 
@@ -295,6 +311,18 @@ impl TeamSidebar {
         collapsed: &HashSet<String>,
         pane_id: &str,
     ) -> Option<usize> {
+        if self.rows.tier.is_some() {
+            // Modern rows have spacers and multi-row cards, so the order is read
+            // from the cached lines instead of being recomputed here.
+            return self.rows.lines.iter().position(|line| match *line {
+                TeamLineRef::Lead => self.lead.pane_id.as_deref() == Some(pane_id),
+                TeamLineRef::Member { group, member } => {
+                    self.groups[group].members[member].pane_id.as_deref() == Some(pane_id)
+                }
+                TeamLineRef::Agent(other) => self.rows.others[other].pane_id == pane_id,
+                _ => false,
+            });
+        }
         let mut index = 0;
         if self.lead.pane_id.as_deref() == Some(pane_id) {
             return Some(index);
@@ -369,6 +397,7 @@ pub(super) fn render_team_line(
     hits: &mut ShellHitMap,
 ) {
     match line {
+        TeamLine::Modern => {}
         TeamLine::Lead(row) => {
             render_team_row(buffer, rect, row, LEAD_INDENT, true, context);
             if row.pane_id.is_some() {
@@ -578,6 +607,13 @@ pub(super) fn render_team_panel(
         agent_scroll,
         hits,
         |buffer, rect, index, line, hits| {
+            if rows.tier.is_some()
+                && super::modern::draw::team::render_line(
+                    buffer, rect, index, line, team, context, hits,
+                )
+            {
+                return;
+            }
             render_team_line(buffer, rect, index, &team.line(line), context, hits);
         },
     );
@@ -617,6 +653,11 @@ impl ClientShellState {
             ),
             None => Some(ordinal),
         }
+    }
+
+    /// Toggles a work lane (modern). Presentation state only: nothing is sent.
+    pub(super) fn toggle_lane(&mut self, lane: crate::ui::chrome::state::Lane) {
+        self.collapsed_lanes.toggle(lane);
     }
 
     /// Toggles a team group header. Presentation state only: nothing is sent.

@@ -40,6 +40,7 @@ STYLE_DISPATCH_FILES = frozenset(
         "sidebar.rs",
         "state.rs",
         "tabs.rs",
+        "team_rows.rs",
         "team_sidebar.rs",
     )
 ) | {"src/client/shell.rs", "src/cli/orbit_activity.rs"}

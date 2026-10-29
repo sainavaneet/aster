@@ -25,7 +25,8 @@ impl ClientShellState {
         let now = self
             .last_composed_at
             .unwrap_or_else(std::time::Instant::now);
-        self.refresh_team_rows(layout.sidebar.width, now);
+        let section_height = self.team_section_height(layout.sidebar);
+        self.refresh_team_rows(layout.sidebar.width, section_height, now);
         let mut buffer = Buffer::empty(Rect::new(0, 0, cols, rows));
         buffer.set_style(
             buffer.area,
@@ -192,8 +193,9 @@ impl ClientShellState {
         }
         self.last_composed_size = Some((cols, rows));
         // Before any borrow of the snapshot below: the frame only reads the rows.
-        let sidebar_width = self.layout(cols, rows).sidebar.width;
-        self.refresh_team_rows(sidebar_width, now);
+        let sidebar = self.layout(cols, rows).sidebar;
+        let section_height = self.team_section_height(sidebar);
+        self.refresh_team_rows(sidebar.width, section_height, now);
         let valid_navigation_target = self.mode == ClientShellMode::Navigate
             && self
                 .navigate_workspace_id

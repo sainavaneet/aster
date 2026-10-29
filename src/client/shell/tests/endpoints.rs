@@ -1444,6 +1444,8 @@ fn aggregate_agents_use_configured_rows_machine_token_and_status_colors() {
     use crate::config::{AgentSidebarToken, StatusIndicatorStyle};
 
     let mut config = Config::default();
+    // Pins the classic status symbols and colors.
+    config.ui.style = crate::config::UiStyleConfig::Classic;
     config.ui.status_indicators = StatusIndicatorStyle::Symbols;
     config.ui.sidebar.agents.rows = vec![vec![
         AgentSidebarToken::StateIcon,

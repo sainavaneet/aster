@@ -692,6 +692,8 @@ fn agent_sidebar_honors_priority_symbols_tokens_and_stable_hits() {
     ];
     let mut config = Config::default();
     config.ui.agent_panel_sort = crate::config::AgentPanelSortConfig::Priority;
+    // Pins the classic status symbols and colors.
+    config.ui.style = crate::config::UiStyleConfig::Classic;
     config.ui.status_indicators = crate::config::StatusIndicatorStyle::Symbols;
     config.ui.sidebar.agents.rows = vec![vec![crate::config::AgentSidebarToken::Agent]];
     config.ui.sidebar.agents.rows_by_agent.insert(

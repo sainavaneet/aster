@@ -15,6 +15,7 @@ use super::agent_sidebar::{agent_row, list_gaps, ordered_agent_pane_ids, row_hei
 use super::team_sidebar::{TeamSidebar, OTHER_GROUP_TITLE, WORK_GROUP_KEY};
 use super::*;
 use crate::api::schema::AgentStatus;
+use crate::ui::chrome::state::{Lane, LaneSet};
 
 const TASK_ROW_HEIGHT: usize = 2;
 const TEAM_ROW_GAP: u16 = 0;
@@ -46,6 +47,23 @@ pub(super) enum TeamLineRef {
     Task(usize),
     /// An index into the work board's resolved tasks.
     Recent(usize),
+    /// Modern only: the work section's label row.
+    WorkLabel,
+    /// Modern only: a lane header; `hidden` resolved tasks do not fit.
+    LaneHeader {
+        lane: Lane,
+        collapsed: bool,
+        hidden: u16,
+    },
+    /// Modern only: an index into the lane's task cards.
+    LaneTask {
+        lane: Lane,
+        index: usize,
+    },
+    /// Modern only: an index into the done lane.
+    LaneDone(usize),
+    /// Modern only: a blank spacer row.
+    Gap,
 }
 
 /// What the rows depend on, borrowed from the shell state for the check.
@@ -55,6 +73,10 @@ pub(super) struct TeamRowsInput<'a> {
     pub(super) collapsed: &'a HashSet<String>,
     pub(super) sidebar_width: u16,
     pub(super) config: &'a ClientShellConfig,
+    /// Collapsed work lanes (modern only).
+    pub(super) collapsed_lanes: LaneSet,
+    /// Height of the sidebar section the rows are shown in.
+    pub(super) section_height: u16,
     /// The frame's time on the endpoint's clock, in Unix milliseconds.
     pub(super) now_ms: u64,
 }
@@ -66,9 +88,55 @@ struct TeamRowsKey {
     sort: crate::config::AgentPanelSortConfig,
     sidebar_work: bool,
     agents: crate::config::AgentsSidebarConfig,
+    style: crate::config::UiStyleConfig,
+    /// Modern only; constant while classic, so classic never rebuilds for them.
+    glyphs: crate::config::UiGlyphsConfig,
+    collapsed_lanes: LaneSet,
+    section_height: u16,
 }
 
 impl TeamRowsKey {
+    fn new(input: &TeamRowsInput<'_>) -> Self {
+        Self {
+            snapshot_serial: input.snapshot_serial,
+            collapsed: input.collapsed.clone(),
+            sidebar_width: input.sidebar_width,
+            sort: input.config.agent_panel_sort,
+            sidebar_work: input.config.sidebar_work,
+            agents: input.config.agents.clone(),
+            style: input.config.ui_style,
+            glyphs: Self::glyphs(input),
+            collapsed_lanes: Self::lanes(input),
+            section_height: Self::height(input),
+        }
+    }
+
+    // The modern-only inputs are constants while classic, so classic never
+    // rebuilds because of them.
+    fn glyphs(input: &TeamRowsInput<'_>) -> crate::config::UiGlyphsConfig {
+        if input.config.ui_style.is_modern() {
+            input.config.ui_glyphs
+        } else {
+            crate::config::UiGlyphsConfig::Unicode
+        }
+    }
+
+    fn lanes(input: &TeamRowsInput<'_>) -> LaneSet {
+        if input.config.ui_style.is_modern() {
+            input.collapsed_lanes
+        } else {
+            LaneSet::EMPTY
+        }
+    }
+
+    fn height(input: &TeamRowsInput<'_>) -> u16 {
+        if input.config.ui_style.is_modern() {
+            input.section_height
+        } else {
+            0
+        }
+    }
+
     fn matches(&self, input: &TeamRowsInput<'_>) -> bool {
         self.snapshot_serial == input.snapshot_serial
             && self.sidebar_width == input.sidebar_width
@@ -76,11 +144,16 @@ impl TeamRowsKey {
             && self.sidebar_work == input.config.sidebar_work
             && self.collapsed == *input.collapsed
             && self.agents == input.config.agents
+            && self.style == input.config.ui_style
+            && self.glyphs == Self::glyphs(input)
+            && self.collapsed_lanes == Self::lanes(input)
+            && self.section_height == Self::height(input)
     }
 }
 
 #[derive(Default)]
 pub(super) struct TeamRows {
+    pub(super) visible_done: usize,
     key: Option<TeamRowsKey>,
     /// The first time a visible resolved task leaves the board.
     expires_at_ms: u64,
@@ -89,6 +162,9 @@ pub(super) struct TeamRows {
     pub(super) others: Vec<AgentRow>,
     pub(super) heights: Vec<u16>,
     pub(super) gaps: Vec<u16>,
+    /// The density tier the modern rows were built for; `None` while classic.
+    /// Keyboard reveal scans `lines` for modern rows.
+    pub(super) tier: Option<super::modern::model::rows::Tier>,
     #[cfg(test)]
     builds: u32,
 }
@@ -103,6 +179,10 @@ impl TeamSidebar {
     /// Rebuilds the cached rows when their inputs changed; a no-op otherwise.
     pub(super) fn refresh_rows(&mut self, input: &TeamRowsInput<'_>) {
         if self.rows.is_current(input) {
+            return;
+        }
+        if input.config.ui_style.is_modern() {
+            self.refresh_rows_modern(input);
             return;
         }
         let mut lines = vec![TeamLineRef::Lead];
@@ -139,19 +219,45 @@ impl TeamSidebar {
         #[cfg(test)]
         let builds = self.rows.builds + 1;
         self.rows = TeamRows {
-            key: Some(TeamRowsKey {
-                snapshot_serial: input.snapshot_serial,
-                collapsed: input.collapsed.clone(),
-                sidebar_width: input.sidebar_width,
-                sort: input.config.agent_panel_sort,
-                sidebar_work: input.config.sidebar_work,
-                agents: input.config.agents.clone(),
-            }),
+            key: Some(TeamRowsKey::new(input)),
             expires_at_ms,
             lines,
             others,
             heights,
             gaps,
+            tier: None,
+            visible_done: 0,
+            #[cfg(test)]
+            builds,
+        };
+    }
+
+    /// The modern rows: role cards, then the work lanes.
+    fn refresh_rows_modern(&mut self, input: &TeamRowsInput<'_>) {
+        let mut lines = vec![TeamLineRef::Lead];
+        for (group, entry) in self.groups.iter().enumerate() {
+            let collapsed = input.collapsed.contains(&entry.key);
+            lines.push(TeamLineRef::Group { group, collapsed });
+            if !collapsed {
+                lines.extend(
+                    (0..entry.members.len()).map(|member| TeamLineRef::Member { group, member }),
+                );
+            }
+        }
+        let others = self.push_other_lines(&mut lines, input);
+        let built = super::modern::model::rows::finish(self, &mut lines, &others, input);
+        let gaps = list_gaps(lines.len(), TEAM_ROW_GAP);
+        #[cfg(test)]
+        let builds = self.rows.builds + 1;
+        self.rows = TeamRows {
+            key: Some(TeamRowsKey::new(input)),
+            expires_at_ms: built.expires_at_ms,
+            lines,
+            others,
+            heights: built.heights,
+            gaps,
+            tier: Some(built.tier),
+            visible_done: built.visible_done,
             #[cfg(test)]
             builds,
         };
@@ -204,9 +310,22 @@ impl ClientShellState {
         self.orbit_clock.unwrap_or(self.wall_clock).unix_ms_at(now)
     }
 
+    /// Height of the sidebar section the team panel is drawn in, the same
+    /// split `render_sidebar` uses.
+    pub(super) fn team_section_height(&self, sidebar: Rect) -> u16 {
+        crate::ui::expanded_sidebar_sections(sidebar, self.sidebar_section_split)
+            .1
+            .height
+    }
+
     /// Brings the team panel's cached rows up to date before a frame is drawn.
     /// Skipped while the panel is not shown.
-    pub(super) fn refresh_team_rows(&mut self, sidebar_width: u16, now: std::time::Instant) {
+    pub(super) fn refresh_team_rows(
+        &mut self,
+        sidebar_width: u16,
+        section_height: u16,
+        now: std::time::Instant,
+    ) {
         let now_ms = self.orbit_frame_unix_ms(now);
         let (Some(team), Some(snapshot)) = (self.team_sidebar.as_mut(), self.snapshot.as_deref())
         else {
@@ -223,6 +342,8 @@ impl ClientShellState {
             collapsed: &self.collapsed_team_groups,
             sidebar_width,
             config: &self.config,
+            collapsed_lanes: self.collapsed_lanes,
+            section_height,
             now_ms,
         });
     }

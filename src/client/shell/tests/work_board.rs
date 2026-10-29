@@ -26,6 +26,10 @@ fn active(
         created_at_ms: NOW_MS - age_ms,
         blocked,
         awaiting_approval: blocked,
+        steps: Vec::new(),
+        step_total: None,
+        parallel: None,
+        steps_omitted: None,
     }
 }
 
@@ -87,7 +91,9 @@ fn set_clock(state: &mut ClientShellState, offset_ms: u64) {
 }
 
 fn wide_config() -> Config {
+    // These tests pin the classic board; the modern lanes are tested apart.
     let mut config = Config::default();
+    config.ui.style = crate::config::UiStyleConfig::Classic;
     config.ui.sidebar_width = 48;
     config.ui.sidebar_max_width = 60;
     config

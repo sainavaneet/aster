@@ -96,13 +96,21 @@ pub(crate) fn render_collapsed_sidebar(
             number_style,
         );
         let status = workspace.agent_status;
+        let (workspace_icon, workspace_color) = if config.chrome.is_modern() {
+            super::super::modern::draw::agent_glyph(config, status, Default::default())
+        } else {
+            (
+                status_icon(status, config.status_indicators),
+                status_color(status, palette),
+            )
+        };
         put_text(
             buffer,
             rect.x.saturating_add(2),
             rect.y,
             rect.width.saturating_sub(2),
-            status_icon(status, config.status_indicators),
-            Style::default().fg(status_color(status, palette)),
+            workspace_icon,
+            Style::default().fg(workspace_color),
         );
         hits.workspaces.push(WorkspaceHit {
             rect,
@@ -183,12 +191,16 @@ pub(crate) fn render_collapsed_sidebar(
                 palette.overlay0
             }),
         );
-        let (icon_glyph, status_fg) = super::super::agent_sidebar::agent_status_icon_and_color(
-            entry.status,
-            config.status_indicators,
-            palette,
-            phase,
-        );
+        let (icon_glyph, status_fg) = if config.chrome.is_modern() {
+            super::super::modern::draw::agent_glyph(config, entry.status, phase)
+        } else {
+            super::super::agent_sidebar::agent_status_icon_and_color(
+                entry.status,
+                config.status_indicators,
+                palette,
+                phase,
+            )
+        };
         put_text(
             buffer,
             rect.x.saturating_add(2),

@@ -48,8 +48,21 @@ fn shorten(text: &str, max: usize) -> String {
 
 /// Redacted, then shortened: a cut never splits a secret into a part the
 /// redaction no longer recognises.
-fn display_text(text: &str, max: usize) -> String {
+pub(super) fn display_text(text: &str, max: usize) -> String {
     shorten(&redact_secrets(text), max)
+}
+
+/// Redact the complete report before selecting a line, so wrapped credentials
+/// are never exposed by truncation at a line boundary.
+pub(super) fn display_first_line(text: &str, max: usize) -> String {
+    let redacted = redact_secrets(text);
+    shorten(
+        redacted
+            .lines()
+            .find(|line| !line.trim().is_empty())
+            .unwrap_or_default(),
+        max,
+    )
 }
 
 /// The assignment's first non-empty line, redacted and shortened. Stored as the
@@ -231,6 +244,7 @@ impl App {
                         };
                         terminals.extend(terminal_id.clone());
                         OrbitShellMember {
+                            model: member.model.clone(),
                             name: member.name.clone(),
                             kind: member.kind.clone(),
                             pane_id: terminal_id
@@ -290,6 +304,7 @@ impl App {
                     state_name(terminal.state)
                 };
                 Some(OrbitShellMember {
+                    model: None,
                     name,
                     kind,
                     pane_id: pane_ids.get(&terminal_id).cloned(),
@@ -316,6 +331,7 @@ impl App {
                 } else {
                     terminal.map_or("unknown", |terminal| state_name(terminal.state))
                 };
+                let shell_steps = task.shell_steps(self.orbit_step_total(task));
                 OrbitShellActiveTask {
                     task_id: task.task_id.clone(),
                     worker_terminal_id: task.worker_id.clone(),
@@ -330,9 +346,22 @@ impl App {
                         && self
                             .orbit_permission_prompt_agent(&task.worker_id)
                             .is_some(),
+                    steps: shell_steps.steps,
+                    step_total: shell_steps.step_total,
+                    parallel: shell_steps.parallel,
+                    steps_omitted: shell_steps.omitted,
                 }
             })
             .collect()
+    }
+
+    /// The relay's length as `orbit_step_line` counts it: the pipeline of the
+    /// last step's role.
+    fn orbit_step_total(&self, task: &Task) -> usize {
+        task.steps
+            .last()
+            .and_then(|step| self.orbit_team.roster.member(&step.member))
+            .map_or(0, |(role, _)| self.orbit_team.pipeline(&role.name).len())
     }
 
     fn orbit_shell_recent_tasks(&self) -> Vec<OrbitShellRecentTask> {

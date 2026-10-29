@@ -1026,6 +1026,10 @@ pub struct OrbitShellMember {
     #[serde(default)]
     pub pane_id: Option<String>,
     pub state: String,
+    /// The roster member's model, when it has one. Absent for scratch workers
+    /// and from older servers.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1044,6 +1048,58 @@ pub struct OrbitShellActiveTask {
     pub blocked: bool,
     /// Blocked on a permission prompt a decision can answer.
     pub awaiting_approval: bool,
+    /// Identity of every step of a relayed or parallel task (at most 32), with
+    /// handoff notes only inside a window of at most 8. Empty for a task that
+    /// was not relayed, and from older servers.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub steps: Vec<OrbitShellStep>,
+    /// The relay's length: the role's pipeline, or the steps so far.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub step_total: Option<u16>,
+    /// Totals over all parallel steps of the task, in or out of the window.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel: Option<OrbitShellParallel>,
+    /// Steps beyond the identity list.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub steps_omitted: Option<OrbitShellOmitted>,
+}
+
+/// One member's turn on a relayed task. `state` is `pending`, `active`, `done`,
+/// `handed_off` or `failed`; clients treat other strings as opaque.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellStep {
+    pub index: u16,
+    pub member: String,
+    pub kind: String,
+    pub state: String,
+    /// The handoff `done` line, redacted, at most 80 characters.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+    /// The handoff `next` line, same treatment.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next: Option<String>,
+    /// For a parallel step: `waiting`, `launching`, `starting`, `running` or `capturing`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel: Option<String>,
+    /// For the integrating step: `waiting`, `applying`, `ready` or `running`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub integrate: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub started_at_ms: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finished_at_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellParallel {
+    pub done: u16,
+    pub total: u16,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellOmitted {
+    pub before: u16,
+    pub after: u16,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1894,6 +1950,88 @@ mod tests {
             active_tasks: Vec::new(),
             recent_tasks: Vec::new(),
             server_now_ms: None,
+        }
+    }
+
+    #[test]
+    fn orbit_steps_model_and_totals_are_optional_and_additive() {
+        let old_task = serde_json::json!({
+            "task_id": "t", "worker_terminal_id": "w", "title": "x", "state": "working",
+            "created_at_ms": 1, "blocked": false, "awaiting_approval": false
+        });
+        let task: OrbitShellActiveTask = serde_json::from_value(old_task.clone()).unwrap();
+        assert!(task.steps.is_empty() && task.step_total.is_none());
+        assert!(task.parallel.is_none() && task.steps_omitted.is_none());
+        let encoded = serde_json::to_value(&task).unwrap();
+        for key in ["steps", "step_total", "parallel", "steps_omitted"] {
+            assert!(encoded.get(key).is_none(), "{key} is absent when unset");
+        }
+        let member: OrbitShellMember = serde_json::from_value(serde_json::json!({
+            "name": "a", "kind": "claude", "state": "idle"
+        }))
+        .unwrap();
+        assert_eq!(member.model, None);
+
+        let relayed = OrbitShellActiveTask {
+            steps: vec![OrbitShellStep {
+                index: 0,
+                member: "a".into(),
+                kind: "claude".into(),
+                state: "a-future-state".into(),
+                note: None,
+                next: None,
+                parallel: None,
+                integrate: None,
+                started_at_ms: None,
+                finished_at_ms: None,
+            }],
+            step_total: Some(2),
+            parallel: Some(OrbitShellParallel { done: 1, total: 2 }),
+            steps_omitted: Some(OrbitShellOmitted {
+                before: 0,
+                after: 3,
+            }),
+            ..task
+        };
+        let round_trip: OrbitShellActiveTask =
+            serde_json::from_str(&serde_json::to_string(&relayed).unwrap()).unwrap();
+        assert_eq!(
+            round_trip, relayed,
+            "unknown step states stay opaque strings"
+        );
+    }
+
+    #[test]
+    fn orbit_optional_projection_changes_are_facts() {
+        let mut value = serde_json::to_value(orbit_view()).unwrap();
+        value["roles"] = serde_json::json!([{"name":"builders", "pinned":false,
+            "members":[{"name":"worker", "kind":"codex", "state":"working", "model":"old"}]}]);
+        value["active_tasks"] = serde_json::json!([{
+            "task_id":"t", "worker_terminal_id":"w", "title":"x", "state":"working",
+            "created_at_ms":1, "blocked":false, "awaiting_approval":false,
+            "steps":[{"index":0,"member":"worker","kind":"codex","state":"active","note":"old"}],
+            "step_total":2, "parallel":{"done":0,"total":2}, "steps_omitted":{"before":0,"after":1}
+        }]);
+        let original: OrbitShellView = serde_json::from_value(value.clone()).unwrap();
+        for pointer in [
+            "/roles/0/members/0/model",
+            "/active_tasks/0/steps/0/state",
+            "/active_tasks/0/steps/0/note",
+        ] {
+            let mut changed = value.clone();
+            *changed.pointer_mut(pointer).unwrap() = serde_json::json!("new");
+            let changed: OrbitShellView = serde_json::from_value(changed).unwrap();
+            assert!(!original.same_facts(&changed), "{pointer}");
+        }
+        for pointer in [
+            "/active_tasks/0/step_total",
+            "/active_tasks/0/parallel/done",
+            "/active_tasks/0/steps_omitted/after",
+        ] {
+            let mut changed = value.clone();
+            *changed.pointer_mut(pointer).unwrap() = serde_json::json!(3);
+            let changed: OrbitShellView = serde_json::from_value(changed).unwrap();
+            assert!(!original.same_facts(&changed), "{pointer}");
         }
     }
 
