@@ -1,7 +1,7 @@
 //! Server-owned services, independent of finite Orbit jobs.
 use crate::api::schema::OrbitServiceStartParams;
 use serde_json::{json, Value};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -27,7 +27,7 @@ struct State {
     pid: Option<u32>,
     status: &'static str,
     ready: &'static str,
-    output: Vec<u8>,
+    output: VecDeque<u8>,
     observed: u64,
     error: Option<String>,
 }
@@ -131,14 +131,17 @@ impl ServiceManager {
     }
     pub(crate) fn list(&self) -> Value {
         json!(self.services.iter().map(|(name, service)| {
-            let s = lock(&service.state);
-            let tail = &s.output[s.output.len().saturating_sub(64 * 1024)..];
-            let output = String::from_utf8_lossy(tail);
+            let (pid, status, ready, error, captured, observed, tail) = {
+                let s = lock(&service.state);
+                let tail: Vec<u8> = s.output.iter().skip(s.output.len().saturating_sub(64 * 1024)).copied().collect();
+                (s.pid, s.status, s.ready, s.error.clone(), s.output.len(), s.observed, tail)
+            };
+            let output = String::from_utf8_lossy(&tail);
             let lines: Vec<_> = output.lines().rev().take(20).collect();
-            json!({"name":name,"command":service.command,"cwd":service.cwd,"pid":s.pid,
-                "uptime_ms":service.created.elapsed().as_millis(),"status":s.status,"ready":s.ready,
-                "last_output_lines":lines.into_iter().rev().collect::<Vec<_>>(),"error":s.error,
-                "captured_bytes":s.output.len(),"observed_bytes":s.observed,"output_limit_bytes":MAX_OUTPUT,"output_truncated":s.observed > s.output.len() as u64})
+            json!({"name":name,"command":service.command,"cwd":service.cwd,"pid":pid,
+                "uptime_ms":service.created.elapsed().as_millis(),"status":status,"ready":ready,
+                "last_output_lines":lines.into_iter().rev().collect::<Vec<_>>(),"error":error,
+                "captured_bytes":captured,"observed_bytes":observed,"output_limit_bytes":MAX_OUTPUT,"output_truncated":observed > captured as u64})
         }).collect::<Vec<_>>())
     }
 }
@@ -160,22 +163,23 @@ async fn capture(
         if n == 0 {
             break;
         }
+        // Match readiness outside the shared output lock.
+        let mut matched = false;
+        if let Some(pattern) = &ready_log {
+            matching.extend_from_slice(&buffer[..n]);
+            matched = matching
+                .windows(pattern.len())
+                .any(|w| w == pattern.as_bytes());
+            let discard = matching.len().saturating_sub(pattern.len());
+            matching.drain(..discard);
+        }
         let mut s = lock(&state);
         s.observed = s.observed.saturating_add(n as u64);
         let excess = (s.output.len() + n).saturating_sub(MAX_OUTPUT);
         s.output.drain(..excess);
-        s.output.extend_from_slice(&buffer[..n]);
-        if let Some(pattern) = &ready_log {
-            matching.extend_from_slice(&buffer[..n]);
-            if matching
-                .windows(pattern.len())
-                .any(|w| w == pattern.as_bytes())
-                && s.ready == "pending"
-            {
-                s.ready = "ready";
-            }
-            let discard = matching.len().saturating_sub(pattern.len());
-            matching.drain(..discard);
+        s.output.extend(&buffer[..n]);
+        if matched && s.ready == "pending" {
+            s.ready = "ready";
         }
     }
 }
@@ -250,13 +254,21 @@ async fn run(
     let readiness = readiness(params.ready_url, state.clone(), timeout);
     tokio::pin!(readiness);
     let mut checked = false;
-    let status = loop {
+    let mut launcher_exited = false;
+    loop {
         tokio::select! {
-            _ = cancel.changed() => break "stopped",
-            result = child.wait() => { result.map_err(|e| e.to_string())?; break "exited"; },
+            _ = cancel.changed() => break,
+            result = child.wait(), if !launcher_exited => {
+                result.map_err(|e| e.to_string())?;
+                launcher_exited = true;
+                // A launcher may background its server and exit. Keep owning its
+                // process group and draining output until stop/shutdown, even
+                // when descendants close their inherited output pipes.
+                lock(&state).status = "launcher_exited";
+            },
             _ = &mut readiness, if !checked => checked = true,
         }
-    };
+    }
     guard.terminate();
     let _ = child.wait().await;
     let _ = tokio::time::timeout(Duration::from_secs(1), async {
@@ -264,7 +276,7 @@ async fn run(
     })
     .await;
     readers.abort_all();
-    lock(&state).status = status;
+    lock(&state).status = "stopped";
     Ok(())
 }
 

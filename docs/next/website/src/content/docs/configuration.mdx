@@ -788,7 +788,10 @@ prompt.
 Use `orbit_service_start` for servers and watchers, and jobs for commands that
 finish. For example, `aster orbit service-start '{"name":"web","command":"python3 -m http.server 8000","ready_url":"http://localhost:8000"}'`.
 Services survive job completion and stop only on `orbit_service_stop` or server
-shutdown (or when their command exits). Starting an existing name stops its old
+shutdown. If a launcher exits after backgrounding a server, its service remains
+tracked as `launcher_exited`, retaining ownership of its process group until
+stop or shutdown. This status records launcher exit, even if all descendants
+have also exited. Starting an existing name stops its old
 process group before launching the replacement. Optional `cwd` is relative to
 the project directory, or absolute. Choose `ready_url` (HTTP success via curl)
 or `ready_log` (a literal output substring); `timeout_ms` defaults to 30000.

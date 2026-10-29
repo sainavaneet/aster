@@ -137,3 +137,61 @@ async fn http_service_survives_another_job_finishing() {
         .unwrap();
     assert!(!result.status.success());
 }
+
+#[cfg(unix)]
+#[tokio::test]
+async fn background_server_survives_launcher_exit_until_stop_or_shutdown() {
+    for shutdown in [false, true] {
+        let port = std::net::TcpListener::bind("127.0.0.1:0")
+            .unwrap()
+            .local_addr()
+            .unwrap()
+            .port();
+        let url = format!("http://127.0.0.1:{port}");
+        let mut manager = ServiceManager::default();
+        let mut p = params(&format!(
+            "python3 -u -m http.server {port} --bind 127.0.0.1 >/dev/null 2>&1 &"
+        ));
+        p.ready_log = None;
+        p.ready_url = Some(url.clone());
+        p.timeout_ms = Some(5000);
+        manager.start(std::env::temp_dir(), p).unwrap();
+        until(&manager, "status", "launcher_exited").await;
+        until(&manager, "ready", "ready").await;
+        // Descendants continue to serve after their launcher has been reaped.
+        let response = tokio::process::Command::new("curl")
+            .args(["--fail", "--silent", "--max-time", "2", &url])
+            .output()
+            .await
+            .unwrap();
+        assert!(response.status.success());
+        if shutdown {
+            manager.shutdown().await;
+            assert_eq!(manager.list(), json!([]));
+        } else {
+            manager.stop("web").unwrap();
+            until(&manager, "status", "stopped").await;
+        }
+        let response = tokio::process::Command::new("curl")
+            .args(["--fail", "--silent", "--max-time", "1", &url])
+            .output()
+            .await
+            .unwrap();
+        assert!(!response.status.success());
+    }
+}
+
+#[tokio::test]
+async fn heavy_output_retains_exact_tail_across_ring_wraps() {
+    let state = Arc::new(Mutex::new(State::default()));
+    let bytes: Vec<_> = (0..MAX_OUTPUT * 8 + 123).map(|i| (i % 251) as u8).collect();
+    capture(bytes.as_slice(), state.clone(), None).await;
+    let s = lock(&state);
+    assert_eq!(s.observed, bytes.len() as u64);
+    assert_eq!(s.output.len(), MAX_OUTPUT);
+    assert!(s
+        .output
+        .iter()
+        .copied()
+        .eq(bytes[bytes.len() - MAX_OUTPUT..].iter().copied()));
+}
