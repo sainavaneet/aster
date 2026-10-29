@@ -23,10 +23,13 @@ pub(in crate::client::shell) struct TabChip {
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub(in crate::client::shell) struct TabActivity {
     pub(in crate::client::shell) working: u16,
-    /// Agents blocked or waiting on an approval.
-    pub(in crate::client::shell) attention: u16,
-    /// At least one of the attention agents waits on an approval.
-    pub(in crate::client::shell) approval: bool,
+    /// Agents blocked without a decision to make.
+    pub(in crate::client::shell) blocked: u16,
+    /// Agents waiting on an approval; counted apart from `blocked`.
+    pub(in crate::client::shell) approval: u16,
+    /// The latest moment any pane of the tab carries a recent-change marker;
+    /// `None` once nothing changed lately.
+    pub(in crate::client::shell) recent_until: Option<std::time::Instant>,
     pub(in crate::client::shell) chips: [TabChip; MAX_CHIPS],
     pub(in crate::client::shell) chip_len: u8,
 }
@@ -48,11 +51,10 @@ impl TabActivity {
     /// there is nothing to show.
     pub(in crate::client::shell) fn suffix_width(&self) -> u16 {
         let mut width = u16::from(self.chip_len);
-        if self.working > 0 {
-            width += 2 + digits(self.working);
-        }
-        if self.attention > 0 {
-            width += 2 + digits(self.attention);
+        for count in [self.blocked, self.approval, self.working] {
+            if count > 0 {
+                width += 2 + digits(count);
+            }
         }
         if width == 0 {
             0
@@ -65,6 +67,8 @@ impl TabActivity {
 /// What the modern tab bar reads: per-tab activity and the chip totals.
 pub(in crate::client::shell) struct TabsView<'a> {
     pub(in crate::client::shell) activity: &'a HashMap<String, TabActivity>,
+    /// The frame's time, to read `recent_until` against.
+    pub(in crate::client::shell) now: std::time::Instant,
     pub(in crate::client::shell) summary: AttentionSummary,
 }
 
@@ -119,10 +123,33 @@ pub(in crate::client::shell) fn summarize(
     summary
 }
 
+/// The approval-aware state of every agent pane of the snapshot: the one input
+/// both the recent-change record and the tab counts are built from.
+pub(in crate::client::shell) fn pane_states(
+    snapshot: &ClientShellSnapshot,
+    team: Option<&TeamSidebar>,
+) -> HashMap<String, StateKind> {
+    let attention = team.map(|team| &team.modern.attention);
+    snapshot
+        .agents
+        .iter()
+        .map(|agent| {
+            let state = team
+                .and_then(|team| team.modern.headers.get(&agent.pane_id))
+                .map_or_else(
+                    || pane_state(attention, &agent.pane_id, agent.agent_status),
+                    |header| header.state,
+                );
+            (agent.pane_id.clone(), state)
+        })
+        .collect()
+}
+
 /// Activity by tab id, for tabs that have an agent.
 pub(in crate::client::shell) fn build(
     snapshot: &ClientShellSnapshot,
     team: Option<&TeamSidebar>,
+    recent: &super::recent::RecentMarks,
 ) -> HashMap<String, TabActivity> {
     let mut tabs = HashMap::<String, TabActivity>::new();
     let attention = team.map(|team| &team.modern.attention);
@@ -133,12 +160,11 @@ pub(in crate::client::shell) fn build(
             |header| header.state,
         );
         let activity = tabs.entry(agent.tab_id.clone()).or_default();
+        activity.recent_until = activity.recent_until.max(recent.until(&agent.pane_id));
         match state {
             StateKind::Working => activity.working = activity.working.saturating_add(1),
-            StateKind::Blocked | StateKind::Approval => {
-                activity.attention = activity.attention.saturating_add(1);
-                activity.approval |= state == StateKind::Approval;
-            }
+            StateKind::Blocked => activity.blocked = activity.blocked.saturating_add(1),
+            StateKind::Approval => activity.approval = activity.approval.saturating_add(1),
             _ => {}
         }
         let Some(tint) = header.and_then(|header| header.tint) else {
@@ -184,7 +210,8 @@ mod tests {
         assert_eq!(activity.suffix_width(), 3);
         activity.working = 12;
         assert_eq!(activity.suffix_width(), 2 + 2 + 2 + 1);
-        activity.attention = 1;
-        assert_eq!(activity.suffix_width(), 2 + 4 + 3 + 1);
+        activity.blocked = 1;
+        activity.approval = 1;
+        assert_eq!(activity.suffix_width(), 2 + 4 + 3 + 3 + 1);
     }
 }

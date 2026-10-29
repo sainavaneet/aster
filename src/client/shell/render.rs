@@ -242,6 +242,8 @@ pub(super) struct ShellRenderState<'a> {
     pub(super) team_sidebar: Option<&'a super::team_sidebar::TeamSidebar>,
     pub(super) tab_activity: &'a HashMap<String, super::modern::model::tabs::TabActivity>,
     pub(super) attention_summary: super::modern::model::tabs::AttentionSummary,
+    pub(super) recent: &'a super::modern::model::recent::RecentMarks,
+    pub(super) now: std::time::Instant,
     /// Wall-clock time of this frame in Unix milliseconds, for work board ages.
     pub(super) frame_unix_ms: u64,
     pub(super) tab_scroll: &'a mut usize,
@@ -305,6 +307,7 @@ pub(super) fn render_shell(
                     .selected_workspace_id
                     .map(|target| target.workspace_id.as_str()),
                 state.team_sidebar,
+                (state.recent, state.now),
                 &mut hits,
             );
         } else {
@@ -330,6 +333,7 @@ pub(super) fn render_shell(
             state.reveal_focused_tab,
             super::modern::model::tabs::TabsView {
                 activity: state.tab_activity,
+                now: state.now,
                 summary: state.attention_summary,
             },
             state.tab_drag_insert_index,

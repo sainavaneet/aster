@@ -41,6 +41,10 @@ pub(in crate::client::shell) struct PaneHeader {
     /// `step 2/3`, `parallel 1/2` or `integrating` for a relayed task.
     pub(in crate::client::shell) step: Option<String>,
     pub(in crate::client::shell) widths: HeaderWidths,
+    /// Bytes the largest grapheme cluster of this header needs in a cell. The
+    /// compositor reserves exactly this in the cells of this pane's header row
+    /// (and nowhere else), so painting never grows a string.
+    pub(in crate::client::shell) cell_bytes: usize,
 }
 
 fn width(text: &str) -> u16 {
@@ -66,7 +70,23 @@ fn header(
         title: title.as_deref().map_or(0, width),
         step: step.as_deref().map_or(0, width),
     };
+    let cell_bytes = [
+        role,
+        member,
+        extra.kind.as_str(),
+        extra.model.as_deref().unwrap_or_default(),
+        title.as_deref().unwrap_or_default(),
+        step.as_deref().unwrap_or_default(),
+    ]
+    .into_iter()
+    .flat_map(|text| text.graphemes(true))
+    .map(str::len)
+    .max()
+    .unwrap_or(0)
+    // The border glyph and the state and separator glyphs are three bytes.
+    .max(3);
     PaneHeader {
+        cell_bytes,
         tint,
         role: role.to_owned(),
         member: member.to_owned(),
@@ -123,25 +143,43 @@ pub(super) fn build(
     headers
 }
 
-/// Maximum encoded cluster size, derived on projection change rather than per frame.
-pub(super) fn symbol_capacity(headers: &HashMap<String, PaneHeader>) -> usize {
-    headers
-        .values()
-        .flat_map(|header| {
-            [
-                header.role.as_str(),
-                header.member.as_str(),
-                header.kind.as_str(),
-                header.model.as_deref().unwrap_or_default(),
-                header.title.as_deref().unwrap_or_default(),
-                header.step.as_deref().unwrap_or_default(),
-            ]
+/// A reservation span in surface-local coordinates, prepared on state change.
+#[derive(Debug, Clone, Copy)]
+pub(in crate::client::shell) struct HeaderCopy {
+    pub(in crate::client::shell) row: u16,
+    pub(in crate::client::shell) from: u16,
+    pub(in crate::client::shell) to: u16,
+    pub(in crate::client::shell) bytes: usize,
+}
+
+pub(in crate::client::shell) fn copy_spans(
+    surface: &crate::protocol::PaneSurfaceFrame,
+    headers: &HashMap<String, PaneHeader>,
+) -> Vec<HeaderCopy> {
+    let mut spans: Vec<_> = surface
+        .panes
+        .iter()
+        .filter_map(|pane| {
+            if pane.inner_rect.y <= pane.rect.y
+                || pane.rect.width < super::super::draw::pane_header::MIN_PANE_WIDTH
+            {
+                return None;
+            }
+            let header = headers.get(&pane.pane_id)?;
+            Some(HeaderCopy {
+                row: pane.rect.y,
+                from: pane.rect.x.saturating_add(1),
+                to: pane
+                    .rect
+                    .x
+                    .saturating_add(pane.rect.width)
+                    .saturating_sub(1),
+                bytes: header.cell_bytes,
+            })
         })
-        .flat_map(|text| text.graphemes(true))
-        .map(str::len)
-        .max()
-        .unwrap_or(0)
-        .max(3)
+        .collect();
+    spans.sort_unstable_by_key(|span| (span.row, span.from));
+    spans
 }
 
 #[cfg(test)]

@@ -97,6 +97,9 @@ pub(super) struct TeamRenderContext<'a> {
     pub(super) focused_pane_id: Option<&'a str>,
     /// Wall-clock reading for this frame, in Unix milliseconds.
     pub(super) now_unix_ms: u64,
+    /// Static recent-change markers and the frame's monotonic time.
+    pub(super) recent: &'a super::modern::model::recent::RecentMarks,
+    pub(super) now: std::time::Instant,
 }
 
 /// One collapsed-sidebar entry, in the same order as the keyboard navigation.

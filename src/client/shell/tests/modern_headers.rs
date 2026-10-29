@@ -247,12 +247,12 @@ fn tabs_show_role_chips_and_counts_in_the_active_glyph_set() {
     let mut state = two_panes(60, "pane_2");
     let frame = state.compose(COLS, ROWS).unwrap();
     let tabs = super::frame_rows(&frame)[0].clone();
-    assert!(tabs.contains("▪▫ ◐1 ⚑2"), "{tabs}");
+    assert!(tabs.contains("▪▫ ▲1 ⚑1 ◐1"), "{tabs}");
     state.config.ui_glyphs = crate::config::UiGlyphsConfig::Ascii;
     state.config.refresh_chrome();
     let frame = state.compose(COLS, ROWS).unwrap();
     let tabs = super::frame_rows(&frame)[0].clone();
-    assert!(tabs.contains("#. *1 ?2"), "{tabs}");
+    assert!(tabs.contains("#. !1 ?1 *1"), "{tabs}");
     state.config.ui_style = crate::config::UiStyleConfig::Classic;
     state.config.refresh_chrome();
     let frame = state.compose(COLS, ROWS).unwrap();
@@ -266,7 +266,11 @@ fn tab_activity_is_rebuilt_with_each_snapshot_and_never_scanned_per_frame() {
     state.compose(COLS, ROWS).unwrap();
     let activity = state.tab_activity["tab_1"];
     assert_eq!(
-        (activity.working, activity.attention, activity.approval),
+        (
+            activity.working,
+            activity.blocked + activity.approval,
+            activity.approval > 0
+        ),
         (1, 2, true)
     );
     // An approval resolving changes the snapshot, and the cache with it.
@@ -274,7 +278,7 @@ fn tab_activity_is_rebuilt_with_each_snapshot_and_never_scanned_per_frame() {
     next.orbit.as_mut().unwrap().active_tasks.clear();
     state.set_snapshot(Box::new(next));
     let activity = state.tab_activity["tab_1"];
-    assert_eq!((activity.attention, activity.approval), (2, false));
+    assert_eq!((activity.blocked, activity.approval), (2, 0));
 }
 
 #[test]
@@ -348,6 +352,8 @@ fn header_writer_never_grows_incoming_cell_strings() {
             ),
             focused_pane_id: Some("pane_3"),
             now_unix_ms: 10_000_000_000,
+            recent: &state.recent,
+            now,
         },
     );
     let after: Vec<_> = frame.cells[start..end]
@@ -403,9 +409,9 @@ fn tab_aggregation_is_scoped_and_ignores_presentation_changes() {
     }
     let mut state = modern_state(26, projected);
     let activity = state.tab_activity.clone();
-    assert!(activity[other].approval);
-    assert!(!activity["tab_1"].approval);
-    assert_eq!(activity[other].attention, 1);
+    assert_eq!(activity[other].approval, 1);
+    assert_eq!(activity["tab_1"].approval, 0);
+    assert_eq!(activity[other].blocked, 0);
     let first = state.tab_activity["tab_1"];
     state.compose(80, ROWS).unwrap();
     state.compose(200, ROWS).unwrap();
@@ -594,4 +600,284 @@ fn the_tab_bar_ends_with_an_attention_chip_that_yields_to_the_tabs() {
     let frame = quiet.compose(COLS, ROWS).unwrap();
     let tabs = super::frame_rows(&frame)[0].trim_end().to_owned();
     assert!(!tabs.contains('▲') && !tabs.contains('◐'), "{tabs}");
+}
+
+// ---- review round 1: stale border text, per-pane capacity, a static recent
+// marker, and blocked/approval kept apart.
+
+#[test]
+fn a_header_clears_the_servers_stale_border_title() {
+    let mut state = state_with_panes(&[("pane_3", 0, 100)], "pane_3");
+    let mut surface = bordered_surface((COLS - 26, ROWS - 1), &[("pane_3", 0, 100)], "pane_3");
+    for (offset, ch) in
+        "STALE-OLD-TITLE-OF-THE-SERVER-THAT-IS-VERY-LONG-AND-RUNS-UNDER-THE-NEW-HEADER"
+            .chars()
+            .enumerate()
+    {
+        surface.frame.cells[1 + offset].symbol = ch.to_string();
+    }
+    state.set_pane_surface(surface);
+    let frame = state.compose(COLS, ROWS).unwrap();
+    let row = header_row(&frame, &state);
+    assert!(
+        !row.contains("STALE") && !row.contains("OLD-TITLE"),
+        "{row}"
+    );
+    assert!(
+        row.contains("approve task title") && row.contains("4m ┐"),
+        "{row}"
+    );
+    // The span between the title and the age is plain border again.
+    let gap = row.split("approve task title").nth(1).unwrap();
+    assert!(gap.trim_start_matches('─').starts_with(" 4m"), "{gap}");
+}
+
+#[test]
+fn a_hidden_workers_header_text_never_grows_visible_cells() {
+    let capacities = |hidden_name: &str| {
+        let mut projected = lane_snapshot();
+        let orbit = projected.orbit.as_mut().unwrap();
+        orbit.roles[0].members[2].name = hidden_name.into();
+        orbit.roles[0].members[2].pane_id = Some("pane_hidden".into());
+        let mut state = modern_state(26, projected);
+        state.set_pane_surface(bordered_surface(
+            (COLS - 26, ROWS - 1),
+            &[("pane_3", 0, 60), ("pane_2", 60, 60)],
+            "pane_3",
+        ));
+        let frame = state.compose(COLS, ROWS).unwrap().frame;
+        let width = usize::from(frame.width);
+        // Content rows of both panes: nothing about them is a header.
+        (3..8)
+            .flat_map(|row| (27..140.min(width)).map(move |col| row * width + col))
+            .map(|index| frame.cells[index].symbol.capacity())
+            .collect::<Vec<_>>()
+    };
+    let plain = capacities("plain");
+    let emoji = capacities("👩‍👩‍👧‍👦👩‍👩‍👧‍👦");
+    assert_eq!(
+        plain, emoji,
+        "an off-screen worker's name changed visible content cells"
+    );
+    assert!(
+        plain.iter().all(|capacity| *capacity <= 8),
+        "content cells reserve header room: {plain:?}"
+    );
+}
+
+fn changed_snapshot_state(
+    mode: crate::config::UiAnimationsConfig,
+) -> (ClientShellState, std::time::Instant) {
+    let mut config = Config::default();
+    config.ui.animations = mode;
+    let mut quiet = lane_snapshot();
+    // Baseline: the relayed worker is working and nobody waits on an approval.
+    quiet
+        .orbit
+        .as_mut()
+        .unwrap()
+        .active_tasks
+        .retain(|task| !task.awaiting_approval);
+    let mut state = team_sidebar::team_state(config, quiet.clone());
+    let base = std::time::Instant::now();
+    state.animations = super::super::animation::ClientAnimationClock::new(base);
+    state.wall_clock = super::super::work_board::WallClock::at(base, 10_000_000_000);
+    state.orbit_clock = None;
+    // The next snapshot: pane_2 finishes, pane_3 starts waiting on an approval.
+    let mut next = lane_snapshot();
+    for agent in &mut next.agents {
+        if agent.pane_id == "pane_2" {
+            agent.agent_status = AgentStatus::Idle;
+        }
+    }
+    next.orbit.as_mut().unwrap().roles[0].members[1].state = "idle".into();
+    state.set_snapshot(Box::new(next));
+    state.set_pane_surface(bordered_surface(
+        (COLS - 26, ROWS - 1),
+        &[("pane_3", 0, 34), ("pane_2", 34, 34), ("pane_4", 68, 34)],
+        "pane_4",
+    ));
+    (state, base)
+}
+
+fn member_cell_modifier(
+    frame: &FrameData,
+    state: &ClientShellState,
+    pane: &str,
+    glyph_offset: usize,
+) -> u16 {
+    let hit = state
+        .hits
+        .panes
+        .iter()
+        .find(|hit| hit.pane_id == pane)
+        .expect("pane hit");
+    let row = super::frame_rows(frame);
+    let text = &row[usize::from(hit.rect.y)];
+    let member = if pane == "pane_2" {
+        "rev-claude"
+    } else {
+        "rev-codex"
+    };
+    let at = text.find(member).unwrap_or_else(|| {
+        panic!(
+            "{member} missing: {text} headers {:?} panes {:?}",
+            state.team_sidebar.as_ref().map(|t| t
+                .modern
+                .headers
+                .keys()
+                .cloned()
+                .collect::<Vec<_>>()),
+            state
+                .hits
+                .panes
+                .iter()
+                .map(|h| (h.pane_id.clone(), h.rect))
+                .collect::<Vec<_>>()
+        )
+    });
+    let column = text[..at].chars().count() + glyph_offset;
+    frame.cells[usize::from(hit.rect.y) * usize::from(frame.width) + column].modifier
+}
+
+#[test]
+fn a_just_finished_or_newly_blocked_pane_keeps_a_static_marker_in_every_motion_mode() {
+    use crate::config::UiAnimationsConfig::{Full, Off, Reduced};
+    let underlined = ratatui::style::Modifier::UNDERLINED.bits();
+    for mode in [Full, Reduced, Off] {
+        let (mut state, base) = changed_snapshot_state(mode);
+        // Long after any one-shot animation has decayed.
+        let late = base + std::time::Duration::from_secs(5);
+        let frame = state.compose_at(COLS, ROWS, late).unwrap().frame;
+        for pane in ["pane_2", "pane_3"] {
+            let modifier = member_cell_modifier(&frame, &state, pane, 0);
+            assert!(
+                modifier & underlined != 0,
+                "{mode:?}: {pane} lost its recent marker"
+            );
+        }
+        // A pane that did not change carries none.
+        let quiet = state
+            .hits
+            .panes
+            .iter()
+            .find(|hit| hit.pane_id == "pane_4")
+            .unwrap();
+        let row = super::frame_rows(&frame);
+        let at = row[usize::from(quiet.rect.y)].find("probe").unwrap();
+        let column = row[usize::from(quiet.rect.y)][..at].chars().count();
+        let cell = &frame.cells[usize::from(quiet.rect.y) * usize::from(frame.width) + column];
+        assert!(
+            cell.modifier & underlined == 0,
+            "{mode:?}: an unchanged pane is marked"
+        );
+        // The marker expires with the existing coarse tick, without motion.
+        let much_later = base + std::time::Duration::from_secs(600);
+        assert!(
+            state.tick_copy_feedback(much_later),
+            "{mode:?}: expiry asks for one repaint"
+        );
+        let frame = state.compose_at(COLS, ROWS, much_later).unwrap().frame;
+        let modifier = member_cell_modifier(&frame, &state, "pane_2", 0);
+        assert!(
+            modifier & underlined == 0,
+            "{mode:?}: the marker never expires"
+        );
+    }
+}
+
+#[test]
+fn tabs_keep_blocked_and_approval_counts_apart() {
+    let mut state = two_panes(60, "pane_2");
+    let frame = state.compose(COLS, ROWS).unwrap();
+    let tabs = super::frame_rows(&frame)[0].clone();
+    assert!(
+        tabs.contains("▪▫ ▲1 ⚑1 ◐1"),
+        "one blocked and one approval must not merge: {tabs}"
+    );
+}
+
+#[test]
+fn recent_marks_reset_with_endpoint_identity_and_classic_expiry_is_quiet() {
+    let (mut state, base) = changed_snapshot_state(crate::config::UiAnimationsConfig::Off);
+    assert!(state
+        .recent
+        .is_recent("pane_2", base + std::time::Duration::from_secs(1)));
+    state.config.ui_style = crate::config::UiStyleConfig::Classic;
+    state.config.refresh_chrome();
+    assert!(
+        !state.tick_copy_feedback(base + std::time::Duration::from_secs(120)),
+        "classic must not repaint for invisible marks"
+    );
+    let (mut state, base) = changed_snapshot_state(crate::config::UiAnimationsConfig::Off);
+    let next = state.snapshot.as_deref().unwrap().clone();
+    state.reset_endpoint_projection();
+    assert!(state.pane_states.is_none());
+    assert!(!state
+        .recent
+        .is_recent("pane_2", base + std::time::Duration::from_secs(1)));
+    state.set_snapshot(Box::new(next));
+    assert!(
+        !state.recent.is_recent("pane_2", std::time::Instant::now()),
+        "a new endpoint starts from a baseline"
+    );
+}
+
+#[test]
+fn long_graphemes_reserve_only_their_own_header_and_spans_rebuild_on_changes() {
+    let cluster = format!("e{}", "\u{301}".repeat(140));
+    assert!(cluster.len() > 255);
+    let mut projected = lane_snapshot();
+    projected.orbit.as_mut().unwrap().roles[0].members[0].name = cluster.clone();
+    let mut state = modern_state(26, projected);
+    state.set_pane_surface(bordered_surface(
+        (COLS - 26, ROWS - 1),
+        &[("pane_3", 0, 100)],
+        "pane_3",
+    ));
+    let count = state.header_copies.len();
+    let storage = state.header_copies.as_ptr();
+    let frame = state.compose(COLS, ROWS).unwrap();
+    assert!(header_row(&frame, &state).contains(&cluster));
+    state.compose(200, ROWS).unwrap();
+    assert_eq!(state.header_copies.len(), count);
+    assert_eq!(
+        state.header_copies.as_ptr(),
+        storage,
+        "frames reuse reservation spans"
+    );
+    let mut next = state.snapshot.as_deref().unwrap().clone();
+    next.orbit.as_mut().unwrap().roles[0].members[0].name = "short".into();
+    state.set_snapshot(Box::new(next));
+    assert!(state
+        .header_copies
+        .iter()
+        .all(|span| span.bytes < cluster.len()));
+    state.set_pane_surface(bordered_surface(
+        (COLS - 26, ROWS - 1),
+        &[("pane_2", 0, 40)],
+        "pane_2",
+    ));
+    assert!(state.header_copies.iter().all(|span| span.to <= 40));
+}
+
+#[test]
+fn cleared_header_cells_cannot_keep_old_links_or_skip_flags() {
+    let mut state = state_with_panes(&[("pane_3", 0, 100)], "pane_3");
+    let mut surface = bordered_surface((COLS - 26, ROWS - 1), &[("pane_3", 0, 100)], "pane_3");
+    surface
+        .frame
+        .hyperlinks
+        .push("https://example.invalid/stale".into());
+    for cell in &mut surface.frame.cells[1..99] {
+        cell.hyperlink = Some(0);
+        cell.skip = true;
+    }
+    state.set_pane_surface(surface);
+    let frame = state.compose(COLS, ROWS).unwrap();
+    let hit = &state.hits.panes[0];
+    let start = usize::from(hit.rect.y) * usize::from(frame.width) + usize::from(hit.rect.x) + 1;
+    assert!(frame.cells[start..start + 98]
+        .iter()
+        .all(|cell| cell.hyperlink.is_none() && !cell.skip));
 }

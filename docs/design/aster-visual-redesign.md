@@ -1284,3 +1284,36 @@ concurrent compilation hit the untouched uncertain-delivery test; it passed in
 isolation and the final full rerun. `just check` stops only at Windows lint for
 the missing SDK libc configuration. No SDK, crates, wire fields or frozen fixture
 updates were needed. Classic goldens remain unchanged.
+
+### Phase 3 review round 1 (design-sonnet)
+
+- Header span is cleared to plain border (the corner cell's style) before painting, so a stale server title never shows between parts. Audit: every other modern surface (sidebar rows, lanes, tab suffix, attention chip) draws into the freshly built chrome buffer, which holds no earlier text; the pane header is the only overlay on cells that arrive with content.
+- Cell capacity is reserved per pane: `PaneHeader::cell_bytes` (largest grapheme of that header) sizes only the header-row cells of panes that are on screen and have a header, inside the surface copy; content cells and off-screen workers copy at their own length.
+- Recent changes have a static form that does not depend on animations: `modern/model/recent.rs` records panes that now need you or stopped working (60 s), updated when a snapshot arrives and expired by the existing coarse tick. The marker is an underline on the member name (pane header, sidebar rows and cards), on the collapsed sidebar glyph, and on a tab holding such a pane. The sidebar done lane was already static. Full and reduced additionally keep the animated fill.
+- Tabs and the chip keep blocked and approval counts apart (`▲N ⚑N ◐N`, most urgent first); role cards and the collapsed sidebar already did.
+
+Validation additions (design-sol): header reservation spans are sorted and cached
+on snapshot/surface changes in surface-local coordinates. Copying uses a linear
+span cursor with no per-frame scratch resize or row-by-pane scan, and keeps byte
+counts as `usize` so graphemes larger than 255 bytes are not truncated. Added
+coverage for cache reuse, snapshot/geometry invalidation, and such a grapheme.
+Endpoint projection reset clears the recent baseline and marks; classic expiry
+cleans the record without requesting a repaint. Clearing header residue also
+removes inherited hyperlink and skip metadata. The new regression tests cover
+all three cases; existing classic golden fixtures remain unedited.
+
+Final round-1 verification: 4,644 native tests pass (16 skipped), including the
+26 focused header/recent/classic checks. Native fmt/clippy, 14 architecture,
+config reference, translation parity, 151 maintenance, 5 release-workflow,
+55 integration asset and 7 docs tests pass. `just check` stops only for the
+missing Windows SDK libc configuration. No SDK or dependencies were added.
+
+Quiet Orbit medians, 1/15/50 panes: run 1 classic 167/168/179 us and modern
+164/176/183 us; run 2 classic 156/163/171 us and modern 160/176/178 us. Absolute
+overhead stays below the 10%/15% limits, but the 15-to-1 ratio deltas are 0.0672
+and 0.0551, above 0.05. This remaining scaling limitation is reported explicitly:
+reservation preparation has been moved off the frame path and row-by-pane scans
+removed, while correct residue clearing adds work on worker border rows. Do not
+claim the ratio budget passed. Six benchmark profiles pass in every run; the
+known native-file CoW retention profile still fails. Classic and endpoint fixture
+expectations remain unedited.

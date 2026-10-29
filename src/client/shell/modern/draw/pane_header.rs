@@ -26,6 +26,8 @@ const MIN_TITLE: u16 = 8;
 /// A role name longer than this is elided even when there is room.
 const ROLE_MAX: u16 = 14;
 /// Border corner, tee and edge glyphs a header must never overwrite.
+/// The horizontal border glyph a cleared header span shows.
+const BORDER: &str = "─";
 const STOPS: [&str; 10] = ["┬", "┴", "┼", "├", "┤", "┌", "┐", "└", "┘", "│"];
 
 /// What fits in a header `width` cells wide. Widths are cells; `0`/`false`
@@ -245,6 +247,33 @@ fn paint_one(
         bg,
         ellipsis: chrome.glyphs.ellipsis,
     };
+    // The server may have drawn its own title here. Everything the header does
+    // not overwrite must read as plain border again, so first clear the whole
+    // writable span (junctions are outside it) to the border's own style.
+    let (border_fg, border_bg, border_modifier) = {
+        let corner = &cells[first - 1];
+        (corner.fg, corner.bg, corner.modifier)
+    };
+    for cell in &mut cells[first..end] {
+        if cell.symbol != BORDER {
+            // A cell without room for the glyph still has to stop showing the
+            // old text: a space (or nothing, at zero capacity) never allocates.
+            let fill = if BORDER.len() <= cell.symbol.capacity() {
+                BORDER
+            } else if cell.symbol.capacity() > 0 {
+                " "
+            } else {
+                ""
+            };
+            cell.symbol.clear();
+            cell.symbol.push_str(fill);
+        }
+        cell.fg = border_fg;
+        cell.bg = border_bg;
+        cell.modifier = border_modifier;
+        cell.hyperlink = None;
+        cell.skip = false;
+    }
     if let Some(bg) = bg {
         for cell in &mut cells[first..end] {
             cell.bg = color_to_u32(bg);
@@ -264,6 +293,15 @@ fn paint_one(
         Modifier::BOLD
     } else {
         Modifier::empty()
+    };
+    // A static mark for a pane that just changed (finished, or now needs you):
+    // an underline, present whatever `ui.animations` says, until the coarse tick
+    // ends it.
+    let recent = ctx.recent.is_recent(&hit.pane_id, ctx.now);
+    let name_modifier = if recent {
+        bold | Modifier::UNDERLINED
+    } else {
+        bold
     };
     let muted = (roles.text_muted, Modifier::empty());
     let mut x = first;
@@ -311,7 +349,7 @@ fn paint_one(
             limit,
             &header.member,
             header.widths.member,
-            (color, bold),
+            (color, name_modifier),
             look,
         );
     }

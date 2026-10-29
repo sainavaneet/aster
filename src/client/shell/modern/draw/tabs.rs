@@ -51,36 +51,24 @@ pub(in crate::client::shell) fn render_suffix(
             on(roles.tint(usize::from(chip.tint))),
         );
     }
-    if activity.working > 0 {
+    // Most urgent first, the same order as the attention chip.
+    let parts = [
+        (activity.blocked, chrome.glyphs.blocked, roles.state_blocked),
+        (
+            activity.approval,
+            chrome.glyphs.approval,
+            roles.state_approval,
+        ),
+        (activity.working, chrome.glyphs.working, roles.state_working),
+    ];
+    for (count, glyph, color) in parts {
+        if count == 0 {
+            continue;
+        }
         x = put_segment(buffer, x, area.y, right, " ", on(roles.text_muted));
-        let style = on(roles.state_working);
-        x = put_segment(buffer, x, area.y, right, chrome.glyphs.working, style);
-        x = put_number(
-            buffer,
-            x,
-            area.y,
-            right,
-            usize::from(activity.working),
-            style,
-        );
-    }
-    if activity.attention > 0 {
-        x = put_segment(buffer, x, area.y, right, " ", on(roles.text_muted));
-        let (glyph, color) = if activity.approval {
-            (chrome.glyphs.approval, roles.state_approval)
-        } else {
-            (chrome.glyphs.blocked, roles.state_blocked)
-        };
         let style = on(color);
         x = put_segment(buffer, x, area.y, right, glyph, style);
-        put_number(
-            buffer,
-            x,
-            area.y,
-            right,
-            usize::from(activity.attention),
-            style,
-        );
+        x = put_number(buffer, x, area.y, right, usize::from(count), style);
     }
 }
 

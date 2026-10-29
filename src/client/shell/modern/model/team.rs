@@ -31,7 +31,6 @@ pub(in crate::client::shell) struct ModernRole {
 
 #[derive(Debug, PartialEq, Eq)]
 pub(in crate::client::shell) struct ModernTeam {
-    pub(in crate::client::shell) header_symbol_capacity: usize,
     pub(in crate::client::shell) attention: PaneAttention,
     pub(in crate::client::shell) lead: ModernMember,
     /// One per `TeamSidebar::groups` entry: the roles, then `scratch`.
@@ -212,7 +211,6 @@ impl ModernTeam {
         }
         let headers = super::pane_header::build(orbit, &lead, &roles, &open);
         Self {
-            header_symbol_capacity: super::pane_header::symbol_capacity(&headers),
             attention: PaneAttention::build(Some(orbit)),
             lead,
             roles,

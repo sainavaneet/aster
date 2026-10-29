@@ -80,6 +80,8 @@ impl ClientShellState {
             team_sidebar: self.team_sidebar.as_ref(),
             tab_activity: &self.tab_activity,
             attention_summary: self.attention_summary,
+            recent: &self.recent,
+            now,
             frame_unix_ms,
             tab_scroll: &mut self.tab_scroll,
             reveal_focused_workspace: &mut self.reveal_focused_workspace,
@@ -267,6 +269,8 @@ impl ClientShellState {
                 team_sidebar: self.team_sidebar.as_ref(),
                 tab_activity: &self.tab_activity,
                 attention_summary: self.attention_summary,
+                recent: &self.recent,
+                now,
                 frame_unix_ms,
                 tab_scroll: &mut self.tab_scroll,
                 reveal_focused_workspace: &mut self.reveal_focused_workspace,
@@ -392,16 +396,12 @@ impl ClientShellState {
             let start = usize::from(bar.y) * usize::from(frame.width) + usize::from(bar.x);
             frame.cells[start..start + usize::from(bar.width)].to_vec()
         });
-        if let Some(team) = self
-            .team_sidebar
-            .as_ref()
-            .filter(|_| self.config.chrome.is_modern())
-        {
-            blit_pane_surface_reserved(
+        if self.config.chrome.is_modern() && self.team_sidebar.is_some() {
+            blit_pane_surface_with_headers(
                 &mut frame,
                 &surface.frame,
                 layout.pane_surface,
-                team.modern.header_symbol_capacity,
+                &self.header_copies,
             );
         } else {
             blit_pane_surface(&mut frame, &surface.frame, layout.pane_surface);
@@ -424,6 +424,8 @@ impl ClientShellState {
                         ),
                         focused_pane_id: snapshot.focused_pane_id.as_deref(),
                         now_unix_ms: frame_unix_ms,
+                        recent: &self.recent,
+                        now,
                     },
                 );
             }

@@ -53,6 +53,10 @@ pub(crate) fn render_collapsed_sidebar(
     animation: super::super::animation::AnimationFrame<'_>,
     selected_workspace_id: Option<&str>,
     team: Option<&super::super::team_sidebar::TeamSidebar>,
+    recent: (
+        &super::super::modern::model::recent::RecentMarks,
+        std::time::Instant,
+    ),
     hits: &mut ShellHitMap,
 ) {
     let palette = &config.palette;
@@ -213,7 +217,14 @@ pub(crate) fn render_collapsed_sidebar(
             rect.y,
             rect.width.saturating_sub(2),
             icon_glyph,
-            Style::default().fg(status_fg),
+            // Modern: a static recent-change marker, whatever `ui.animations` says.
+            if config.chrome.is_modern() && recent.0.is_recent(entry.pane_id, recent.1) {
+                Style::default()
+                    .fg(status_fg)
+                    .add_modifier(Modifier::UNDERLINED)
+            } else {
+                Style::default().fg(status_fg)
+            },
         );
         hits.agents.push((rect, entry.pane_id.to_owned()));
     }
@@ -490,6 +501,8 @@ pub(crate) fn render_sidebar(
                 animation: state.animation,
                 focused_pane_id: snapshot.focused_pane_id.as_deref(),
                 now_unix_ms: state.frame_unix_ms,
+                recent: state.recent,
+                now: state.now,
             },
             state.agent_scroll,
             hits,

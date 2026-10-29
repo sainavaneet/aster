@@ -249,18 +249,35 @@ fn panel_contrast_fg(palette: &Palette) -> ratatui::style::Color {
 }
 
 fn blit_pane_surface(target: &mut FrameData, source: &FrameData, area: Rect) {
-    blit_pane_surface_cells(target, source, area, Clone::clone);
+    blit_pane_surface_cells(target, source, area, |cell, _, _| cell.clone());
 }
 
-/// Uses the existing surface-copy allocation to provision header graphemes;
-/// the painter itself never allocates. Capacity is cached on projection change.
-fn blit_pane_surface_reserved(
+/// Uses the existing cell-copy allocation only for cached visible header spans.
+/// The ordered span cursor advances once per span; no frame scratch allocation
+/// or row-by-pane scan is needed.
+fn blit_pane_surface_with_headers(
     target: &mut FrameData,
     source: &FrameData,
     area: Rect,
-    capacity: usize,
+    spans: &[modern::model::pane_header::HeaderCopy],
 ) {
-    blit_pane_surface_cells(target, source, area, |cell| {
+    let mut cursor = 0;
+    blit_pane_surface_cells(target, source, area, |cell, x, y| {
+        let x = x.saturating_sub(area.x);
+        let y = y.saturating_sub(area.y);
+        while spans
+            .get(cursor)
+            .is_some_and(|span| span.row < y || (span.row == y && span.to <= x))
+        {
+            cursor += 1;
+        }
+        let capacity = spans
+            .get(cursor)
+            .filter(|span| span.row == y && span.from <= x && x < span.to)
+            .map_or(0, |span| span.bytes);
+        if capacity == 0 {
+            return cell.clone();
+        }
         let mut symbol = String::with_capacity(cell.symbol.len().max(capacity));
         symbol.push_str(&cell.symbol);
         crate::protocol::CellData {
@@ -278,7 +295,7 @@ fn blit_pane_surface_cells(
     target: &mut FrameData,
     source: &FrameData,
     area: Rect,
-    copy: impl Fn(&crate::protocol::CellData) -> crate::protocol::CellData,
+    mut copy: impl FnMut(&crate::protocol::CellData, u16, u16) -> crate::protocol::CellData,
 ) {
     let copy_width = source.width.min(area.width);
     let copy_height = source.height.min(area.height);
@@ -297,7 +314,7 @@ fn blit_pane_surface_cells(
             ) else {
                 continue;
             };
-            *target_cell = copy(source_cell);
+            *target_cell = copy(source_cell, target_x, target_y);
             target_cell.hyperlink = source_cell.hyperlink.and_then(|index| {
                 ((index as usize) < source.hyperlinks.len()).then_some(hyperlink_base + index)
             });

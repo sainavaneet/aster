@@ -136,6 +136,11 @@ pub(crate) fn render_tab_bar(
             break;
         }
         let rect = Rect::new(x, area.y, width, 1);
+        let activity = if modern {
+            tab_activity.get(&tab.tab_id)
+        } else {
+            None
+        };
         let style = if tab.focused {
             let base = Style::default()
                 .fg(panel_contrast_fg(palette))
@@ -149,6 +154,17 @@ pub(crate) fn render_tab_bar(
             Style::default().fg(palette.overlay1).bg(palette.surface0)
         } else {
             Style::default().fg(palette.overlay0).bg(palette.surface0)
+        };
+        // Modern: a tab holding a recently changed pane is underlined, a static
+        // marker that does not depend on `ui.animations`.
+        let style = if activity.is_some_and(|activity| {
+            activity
+                .recent_until
+                .is_some_and(|until| modern_tabs.now < until)
+        }) {
+            style.add_modifier(Modifier::UNDERLINED)
+        } else {
+            style
         };
         // The suffix only appears on a tab drawn at its full width.
         let extra = if width >= desired {
@@ -169,11 +185,6 @@ pub(crate) fn render_tab_bar(
             buffer.set_style(rect, style);
         }
         put_text(buffer, rect.x, rect.y, label_width, &text, style);
-        let activity = if modern {
-            tab_activity.get(&tab.tab_id)
-        } else {
-            None
-        };
         if let Some(activity) = activity.filter(|_| extra > 0) {
             super::modern::draw::tabs::render_suffix(
                 buffer,

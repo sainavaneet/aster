@@ -63,6 +63,13 @@ pub(in crate::client::shell) fn render_line(
     true
 }
 
+/// A recent-change marker (static; see `modern::model::recent`).
+fn recent(row: &TeamRow, ctx: &TeamRenderContext<'_>) -> bool {
+    row.pane_id
+        .as_deref()
+        .is_some_and(|pane_id| ctx.recent.is_recent(pane_id, ctx.now))
+}
+
 fn focused(row: &TeamRow, ctx: &TeamRenderContext<'_>) -> bool {
     row.pane_id
         .as_deref()
@@ -96,9 +103,12 @@ fn lead(buffer: &mut Buffer, rect: Rect, team: &TeamSidebar, ctx: &TeamRenderCon
     } else {
         right
     };
-    let name = Style::default()
+    let mut name = Style::default()
         .fg(roles.text_strong)
         .add_modifier(Modifier::BOLD);
+    if recent(row, ctx) {
+        name = name.add_modifier(Modifier::UNDERLINED);
+    }
     x = put_elided(
         buffer,
         x,
@@ -283,7 +293,12 @@ fn member_row(
         } else {
             Modifier::empty()
         })
-        .add_modifier(dim);
+        .add_modifier(dim)
+        .add_modifier(if recent(row, ctx) {
+            Modifier::UNDERLINED
+        } else {
+            Modifier::empty()
+        });
     let meta = Style::default().fg(roles.text_muted).add_modifier(dim);
     let separator = chrome.glyphs.separator;
     // Right side, best first: kind and model, kind, nothing; a member without a

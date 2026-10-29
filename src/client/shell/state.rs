@@ -978,6 +978,13 @@ pub(crate) struct ClientShellState {
     pub(super) collapsed_lanes: crate::ui::chrome::state::LaneSet,
     /// Per-tab activity for the modern tab bar, rebuilt with each snapshot.
     pub(super) tab_activity: HashMap<String, super::modern::model::tabs::TabActivity>,
+    /// The previous snapshot's pane states, to notice notable changes; `None`
+    /// until the first snapshot, which is only a baseline.
+    pub(super) pane_states: Option<HashMap<String, crate::ui::chrome::state::StateKind>>,
+    /// Surface-local header reservation spans, prepared on snapshot/surface changes.
+    pub(super) header_copies: Vec<super::modern::model::pane_header::HeaderCopy>,
+    /// Static recent-change markers, independent of `ui.animations`.
+    pub(super) recent: super::modern::model::recent::RecentMarks,
     /// Totals for the tab bar's attention chip, rebuilt with each snapshot.
     pub(super) attention_summary: super::modern::model::tabs::AttentionSummary,
     pub(super) wall_clock: super::work_board::WallClock,
@@ -1164,6 +1171,9 @@ impl ClientShellState {
             collapsed_team_groups: HashSet::new(),
             collapsed_lanes: crate::ui::chrome::state::LaneSet::EMPTY,
             tab_activity: HashMap::new(),
+            header_copies: Vec::new(),
+            pane_states: None,
+            recent: Default::default(),
             attention_summary: Default::default(),
             wall_clock: super::work_board::WallClock::now(),
             orbit_clock: None,
@@ -1347,6 +1357,9 @@ impl ClientShellState {
     }
 
     pub(super) fn reset_endpoint_projection(&mut self) {
+        self.header_copies.clear();
+        self.pane_states = None;
+        self.recent = Default::default();
         self.hits = ShellHitMap::default();
         self.pane_surface = None;
         self.pending_pane_surface = None;
@@ -1717,9 +1730,19 @@ impl ClientShellState {
         }
         self.snapshot = Some(snapshot);
         self.snapshot_serial = self.snapshot_serial.wrapping_add(1);
+        let current = super::modern::model::tabs::pane_states(
+            self.snapshot.as_deref().expect("just set"),
+            self.team_sidebar.as_ref(),
+        );
+        if let Some(previous) = self.pane_states.as_ref() {
+            self.recent
+                .record(previous, &current, std::time::Instant::now());
+        }
+        self.pane_states = Some(current);
         self.tab_activity = super::modern::model::tabs::build(
             self.snapshot.as_deref().expect("just set"),
             self.team_sidebar.as_ref(),
+            &self.recent,
         );
         self.attention_summary = super::modern::model::tabs::summarize(
             self.snapshot.as_deref().expect("just set"),
@@ -1741,8 +1764,18 @@ impl ClientShellState {
                 self.pending_pane_surface = Some(surface);
             }
         }
+        self.refresh_header_copies();
         self.resume_mobile_switcher_if_ready();
         self.reconcile_input_source();
+    }
+
+    fn refresh_header_copies(&mut self) {
+        self.header_copies = match (self.pane_surface.as_ref(), self.team_sidebar.as_ref()) {
+            (Some(surface), Some(team)) => {
+                super::modern::model::pane_header::copy_spans(surface, &team.modern.headers)
+            }
+            _ => Vec::new(),
+        };
     }
 
     pub(crate) fn has_presented_surface(&self) -> bool {
@@ -1942,6 +1975,7 @@ impl ClientShellState {
         self.graphics
             .set_scene(std::mem::take(&mut surface.graphics));
         self.pane_surface = Some(surface);
+        self.refresh_header_copies();
         self.pane_surface_generation = self.active_snapshot_generation;
         self.invalidate_link_hover();
         self.resume_mobile_switcher_if_ready();
@@ -1970,7 +2004,9 @@ impl ClientShellState {
     }
 
     pub(crate) fn tick_copy_feedback(&mut self, now: std::time::Instant) -> bool {
-        let mut repaint = false;
+        // The recent-change markers end on the coarse tick, without motion.
+        let expired = self.recent.expire(now);
+        let mut repaint = self.config.ui_style.is_modern() && expired;
         if self
             .copy_feedback_deadline
             .is_some_and(|deadline| now >= deadline)

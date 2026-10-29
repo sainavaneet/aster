@@ -230,11 +230,18 @@ fn task_card(
     if let Some(bg) = row_background(ctx, is_focused, phase) {
         buffer.set_style(rect, Style::default().bg(bg));
     }
-    let who = Style::default().fg(if lane == Lane::NeedsYou || is_focused {
+    let mut who = Style::default().fg(if lane == Lane::NeedsYou || is_focused {
         roles.text_strong
     } else {
         roles.text_body
     });
+    if card
+        .pane_id
+        .as_deref()
+        .is_some_and(|pane_id| ctx.recent.is_recent(pane_id, ctx.now))
+    {
+        who = who.add_modifier(Modifier::UNDERLINED);
+    }
     // Reserved first: the age. Then who, elided to what the age leaves. The
     // bar and the short id are decoration and only use space left over.
     let elapsed = ctx.now_unix_ms.saturating_sub(card.created_at_ms);
