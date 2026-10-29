@@ -48,25 +48,11 @@ impl ServiceProcess {
         if !self.owned {
             return Ok(ServicePhase::Exited);
         }
-        let mut info: libc::siginfo_t = unsafe { std::mem::zeroed() };
-        let result = unsafe {
-            libc::waitid(
-                libc::P_PID,
-                self.pid(),
-                &mut info,
-                libc::WEXITED | libc::WNOHANG | libc::WNOWAIT,
-            )
-        };
-        if result != 0 {
-            let error = io::Error::last_os_error();
-            if error.raw_os_error() == Some(libc::ECHILD) {
-                // An external reaper released the identity. Never signal it.
-                self.owned = false;
-                return Ok(ServicePhase::Exited);
-            }
-            return Err(error);
+        let exited = self.leader_exited()?;
+        if !self.owned {
+            return Ok(ServicePhase::Exited);
         }
-        if unsafe { info.si_pid() } == 0 {
+        if !exited {
             return Ok(ServicePhase::Running);
         }
         let has_members = super::service_group_has_members(self.pid()).unwrap_or_else(|error| {
@@ -82,8 +68,41 @@ impl ServiceProcess {
         self.child.wait()?;
         Ok(ServicePhase::Exited)
     }
+    // Both polling and teardown require exclusive access to this owner. Every
+    // signal revalidates the unreaped child rather than trusting an older poll.
+    fn leader_exited(&mut self) -> io::Result<bool> {
+        let result = retry_interrupted(|| {
+            let mut info: libc::siginfo_t = unsafe { std::mem::zeroed() };
+            if unsafe {
+                libc::waitid(
+                    libc::P_PID,
+                    self.pid(),
+                    &mut info,
+                    libc::WEXITED | libc::WNOHANG | libc::WNOWAIT,
+                )
+            } != 0
+            {
+                return Err(io::Error::last_os_error());
+            }
+            Ok(unsafe { info.si_pid() } != 0)
+        });
+        match result {
+            Err(error) if error.raw_os_error() == Some(libc::ECHILD) => {
+                self.owned = false;
+                Ok(true)
+            }
+            result => result,
+        }
+    }
     pub(crate) fn terminate(&mut self) {
         if self.owned {
+            if let Err(error) = self.leader_exited() {
+                tracing::warn!(%error, pid = self.pid(), "cannot verify service ownership; refusing group signal");
+                return;
+            }
+            if !self.owned {
+                return;
+            }
             #[cfg(test)]
             {
                 self.signals += 1;
@@ -99,6 +118,15 @@ impl ServiceProcess {
 impl Drop for ServiceProcess {
     fn drop(&mut self) {
         self.terminate();
+    }
+}
+
+fn retry_interrupted<T>(mut operation: impl FnMut() -> io::Result<T>) -> io::Result<T> {
+    loop {
+        match operation() {
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+            result => return result,
+        }
     }
 }
 
@@ -175,5 +203,42 @@ mod tests {
         process.terminate();
         assert!(!process.owned);
         assert_eq!(process.signals, 0);
+    }
+    #[test]
+    fn external_reap_then_direct_termination_never_signals() {
+        let mut command = crate::platform::detached_custom_command_process("true");
+        crate::platform::configure_status_command(&mut command);
+        let child = command.spawn().unwrap();
+        let mut process = ServiceProcess {
+            child,
+            owned: true,
+            signals: 0,
+        };
+        process.child.wait().unwrap();
+        // No intervening poll: terminate must independently detect ECHILD.
+        process.terminate();
+        assert!(!process.owned);
+        assert_eq!(process.signals, 0);
+    }
+    #[test]
+    fn interrupted_wait_retries_and_other_errors_propagate() {
+        let mut attempts = 0;
+        let value = retry_interrupted(|| {
+            attempts += 1;
+            if attempts < 3 {
+                Err(io::Error::from_raw_os_error(libc::EINTR))
+            } else {
+                Ok(42)
+            }
+        })
+        .unwrap();
+        assert_eq!(value, 42);
+        assert_eq!(attempts, 3);
+        assert_eq!(
+            retry_interrupted::<()>(|| Err(io::Error::from_raw_os_error(libc::EINVAL)))
+                .unwrap_err()
+                .raw_os_error(),
+            Some(libc::EINVAL)
+        );
     }
 }

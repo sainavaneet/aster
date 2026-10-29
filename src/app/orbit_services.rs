@@ -217,68 +217,101 @@ async fn run(
     params: OrbitServiceStartParams,
     timeout: Duration,
     state: Arc<Mutex<State>>,
-    mut cancel: watch::Receiver<bool>,
+    cancel: watch::Receiver<bool>,
+) -> Result<(), String> {
+    run_with_poll(
+        cwd,
+        params,
+        timeout,
+        state,
+        cancel,
+        crate::platform::ServiceProcess::poll,
+    )
+    .await
+}
+
+async fn run_with_poll(
+    cwd: PathBuf,
+    params: OrbitServiceStartParams,
+    timeout: Duration,
+    state: Arc<Mutex<State>>,
+    cancel: watch::Receiver<bool>,
+    mut poll: impl FnMut(
+            &mut crate::platform::ServiceProcess,
+        ) -> std::io::Result<crate::platform::ServicePhase>
+        + Send
+        + 'static,
 ) -> Result<(), String> {
     if *cancel.borrow() {
         lock(&state).status = "stopped";
         return Ok(());
     }
-    // Process creation and filesystem resolution are kept off the application event loop.
+    let (started, output) = oneshot::channel();
     let command = params.command;
-    let (mut process, stdout, stderr) = tokio::task::spawn_blocking(move || {
-        let mut process = crate::platform::detached_custom_command_process(&command);
-        process
+    let worker_state = state.clone();
+    // Ownership never crosses into an async task. Every success, failure,
+    // panic, or dropped output receiver destroys the process on this worker.
+    let worker = tokio::task::spawn_blocking(move || {
+        let mut command_process = crate::platform::detached_custom_command_process(&command);
+        command_process
             .current_dir(cwd)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
-        crate::platform::configure_status_command(&mut process);
-        crate::platform::ServiceProcess::spawn(process)
-    })
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|e| e.to_string())?;
-    {
-        let mut s = lock(&state);
-        s.pid = Some(process.pid());
-        s.status = "running";
-    }
+        crate::platform::configure_status_command(&mut command_process);
+        let (mut process, stdout, stderr) =
+            crate::platform::ServiceProcess::spawn(command_process).map_err(|e| e.to_string())?;
+        {
+            let mut s = lock(&worker_state);
+            s.pid = Some(process.pid());
+            s.status = "running";
+        }
+        started
+            .send((stdout, stderr))
+            .map_err(|_| "service output receiver closed".to_owned())?;
+        loop {
+            if *cancel.borrow() || cancel.has_changed().is_err() {
+                process.terminate();
+                return Ok("stopped");
+            }
+            match poll(&mut process).map_err(|e| e.to_string())? {
+                crate::platform::ServicePhase::Running => {}
+                crate::platform::ServicePhase::LauncherExited => {
+                    lock(&worker_state).status = "launcher_exited"
+                }
+                crate::platform::ServicePhase::Exited => return Ok("exited"),
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        }
+    });
+    let (stdout, stderr) = match output.await {
+        Ok(output) => output,
+        Err(_) => return worker.await.map_err(|e| e.to_string())?.map(|_| ()),
+    };
     let mut readers = tokio::task::JoinSet::new();
     readers.spawn(capture(stdout, state.clone(), params.ready_log.clone()));
     readers.spawn(capture(stderr, state.clone(), params.ready_log));
     let readiness = readiness(params.ready_url, state.clone(), timeout);
     tokio::pin!(readiness);
     let mut checked = false;
-    let status = loop {
-        tokio::select! {
-            _ = cancel.changed() => break "stopped",
-            _ = tokio::time::sleep(Duration::from_millis(100)) => {
-                let (returned, phase) = tokio::task::spawn_blocking(move || {
-                    let phase = process.poll();
-                    (process, phase)
-                }).await.map_err(|e| e.to_string())?;
-                process = returned;
-                match phase.map_err(|e| e.to_string())? {
-                    crate::platform::ServicePhase::Running => {},
-                    crate::platform::ServicePhase::LauncherExited => lock(&state).status = "launcher_exited",
-                    crate::platform::ServicePhase::Exited => break "exited",
-                }
-            },
-            _ = &mut readiness, if !checked => checked = true,
+    let result = {
+        tokio::pin!(worker);
+        loop {
+            tokio::select! {
+                result = &mut worker => break result.map_err(|e| e.to_string()).and_then(|result| result),
+                _ = &mut readiness, if !checked => checked = true,
+            }
         }
     };
-    tokio::task::spawn_blocking(move || process.terminate())
-        .await
-        .map_err(|e| e.to_string())?;
     let _ = tokio::time::timeout(Duration::from_secs(1), async {
         while readers.join_next().await.is_some() {}
     })
     .await;
     readers.abort_all();
     let mut s = lock(&state);
-    s.status = status;
     s.pid = None;
-    Ok(())
+    s.status = result.as_ref().copied().unwrap_or("failed");
+    result.map(|_| ())
 }
 
 #[cfg(test)]

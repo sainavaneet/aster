@@ -212,3 +212,39 @@ async fn empty_service_groups_exit_and_release_ownership() {
         assert_eq!(manager.list(), json!([]));
     }
 }
+
+#[cfg(unix)]
+#[tokio::test]
+async fn poll_failure_cleans_up_on_the_blocking_supervisor() {
+    use std::sync::atomic::{AtomicU32, Ordering};
+    let state = Arc::new(Mutex::new(State::default()));
+    let pid = Arc::new(AtomicU32::new(0));
+    let recorded_pid = pid.clone();
+    let async_thread = std::thread::current().id();
+    let (_sender, receiver) = watch::channel(false);
+    let result = run_with_poll(
+        std::env::temp_dir(),
+        params("sleep 60"),
+        Duration::from_secs(2),
+        state.clone(),
+        receiver,
+        move |process| {
+            assert_ne!(std::thread::current().id(), async_thread);
+            recorded_pid.store(process.pid(), Ordering::SeqCst);
+            Err(std::io::Error::other("injected poll failure"))
+        },
+    )
+    .await;
+    assert_eq!(result.unwrap_err(), "injected poll failure");
+    assert_eq!(lock(&state).status, "failed");
+    assert!(lock(&state).pid.is_none());
+    // The worker has already killed/reaped its child before delivering error.
+    let pid = pid.load(Ordering::SeqCst);
+    assert_ne!(pid, 0);
+    let probe = tokio::process::Command::new("kill")
+        .args(["-0", &pid.to_string()])
+        .output()
+        .await
+        .unwrap();
+    assert!(!probe.status.success());
+}
