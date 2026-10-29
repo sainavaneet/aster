@@ -61,6 +61,9 @@ impl ServiceManager {
         if !(1..=86_400_000).contains(&timeout) {
             return Err("timeout_ms must be between 1 and 86400000".into());
         }
+        if !crate::platform::status_commands_supported() {
+            return Err("service groups are unsupported on this platform".into());
+        }
         let runtime = tokio::runtime::Handle::try_current()
             .map_err(|_| "services require the server runtime")?;
         if self.services.len() >= 32 && !self.services.contains_key(&params.name) {
@@ -222,7 +225,7 @@ async fn run(
     }
     // Process creation and filesystem resolution are kept off the application event loop.
     let command = params.command;
-    let (mut child, mut guard) = tokio::task::spawn_blocking(move || {
+    let (mut process, stdout, stderr) = tokio::task::spawn_blocking(move || {
         let mut process = crate::platform::detached_custom_command_process(&command);
         process
             .current_dir(cwd)
@@ -230,53 +233,51 @@ async fn run(
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
         crate::platform::configure_status_command(&mut process);
-        let mut process = tokio::process::Command::from(process);
-        process.kill_on_drop(true);
-        let child = process.spawn()?;
-        let guard = crate::platform::StatusCommandGuard::new(&child)?;
-        Ok::<_, std::io::Error>((child, guard))
+        crate::platform::ServiceProcess::spawn(process)
     })
     .await
     .map_err(|e| e.to_string())?
     .map_err(|e| e.to_string())?;
     {
         let mut s = lock(&state);
-        s.pid = child.id();
+        s.pid = Some(process.pid());
         s.status = "running";
     }
     let mut readers = tokio::task::JoinSet::new();
-    if let Some(stdout) = child.stdout.take() {
-        readers.spawn(capture(stdout, state.clone(), params.ready_log.clone()));
-    }
-    if let Some(stderr) = child.stderr.take() {
-        readers.spawn(capture(stderr, state.clone(), params.ready_log));
-    }
+    readers.spawn(capture(stdout, state.clone(), params.ready_log.clone()));
+    readers.spawn(capture(stderr, state.clone(), params.ready_log));
     let readiness = readiness(params.ready_url, state.clone(), timeout);
     tokio::pin!(readiness);
     let mut checked = false;
-    let mut launcher_exited = false;
-    loop {
+    let status = loop {
         tokio::select! {
-            _ = cancel.changed() => break,
-            result = child.wait(), if !launcher_exited => {
-                result.map_err(|e| e.to_string())?;
-                launcher_exited = true;
-                // A launcher may background its server and exit. Keep owning its
-                // process group and draining output until stop/shutdown, even
-                // when descendants close their inherited output pipes.
-                lock(&state).status = "launcher_exited";
+            _ = cancel.changed() => break "stopped",
+            _ = tokio::time::sleep(Duration::from_millis(100)) => {
+                let (returned, phase) = tokio::task::spawn_blocking(move || {
+                    let phase = process.poll();
+                    (process, phase)
+                }).await.map_err(|e| e.to_string())?;
+                process = returned;
+                match phase.map_err(|e| e.to_string())? {
+                    crate::platform::ServicePhase::Running => {},
+                    crate::platform::ServicePhase::LauncherExited => lock(&state).status = "launcher_exited",
+                    crate::platform::ServicePhase::Exited => break "exited",
+                }
             },
             _ = &mut readiness, if !checked => checked = true,
         }
-    }
-    guard.terminate();
-    let _ = child.wait().await;
+    };
+    tokio::task::spawn_blocking(move || process.terminate())
+        .await
+        .map_err(|e| e.to_string())?;
     let _ = tokio::time::timeout(Duration::from_secs(1), async {
         while readers.join_next().await.is_some() {}
     })
     .await;
     readers.abort_all();
-    lock(&state).status = "stopped";
+    let mut s = lock(&state);
+    s.status = status;
+    s.pid = None;
     Ok(())
 }
 

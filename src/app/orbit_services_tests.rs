@@ -195,3 +195,20 @@ async fn heavy_output_retains_exact_tail_across_ring_wraps() {
         .copied()
         .eq(bytes[bytes.len() - MAX_OUTPUT..].iter().copied()));
 }
+
+#[cfg(unix)]
+#[tokio::test]
+async fn empty_service_groups_exit_and_release_ownership() {
+    for command in ["true", "sleep 0.3 &"] {
+        let mut manager = ServiceManager::default();
+        let mut p = params(command);
+        p.ready_log = None;
+        manager.start(std::env::temp_dir(), p).unwrap();
+        let exited = until(&manager, "status", "exited").await;
+        assert!(exited["pid"].is_null(), "no retained group identity");
+        manager.stop("web").unwrap();
+        assert_eq!(manager.list()[0]["status"], "exited");
+        manager.shutdown().await;
+        assert_eq!(manager.list(), json!([]));
+    }
+}
