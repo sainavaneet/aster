@@ -260,6 +260,9 @@ pub(crate) struct Task {
     pub(super) created_at: u64,
     #[serde(default)]
     pub(super) updated_at: u64,
+    /// First line of the assignment, redacted and shortened; for display only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) title: Option<String>,
     /// Lead delivery attempts: prompts queued to the lead PTY plus refusals that
     /// are not a wait for the lead to host its agent (`agent_not_ready`/`_found`).
     #[serde(default)]
@@ -354,6 +357,7 @@ impl Task {
             error: None,
             created_at: now_ms,
             updated_at: now_ms,
+            title: None,
             attempts: 0,
             recoveries: 0,
             redelivered: false,

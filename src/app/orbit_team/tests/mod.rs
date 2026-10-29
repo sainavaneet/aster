@@ -9,8 +9,10 @@ use crate::workspace::Workspace;
 
 use super::roster::{self, RoleSpec};
 
+mod pinned;
 mod roster_tests;
 mod routing;
+mod shell_view;
 mod startup;
 mod supervision;
 

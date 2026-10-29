@@ -25,6 +25,8 @@ pub(crate) struct ClientShellConfig {
     pub(super) spaces: SpacesSidebarConfig,
     pub(super) agents: crate::config::AgentsSidebarConfig,
     pub(super) agent_panel_sort: crate::config::AgentPanelSortConfig,
+    pub(super) sidebar_team: bool,
+    pub(super) sidebar_work: bool,
     pub(super) status_indicators: crate::config::StatusIndicatorStyle,
     pub(super) animations: crate::config::UiAnimationsConfig,
     pub(super) sound_enabled: bool,
@@ -96,6 +98,11 @@ pub(super) struct ShellHitMap {
     pub(super) popup: Option<PaneHit>,
     pub(super) pane_splits: Vec<PaneSplitHit>,
     pub(super) agents: Vec<(Rect, String)>,
+    /// Team tree group headers: the group index in the active `TeamSidebar`.
+    pub(super) team_groups: Vec<(Rect, usize)>,
+    /// Team tree rows that focus a pane: the line index in the active
+    /// `TeamSidebar`'s cached rows, which own the pane id.
+    pub(super) team_agents: Vec<(Rect, usize)>,
     pub(super) endpoint_agents: Vec<(Rect, ClientEndpointId, String)>,
     pub(super) agent_body: Rect,
     pub(super) agent_scrollbar: Rect,
@@ -893,6 +900,15 @@ pub(crate) struct ClientShellState {
     pub(super) remote_collapsed_groups: HashMap<ClientEndpointId, HashSet<String>>,
     pub(super) workspace_scroll: usize,
     pub(super) agent_scroll: usize,
+    /// Precomputed Orbit team rows, rebuilt when the snapshot's `orbit` changes.
+    pub(super) team_sidebar: Option<super::team_sidebar::TeamSidebar>,
+    /// Collapsed team groups (`role:<name>`, `scratch`, `other`); never persisted or sent.
+    pub(super) collapsed_team_groups: HashSet<String>,
+    pub(super) wall_clock: super::work_board::WallClock,
+    /// The active endpoint's Orbit clock; ages fall back to `wall_clock` without it.
+    pub(super) orbit_clock: Option<super::work_board::WallClock>,
+    /// Bumped whenever `snapshot` is replaced; keys the team row cache.
+    pub(super) snapshot_serial: u64,
     pub(super) pending_agent_reveal: Option<(ClientEndpointId, String)>,
     pub(super) tab_scroll: usize,
     pub(super) mobile_switcher_scroll: usize,
@@ -1068,6 +1084,11 @@ impl ClientShellState {
             remote_collapsed_groups,
             workspace_scroll: 0,
             agent_scroll: 0,
+            team_sidebar: None,
+            collapsed_team_groups: HashSet::new(),
+            wall_clock: super::work_board::WallClock::now(),
+            orbit_clock: None,
+            snapshot_serial: 0,
             pending_agent_reveal: None,
             tab_scroll: 0,
             mobile_switcher_scroll: 0,
@@ -1595,7 +1616,27 @@ impl ClientShellState {
                 Some(_) => {}
             }
         }
+        let same_orbit = match (
+            self.snapshot
+                .as_deref()
+                .map(|current| current.orbit.as_ref()),
+            snapshot.orbit.as_ref(),
+        ) {
+            (Some(Some(current)), Some(next)) => current.same_facts(next),
+            (Some(None), None) => true,
+            _ => false,
+        };
+        if !same_orbit {
+            self.team_sidebar = snapshot
+                .orbit
+                .as_ref()
+                .map(super::team_sidebar::TeamSidebar::build);
+            // Hits index the replaced model's rows.
+            self.hits.team_agents.clear();
+            self.hits.team_groups.clear();
+        }
         self.snapshot = Some(snapshot);
+        self.snapshot_serial = self.snapshot_serial.wrapping_add(1);
         self.reconcile_pending_workspace_highlight();
         let pending_surface = self.pending_pane_surface.take();
         if let Some(surface) = pending_surface {

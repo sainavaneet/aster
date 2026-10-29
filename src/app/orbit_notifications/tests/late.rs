@@ -52,6 +52,7 @@ fn filler(index: usize, delivery: Delivery, origin: Option<ReportOrigin>) -> Tas
         error: None,
         created_at: 1,
         updated_at: 1,
+        title: None,
         attempts: 0,
         recoveries: 0,
         redelivered: false,

@@ -16,6 +16,9 @@ pub(crate) struct ClientShellEndpoint {
     pub(crate) snapshot: Option<Box<ClientShellSnapshot>>,
     /// Connection generation that produced `snapshot`. `None` is reserved for local tests.
     pub(crate) snapshot_generation: Option<u64>,
+    /// The endpoint's Orbit clock, anchored when `snapshot` arrived; `None` when
+    /// the server sent no `server_now_ms`.
+    pub(super) orbit_clock: Option<super::work_board::WallClock>,
     pub(crate) agent_recency: HashMap<String, u64>,
     pub(super) agent_presentation: super::endpoint_agent_state::EndpointAgentPresentation,
     pub(crate) agent_view_projection: Option<ClientEndpointAgentViewProjection>,
@@ -75,6 +78,7 @@ impl ClientShellState {
                 ),
                 snapshot: previous.and_then(|endpoint| endpoint.snapshot.clone()),
                 snapshot_generation: previous.and_then(|endpoint| endpoint.snapshot_generation),
+                orbit_clock: previous.and_then(|endpoint| endpoint.orbit_clock),
                 agent_recency: previous
                     .map(|endpoint| endpoint.agent_recency.clone())
                     .unwrap_or_default(),
@@ -109,6 +113,9 @@ impl ClientShellState {
         self.active_endpoint_id = ClientEndpointId::Local;
         self.mode = ClientShellMode::Terminal;
         self.snapshot = None;
+        self.team_sidebar = None;
+        self.orbit_clock = None;
+        self.hits.team_agents.clear();
         self.graphics.set_scope("local:unavailable");
         self.reconcile_input_source();
     }
@@ -629,6 +636,13 @@ impl ClientShellState {
         let endpoint = &mut self.endpoints[index];
         endpoint.agent_recency = recency;
         endpoint.snapshot_generation = generation;
+        endpoint.orbit_clock = snapshot
+            .orbit
+            .as_ref()
+            .and_then(|orbit| orbit.server_now_ms)
+            .map(|server_ms| {
+                super::work_board::WallClock::at(std::time::Instant::now(), server_ms)
+            });
         endpoint.snapshot = Some(snapshot);
         let pending_matches =
             endpoint
@@ -680,6 +694,7 @@ impl ClientShellState {
         };
         if changed {
             self.snapshot = self.endpoints[index].snapshot.clone();
+            self.snapshot_serial = self.snapshot_serial.wrapping_add(1);
         }
         changed
     }
@@ -719,6 +734,11 @@ impl ClientShellState {
             return;
         };
         if endpoint_id == &self.active_endpoint_id {
+            self.orbit_clock = self
+                .endpoints
+                .iter()
+                .find(|endpoint| &endpoint.endpoint_id == endpoint_id)
+                .and_then(|endpoint| endpoint.orbit_clock);
             self.apply_active_snapshot(snapshot, generation);
         }
     }
@@ -744,6 +764,7 @@ pub(super) fn local_endpoint() -> ClientShellEndpoint {
         status: ClientEndpointStatus::Online,
         snapshot: None,
         snapshot_generation: None,
+        orbit_clock: None,
         agent_recency: HashMap::new(),
         agent_presentation: Default::default(),
         agent_view_projection: None,

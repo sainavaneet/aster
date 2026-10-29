@@ -355,6 +355,14 @@ model = "fable"
 # "workspaces" is accepted as an alias for "spaces".
 # agent_panel_sort = "spaces"
 
+# Show the Orbit team (lead, roles, scratch workers) as a collapsible tree in the agent
+# sidebar when the session has a team. false keeps the flat agent list.
+# sidebar_team = true
+
+# Show the work board below the team tree: active Orbit assignments (blocked first), then
+# recently resolved ones for ten minutes. Needs sidebar_team. false hides the board.
+# sidebar_work = true
+
 # Agent status indicators: "dots" preserves the compact color marks; "symbols" uses
 # distinct static glyphs for blocked, working, done, idle, and unknown states.
 # status_indicators = "dots"

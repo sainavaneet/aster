@@ -62,6 +62,7 @@ pub(super) fn render_agent_panel(
     if !render_agent_panel_header(
         buffer,
         area,
+        AGENT_PANEL_TITLE,
         snapshot.agent_view_label.as_deref(),
         config,
         hits,
@@ -81,6 +82,7 @@ pub(super) fn render_agent_panel(
         config,
         agent_scroll,
         hits,
+        config.agents.row_gap,
         |row| row.rows.len(),
         |buffer, rect, row, hits| {
             let phase = animation.agent_row(endpoint_id, &row.pane_id, row.status);
@@ -90,9 +92,12 @@ pub(super) fn render_agent_panel(
     );
 }
 
+pub(super) const AGENT_PANEL_TITLE: &str = " agents";
+
 pub(super) fn render_agent_panel_header(
     buffer: &mut Buffer,
     area: Rect,
+    title: &str,
     agent_view_label: Option<&str>,
     config: &ClientShellConfig,
     hits: &mut ShellHitMap,
@@ -116,7 +121,7 @@ pub(super) fn render_agent_panel_header(
         area.x,
         area.y + 1,
         area.width,
-        " agents",
+        title,
         Style::default()
             .fg(config.palette.overlay0)
             .add_modifier(Modifier::BOLD),
@@ -162,9 +167,67 @@ pub(super) fn render_agent_list<T>(
     config: &ClientShellConfig,
     agent_scroll: &mut usize,
     hits: &mut ShellHitMap,
+    row_gap: u16,
     row_lines: impl Fn(&T) -> usize,
     mut render_row: impl FnMut(&mut Buffer, Rect, &T, &mut ShellHitMap),
 ) {
+    let row_heights = rows
+        .iter()
+        .map(|row| row_height(row_lines(row)))
+        .collect::<Vec<_>>();
+    let gaps = list_gaps(rows.len(), row_gap);
+    render_measured_agent_list(
+        buffer,
+        area,
+        AgentListRows {
+            rows,
+            heights: &row_heights,
+            gaps: &gaps,
+        },
+        empty_message,
+        config,
+        agent_scroll,
+        hits,
+        |buffer, rect, _, row, hits| render_row(buffer, rect, row, hits),
+    );
+}
+
+/// A list row's height in cells from its line count.
+pub(super) fn row_height(lines: usize) -> u16 {
+    lines.max(1).min(u16::MAX as usize) as u16
+}
+
+/// `row_gap` after every row but the last.
+pub(super) fn list_gaps(rows: usize, row_gap: u16) -> Vec<u16> {
+    (0..rows)
+        .map(|index| if index + 1 < rows { row_gap } else { 0 })
+        .collect()
+}
+
+/// Rows with their heights and the gap after each, all the same length.
+pub(super) struct AgentListRows<'a, T> {
+    pub(super) rows: &'a [T],
+    pub(super) heights: &'a [u16],
+    pub(super) gaps: &'a [u16],
+}
+
+/// `render_agent_list` for rows measured ahead of time, so a caller that
+/// caches its rows allocates nothing here. `render_row` gets the row index.
+pub(super) fn render_measured_agent_list<T>(
+    buffer: &mut Buffer,
+    area: Rect,
+    list: AgentListRows<'_, T>,
+    empty_message: Option<&str>,
+    config: &ClientShellConfig,
+    agent_scroll: &mut usize,
+    hits: &mut ShellHitMap,
+    mut render_row: impl FnMut(&mut Buffer, Rect, usize, &T, &mut ShellHitMap),
+) {
+    let AgentListRows {
+        rows,
+        heights: row_heights,
+        gaps,
+    } = list;
     let body = Rect::new(
         area.x,
         area.y.saturating_add(3),
@@ -189,23 +252,7 @@ pub(super) fn render_agent_list<T>(
         return;
     }
 
-    let row_heights = rows
-        .iter()
-        .map(|row| row_lines(row).max(1).min(u16::MAX as usize) as u16)
-        .collect::<Vec<_>>();
-    let gaps = rows
-        .iter()
-        .enumerate()
-        .map(|(index, _)| {
-            if index + 1 < rows.len() {
-                config.agents.row_gap
-            } else {
-                0
-            }
-        })
-        .collect::<Vec<_>>();
-    let metrics =
-        super::scroll::list_scroll_metrics(&row_heights, &gaps, body.height, *agent_scroll);
+    let metrics = super::scroll::list_scroll_metrics(row_heights, gaps, body.height, *agent_scroll);
     hits.agent_max_scroll = metrics.max_offset_from_bottom;
     hits.agent_scroll_metrics = Some(metrics);
     *agent_scroll = metrics
@@ -220,14 +267,8 @@ pub(super) fn render_agent_list<T>(
             break;
         }
         let rect = Rect::new(body.x, y, content_width, height);
-        render_row(buffer, rect, row, hits);
-        y = y
-            .saturating_add(height)
-            .saturating_add(if index + 1 < rows.len() {
-                config.agents.row_gap
-            } else {
-                0
-            });
+        render_row(buffer, rect, index, row, hits);
+        y = y.saturating_add(height).saturating_add(gaps[index]);
     }
 
     if show_scrollbar {

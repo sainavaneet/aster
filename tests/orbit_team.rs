@@ -191,3 +191,42 @@ fn restart_restores_the_role_tab_and_resumed_members_report_to_the_lead() {
     let delivered = orbit.wait_lead_prompt(&marker(&task_id));
     assert!(delivered.contains("reviewed after restart"), "{delivered}");
 }
+
+const PINNED_ACTOR: &str = "\n[[polaris.team]]\nname = \"actor\"\narea = \"Edits\"\nprompt = \"Edit carefully.\"\n\n[[polaris.team.members]]\nname = \"ac\"\nkind = \"claude\"\nmodel = \"ac\"\n";
+
+#[test]
+fn a_pinned_config_role_joins_a_session_roster_first_and_cannot_be_removed() {
+    // A session whose roster already holds a role it defined itself.
+    let (mut orbit, rc, _) = staffed("team-pinned");
+    orbit.stop();
+    orbit.append_config(PINNED_ACTOR);
+
+    orbit.start();
+    let ac = orbit.wait_worker("ac");
+    assert_eq!(orbit.wait_worker("rc").terminal_id, rc.terminal_id);
+    assert_eq!(
+        orbit.polaris_tabs(),
+        ["Polaris", "Actor", "Reviewer", "Orbit"]
+    );
+    let actor = orbit.team_role("actor");
+    assert_eq!(actor["pinned"], true, "{actor}");
+    assert_eq!(orbit.team_role("reviewer")["pinned"], false);
+
+    orbit.stop();
+    orbit.start();
+    assert_eq!(orbit.wait_worker("ac").terminal_id, ac.terminal_id);
+    orbit.wait_worker("rc");
+    assert_eq!(
+        orbit.polaris_tabs(),
+        ["Polaris", "Actor", "Reviewer", "Orbit"]
+    );
+
+    let refused = orbit.orbit_cli("team-remove", &json!({"name": "actor", "force": true}));
+    assert!(!refused.success, "{}", refused.raw);
+    assert_eq!(
+        refused.body["error"]["code"], "orbit_role_pinned",
+        "{}",
+        refused.raw
+    );
+    assert_eq!(orbit.team_role("actor")["pinned"], true);
+}

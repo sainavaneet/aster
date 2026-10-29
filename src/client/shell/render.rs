@@ -239,6 +239,9 @@ pub(super) struct ShellRenderState<'a> {
     pub(super) remote_collapsed_groups: &'a HashMap<ClientEndpointId, HashSet<String>>,
     pub(super) workspace_scroll: &'a mut usize,
     pub(super) agent_scroll: &'a mut usize,
+    pub(super) team_sidebar: Option<&'a super::team_sidebar::TeamSidebar>,
+    /// Wall-clock time of this frame in Unix milliseconds, for work board ages.
+    pub(super) frame_unix_ms: u64,
     pub(super) tab_scroll: &'a mut usize,
     pub(super) reveal_focused_workspace: &'a mut bool,
     pub(super) reveal_focused_tab: &'a mut bool,
@@ -299,6 +302,7 @@ pub(super) fn render_shell(
                 state
                     .selected_workspace_id
                     .map(|target| target.workspace_id.as_str()),
+                state.team_sidebar,
                 &mut hits,
             );
         } else {
@@ -336,6 +340,8 @@ pub(super) fn render_shell(
         hits.machines.clear();
         hits.workspaces.clear();
         hits.agents.clear();
+        hits.team_groups.clear();
+        hits.team_agents.clear();
         hits.endpoint_agents.clear();
         hits.tab_scroll_left = Rect::default();
         hits.tab_scroll_right = Rect::default();

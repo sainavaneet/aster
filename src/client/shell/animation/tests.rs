@@ -83,6 +83,7 @@ fn test_snapshot(status: AgentStatus, seq: u64) -> ClientShellSnapshot {
             focused: true,
         }],
         commands: Vec::new(),
+        orbit: None,
     }
 }
 

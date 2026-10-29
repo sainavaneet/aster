@@ -311,6 +311,10 @@ The active palette is applied in this order: built-in theme, `[theme.custom]`, t
 
 The sidebar is the main Aster dashboard. Search `ui.` in the [Config reference](/docs/config-reference/) for sizing, collapsed mode, Agent panel ordering, mouse behavior, pane borders, and other presentation settings.
 
+When the session has an Orbit team, the agent sidebar shows it as a tree: the Polaris lead, one collapsible group per role with its members (kind and state beside each name), then a `scratch` group for workers that belong to no role. Agents outside the team follow in an `other` group, still ordered by `ui.agent_panel_sort`; role members always keep roster order. Click a member to focus its pane, or a group header to collapse it. A member whose agent is not running shows its supervision phase (for example `starting` or `gave up`) and is not clickable while it has no pane. Collapse state is local to the terminal and is not saved. Set `ui.sidebar_team = false` to keep the flat agent list.
+
+Below the tree, a work board lists the team's assignments under a `work  N active · M blocked` header. Active assignments come first with blocked ones on top and pulsing; each shows the last 8 characters of the task id, the role (or the worker when there is none), the state, how long ago it was assigned, and the assignment title, with `⚑` marking one that waits on a permission prompt. Up to five recently resolved assignments follow with their outcome and summary, and disappear ten minutes after they finish. Click an active assignment to focus its worker's pane; click the header to collapse the board. Ages are measured with the terminal's clock against the endpoint's ledger times, and refresh when the sidebar repaints. Set `ui.sidebar_work = false` to hide the board; it needs `ui.sidebar_team`.
+
 `ui.pane_borders` accepts `"auto"` (the default, borders only for split panes), `"always"` (also frame a single pane), or `"off"`. A single-pane frame requires `ui.pane_outer_borders = true`, because all its edges are outer edges. Existing boolean values remain valid: `true` means `"auto"` and `false` means `"off"`.
 
 Set `tab_bar_position = "bottom"` under `[ui]` to place the desktop tab row below the terminal panes. Prefix, Navigate, Copy, and Resize mode bars temporarily replace the bottom tab row while active. The default is `"top"`.
@@ -708,8 +712,8 @@ Polaris manages the team with three tools, also available from a shell:
 | Tool | CLI | Purpose |
 | --- | --- | --- |
 | `orbit_team_define {name, area, prompt?, members}` | `aster orbit team-define` | Create or replace a role. The first definition creates its tab without moving your focus. |
-| `orbit_team_remove {name, stop_members?, force?}` | `aster orbit team-remove` | Retire a role. Refused while a member has an assignment awaiting its report, unless `force` cancels it. `stop_members` also closes the tab. |
-| `orbit_team_list` | `aster orbit team-list` | Roles, areas, tabs, and members with `pane_id`, `terminal_id`, `state`, `agent_status`, and `open_tasks`. |
+| `orbit_team_remove {name, stop_members?, force?}` | `aster orbit team-remove` | Retire a role. Refused for a pinned config role (`orbit_role_pinned`), and while a member has an assignment awaiting its report unless `force` cancels it. `stop_members` also closes the tab. |
+| `orbit_team_list` | `aster orbit team-list` | Roles, areas, tabs, `pinned`, `overridden`, and members with `pane_id`, `terminal_id`, `state`, `agent_status`, and `open_tasks`. |
 
 ```sh
 aster orbit team-define '{"name":"reviewer","area":"Code review","prompt":"Review strictly; never edit files.","members":[{"name":"reviewer-claude","kind":"claude","model":"opus"},{"name":"reviewer-codex","kind":"codex"}]}'
@@ -733,10 +737,29 @@ written back unchanged, a member whose kind this build cannot run is listed in
 launched or picked for a role assignment, and a member session this build cannot
 read is dropped so the member starts fresh. A roster that is not valid JSON, has
 another version, or breaks the role rules is left untouched and reported;
-team changes are refused until it is fixed. To start every new session with a
-team, declare roles in config. They seed the roster only when the session has
-none yet; afterwards the roster is the source of truth, and config reload does
-not change it.
+team changes are refused until it is fixed.
+
+Roles declared in config are **pinned**: the same team is present in every
+session, fresh or restored. At every session start and on
+`aster server reload-config`, each `[[polaris.team]]` role is merged into the
+session's roster: its area, prompt, and members (kind, model, permission mode)
+follow config, while each member keeps its recorded terminal, native session,
+and the role's tab. A member new in config is added and started; a member
+removed from config is released, so its agent keeps running in its pane without
+supervision. A pinned role's tab is created on first start (or within one
+supervisor pass after a reload), after the Polaris tab in config order, before
+roles the session defined itself and before the Orbit tab. Roles the session
+defined with `orbit_team_define` are never changed by config.
+
+Polaris cannot remove a pinned role: `orbit_team_remove` refuses it with
+`orbit_role_pinned`. To retire one, delete it from config and reload; it then
+stays in the session as an ordinary role (nothing disappears under you) and can
+be removed. `orbit_team_define` on a pinned role may add members and replace
+the prompt for the current session only: the role is then marked
+`overridden`, later reloads keep the session's prompt, and the area and config
+members still come from config. Define the role again with its config prompt to
+drop the override. `orbit_team_list` reports `pinned` and `overridden` for each
+role and `pinned` for each config member.
 
 ```toml
 [[polaris.team]]

@@ -2144,12 +2144,31 @@ impl ClientShellState {
                 if self.handle_endpoint_agent_click(point, outcome) {
                     return;
                 }
-                let agent_pane_id = self
+                let team_group = self
                     .hits
-                    .agents
+                    .team_groups
                     .iter()
                     .find(|(rect, _)| super::contains(*rect, point))
-                    .map(|(_, pane_id)| pane_id.clone());
+                    .map(|(_, group)| *group);
+                if let Some(group) = team_group {
+                    self.toggle_team_group(group);
+                    outcome.repaint = true;
+                    return;
+                }
+                let team_pane_id = self
+                    .hits
+                    .team_agents
+                    .iter()
+                    .find(|(rect, _)| super::contains(*rect, point))
+                    .and_then(|(_, line)| self.team_sidebar.as_ref()?.line_pane_id(*line))
+                    .map(str::to_owned);
+                let agent_pane_id = team_pane_id.or_else(|| {
+                    self.hits
+                        .agents
+                        .iter()
+                        .find(|(rect, _)| super::contains(*rect, point))
+                        .map(|(_, pane_id)| pane_id.clone())
+                });
                 if let Some(pane_id) = agent_pane_id {
                     self.push_endpoint_method(
                         crate::api::schema::Method::PaneFocus(crate::api::schema::PaneTarget {

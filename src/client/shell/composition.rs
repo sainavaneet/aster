@@ -22,6 +22,10 @@ fn restore_mode_bar(
 impl ClientShellState {
     fn compose_unavailable(&mut self, cols: u16, rows: u16) -> FrameData {
         let layout = self.layout(cols, rows);
+        let now = self
+            .last_composed_at
+            .unwrap_or_else(std::time::Instant::now);
+        self.refresh_team_rows(layout.sidebar.width, now);
         let mut buffer = Buffer::empty(Rect::new(0, 0, cols, rows));
         buffer.set_style(
             buffer.area,
@@ -57,6 +61,7 @@ impl ClientShellState {
         let now = self
             .last_composed_at
             .unwrap_or_else(std::time::Instant::now);
+        let frame_unix_ms = self.orbit_frame_unix_ms(now);
         let mut render_state = render::ShellRenderState {
             machine_diagnostics: &self.machine_diagnostics,
             endpoints: &self.endpoints,
@@ -71,6 +76,8 @@ impl ClientShellState {
             remote_collapsed_groups: &self.remote_collapsed_groups,
             workspace_scroll: &mut self.workspace_scroll,
             agent_scroll: &mut self.agent_scroll,
+            team_sidebar: self.team_sidebar.as_ref(),
+            frame_unix_ms,
             tab_scroll: &mut self.tab_scroll,
             reveal_focused_workspace: &mut self.reveal_focused_workspace,
             reveal_focused_tab: &mut self.reveal_focused_tab,
@@ -175,6 +182,9 @@ impl ClientShellState {
             self.reveal_mobile_workspace = true;
         }
         self.last_composed_size = Some((cols, rows));
+        // Before any borrow of the snapshot below: the frame only reads the rows.
+        let sidebar_width = self.layout(cols, rows).sidebar.width;
+        self.refresh_team_rows(sidebar_width, now);
         let valid_navigation_target = self.mode == ClientShellMode::Navigate
             && self
                 .navigate_workspace_id
@@ -202,6 +212,7 @@ impl ClientShellState {
             return None;
         }
         let layout = self.layout(cols, rows);
+        let frame_unix_ms = self.orbit_frame_unix_ms(now);
         if self.last_tab_bar_width != Some(layout.tab_bar.width) {
             self.last_tab_bar_width = Some(layout.tab_bar.width);
             self.reveal_focused_tab = true;
@@ -240,6 +251,8 @@ impl ClientShellState {
                 remote_collapsed_groups: &self.remote_collapsed_groups,
                 workspace_scroll: &mut self.workspace_scroll,
                 agent_scroll: &mut self.agent_scroll,
+                team_sidebar: self.team_sidebar.as_ref(),
+                frame_unix_ms,
                 tab_scroll: &mut self.tab_scroll,
                 reveal_focused_workspace: &mut self.reveal_focused_workspace,
                 reveal_focused_tab: &mut self.reveal_focused_tab,

@@ -1045,7 +1045,7 @@ impl App {
             self.set_orbit_worker_policy(&config.polaris.workers);
             self.configure_orbit_notifications(&config.polaris);
             self.configure_orbit_decisions(&config.polaris.decisions);
-            self.orbit_team.set_seed(&config.polaris.team);
+            self.reload_orbit_team_config(&config.polaris.team);
         }
 
         if !invalid_section("advanced") {

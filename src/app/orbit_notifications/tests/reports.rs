@@ -20,6 +20,7 @@ fn resolved_task(task_id: &str, delivery: Delivery) -> Task {
         error: None,
         created_at: 1,
         updated_at: 2,
+        title: None,
         attempts: 1,
         recoveries: 0,
         redelivered: false,

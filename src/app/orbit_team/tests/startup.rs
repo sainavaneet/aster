@@ -99,7 +99,7 @@ async fn startup_recreates_a_missing_role_tab_rebinds_and_notifies() {
 }
 
 #[tokio::test]
-async fn a_config_seed_creates_tabs_on_first_start_and_no_roster_means_no_change() {
+async fn config_roles_create_tabs_on_first_start_and_no_roster_means_no_change() {
     let mut config = crate::config::Config::default();
     config.polaris.team = toml::from_str::<crate::config::PolarisConfig>(
         "[[team]]\nname = \"actor\"\narea = \"Edits\"\n[[team.members]]\nname = \"ac\"\nkind = \"claude\"\n",

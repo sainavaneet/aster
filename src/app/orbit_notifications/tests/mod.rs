@@ -345,6 +345,7 @@ fn server_origin_marker_is_explicit_in_delivered_text() {
         error: None,
         created_at: 0,
         updated_at: 0,
+        title: None,
         attempts: 1,
         recoveries: 0,
         redelivered: false,

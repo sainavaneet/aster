@@ -22,6 +22,7 @@ fn queued_task(task_id: &str, lead_id: &str, summary: String) -> Task {
         error: None,
         created_at: 1,
         updated_at: 1,
+        title: None,
         attempts: 0,
         recoveries: 0,
         redelivered: false,

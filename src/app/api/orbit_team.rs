@@ -94,6 +94,7 @@ impl App {
                 "terminal_id": terminal_id,
                 "state": state,
                 "unsupported": !member.supported(),
+                "pinned": member.pinned,
                 "agent_status": agent.as_ref().map(|agent| agent.agent_status),
                 "open_tasks": open_tasks,
                 "resumable": member.session.is_some(),
@@ -106,6 +107,8 @@ impl App {
             "area": role.area,
             "tab_id": tab_id,
             "tab_missing": place.is_none(),
+            "pinned": role.pinned,
+            "overridden": role.overridden,
             "members": members,
         });
         if with_prompt {
@@ -126,11 +129,30 @@ impl App {
     fn orbit_team_define(&mut self, params: OrbitTeamDefineParams) -> Result<Value, Failure> {
         self.orbit_team_ready()?;
         let previous = self.orbit_team.roster.role(&params.name).cloned();
-        let role = roster::validate(
-            RoleSpec::from(params),
-            &self.orbit_worker_policy,
-            previous.as_ref(),
-        )?;
+        let role = match self.orbit_team.pinned_config(&params.name).cloned() {
+            // A pinned role keeps its config area and members; this session
+            // may add members and replace the prompt.
+            Some(config) => {
+                let prompt = params.prompt.clone().or_else(|| {
+                    previous
+                        .as_ref()
+                        .filter(|role| role.overridden)
+                        .map(|role| role.prompt.clone())
+                });
+                roster::pinned_role(
+                    &config,
+                    previous.as_ref(),
+                    RoleSpec::from(params).members,
+                    prompt,
+                    &self.orbit_worker_policy,
+                )?
+            }
+            None => roster::validate(
+                RoleSpec::from(params),
+                &self.orbit_worker_policy,
+                previous.as_ref(),
+            )?,
+        };
         let before = self.orbit_team.roster.clone();
         self.orbit_team.roster.upsert(role.clone())?;
         let index = self
@@ -185,6 +207,16 @@ impl App {
     ) -> Result<Value, Failure> {
         self.orbit_team_ready()?;
         let role = self.orbit_team_role(&params.name)?;
+        if role.pinned {
+            return Err((
+                "orbit_role_pinned",
+                format!(
+                    "Role {} is pinned by [[polaris.team]] in the user's Aster config ({}) and cannot be removed; remove it there and run aster server reload-config",
+                    role.name,
+                    crate::config::config_path().display()
+                ),
+            ));
+        }
         let terminals: Vec<String> = self
             .orbit_role_terminals(&role)
             .into_iter()

@@ -948,6 +948,113 @@ pub struct ClientShellSnapshot {
     pub panes: Vec<ClientShellPane>,
     pub agents: Vec<ClientShellAgent>,
     pub commands: Vec<ClientShellCommand>,
+    /// Orbit team projection; absent when the session has no Orbit lead.
+    #[serde(default)]
+    pub orbit: Option<OrbitShellView>,
+}
+
+/// Orbit lead, team, scratch workers, and assignments as one read-only
+/// projection of server-owned runtime facts. It carries no prompt bodies,
+/// report tokens, or role prompts. `state` fields are agent-state names
+/// (`idle`, `working`, `blocked`, `unknown`) or, for a member without a live
+/// agent, a supervision phase (`pending`, `starting`, `relaunching`,
+/// `exited`, `gave_up`, `unsupervised`, `unsupported`). Clients treat unknown
+/// strings as opaque.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellView {
+    pub lead: OrbitShellLead,
+    #[serde(default)]
+    pub roles: Vec<OrbitShellRole>,
+    /// Workers started in the Orbit tab that belong to no role.
+    #[serde(default)]
+    pub scratch: Vec<OrbitShellMember>,
+    #[serde(default)]
+    pub active_tasks: Vec<OrbitShellActiveTask>,
+    /// Newest resolved assignments, at most five.
+    #[serde(default)]
+    pub recent_tasks: Vec<OrbitShellRecentTask>,
+    /// The server's ledger clock, in Unix milliseconds, when the snapshot
+    /// carrying this view was projected. Clients measure task ages against it
+    /// so a skewed client clock does not skew them. Absent from older servers.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub server_now_ms: Option<u64>,
+}
+
+impl OrbitShellView {
+    /// Equal projected facts, ignoring the `server_now_ms` stamp, which changes
+    /// with every projection without changing anything shown.
+    pub fn same_facts(&self, other: &Self) -> bool {
+        let Self {
+            lead,
+            roles,
+            scratch,
+            active_tasks,
+            recent_tasks,
+            server_now_ms: _,
+        } = self;
+        *lead == other.lead
+            && *roles == other.roles
+            && *scratch == other.scratch
+            && *active_tasks == other.active_tasks
+            && *recent_tasks == other.recent_tasks
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellLead {
+    pub name: String,
+    pub terminal_id: String,
+    #[serde(default)]
+    pub pane_id: Option<String>,
+    pub state: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellRole {
+    pub name: String,
+    pub pinned: bool,
+    #[serde(default)]
+    pub members: Vec<OrbitShellMember>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellMember {
+    pub name: String,
+    pub kind: String,
+    #[serde(default)]
+    pub terminal_id: Option<String>,
+    #[serde(default)]
+    pub pane_id: Option<String>,
+    pub state: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellActiveTask {
+    pub task_id: String,
+    pub worker_terminal_id: String,
+    /// The role the worker acts for; absent for a scratch worker.
+    #[serde(default)]
+    pub role: Option<String>,
+    /// First line of the assignment, at most 48 characters.
+    pub title: String,
+    /// `assigning` until the assignment is submitted, then the worker's state.
+    pub state: String,
+    /// Ledger time in Unix milliseconds.
+    pub created_at_ms: u64,
+    pub blocked: bool,
+    /// Blocked on a permission prompt a decision can answer.
+    pub awaiting_approval: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OrbitShellRecentTask {
+    pub task_id: String,
+    /// The report outcome (`completed`, `failed`, `blocked`), or how Aster
+    /// resolved the assignment (`cancelled`, `worker_lost`, `timed_out`, ...).
+    pub outcome: String,
+    /// Report summary, at most 80 characters.
+    pub summary: String,
+    pub finished_at_ms: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1773,6 +1880,48 @@ pub fn check_client_version(client_version: u32) -> VersionCheck {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn orbit_view() -> OrbitShellView {
+        OrbitShellView {
+            lead: OrbitShellLead {
+                name: "polaris".into(),
+                terminal_id: "term_1".into(),
+                pane_id: None,
+                state: "idle".into(),
+            },
+            roles: Vec::new(),
+            scratch: Vec::new(),
+            active_tasks: Vec::new(),
+            recent_tasks: Vec::new(),
+            server_now_ms: None,
+        }
+    }
+
+    #[test]
+    fn orbit_server_clock_is_optional_and_additive() {
+        let view = orbit_view();
+        let encoded = serde_json::to_value(&view).unwrap();
+        assert!(encoded.get("server_now_ms").is_none(), "absent when unset");
+        let decoded: OrbitShellView = serde_json::from_value(encoded).unwrap();
+        assert_eq!(decoded.server_now_ms, None, "older servers omit it");
+
+        let stamped = OrbitShellView {
+            server_now_ms: Some(42),
+            ..view.clone()
+        };
+        let round_trip: OrbitShellView =
+            serde_json::from_str(&serde_json::to_string(&stamped).unwrap()).unwrap();
+        assert_eq!(round_trip.server_now_ms, Some(42));
+        assert!(stamped.same_facts(&view), "the stamp is not a fact");
+        let changed = OrbitShellView {
+            lead: OrbitShellLead {
+                state: "working".into(),
+                ..view.lead.clone()
+            },
+            ..view.clone()
+        };
+        assert!(!changed.same_facts(&view));
+    }
 
     #[test]
     fn graphics_bulk_codec_preserves_legacy_wire_and_json() {
@@ -2859,6 +3008,7 @@ mod tests {
                 action: ClientShellCommandAction::Shell,
                 description: Some("deploy".into()),
             }],
+            orbit: None,
         }));
         let encoded = bincode::serde::encode_to_vec(&msg, bincode::config::standard()).unwrap();
         let (decoded, _): (ServerMessage, _) =

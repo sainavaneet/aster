@@ -23,6 +23,7 @@ mod notify;
 mod pump;
 mod redact;
 mod report;
+mod shell_view;
 mod state;
 mod store;
 mod team;
@@ -140,6 +141,8 @@ pub(crate) struct Notifications {
     load_warning: Option<String>,
     /// `[polaris.delivery] lead_absent_timeout_ms`; see `deadlines`.
     lead_absent_fail_ms: Option<u64>,
+    /// The Orbit sidebar projection published to client shells; see `shell_view`.
+    shell_view: shell_view::ShellViewCache,
 }
 
 pub(super) fn response_error(id: String, message: impl ToString) -> String {
@@ -175,6 +178,16 @@ impl Notifications {
                 self.save_retry_at = now + SAVE_RETRY_MS;
             }
         }
+    }
+
+    /// The ledger clock at `now` without advancing it: what `now_ms` would
+    /// return, for read-only projections. The wall clock before the first task.
+    fn peek_now_ms(&self, now: Instant) -> u64 {
+        let wall = wall_ms();
+        self.clock.map_or(wall, |clock| {
+            let mut clock = clock;
+            clock.now_ms(now, wall)
+        })
     }
 
     fn now_ms(&mut self, now: Instant) -> u64 {

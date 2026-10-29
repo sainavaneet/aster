@@ -216,7 +216,7 @@
           "key": "polaris.team",
           "type": "array of tables",
           "default": "[]",
-          "description": "Team roles that seed the session's Orbit team roster on first start, when the session has no orbit-team.json yet. Each [[polaris.team]] entry has name (lowercase, like an agent name), area (free text), prompt (role instructions, at most 4096 bytes), and members: 1 to 4 tables with name, kind (claude or codex), and optional model and permission_mode, checked against [polaris.workers]. At most 8 roles. Each role gets its own tab before the Orbit tab; its members are resumed after a restart and relaunched when their agent exits. Later changes are made with orbit_team_define and orbit_team_remove; config reload does not change an existing roster."
+          "description": "Pinned team roles, present in every session's Orbit team roster: merged into orbit-team.json at each session start and on config reload (area, prompt, and members follow config; members keep their terminals and sessions; members removed from config are released). Each [[polaris.team]] entry has name (lowercase, like an agent name), area (free text), prompt (role instructions, at most 4096 bytes), and members: 1 to 4 tables with name, kind (claude or codex), and optional model and permission_mode, checked against [polaris.workers]. At most 8 roles. Each role gets its own tab before the Orbit tab; its members are resumed after a restart and relaunched when their agent exits. Polaris cannot remove a pinned role (orbit_role_pinned); orbit_team_define may add members or override its prompt for the current session only. A role removed from config stays in the session, unpinned."
         }
       ]
     },
@@ -1257,6 +1257,18 @@
             "spaces",
             "priority"
           ]
+        },
+        {
+          "key": "ui.sidebar_team",
+          "type": "boolean",
+          "default": "true",
+          "description": "Show the Orbit team as a tree in the agent sidebar when the session has one: the Polaris lead, a collapsible group per role with its members, then scratch workers. Agents outside the team follow in an \"other\" group, still ordered by ui.agent_panel_sort. Set false to keep the flat agent list."
+        },
+        {
+          "key": "ui.sidebar_work",
+          "type": "boolean",
+          "default": "true",
+          "description": "Show the work board below the Orbit team tree: active assignments with blocked ones first and pulsing, then up to five recently resolved assignments for ten minutes after they finish. Needs ui.sidebar_team. Set false to hide the board."
         },
         {
           "key": "ui.status_indicators",

@@ -118,6 +118,10 @@ fn observed_session(terminal: &TerminalState, agent: Agent) -> Option<SessionVie
 }
 
 impl Supervisor {
+    pub(super) fn is_active(&self) -> bool {
+        self.active
+    }
+
     fn phase(&self, member: &str) -> Phase {
         self.members
             .get(member)
@@ -217,7 +221,7 @@ impl App {
         if self.pending_polaris_start.is_some() {
             return false;
         }
-        let mut changed = false;
+        let mut changed = self.ensure_pinned_role_tabs();
         let mut dirty = false;
         // By index, reading the roster in place: the role is cloned only when a
         // member must be launched or rescheduled, never on a quiet pass.

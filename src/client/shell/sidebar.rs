@@ -52,6 +52,7 @@ pub(crate) fn render_collapsed_sidebar(
     endpoint_id: &ClientEndpointId,
     animation: super::super::animation::AnimationFrame<'_>,
     selected_workspace_id: Option<&str>,
+    team: Option<&super::super::team_sidebar::TeamSidebar>,
     hits: &mut ShellHitMap,
 ) {
     let palette = &config.palette;
@@ -129,26 +130,37 @@ pub(crate) fn render_collapsed_sidebar(
         detail_area.width,
         detail_area.height.saturating_sub(1),
     );
-    for (index, pane_id) in super::ordered_agent_pane_ids(snapshot, config.agent_panel_sort)
+    let team = super::super::team_sidebar::TeamSidebar::active(team, config, snapshot);
+    let entries = match team {
+        Some(team) => team.collapsed_entries(snapshot, config.agent_panel_sort),
+        None => super::ordered_agent_pane_ids(snapshot, config.agent_panel_sort)
+            .iter()
+            .filter_map(|pane_id| {
+                let agent = snapshot
+                    .agents
+                    .iter()
+                    .find(|agent| &agent.pane_id == pane_id)?;
+                Some(super::super::team_sidebar::CollapsedEntry {
+                    pane_id: agent.pane_id.as_str(),
+                    status: agent.agent_status,
+                    focused: agent.focused,
+                })
+            })
+            .collect(),
+    };
+    for (index, entry) in entries
         .into_iter()
         .take(detail_content.height as usize)
         .enumerate()
     {
-        let Some(agent) = snapshot
-            .agents
-            .iter()
-            .find(|agent| agent.pane_id == pane_id)
-        else {
-            continue;
-        };
         let rect = Rect::new(
             detail_content.x,
             detail_content.y + index as u16,
             detail_content.width,
             1,
         );
-        let phase = animation.agent_row(endpoint_id, &agent.pane_id, agent.agent_status);
-        if agent.focused {
+        let phase = animation.agent_row(endpoint_id, entry.pane_id, entry.status);
+        if entry.focused {
             buffer.set_style(rect, Style::default().bg(palette.active_row_bg));
         } else if phase.status_flash > 0.0 || phase.recency_highlight > 0.0 {
             let bg = super::super::animation::blend_color(
@@ -165,14 +177,14 @@ pub(crate) fn render_collapsed_sidebar(
             rect.y,
             rect.width.min(2),
             &format!("{:<2}", index + 1),
-            Style::default().fg(if agent.focused {
+            Style::default().fg(if entry.focused {
                 palette.text
             } else {
                 palette.overlay0
             }),
         );
         let (icon_glyph, status_fg) = super::super::agent_sidebar::agent_status_icon_and_color(
-            agent.agent_status,
+            entry.status,
             config.status_indicators,
             palette,
             phase,
@@ -185,7 +197,7 @@ pub(crate) fn render_collapsed_sidebar(
             icon_glyph,
             Style::default().fg(status_fg),
         );
-        hits.agents.push((rect, pane_id));
+        hits.agents.push((rect, entry.pane_id.to_owned()));
     }
     hits.sidebar_toggle = if area.is_empty() || workspace_area.width == 0 {
         Rect::default()
@@ -447,16 +459,35 @@ pub(crate) fn render_sidebar(
         }
     }
 
-    super::render_agent_panel(
-        buffer,
-        detail_area,
-        snapshot,
-        config,
-        state.active_endpoint_id,
-        state.animation,
-        state.agent_scroll,
-        hits,
-    );
+    if let Some(team) =
+        super::super::team_sidebar::TeamSidebar::active(state.team_sidebar, config, snapshot)
+    {
+        super::super::team_sidebar::render_team_panel(
+            buffer,
+            detail_area,
+            team,
+            &super::super::team_sidebar::TeamRenderContext {
+                config,
+                endpoint_id: state.active_endpoint_id,
+                animation: state.animation,
+                focused_pane_id: snapshot.focused_pane_id.as_deref(),
+                now_unix_ms: state.frame_unix_ms,
+            },
+            state.agent_scroll,
+            hits,
+        );
+    } else {
+        super::render_agent_panel(
+            buffer,
+            detail_area,
+            snapshot,
+            config,
+            state.active_endpoint_id,
+            state.animation,
+            state.agent_scroll,
+            hits,
+        );
+    }
 
     hits.sidebar_toggle = Rect::new(
         area.right().saturating_sub(2),

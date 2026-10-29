@@ -51,6 +51,7 @@ fn worker_task(report: &OrbitAgentReportParams) -> Task {
         error: None,
         created_at: 0,
         updated_at: 0,
+        title: None,
         attempts: 1,
         recoveries: 0,
         redelivered: false,

@@ -70,6 +70,19 @@ fn redact_hex_runs(text: &str) -> String {
 /// Characters of a credential token; quotes and whitespace end it.
 const TOKEN_CHARS: &str = r#"[^\s'"`]"#;
 
+/// Labels whose value is a credential. A label may carry a prefix
+/// (`client_secret`, `DB_PASSWORD`, `x-auth-token`) but must end at the label,
+/// so `tokenizer` or `passwords` are not labels.
+const LABELS: &str = r"password|passwd|secret|api[ _-]?key|token|authorization|private[ _-]?key";
+/// A quoted value, quotes included, on one line.
+const QUOTED: &str = r#""[^"\n]*"|'[^'\n]*'|`[^`\n]*`"#;
+/// A word after a label and a plain space, redacted only when it does not read
+/// as prose: it holds a digit, a symbol other than sentence punctuation, or an
+/// upper-case letter after its first character. So `password hunter2` is
+/// redacted and `password reset flow` is kept. Case-sensitive on purpose.
+const SECRET_LIKE_WORD: &str =
+    r#"(?-i:[^\s'"`&;:=]*(?:[0-9]|[^\sA-Za-z0-9.,!?()'"`&;:=-]|[^\s'"`&;:=][A-Z])[^\s'"`&;:=]*)"#;
+
 /// How a pattern's match is replaced.
 #[derive(Clone, Copy)]
 enum Replace {
@@ -81,8 +94,8 @@ enum Replace {
 }
 
 /// Common credential shapes, in the order they are applied: PEM blocks,
-/// `Authorization:` headers, bearer tokens, `password=`-style values, provider
-/// key prefixes, and JWTs.
+/// `Authorization:` headers, bearer tokens, labelled values (`password: x`,
+/// `token = x`, `"secret": "x"`, `api key x`), provider key prefixes, and JWTs.
 fn secret_patterns() -> &'static [(regex::Regex, Replace)] {
     static PATTERNS: std::sync::OnceLock<Vec<(regex::Regex, Replace)>> = std::sync::OnceLock::new();
     PATTERNS.get_or_init(|| {
@@ -101,9 +114,14 @@ fn secret_patterns() -> &'static [(regex::Regex, Replace)] {
                 Replace::Labelled(" <redacted>"),
             ),
             (
-                r#"(?i)([a-z0-9_]*(?:password|passwd|token|secret|api[_-]?key))=(?:"[^"]*"|'[^']*'|[^\s'"`&;]+)"#
-                    .to_owned(),
-                Replace::Labelled("=<redacted>"),
+                format!(
+                    r#"(?i)(\b[a-z0-9_-]*(?:{LABELS})["'`]?[ \t]*[:=][ \t]*)(?:{QUOTED}|[^\s'"`&;]+)"#
+                ),
+                Replace::Labelled(REDACTED),
+            ),
+            (
+                format!(r"(?i)(\b[a-z0-9_-]*(?:{LABELS})[ \t]+)(?:{QUOTED}|{SECRET_LIKE_WORD})"),
+                Replace::Labelled(REDACTED),
             ),
             (
                 format!(r"\b(?:{prefixes}){TOKEN_CHARS}*{wrapped}"),
@@ -245,6 +263,80 @@ mod tests {
         }
         let jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig\nnature rest";
         assert_eq!(redact_secrets(jwt), "<redacted>\n<redacted> rest");
+    }
+
+    #[test]
+    fn labelled_secret_values_are_redacted_and_the_label_kept() {
+        let cases = [
+            (
+                "login password: hunter2 now",
+                "login password: <redacted> now",
+            ),
+            ("login Password:hunter2", "login Password:<redacted>"),
+            ("login PASSWORD = hunter2", "login PASSWORD = <redacted>"),
+            (
+                "login password hunter2 now",
+                "login password <redacted> now",
+            ),
+            ("login passwd = x", "login passwd = <redacted>"),
+            ("db passwd: 'two words'", "db passwd: <redacted>"),
+            ("vault secret: x", "vault secret: <redacted>"),
+            ("vault Secret \"s3 cr3t\" ok", "vault Secret <redacted> ok"),
+            ("use api key: x", "use api key: <redacted>"),
+            ("use API_KEY=x", "use API_KEY=<redacted>"),
+            ("use api-key x9", "use api-key <redacted>"),
+            ("use apikey: x", "use apikey: <redacted>"),
+            ("use token: x", "use token: <redacted>"),
+            ("use TOKEN x1y2", "use TOKEN <redacted>"),
+            ("use access_token=x", "use access_token=<redacted>"),
+            ("send Authorization: x", "send Authorization: <redacted>"),
+            ("send authorization = x", "send authorization = <redacted>"),
+            ("oauth client_secret=x", "oauth client_secret=<redacted>"),
+            ("oauth CLIENT_SECRET: x", "oauth CLIENT_SECRET: <redacted>"),
+            ("ssh private key: x", "ssh private key: <redacted>"),
+            ("ssh private_key=x", "ssh private_key=<redacted>"),
+            (
+                r#"json {"password": "hunter2", "user": "bob"}"#,
+                r#"json {"password": <redacted>, "user": "bob"}"#,
+            ),
+            ("yaml token: 'abc def'", "yaml token: <redacted>"),
+            ("pass secret `x y` on", "pass secret <redacted> on"),
+            ("rotate token xYz", "rotate token <redacted>"),
+            ("token a/b+c", "token <redacted>"),
+        ];
+        for (text, expected) in cases {
+            assert_eq!(redact_secrets(text), expected, "{text}");
+        }
+    }
+
+    #[test]
+    fn labels_in_prose_are_kept() {
+        for text in [
+            "update the password reset flow",
+            "fix the tokenizer for long input",
+            "the tokenizer: rewrite it",
+            "token-based auth is fine",
+            "rotate passwords weekly",
+            "the secret sauce, really.",
+            "add an api key rotation job",
+            "the Authorization header is missing",
+            "store the private key safely",
+            "token (optional) handling",
+        ] {
+            assert_eq!(redact_secrets(text), text);
+        }
+    }
+
+    #[test]
+    fn redaction_is_idempotent_for_labelled_values() {
+        for text in [
+            "password: hunter2",
+            "token hunter2",
+            "Authorization: Basic abc",
+        ] {
+            let once = redact_secrets(text);
+            assert_eq!(redact_secrets(&once), once, "{text}");
+        }
     }
 
     #[test]

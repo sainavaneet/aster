@@ -251,6 +251,7 @@ mod tests {
             error: None,
             created_at: 1,
             updated_at: 2,
+            title: None,
             attempts: 3,
             recoveries: 0,
             redelivered: false,

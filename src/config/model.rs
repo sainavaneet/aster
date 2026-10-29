@@ -356,13 +356,14 @@ pub struct PolarisConfig {
     pub delivery: PolarisDeliveryConfig,
     /// The decision layer: rules first, then an optional provider.
     pub decisions: Box<PolarisDecisionsConfig>,
-    /// Team roles that seed the Orbit roster when the session has none yet.
+    /// Pinned team roles, present in every session's Orbit roster.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub team: Vec<PolarisTeamRoleConfig>,
 }
 
-/// One `[[polaris.team]]` role: a persistent Polaris tab whose members are
-/// resumed instead of relaunched. Seeds `orbit-team.json` on first start only.
+/// One `[[polaris.team]]` role: a pinned Polaris tab whose members are resumed
+/// instead of relaunched. Merged into every session's `orbit-team.json` at
+/// startup and on config reload; Polaris cannot remove it.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct PolarisTeamRoleConfig {
@@ -1266,6 +1267,12 @@ pub struct UiConfig {
     pub window_title: String,
     /// Agent sidebar ordering. Saved values are "spaces" or "priority". Default: "spaces".
     pub agent_panel_sort: AgentPanelSortConfig,
+    /// Show the Orbit team (lead, roles, scratch workers) as a tree in the agent sidebar when
+    /// the session has one. Default: true. False keeps the flat agent list.
+    pub sidebar_team: bool,
+    /// Show the work board (active and recent Orbit assignments) below the team tree.
+    /// Default: true. Needs `sidebar_team`.
+    pub sidebar_work: bool,
     /// Retired setting that Aster wrote before the workspace filter was removed.
     #[serde(rename = "agent_panel_scope")]
     _legacy_agent_panel_scope: Option<LegacyAgentPanelScopeConfig>,
@@ -1499,6 +1506,8 @@ impl Default for UiConfig {
             tab_bar_right_separator: " ".into(),
             window_title: super::window_title::default_window_title(),
             agent_panel_sort: AgentPanelSortConfig::Spaces,
+            sidebar_team: true,
+            sidebar_work: true,
             _legacy_agent_panel_scope: None,
             status_indicators: StatusIndicatorStyle::Dots,
             animations: UiAnimationsConfig::Full,

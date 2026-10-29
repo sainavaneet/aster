@@ -66,9 +66,17 @@ pub(crate) struct Member {
         deserialize_with = "lenient_session"
     )]
     pub(crate) session: Option<MemberSession>,
+    /// Declared by the role's `[[polaris.team]]` entry rather than added by the
+    /// session; such members follow config and are released when config drops them.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub(crate) pinned: bool,
     /// Fields from a newer build, kept so they survive this build's saves.
     #[serde(flatten)]
     pub(crate) extra: Map<String, Value>,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 /// A session this build cannot read is dropped; the member starts fresh.
@@ -109,6 +117,13 @@ pub(crate) struct Role {
     pub(crate) members: Vec<Member>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) tab: Option<TabBinding>,
+    /// Defined in `[[polaris.team]]`: present in every session, refreshed from
+    /// config, and never removed by `orbit_team_remove`.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub(crate) pinned: bool,
+    /// A pinned role whose prompt this session replaced; reloads keep it.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub(crate) overridden: bool,
     /// Fields from a newer build, kept so they survive this build's saves.
     #[serde(flatten)]
     pub(crate) extra: Map<String, Value>,
@@ -301,6 +316,7 @@ pub(crate) fn validate(
                 .map(str::to_owned),
             terminal_id: kept.and_then(|old| old.terminal_id.clone()),
             session: kept.and_then(|old| old.session.clone()),
+            pinned: false,
             extra: kept.map(|old| old.extra.clone()).unwrap_or_default(),
         });
     }
@@ -310,6 +326,8 @@ pub(crate) fn validate(
         prompt: spec.prompt,
         members,
         tab: previous.and_then(|role| role.tab.clone()),
+        pinned: false,
+        overridden: false,
         extra: previous.map(|role| role.extra.clone()).unwrap_or_default(),
     })
 }
@@ -421,21 +439,160 @@ impl Roster {
     }
 }
 
-/// Seeds a roster from `[[polaris.team]]`; any invalid entry rejects the seed.
-pub(crate) fn seed(
+impl From<&Member> for MemberSpec {
+    fn from(member: &Member) -> Self {
+        Self {
+            name: member.name.clone(),
+            kind: member.kind.clone(),
+            model: member.model.clone(),
+            permission_mode: member.permission_mode.clone(),
+        }
+    }
+}
+
+/// The pinned role `config` merged onto `previous`: area and the config
+/// members' kinds, models, and permission modes come from config; observed
+/// state and the tab binding are kept; `extras` (members the session added) are
+/// appended; `prompt` replaces the config prompt for this session only.
+pub(crate) fn pinned_role(
+    config: &crate::config::PolarisTeamRoleConfig,
+    previous: Option<&Role>,
+    extras: Vec<MemberSpec>,
+    prompt: Option<String>,
+    policy: &WorkerPolicy,
+) -> Result<Role, Rejection> {
+    let configured = |name: &str| config.members.iter().any(|member| member.name == name);
+    let mut spec = RoleSpec::from(config);
+    spec.members
+        .extend(extras.into_iter().filter(|extra| !configured(&extra.name)));
+    if let Some(prompt) = prompt {
+        spec.prompt = prompt;
+    }
+    let role = validate(spec, policy, previous)?;
+    let members = role
+        .members
+        .into_iter()
+        .map(|member| Member {
+            pinned: configured(&member.name),
+            ..member
+        })
+        .collect();
+    Ok(Role {
+        pinned: true,
+        overridden: role.prompt != config.prompt,
+        members,
+        ..role
+    })
+}
+
+/// The result of pinning config roles onto a session roster.
+#[derive(Debug, Default)]
+pub(crate) struct Pinned {
+    pub(crate) roster: Roster,
+    /// Members no longer in the roster; their agents keep running unsupervised.
+    pub(crate) released: Vec<String>,
+    /// Config roles that could not be pinned, as diagnostics.
+    pub(crate) errors: Vec<String>,
+}
+
+/// The pinned role for `config` on a reload or session start: the session's
+/// prompt override and added members survive; config members dropped from
+/// config, and added members beyond `MAX_MEMBERS`, are released.
+fn repin(
+    config: &crate::config::PolarisTeamRoleConfig,
+    previous: Option<&Role>,
+    policy: &WorkerPolicy,
+) -> Result<Role, Rejection> {
+    let room = MAX_MEMBERS.saturating_sub(config.members.len());
+    let extras = previous
+        .iter()
+        .flat_map(|role| &role.members)
+        .filter(|member| !member.pinned)
+        .filter(|member| !config.members.iter().any(|other| other.name == member.name))
+        .take(room)
+        .map(MemberSpec::from)
+        .collect();
+    let prompt = previous
+        .filter(|role| role.pinned && role.overridden)
+        .map(|role| role.prompt.clone());
+    pinned_role(config, previous, extras, prompt, policy)
+}
+
+/// `current` with every `[[polaris.team]]` role present and up to date, in
+/// config order ahead of the session's own roles. Roles the session defined are
+/// untouched; a role no longer in config stays, unpinned. A config role that
+/// cannot be pinned is reported and its previous state, if any, kept.
+pub(crate) fn pin(
+    current: &Roster,
     configs: &[crate::config::PolarisTeamRoleConfig],
     policy: &WorkerPolicy,
-) -> Result<Roster, String> {
-    let mut roster = Roster::default();
+) -> Pinned {
+    let configured = |name: &str| configs.iter().any(|config| config.name == name);
+    let session: Vec<Role> = current
+        .roles
+        .iter()
+        .filter(|role| !configured(&role.name))
+        .map(|role| Role {
+            pinned: false,
+            overridden: false,
+            members: role
+                .members
+                .iter()
+                .map(|member| Member {
+                    pinned: false,
+                    ..member.clone()
+                })
+                .collect(),
+            ..role.clone()
+        })
+        .collect();
+    let mut errors = Vec::new();
+    let mut pinned: Vec<Role> = Vec::new();
     for config in configs {
-        let role = validate(RoleSpec::from(config), policy, None)
-            .map_err(|(_, message)| format!("[[polaris.team]] {}: {message}", config.name))?;
-        if roster.role(&role.name).is_some() {
-            return Err(format!("[[polaris.team]] {} is defined twice", role.name));
+        if pinned.iter().any(|role| role.name == config.name) {
+            errors.push(format!("[[polaris.team]] {} is defined twice", config.name));
+            continue;
         }
-        roster
-            .upsert(role)
-            .map_err(|(_, message)| format!("[[polaris.team]] {}: {message}", config.name))?;
+        let previous = current.role(&config.name);
+        let candidate = repin(config, previous, policy).and_then(|role| {
+            if previous.is_none() && session.len() + pinned.len() >= MAX_ROLES {
+                return Err(invalid(format!(
+                    "The team allows at most {MAX_ROLES} roles"
+                )));
+            }
+            let mut check = Roster {
+                roles: session.iter().chain(&pinned).cloned().collect(),
+                extra: Map::new(),
+            };
+            check.upsert(role.clone()).map(|()| role)
+        });
+        match candidate {
+            Ok(role) => pinned.push(role),
+            Err((_, message)) => {
+                errors.push(format!("[[polaris.team]] {}: {message}", config.name));
+                pinned.extend(previous.cloned());
+            }
+        }
     }
-    Ok(roster)
+    let roles: Vec<Role> = pinned.into_iter().chain(session).collect();
+    let released = current
+        .roles
+        .iter()
+        .flat_map(|role| &role.members)
+        .filter(|old| {
+            !roles
+                .iter()
+                .flat_map(|role| &role.members)
+                .any(|member| member.name == old.name)
+        })
+        .map(|old| old.name.clone())
+        .collect();
+    Pinned {
+        roster: Roster {
+            roles,
+            extra: current.extra.clone(),
+        },
+        released,
+        errors,
+    }
 }

@@ -98,6 +98,7 @@ impl App {
         now: u64,
     ) -> Result<Value, String> {
         let fail = |message: String| response_error(id.into(), message);
+        let title = super::shell_view::assignment_title(&params.prompt);
         if params.prompt.trim().is_empty() {
             return Err(fail("Task prompt must not be empty".into()));
         }
@@ -161,6 +162,7 @@ impl App {
             error: None,
             created_at: now,
             updated_at: now,
+            title,
             attempts: 0,
             recoveries: 0,
             redelivered: false,

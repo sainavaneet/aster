@@ -447,6 +447,10 @@ impl HeadlessServer {
             if !self.shutting_down {
                 self.app.pump_orbit_notifications_at(Instant::now());
                 self.forward_orbit_human_notices();
+                if self.app.refresh_orbit_shell_view(Instant::now()) {
+                    needs_render = true;
+                    needs_full_render = true;
+                }
             }
 
             // If shutdown has been initiated, complete it and exit.

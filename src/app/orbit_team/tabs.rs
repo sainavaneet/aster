@@ -1,5 +1,6 @@
-//! Role tabs: created in the Polaris workspace just before the Orbit tab,
-//! without changing focus, and bound by workspace id and stable tab number.
+//! Role tabs: created in the Polaris workspace in roster order (pinned roles in
+//! config order, then the session's own roles) before the Orbit tab, without
+//! changing focus, and bound by workspace id and stable tab number.
 use crate::api::schema::{TabCreateParams, TabMoveParams};
 use crate::app::App;
 
@@ -9,13 +10,25 @@ use super::roster::TabBinding;
 pub(crate) const TAB_RECREATED: &str = "role tab recreated";
 
 impl App {
-    /// Creates the tab of the role at `role_index` before the Orbit tab and binds
-    /// it. Focus and the active tab are left where they were.
+    /// Where a new tab of the role at `role_index` goes in `ws`: before the
+    /// first tab of a role later in the roster, or else before the Orbit tab.
+    fn orbit_role_tab_slot(&self, role_index: usize, ws: usize, orbit_tab: usize) -> usize {
+        self.orbit_team.roster.roles[role_index + 1..]
+            .iter()
+            .filter_map(|role| self.resolve_role_tab(role).ok())
+            .filter(|(role_ws, _)| *role_ws == ws)
+            .map(|(_, tab)| tab)
+            .fold(orbit_tab, usize::min)
+    }
+
+    /// Creates the tab of the role at `role_index` in roster order before the
+    /// Orbit tab and binds it. Focus and the active tab are left where they were.
     pub(crate) fn create_orbit_role_tab(
         &mut self,
         role_index: usize,
     ) -> Result<(usize, usize), (&'static str, String)> {
         let (ws, orbit_tab) = self.resolve_orbit()?;
+        let slot = self.orbit_role_tab_slot(role_index, ws, orbit_tab);
         let label = self.orbit_team.roster.roles[role_index].label();
         let response = self.handle_tab_create(
             "orbit:team:tab".into(),
@@ -36,13 +49,13 @@ impl App {
         }
         let created = self.state.workspaces[ws].tabs.len() - 1;
         let number = self.state.workspaces[ws].tabs[created].number;
-        if orbit_tab < created {
+        if slot < created {
             if let Some(tab_id) = self.public_tab_id(ws, created) {
                 self.handle_tab_move(
                     "orbit:team:tab".into(),
                     TabMoveParams {
                         tab_id,
-                        insert_index: orbit_tab,
+                        insert_index: slot,
                     },
                 );
             }
@@ -59,6 +72,32 @@ impl App {
         self.save_orbit_team();
         self.schedule_session_save();
         Ok((ws, tab))
+    }
+
+    /// Gives each pinned role that never had a tab its tab, so a role added to
+    /// config appears without a restart. A role tab the user closed stays closed
+    /// until the next startup. Returns whether a tab was created.
+    pub(crate) fn ensure_pinned_role_tabs(&mut self) -> bool {
+        let mut created = false;
+        for index in 0..self.orbit_team.roster.roles.len() {
+            let role = &self.orbit_team.roster.roles[index];
+            if !role.pinned || role.tab.is_some() {
+                continue;
+            }
+            let name = role.name.clone();
+            match self.create_orbit_role_tab(index) {
+                Ok(_) => {
+                    tracing::info!(role = %name, "pinned orbit role tab created");
+                    created = true;
+                }
+                Err((_, error)) => {
+                    tracing::warn!(role = %name, %error, "pinned orbit role tab unavailable");
+                    self.state.config_diagnostic = Some(error);
+                    return created;
+                }
+            }
+        }
+        created
     }
 
     /// Session start, after Polaris and Orbit: every role gets its tab back (a

@@ -69,6 +69,7 @@ pub(super) fn render_expanded(
     if !super::agent_sidebar::render_agent_panel_header(
         buffer,
         area,
+        super::agent_sidebar::AGENT_PANEL_TITLE,
         agent_view_label,
         config,
         hits,
@@ -84,6 +85,7 @@ pub(super) fn render_expanded(
         config,
         agent_scroll,
         hits,
+        config.agents.row_gap,
         |row| row.agent.rows.len(),
         |buffer, rect, row, hits| {
             let phase = animation.agent_row(&row.endpoint_id, &row.agent.pane_id, row.agent.status);

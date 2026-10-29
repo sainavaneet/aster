@@ -165,6 +165,7 @@ mod tests {
                         kind: AgentSessionRefKind::Id,
                         value: "s-1".into(),
                     }),
+                    pinned: false,
                     extra: Default::default(),
                 },
                 Member {
@@ -179,10 +180,13 @@ mod tests {
                         kind: AgentSessionRefKind::Id,
                         value: "c-1".into(),
                     }),
+                    pinned: false,
                     extra: Default::default(),
                 },
             ],
             tab: None,
+            pinned: false,
+            overridden: false,
             extra: Default::default(),
         }
     }

@@ -24,27 +24,31 @@ pub(crate) struct TeamState {
     loaded: bool,
     /// The roster file could not be read; nothing is saved over it.
     pub(crate) error: Option<String>,
-    /// `[[polaris.team]]`, used only when the session has no roster yet.
-    seed: Vec<PolarisTeamRoleConfig>,
+    /// `[[polaris.team]]`: the pinned roles every session has.
+    pub(crate) pinned: Vec<PolarisTeamRoleConfig>,
     supervisor: supervisor::Supervisor,
 }
 
 impl TeamState {
-    pub(crate) fn new(seed: &[PolarisTeamRoleConfig]) -> Self {
+    pub(crate) fn new(pinned: &[PolarisTeamRoleConfig]) -> Self {
         Self {
-            seed: seed.to_vec(),
+            pinned: pinned.to_vec(),
             ..Self::default()
         }
     }
 
-    pub(crate) fn set_seed(&mut self, seed: &[PolarisTeamRoleConfig]) {
-        self.seed = seed.to_vec();
+    /// The `[[polaris.team]]` entry of `role`, when the role is pinned.
+    pub(crate) fn pinned_config(&self, role: &str) -> Option<&PolarisTeamRoleConfig> {
+        self.roster
+            .role(role)
+            .filter(|role| role.pinned)
+            .and(self.pinned.iter().find(|config| config.name == role))
     }
 }
 
 impl App {
-    /// Loads the roster once: the session's `orbit-team.json`, or the config
-    /// seed when the session has none.
+    /// Loads the roster once, the session's `orbit-team.json` or an empty one,
+    /// and pins the config roles into it.
     pub(crate) fn ensure_orbit_team_loaded(&mut self) {
         if self.orbit_team.loaded {
             return;
@@ -56,23 +60,58 @@ impl App {
             Ok(None)
         };
         match loaded {
-            Ok(Some(roster)) => self.orbit_team.roster = roster,
-            Ok(None) if self.orbit_team.seed.is_empty() => {}
-            Ok(None) => match roster::seed(&self.orbit_team.seed, &self.orbit_worker_policy) {
-                Ok(roster) => {
+            Ok(roster) => {
+                if let Some(roster) = roster {
                     self.orbit_team.roster = roster;
-                    self.save_orbit_team();
                 }
-                Err(error) => {
-                    tracing::warn!(%error, "orbit team seed rejected");
-                    self.state.config_diagnostic = Some(error);
-                }
-            },
+                self.pin_orbit_team_roles();
+            }
             Err(error) => {
                 tracing::warn!(%error, "orbit team roster unavailable");
                 self.state.config_diagnostic = Some(error.clone());
                 self.orbit_team.error = Some(error);
             }
+        }
+    }
+
+    /// Ensures every `[[polaris.team]]` role is in the roster and current;
+    /// released members stop being supervised. Returns whether the roster changed.
+    fn pin_orbit_team_roles(&mut self) -> bool {
+        if self.orbit_team.error.is_some() {
+            return false;
+        }
+        let pinned = roster::pin(
+            &self.orbit_team.roster,
+            &self.orbit_team.pinned,
+            &self.orbit_worker_policy,
+        );
+        if !pinned.errors.is_empty() {
+            let message = pinned.errors.join("; ");
+            tracing::warn!(%message, "orbit team config roles rejected");
+            self.state.config_diagnostic = Some(message);
+        }
+        if pinned.roster == self.orbit_team.roster {
+            return false;
+        }
+        self.orbit_team.roster = pinned.roster;
+        for name in &pinned.released {
+            tracing::info!(member = %name, "orbit team member released by config");
+            self.reset_orbit_team_member(name);
+        }
+        self.save_orbit_team();
+        true
+    }
+
+    /// Config reload: the new `[[polaris.team]]` applies at once, and a role new
+    /// to config gets its tab when the team is already running.
+    pub(crate) fn reload_orbit_team_config(&mut self, pinned: &[PolarisTeamRoleConfig]) {
+        self.orbit_team.pinned = pinned.to_vec();
+        if !self.orbit_team.loaded {
+            return;
+        }
+        if self.pin_orbit_team_roles() && self.orbit_team.supervisor.is_active() {
+            self.ensure_pinned_role_tabs();
+            self.activate_orbit_team_supervisor();
         }
     }
 
@@ -190,6 +229,14 @@ impl App {
         terminal_id: &str,
     ) -> Option<(String, String)> {
         self.ensure_orbit_team_loaded();
+        self.loaded_orbit_team_member_of_terminal(terminal_id)
+    }
+
+    /// `orbit_team_member_of_terminal` for a roster that is already loaded.
+    pub(crate) fn loaded_orbit_team_member_of_terminal(
+        &self,
+        terminal_id: &str,
+    ) -> Option<(String, String)> {
         let agent_name = self
             .state
             .terminals

@@ -198,7 +198,7 @@ fn roster_file_round_trips_atomically_and_rejects_invalid_files() {
 }
 
 #[test]
-fn config_seed_validates_every_role() {
+fn config_roles_are_validated_one_by_one_when_pinned() {
     let config: crate::config::PolarisConfig = toml::from_str(
         "[[team]]\nname = \"reviewer\"\narea = \"Reviews\"\nprompt = \"Be strict\"\n\
          [[team.members]]\nname = \"rc\"\nkind = \"claude\"\nmodel = \"opus\"\n\
@@ -206,8 +206,14 @@ fn config_seed_validates_every_role() {
          [[team]]\nname = \"actor\"\narea = \"Edits\"\n[[team.members]]\nname = \"ac\"\nkind = \"claude\"\n",
     )
     .unwrap();
-    let roster = roster::seed(&config.team, &WorkerPolicy::default()).unwrap();
+    let pinned = roster::pin(&Roster::default(), &config.team, &WorkerPolicy::default());
+    assert!(pinned.errors.is_empty(), "{:?}", pinned.errors);
+    let roster = pinned.roster;
     assert_eq!(roster.roles.len(), 2);
+    assert!(roster
+        .roles
+        .iter()
+        .all(|role| role.pinned && !role.overridden));
     assert_eq!(
         roster.role("reviewer").unwrap().members[0].model.as_deref(),
         Some("opus")
@@ -215,9 +221,17 @@ fn config_seed_validates_every_role() {
     assert!(roster.roles.iter().all(|role| role.tab.is_none()));
     let mut invalid = config.team.clone();
     invalid[1].members[0].name = "rc".into();
-    assert!(roster::seed(&invalid, &WorkerPolicy::default())
-        .unwrap_err()
-        .contains("[[polaris.team]] actor"));
+    let pinned = roster::pin(&Roster::default(), &invalid, &WorkerPolicy::default());
+    assert_eq!(
+        pinned.roster.roles.len(),
+        1,
+        "the valid role is still pinned"
+    );
+    assert!(
+        pinned.errors[0].contains("[[polaris.team]] actor"),
+        "{:?}",
+        pinned.errors
+    );
     assert!(crate::config::PolarisConfig::default().team.is_empty());
 }
 

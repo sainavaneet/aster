@@ -692,6 +692,17 @@ impl HeadlessServer {
                     self.server_config_diagnostic_without_keybindings.clone()
                 };
                 candidate.revision = client.shell_projection_revision;
+                // The Orbit clock stamp changes with every projection; compare
+                // with the stamp last sent, and send a fresh one only when
+                // something else changed.
+                let fresh_orbit_clock = swap_orbit_clock(
+                    &mut candidate,
+                    client
+                        .shell_snapshot
+                        .as_ref()
+                        .and_then(|sent| sent.orbit.as_ref())
+                        .and_then(|orbit| orbit.server_now_ms),
+                );
                 if client.shell_snapshot.as_ref() != Some(&candidate)
                     || client.shell_agent_completions.as_ref() != Some(&completions)
                     || client.shell_agent_view != agent_view
@@ -699,6 +710,7 @@ impl HeadlessServer {
                     client.shell_projection_revision =
                         client.shell_projection_revision.saturating_add(1);
                     candidate.revision = client.shell_projection_revision;
+                    swap_orbit_clock(&mut candidate, fresh_orbit_clock);
                     completions.revision = candidate.revision;
                     let completion_framed =
                         match crate::protocol::endpoint::agent_completions_message(&completions)
@@ -1099,6 +1111,17 @@ fn draft_key_bytes(key: crossterm::event::KeyEvent, buffer: &mut [u8; 4]) -> Opt
         KeyCode::Char(ch) => Some(ch.encode_utf8(buffer).as_bytes()),
         _ => None,
     }
+}
+
+/// Replaces the Orbit view's clock stamp with `stamp`; returns the previous one.
+fn swap_orbit_clock(
+    snapshot: &mut crate::protocol::ClientShellSnapshot,
+    stamp: Option<u64>,
+) -> Option<u64> {
+    snapshot
+        .orbit
+        .as_mut()
+        .and_then(|orbit| std::mem::replace(&mut orbit.server_now_ms, stamp))
 }
 
 #[cfg(test)]

@@ -263,6 +263,7 @@ pub(super) fn snapshot_with_completions(
         panes,
         agents,
         commands: app.client_shell_command_manifest(),
+        orbit: app.orbit_shell_view_at(std::time::Instant::now()),
     };
     (shell, completions)
 }

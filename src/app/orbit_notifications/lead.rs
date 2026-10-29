@@ -11,7 +11,7 @@ use crate::detect::AgentState;
 
 const LEAD_NAME: &str = crate::app::polaris::NAME;
 
-fn state_name(state: AgentState) -> &'static str {
+pub(super) fn state_name(state: AgentState) -> &'static str {
     match state {
         AgentState::Idle => "idle",
         AgentState::Working => "working",
