@@ -325,6 +325,7 @@ fn bench_orbit() -> crate::protocol::OrbitShellView {
         finished_at_ms: None,
         worker_terminal_id: None,
         pane_id: None,
+        model: None,
     };
     let active_tasks = (0..32)
         .map(|task| {

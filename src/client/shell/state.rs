@@ -414,10 +414,13 @@ pub(super) struct ClientGlobalMenuOverlay {
     pub(super) highlighted: usize,
 }
 
-/// At most one header per lane. Inline storage avoids allocating in draw.
+/// One header per lane plus the work label's flow opener. Inline storage avoids
+/// allocating in draw; the size follows the lane set.
+const CHROME_TARGET_SLOTS: usize = crate::ui::chrome::state::Lane::ALL.len() + 1;
+
 #[derive(Default)]
 pub(super) struct ChromeTargets {
-    entries: [Option<(Rect, ChromeTarget)>; 4],
+    entries: [Option<(Rect, ChromeTarget)>; CHROME_TARGET_SLOTS],
     len: usize,
 }
 

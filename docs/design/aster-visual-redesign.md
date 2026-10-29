@@ -843,6 +843,9 @@ pub struct OrbitShellStep {
     pub index: u16,
     pub member: String,
     pub kind: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub worker_terminal_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub pane_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub model: Option<String>,
     pub state: String,        // pending|active|done|handed_off|failed; opaque strings tolerated
     #[serde(default, skip_serializing_if = "Option::is_none")] pub note: Option<String>,    // handoff `done`, first line, redacted, <= 80 chars
     #[serde(default, skip_serializing_if = "Option::is_none")] pub next: Option<String>,    // handoff `next`, same treatment
@@ -1323,7 +1326,7 @@ expectations remain unedited.
 - Built: the Orbit flow view as an overlay (`ClientShellOverlay::OrbitFlow`, `shell/flow_view.rs`, `modern/model/flow.rs`, `modern/draw/flow.rs`). The layout (`FlowLayout`: rows, focusable step slots, summary) is built when the view opens and when its key (snapshot serial, selected task, popup width) changes, and holds indices into `snapshot.orbit`, not copies; drawing borrows the snapshot, and with the view closed nothing runs.
 - Layout: lead ━▶ role header with the task progress; relay steps joined by arrows labelled with the first line of the handoff `next` text; parallel steps under `parallel D/T done` (the task-level total), as columns from 100 cells up to 4 steps and as a list otherwise or beyond; the integrator; `… N earlier/later steps` rows for steps beyond the projected list; task chips at the bottom. Member and kind are drawn before the note and the right-hand age/phase are reserved first, so truncation cuts the note first.
 - Data: `OrbitShellStep` gained optional `worker_terminal_id` and `pane_id` (parallel steps use their own agent, the active step the current worker, others the roster member's terminal; `pane_id` only while the terminal sits in a pane). The client focuses a step only if that pane is also an agent in the snapshot; the integrator and stopped workers are inert. Optional JSON fields only; no frozen codec or enum changed, so `PROTOCOL_VERSION` is not bumped.
-- Entry points: `keys.orbit_flow` (default `prefix+f`), the modern `WORK` label, gated by `ui.flow_view` (default true). Classic keeps the binding inert and its existing output unchanged. Keybinding help and the global menu currently do not list the flow entry; the modern WORK label and configured binding open it.
+- Entry points: `keys.orbit_flow` (default `prefix+f`), the modern `WORK` label, gated by `ui.flow_view` (default true). Classic keeps the binding inert and its existing output unchanged. Modern keybinding help, the global menu and the mobile menu list the flow entry when an Orbit team is present.
 - Motion: the active step uses the shared spinner under full animations; reduced and off show the static glyph with all information.
 
 
@@ -1363,3 +1366,37 @@ expectations remain unedited.
   not a wall-clock budget for the open flow popup. Both runs passed six profiles
   and hit the documented pre-existing native_file_render_scale_profile retained
   graphics failure. No new dependencies or frozen fixture changes.
+
+
+### Phase 4 review round 1
+
+- Parallel steps focus only their recorded launched agent; integration steps
+  focus the recorded integrator. Neither guesses ownership from the current
+  task worker or roster. Relay ownership retains its established fallback.
+- Optional JSON step `model` data is shown after kind and omitted before member
+  identity when space runs out. Missing fields retain compatibility.
+- Each active step projects its own live blocked/approval attention on snapshot
+  change. Lone-worker identity and state are cached rather than roster-scanned
+  during drawing. Live classic/flow-disable config changes close the popup.
+- The inline chrome-target capacity includes all four lane headers plus WORK;
+  modern help/global/mobile entries expose the view without changing classic.
+- Counting-allocator tests cover modern drawing, including oversized Unicode
+  graphemes. Modern cell writers keep symbols inline (oversized joined emoji
+  degrade to their first scalar); classic writers preserve ratatui's full
+  grapheme behavior. A separate test protects that classic representation.
+- Width calculations safely omit a model wider than the u16 display counter.
+  Existing snapshot and frozen endpoint fixtures are unchanged; no new crates.
+- Validation: 4,682 native tests passed (16 skipped), including unchanged classic
+  and modern snapshots and endpoint contracts. Fmt/clippy, 151 maintenance tests,
+  architecture (14), translation parity (4), config reference and docs contract
+  (7) pass. `just check` stops at Windows lint because the local Windows SDK libc
+  configuration is absent; no platform code changed. An initial build exhausted
+  disk space; package-scoped Cargo cleanup and nonincremental compilation let
+  the final native validation complete.
+- Quiet render-scale medians with lanes visible at 1/15/50 panes (µs): classic
+  163/172/174, modern 167/176/180. Modern overhead is 2.5%/2.3%/3.4%; the
+  normalized 15:1 gap is -0.001 and 50:1 gap +0.010, within budget. Before this
+  review, the final Phase 4 sample was classic 167/170/177 and modern
+  166/176/182. Six benchmark profiles pass; the documented native graphics
+  CoW-retention assertion still fails. These timings cover normal composition
+  with the flow closed; allocation coverage exercises the open flow draw path.

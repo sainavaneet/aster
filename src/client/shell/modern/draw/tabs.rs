@@ -5,7 +5,7 @@ use ratatui::{buffer::Buffer, layout::Rect, style::Style};
 
 use crate::client::shell::modern::model::tabs::{AttentionSummary, TabActivity};
 use crate::client::shell::{panel_contrast_fg, ClientShellConfig};
-use crate::ui::chrome::draw::{put_number, put_segment};
+use crate::ui::chrome::draw::{put_number, put_segment_inline as put_segment};
 
 /// Draws `activity` inside `area` (the tab's right part, `suffix_width` cells
 /// wide, its first cell the gap after the label). On the focused tab every

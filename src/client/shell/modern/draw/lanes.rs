@@ -14,7 +14,9 @@ use crate::client::shell::team_rows::TeamLineRef;
 use crate::client::shell::team_sidebar::{TeamRenderContext, TeamSidebar};
 use crate::client::shell::{ChromeTarget, ShellHitMap};
 use crate::ui::chrome::age::{age_bar_cells, age_text, age_tone, AgeTone, AGE_BUFFER_LEN};
-use crate::ui::chrome::draw::{display_width, put_bar, put_elided, put_number, put_segment};
+use crate::ui::chrome::draw::{
+    display_width, put_bar, put_elided, put_number, put_segment_inline as put_segment,
+};
 use crate::ui::chrome::state::{Lane, StateKind};
 
 const LABEL_INDENT: u16 = 1;
@@ -39,7 +41,7 @@ pub(in crate::client::shell) fn render_line(
         TeamLineRef::WorkLabel => {
             work_label(buffer, rect, team, ctx);
             // The label opens the flow view (a no-op when `ui.flow_view` is off).
-            if ctx.config.flow_view {
+            if ctx.config.flow_view && ctx.config.chrome.is_modern() {
                 hits.chrome_targets.push((rect, ChromeTarget::FlowOpen));
             }
         }

@@ -7,7 +7,9 @@
 use ratatui::layout::Rect;
 
 use super::lanes::strip;
-use crate::protocol::{OrbitShellActiveTask, OrbitShellView};
+use super::team::{pane_state, PaneAttention};
+use crate::protocol::{ClientShellSnapshot, OrbitShellActiveTask, OrbitShellView};
+use crate::ui::chrome::state::StateKind;
 
 /// Inner width from which parallel steps sit side by side.
 pub(in crate::client::shell) const SIDE_BY_SIDE_FROM: u16 = 100;
@@ -74,6 +76,20 @@ pub(in crate::client::shell) struct FlowLayout {
     pub(in crate::client::shell) summary: String,
     /// For a task without steps: the pane of its worker, if it sits in one.
     pub(in crate::client::shell) lone_pane: Option<String>,
+    /// For a task without steps: who the worker is, resolved at build time.
+    pub(in crate::client::shell) lone: Option<LoneWorker>,
+    /// The state of each focusable slot, projected when the layout is built.
+    pub(in crate::client::shell) states: Vec<StateKind>,
+    /// The task's own state, for the header and the lone row.
+    pub(in crate::client::shell) task_state: StateKind,
+}
+
+/// The worker of a task that was never relayed or fanned out.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(in crate::client::shell) struct LoneWorker {
+    pub(in crate::client::shell) name: String,
+    pub(in crate::client::shell) kind: String,
+    pub(in crate::client::shell) model: Option<String>,
 }
 
 impl FlowLayout {
@@ -91,6 +107,9 @@ impl FlowLayout {
             slots: Vec::new(),
             summary: String::new(),
             lone_pane: None,
+            lone: None,
+            states: Vec::new(),
+            task_state: StateKind::Working,
         };
         let Some(task) = orbit.active_tasks.get(task_index) else {
             return layout;
@@ -98,15 +117,21 @@ impl FlowLayout {
         layout.task_id.clone_from(&task.task_id);
         layout.step_indices = task.steps.iter().map(|step| step.index).collect();
         layout.summary = summary(task);
+        layout.task_state = task_state(task);
         if task.steps.is_empty() {
             layout.rows.push(FlowRow::Lone);
-            layout.lone_pane = orbit
+            let worker = orbit
                 .roles
                 .iter()
                 .flat_map(|role| &role.members)
                 .chain(&orbit.scratch)
-                .find(|member| member.terminal_id.as_deref() == Some(&task.worker_terminal_id))
-                .and_then(|member| member.pane_id.clone());
+                .find(|member| member.terminal_id.as_deref() == Some(&task.worker_terminal_id));
+            layout.lone_pane = worker.and_then(|member| member.pane_id.clone());
+            layout.lone = Some(LoneWorker {
+                name: worker.map_or_else(|| task.worker_terminal_id.clone(), |m| m.name.clone()),
+                kind: worker.map(|m| m.kind.clone()).unwrap_or_default(),
+                model: worker.and_then(|m| m.model.clone()),
+            });
             return layout;
         }
         if let Some(omitted) = task.steps_omitted.filter(|omitted| omitted.before > 0) {
@@ -149,7 +174,56 @@ impl FlowLayout {
         if let Some(omitted) = task.steps_omitted.filter(|omitted| omitted.after > 0) {
             layout.rows.push(FlowRow::OmittedAfter(omitted.after));
         }
+        layout.states = layout
+            .slots
+            .iter()
+            .map(|slot| step_state(task, &task.steps[slot.step]))
+            .collect();
         layout
+    }
+
+    /// Projects each active worker's live attention onto the slots: a worker
+    /// whose agent is blocked or waits on an approval shows that, whatever the
+    /// task-level flags say. Runs on snapshot change, not per frame.
+    pub(in crate::client::shell) fn project_live(
+        &mut self,
+        orbit: &OrbitShellView,
+        snapshot: &ClientShellSnapshot,
+        attention: Option<&PaneAttention>,
+    ) {
+        let live = |pane_id: &str, state: StateKind| {
+            let agent = snapshot
+                .agents
+                .iter()
+                .find(|agent| agent.pane_id == pane_id)?;
+            match pane_state(attention, pane_id, agent.agent_status) {
+                waiting @ (StateKind::Blocked | StateKind::Approval) => Some(waiting),
+                _ => Some(state),
+            }
+        };
+        let Some(task) = orbit.active_tasks.get(self.key.task) else {
+            return;
+        };
+        for (position, slot) in self.slots.iter().enumerate() {
+            let step = &task.steps[slot.step];
+            if step.state != "active" {
+                continue;
+            }
+            if let Some(state) = step
+                .pane_id
+                .as_deref()
+                .and_then(|pane| live(pane, self.states[position]))
+            {
+                self.states[position] = state;
+            }
+        }
+        if let Some(state) = self
+            .lone_pane
+            .as_deref()
+            .and_then(|pane| live(pane, self.task_state))
+        {
+            self.task_state = state;
+        }
     }
 
     fn slot(&mut self, step: usize) -> usize {
@@ -209,6 +283,45 @@ impl FlowLayout {
     }
 }
 
+/// The state a step shows from the task's own flags: approval and blocked belong
+/// to the active relay step (the task's current worker); a waiting parallel step
+/// is queued. `project_live` refines active steps with their own agent.
+fn step_state(task: &OrbitShellActiveTask, step: &crate::protocol::OrbitShellStep) -> StateKind {
+    match step.state.as_str() {
+        "active" => {
+            let current = match step.worker_terminal_id.as_deref() {
+                Some(worker) => worker == task.worker_terminal_id,
+                None => step.parallel.is_none() && step.integrate.is_none(),
+            };
+            if current && task.awaiting_approval {
+                StateKind::Approval
+            } else if current && task.blocked {
+                StateKind::Blocked
+            } else if step.parallel.as_deref() == Some("waiting") {
+                StateKind::Queued
+            } else {
+                StateKind::Working
+            }
+        }
+        "done" | "handed_off" => StateKind::Done,
+        "failed" => StateKind::Failed,
+        "pending" => StateKind::Queued,
+        _ => StateKind::Unknown,
+    }
+}
+
+pub(in crate::client::shell) fn task_state(task: &OrbitShellActiveTask) -> StateKind {
+    if task.awaiting_approval {
+        StateKind::Approval
+    } else if task.blocked {
+        StateKind::Blocked
+    } else if task.state == "assigning" {
+        StateKind::Queued
+    } else {
+        StateKind::Working
+    }
+}
+
 /// `parallel 3/4 done` for a fan-out, else `step 2/3`.
 fn summary(task: &OrbitShellActiveTask) -> String {
     match task.parallel {
@@ -249,6 +362,7 @@ mod tests {
             finished_at_ms: None,
             worker_terminal_id: Some(format!("term_{index}")),
             pane_id: Some(format!("pane_{index}")),
+            model: None,
         }
     }
 
@@ -420,6 +534,11 @@ impl FlowHits {
             *entry = hit;
             self.len += 1;
         }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn clear(&mut self) {
+        self.len = 0;
     }
 
     pub(crate) fn iter(&self) -> std::slice::Iter<'_, (Rect, usize)> {

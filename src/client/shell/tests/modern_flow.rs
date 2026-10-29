@@ -28,6 +28,7 @@ pub(super) fn flow_snapshot() -> ClientShellSnapshot {
             finished_at_ms: None,
             worker_terminal_id: pane.map(|pane| format!("term_{pane}")),
             pane_id: pane.map(str::to_owned),
+            model: None,
         }
     };
     let mut first = step(0, "ada", "handed_off", Some("pane_2"));
@@ -498,4 +499,388 @@ fn snapshot_reordering_preserves_selected_task_and_original_step() {
     state.compose(120, ROWS).unwrap();
     assert_eq!(flow(&state).task, 0);
     assert_eq!(state.flow_slot_pane(flow(&state).step), Some("pane_6"));
+}
+
+// ---- review round 1
+
+#[test]
+fn every_lane_header_and_the_flow_label_stay_clickable() {
+    let mut state = modern_state(36, flow_snapshot());
+    state.compose(130, 120).unwrap();
+    let lanes: Vec<_> = state
+        .hits
+        .chrome_targets
+        .iter()
+        .filter_map(|(_, target)| match target {
+            ChromeTarget::Lane(lane) => Some(*lane),
+            ChromeTarget::FlowOpen => None,
+        })
+        .collect();
+    assert_eq!(
+        lanes.len(),
+        crate::ui::chrome::state::Lane::ALL.len(),
+        "{lanes:?}"
+    );
+    assert!(
+        state
+            .hits
+            .chrome_targets
+            .iter()
+            .any(|(_, target)| *target == ChromeTarget::FlowOpen),
+        "the WORK label opens the flow"
+    );
+}
+
+#[test]
+fn an_open_flow_closes_when_the_flow_view_or_the_modern_style_goes_away() {
+    for edit in [
+        (|state: &mut ClientShellState| state.config.flow_view = false)
+            as fn(&mut ClientShellState),
+        |state| {
+            state.config.ui_style = crate::config::UiStyleConfig::Classic;
+            state.config.refresh_chrome();
+        },
+    ] {
+        let mut state = open_flow(130, 1);
+        edit(&mut state);
+        state.compose(130, ROWS).unwrap();
+        assert!(
+            state.overlay.is_none(),
+            "the flow stayed open after a live config change"
+        );
+        assert!(state.hits.flow_popup.is_empty() && state.hits.flow_steps.is_empty());
+    }
+}
+
+#[test]
+fn modern_draw_paths_never_allocate_even_with_wide_graphemes() {
+    const FAMILY: &str = "👩‍👩‍👧‍👦👩‍👩‍👧‍👦";
+    let mut projected = flow_snapshot();
+    {
+        let orbit = projected.orbit.as_mut().unwrap();
+        orbit.roles[0].members[0].name = FAMILY.into();
+        orbit.active_tasks[1].title = format!("{FAMILY} title");
+        let task = &mut orbit.active_tasks[1];
+        task.steps[0].member = FAMILY.into();
+        task.steps[0].note = Some(format!("note {FAMILY}"));
+        task.steps[0].next = Some(format!("next {FAMILY}"));
+        task.steps[1].member = FAMILY.into();
+    }
+    let mut state = modern_state(36, projected);
+    let mut outcome = ClientShellInput::default();
+    state.open_orbit_flow(&mut outcome);
+    if let Some(ClientShellOverlay::OrbitFlow(flow)) = state.overlay.as_mut() {
+        flow.task = 1;
+    }
+    state.set_pane_surface(super::modern_headers::bordered_surface(
+        (104, 35),
+        &[("pane_3", 0, 50), ("pane_2", 50, 50)],
+        "pane_3",
+    ));
+    let frame = state.compose(130, ROWS).unwrap().frame;
+    let mut buffer = Buffer::empty(Rect::new(0, 0, 130, ROWS));
+    let team = state.team_sidebar.as_ref().unwrap();
+    let popup = super::super::render::flow_popup(buffer.area).unwrap();
+    let inner = super::super::modern::model::flow::inner_of(popup);
+    let ClientShellOverlay::OrbitFlow(flow_overlay) = state.overlay.as_ref().unwrap() else {
+        unreachable!()
+    };
+    let orbit = state.snapshot.as_deref().unwrap().orbit.as_ref();
+    let draw = super::super::modern::draw::flow::FlowDraw {
+        chrome: &state.config.chrome,
+        spinner: Some(3),
+        now_unix_ms: 10_000_000_000,
+        selected_pane: true,
+        offered: true,
+    };
+    let mut steps = super::super::modern::model::flow::FlowHits::default();
+    let mut tasks = super::super::modern::model::flow::FlowHits::default();
+    let mut hits = ShellHitMap::default();
+    hits.team_agents.reserve(64);
+    hits.team_groups.reserve(64);
+    hits.chrome_targets = Default::default();
+    let ctx = super::super::team_sidebar::TeamRenderContext {
+        config: &state.config,
+        endpoint_id: &state.active_endpoint_id,
+        animation: super::super::animation::AnimationFrame::new(
+            &state.animations,
+            state.config.animations,
+            std::time::Instant::now(),
+        ),
+        focused_pane_id: Some("pane_3"),
+        now_unix_ms: 10_000_000_000,
+        recent: &state.recent,
+        now: std::time::Instant::now(),
+    };
+    let mut painted = frame.clone();
+    let activity = state
+        .tab_activity
+        .values()
+        .next()
+        .copied()
+        .unwrap_or_default();
+    let draw_all = |buffer: &mut Buffer,
+                    steps: &mut super::super::modern::model::flow::FlowHits,
+                    tasks: &mut super::super::modern::model::flow::FlowHits,
+                    hits: &mut ShellHitMap,
+                    painted: &mut FrameData| {
+        steps.clear();
+        tasks.clear();
+        hits.team_agents.clear();
+        hits.team_groups.clear();
+        hits.chrome_targets = Default::default();
+        super::super::modern::draw::flow::render(
+            buffer,
+            inner,
+            flow_overlay,
+            orbit,
+            &draw,
+            steps,
+            tasks,
+        );
+        for (index, line) in team.rows.lines.iter().enumerate() {
+            super::super::modern::draw::team::render_line(
+                buffer,
+                Rect::new(0, index as u16 % 30, 25, 3),
+                index,
+                line,
+                team,
+                &ctx,
+                hits,
+            );
+        }
+        super::super::modern::draw::tabs::render_suffix(
+            buffer,
+            Rect::new(60, 0, 20, 1),
+            &activity,
+            false,
+            &state.config,
+        );
+        super::super::modern::draw::tabs::render_attention(
+            buffer,
+            Rect::new(100, 0, 20, 1),
+            &state.attention_summary,
+            &state.config,
+        );
+        super::super::modern::draw::pane_header::paint(painted, &state.hits.panes, team, &ctx);
+    };
+    // The first pass sizes the reusable hit lists; the second must not allocate.
+    draw_all(&mut buffer, &mut steps, &mut tasks, &mut hits, &mut painted);
+    let count = super::alloc_count::allocations(|| {
+        draw_all(&mut buffer, &mut steps, &mut tasks, &mut hits, &mut painted);
+    });
+    assert_eq!(count, 0, "modern draw paths allocated {count} times");
+}
+
+fn slot_states(state: &ClientShellState) -> Vec<crate::ui::chrome::state::StateKind> {
+    flow(state).layout.as_ref().unwrap().states.clone()
+}
+
+#[test]
+fn each_branch_shows_its_own_live_state_not_the_task_flags() {
+    use crate::ui::chrome::state::StateKind;
+    // Slots: 0 ada (handed off), 1 bo (active branch), 2 bo2 (done), 3 integrator.
+    let mut snapshot = flow_snapshot();
+    snapshot.orbit.as_mut().unwrap().active_tasks[1].blocked = true;
+    let mut state = modern_state(26, snapshot);
+    state.open_orbit_flow(&mut ClientShellInput::default());
+    select(&mut state, 0);
+    if let Some(ClientShellOverlay::OrbitFlow(flow)) = state.overlay.as_mut() {
+        flow.task = 1;
+    }
+    state.compose(130, ROWS).unwrap();
+    assert_eq!(
+        slot_states(&state),
+        [
+            StateKind::Done,
+            StateKind::Working,
+            StateKind::Done,
+            StateKind::Queued
+        ],
+        "a task-level flag belongs to its current worker, not to every branch"
+    );
+
+    let mut snapshot = flow_snapshot();
+    for agent in snapshot.agents.iter_mut().filter(|a| a.pane_id == "pane_5") {
+        agent.agent_status = AgentStatus::Blocked;
+    }
+    state.set_snapshot(Box::new(snapshot));
+    state.compose(130, ROWS).unwrap();
+    assert_eq!(
+        slot_states(&state)[1],
+        StateKind::Blocked,
+        "the branch whose agent waits shows it"
+    );
+    assert_eq!(slot_states(&state)[2], StateKind::Done);
+}
+
+#[test]
+fn the_flow_is_offered_by_help_the_global_menu_and_the_mobile_menu_only_when_modern() {
+    use super::super::flow_view::flow_offered;
+    use super::super::global_menu::global_menu_items;
+    let state = modern_state(26, flow_snapshot());
+    let snapshot = state.snapshot.as_deref().unwrap();
+    assert!(flow_offered(&state.config, snapshot));
+    let labels = |offer| -> Vec<&'static str> {
+        global_menu_items(snapshot, offer)
+            .into_iter()
+            .map(|(label, _)| label)
+            .collect()
+    };
+    assert!(labels(true).contains(&"orbit flow"));
+    assert_eq!(
+        labels(false),
+        ["settings", "keybinds", "reload config", "detach"],
+        "the classic menu is unchanged"
+    );
+    let item = global_menu_items(snapshot, true)
+        .into_iter()
+        .find(|(label, _)| *label == "orbit flow")
+        .unwrap();
+    assert_eq!(
+        item.1,
+        super::super::global_menu::ClientGlobalMenuAction::Binding(
+            crate::input::KeybindAction::OrbitFlow
+        )
+    );
+
+    // Classic, a switched-off flow and a session without a team offer nothing.
+    let mut off = modern_state(26, flow_snapshot());
+    off.config.flow_view = false;
+    assert!(!flow_offered(&off.config, snapshot));
+    let mut classic = modern_state(26, flow_snapshot());
+    classic.config.ui_style = crate::config::UiStyleConfig::Classic;
+    classic.config.refresh_chrome();
+    assert!(!flow_offered(&classic.config, snapshot));
+    let mut bare = flow_snapshot();
+    bare.orbit = None;
+    assert!(!flow_offered(&state.config, &bare));
+}
+
+#[test]
+fn help_lists_the_flow_key_only_while_it_is_offered() {
+    for (offered, expected) in [(true, true), (false, false)] {
+        let mut state = modern_state(26, flow_snapshot());
+        state.config.flow_view = offered;
+        state.overlay = Some(ClientShellOverlay::Help(ClientHelpOverlay {
+            query: TextEditor::default(),
+            search_focused: false,
+            scroll: 0,
+        }));
+        let frame = state.compose(130, 50).unwrap();
+        let text = super::frame_rows(&frame).join("\n");
+        assert_eq!(text.contains("orbit flow"), expected, "{text}");
+    }
+}
+
+#[test]
+fn the_mobile_menu_offers_the_flow_and_opens_it() {
+    let mut state = modern_state(26, flow_snapshot());
+    state.mode = ClientShellMode::Navigate;
+    let frame = state.compose(50, 40).unwrap();
+    let text = super::frame_rows(&frame).join("\n");
+    assert!(text.contains("orbit flow"), "{text}");
+    let target = state
+        .hits
+        .mobile_targets
+        .iter()
+        .filter_map(|(rect, target)| match target {
+            ClientMobileTarget::Menu(index) => Some((*rect, *index)),
+            _ => None,
+        })
+        .find(|(_, index)| {
+            let snapshot = state.snapshot.as_deref().unwrap();
+            super::super::global_menu::global_menu_items(snapshot, true)[*index].0 == "orbit flow"
+        })
+        .expect("a mobile menu target for the flow");
+    let click = crossterm::event::MouseEvent {
+        kind: crossterm::event::MouseEventKind::Down(crossterm::event::MouseButton::Left),
+        column: target.0.x,
+        row: target.0.y,
+        modifiers: crossterm::event::KeyModifiers::NONE,
+    };
+    state.handle_mouse(click, &mut ClientShellInput::default());
+    assert!(
+        matches!(state.overlay, Some(ClientShellOverlay::OrbitFlow(_))),
+        "{:?}",
+        state.overlay
+    );
+}
+
+#[test]
+fn the_step_model_is_drawn_after_the_kind_and_dropped_before_the_member() {
+    let mut snapshot = flow_snapshot();
+    let task = &mut snapshot.orbit.as_mut().unwrap().active_tasks[1];
+    task.steps[0].model = Some("gpt-5.5-preview-with-a-long-name".into());
+    task.steps[1].model = Some("opus-4".into());
+    let mut state = modern_state(26, snapshot.clone());
+    state.open_orbit_flow(&mut ClientShellInput::default());
+    if let Some(ClientShellOverlay::OrbitFlow(flow)) = state.overlay.as_mut() {
+        flow.task = 1;
+    }
+    let wide = popup_text(&mut state, 130);
+    assert!(
+        wide.contains("ada codex · gpt-5.5-preview-with-a-long-name"),
+        "{wide}"
+    );
+    let narrow = popup_text(&mut state, 50);
+    assert!(narrow.contains("ada"), "{narrow}");
+    assert!(
+        !narrow.contains("gpt-5.5"),
+        "the model yields first:\n{narrow}"
+    );
+}
+
+#[test]
+fn the_step_model_is_optional_on_the_wire() {
+    let step = flow_snapshot().orbit.unwrap().active_tasks[1].steps[0].clone();
+    let json = serde_json::to_value(&step).unwrap();
+    assert!(json.get("model").is_none(), "{json}");
+    let mut with = step.clone();
+    with.model = Some("opus".into());
+    let json = serde_json::to_value(&with).unwrap();
+    assert_eq!(json["model"], "opus");
+    let back: crate::protocol::OrbitShellStep = serde_json::from_value(json).unwrap();
+    assert_eq!(back.model.as_deref(), Some("opus"));
+    let mut old = serde_json::to_value(&step).unwrap();
+    old.as_object_mut().unwrap().remove("model");
+    let back: crate::protocol::OrbitShellStep = serde_json::from_value(old).unwrap();
+    assert_eq!(back.model, None, "an older server omits the field");
+}
+
+#[test]
+fn a_model_wider_than_the_wire_width_counter_is_omitted_without_overflow() {
+    let mut snapshot = flow_snapshot();
+    snapshot.orbit.as_mut().unwrap().active_tasks[1].steps[0].model = Some("界".repeat(40_000));
+    let mut state = modern_state(26, snapshot);
+    state.open_orbit_flow(&mut ClientShellInput::default());
+    if let Some(ClientShellOverlay::OrbitFlow(flow)) = state.overlay.as_mut() {
+        flow.task = 1;
+    }
+    assert!(popup_text(&mut state, 130).contains("ada codex"));
+}
+
+#[test]
+fn classic_writer_retains_long_graphemes_while_modern_writer_stays_inline() {
+    use crate::ui::chrome::draw::{put_segment, put_segment_inline};
+    let text = "👩‍👩‍👧‍👦";
+    let area = Rect::new(0, 0, 8, 1);
+    let mut expected = Buffer::empty(area);
+    expected.set_stringn(0, 0, text, 8, ratatui::style::Style::default());
+    let mut classic = Buffer::empty(area);
+    put_segment(
+        &mut classic,
+        0,
+        0,
+        8,
+        text,
+        ratatui::style::Style::default(),
+    );
+    assert_eq!(classic, expected);
+    let mut modern = Buffer::empty(area);
+    let count = super::alloc_count::allocations(|| {
+        put_segment_inline(&mut modern, 0, 0, 8, text, ratatui::style::Style::default());
+    });
+    assert_eq!(count, 0);
+    assert_eq!(modern[(0, 0)].symbol(), "👩");
 }

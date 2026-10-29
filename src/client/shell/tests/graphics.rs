@@ -348,6 +348,7 @@ fn every_dialog_and_menu_occludes_its_panel_not_the_whole_screen() {
                 state.hits.global_launcher,
                 menu,
                 snapshot,
+                super::super::flow_view::flow_offered(&state.config, snapshot),
                 &state.config.palette,
             ),
             _ => render::render_client_overlay(
@@ -363,6 +364,7 @@ fn every_dialog_and_menu_occludes_its_panel_not_the_whole_screen() {
                     spinner: None,
                     now_unix_ms: 0,
                     selected_pane: false,
+                    offered: false,
                 },
             ),
         }

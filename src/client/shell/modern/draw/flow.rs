@@ -10,11 +10,13 @@ use ratatui::{
     style::{Modifier, Style},
 };
 
-use crate::client::shell::modern::model::flow::{FlowHits, FlowLayout, FlowRow};
+use crate::client::shell::modern::model::flow::{task_state, FlowHits, FlowLayout, FlowRow};
 use crate::client::shell::ClientOrbitFlowOverlay;
 use crate::protocol::{OrbitShellActiveTask, OrbitShellStep, OrbitShellView};
 use crate::ui::chrome::age::{age_text, AGE_BUFFER_LEN};
-use crate::ui::chrome::draw::{display_width, put_elided, put_number, put_segment};
+use crate::ui::chrome::draw::{
+    display_width, put_elided, put_number, put_segment_inline as put_segment,
+};
 use crate::ui::chrome::state::StateKind;
 use crate::ui::chrome::Chrome;
 
@@ -34,42 +36,8 @@ pub(in crate::client::shell) struct FlowDraw<'a> {
     pub(in crate::client::shell) now_unix_ms: u64,
     /// Whether the selected slot's worker pane can be focused.
     pub(in crate::client::shell) selected_pane: bool,
-}
-
-/// The state a step shows: approval and blocked belong to the active step that
-/// is the task's current worker; a waiting parallel step is queued.
-fn step_state(task: &OrbitShellActiveTask, step: &OrbitShellStep) -> StateKind {
-    match step.state.as_str() {
-        "active" => {
-            let current = step.parallel.is_none()
-                || step.worker_terminal_id.as_deref() == Some(&task.worker_terminal_id);
-            if current && task.awaiting_approval {
-                StateKind::Approval
-            } else if current && task.blocked {
-                StateKind::Blocked
-            } else if step.parallel.as_deref() == Some("waiting") {
-                StateKind::Queued
-            } else {
-                StateKind::Working
-            }
-        }
-        "done" | "handed_off" => StateKind::Done,
-        "failed" => StateKind::Failed,
-        "pending" => StateKind::Queued,
-        _ => StateKind::Unknown,
-    }
-}
-
-fn task_state(task: &OrbitShellActiveTask) -> StateKind {
-    if task.awaiting_approval {
-        StateKind::Approval
-    } else if task.blocked {
-        StateKind::Blocked
-    } else if task.state == "assigning" {
-        StateKind::Queued
-    } else {
-        StateKind::Working
-    }
+    /// Whether the session offers the flow view (help lists its key).
+    pub(in crate::client::shell) offered: bool,
 }
 
 struct Pen<'a> {
@@ -206,7 +174,7 @@ fn draw_row(
     let muted = Style::default().fg(roles.text_muted);
     match row {
         FlowRow::Header => {
-            let (glyph, glyph_style) = pen.glyph(task_state(task));
+            let (glyph, glyph_style) = pen.glyph(layout.task_state);
             let mut x = pen.put(x, y, right, glyph, glyph_style);
             x = pen.put(x, y, right, " ", Style::default());
             x = pen.put(
@@ -278,7 +246,8 @@ fn draw_row(
                 }
                 _ => {}
             }
-            draw_step(pen, x, y, right, task, step, slot == selected);
+            let state = layout.states[slot];
+            draw_step(pen, (x, y, right), state, step, slot == selected);
         }
         FlowRow::Arrow(slot) => {
             let step = &task.steps[layout.slots[slot].step];
@@ -313,8 +282,7 @@ fn draw_row(
                     pen.highlight(rect);
                 }
                 hits.push((rect, slot));
-                let state = step_state(task, step);
-                let (glyph, glyph_style) = pen.glyph(state);
+                let (glyph, glyph_style) = pen.glyph(layout.states[slot]);
                 let limit = left + rect.width;
                 let mut cx = pen.put(left, y, limit, glyph, glyph_style);
                 cx = pen.put(cx, y, limit, " ", Style::default());
@@ -330,27 +298,23 @@ fn draw_row(
                 let mut cx = pen.elide(left + 2, y + 1, limit, &step.kind, muted);
                 if let Some(phase) = phase_of(step) {
                     cx = pen.put(cx, y + 1, limit, " ", Style::default());
-                    pen.elide(cx, y + 1, limit, phase, muted);
+                    cx = pen.elide(cx, y + 1, limit, phase, muted);
                 }
+                put_model(pen, cx, y + 1, limit, step.model.as_deref());
             }
         }
         FlowRow::Lone => {
             let rect = row_rect(inner, y);
             hits.push((rect, 0));
             pen.highlight(rect);
-            let (glyph, glyph_style) = pen.glyph(task_state(task));
+            let (glyph, glyph_style) = pen.glyph(layout.task_state);
             let mut x = pen.put(x, y, right, glyph, glyph_style);
             x = pen.put(x, y, right, " ", Style::default());
-            let worker = orbit
-                .roles
-                .iter()
-                .flat_map(|role| &role.members)
-                .chain(&orbit.scratch)
-                .find(|member| member.terminal_id.as_deref() == Some(&task.worker_terminal_id));
-            if let Some(worker) = worker {
+            if let Some(worker) = layout.lone.as_ref() {
                 x = pen.elide(x, y, right, &worker.name, member_style(roles, true));
                 x = pen.put(x, y, right, " ", Style::default());
-                pen.elide(x, y, right, &worker.kind, muted);
+                x = pen.elide(x, y, right, &worker.kind, muted);
+                put_model(pen, x, y, right, worker.model.as_deref());
             } else {
                 pen.elide(x, y, right, &task.worker_terminal_id, muted);
             }
@@ -375,20 +339,35 @@ fn phase_of(step: &OrbitShellStep) -> Option<&str> {
         .or_else(|| (step.state == "pending").then_some("waiting"))
 }
 
-/// `glyph member kind … phase age note`: the identity is drawn first so it is
-/// the last thing to be cut, the note last so it is the first.
+/// ` · model` after the kind, only when it fits whole: the model is the first
+/// thing cut after the note. Returns the next free column.
+fn put_model(pen: &mut Pen<'_>, x: u16, y: u16, right: u16, model: Option<&str>) -> u16 {
+    let Some(model) = model else { return x };
+    let separator = pen.draw.chrome.glyphs.separator;
+    let width = display_width(separator)
+        .saturating_add(display_width(model))
+        .saturating_add(2);
+    if width > right.saturating_sub(x) {
+        return x;
+    }
+    let muted = Style::default().fg(pen.draw.chrome.roles.text_muted);
+    let x = pen.put(x, y, right, " ", Style::default());
+    let x = pen.put(x, y, right, separator, muted);
+    let x = pen.put(x, y, right, " ", Style::default());
+    pen.put(x, y, right, model, muted)
+}
+
+/// `glyph member kind model … phase age note`: the identity is drawn first so it
+/// is the last thing to be cut, the note last so it is the first.
 fn draw_step(
     pen: &mut Pen<'_>,
-    x: u16,
-    y: u16,
-    right: u16,
-    task: &OrbitShellActiveTask,
+    (x, y, right): (u16, u16, u16),
+    state: StateKind,
     step: &OrbitShellStep,
     selected: bool,
 ) {
     let roles = &pen.draw.chrome.roles;
     let muted = Style::default().fg(roles.text_muted);
-    let state = step_state(task, step);
     let (glyph, glyph_style) = pen.glyph(state);
     let mut x = pen.put(x, y, right, glyph, glyph_style);
     x = pen.put(x, y, right, " ", Style::default());
@@ -414,6 +393,7 @@ fn draw_step(
     );
     x = pen.put(x, y, free_right, " ", Style::default());
     x = pen.elide(x, y, free_right, &step.kind, muted);
+    x = put_model(pen, x, y, free_right, step.model.as_deref());
     if let Some(note) = step.note.as_deref() {
         x = pen.put(x, y, free_right, "  ", Style::default());
         pen.elide(

@@ -938,9 +938,12 @@ fn mobile_items(
     }
 
     items.push(MobileItem::section("menu", palette));
-    for (index, (label, _)) in super::global_menu::global_menu_items(snapshot)
-        .into_iter()
-        .enumerate()
+    for (index, (label, _)) in super::global_menu::global_menu_items(
+        snapshot,
+        super::flow_view::flow_offered(config, snapshot),
+    )
+    .into_iter()
+    .enumerate()
     {
         items.push(MobileItem {
             lines: vec![Line::from(Span::styled(
@@ -1084,12 +1087,15 @@ impl ClientShellState {
             }
             Some(ClientMobileTarget::Menu(index)) => {
                 let actionable = self.snapshot.as_deref().is_some_and(|snapshot| {
-                    super::global_menu::global_menu_items(snapshot)
-                        .get(index)
-                        .is_some_and(|(_, action)| {
-                            *action != super::global_menu::ClientGlobalMenuAction::WhatsNew
-                                || snapshot.release_notes.is_some()
-                        })
+                    super::global_menu::global_menu_items(
+                        snapshot,
+                        super::flow_view::flow_offered(&self.config, snapshot),
+                    )
+                    .get(index)
+                    .is_some_and(|(_, action)| {
+                        *action != super::global_menu::ClientGlobalMenuAction::WhatsNew
+                            || snapshot.release_notes.is_some()
+                    })
                 });
                 if actionable {
                     self.mobile_switcher_suspended = true;

@@ -132,6 +132,7 @@ impl Task {
                     // Filled by the view, which knows terminals and panes.
                     worker_terminal_id: None,
                     pane_id: None,
+                    model: None,
                 })
             })
             .collect();

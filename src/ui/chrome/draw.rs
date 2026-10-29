@@ -1,15 +1,32 @@
-//! Allocation-free cell writers shared by classic and modern chrome. They
-//! write borrowed text and stack-formatted numbers into a buffer and never
-//! allocate, lock, or read the clock.
+//! Cell writers shared by classic and modern chrome. Modern inline writers
+//! bound symbols to cell storage; classic writers retain ratatui representation.
+//! Neither path locks or reads the clock.
 
 use ratatui::{buffer::Buffer, layout::Rect, style::Style};
+use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
+
+/// Bytes a cell holds inline; a longer symbol would make the cell allocate.
+const INLINE_SYMBOL_BYTES: usize = std::mem::size_of::<String>();
+
+/// The symbol written for `grapheme`: itself when it fits a cell inline, else
+/// its first scalar, so painting never allocates (a long ZWJ sequence degrades
+/// to its first emoji instead of a heap-backed cell).
+fn inline_symbol(grapheme: &str) -> &str {
+    if grapheme.len() <= INLINE_SYMBOL_BYTES {
+        return grapheme;
+    }
+    grapheme
+        .chars()
+        .next()
+        .map_or("", |first| &grapheme[..first.len_utf8()])
+}
 
 pub(crate) fn display_width(text: &str) -> u16 {
     UnicodeWidthStr::width(text).min(u16::MAX as usize) as u16
 }
 
-/// Writes at most `width` cells of `text` at `(x, y)`; clipped to the buffer.
+/// Classic writer: preserve ratatui's full grapheme representation exactly.
 pub(crate) fn put_text(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &str, style: Style) {
     if width == 0 || y >= buffer.area.bottom() || x >= buffer.area.right() {
         return;
@@ -17,7 +34,7 @@ pub(crate) fn put_text(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &s
     buffer.set_stringn(x, y, text, width as usize, style);
 }
 
-/// Writes `text` clipped at column `right`; returns the next free column.
+/// Classic segment writer; modern surfaces use `put_segment_inline`.
 pub(crate) fn put_segment(
     buffer: &mut Buffer,
     x: u16,
@@ -28,6 +45,48 @@ pub(crate) fn put_segment(
 ) -> u16 {
     let width = display_width(text).min(right.saturating_sub(x));
     put_text(buffer, x, y, width, text, style);
+    x.saturating_add(width)
+}
+
+/// Writes at most `width` cells of `text` at `(x, y)`; clipped to the buffer.
+fn put_text_inline(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &str, style: Style) {
+    if width == 0 || y >= buffer.area.bottom() || x >= buffer.area.right() {
+        return;
+    }
+    let right = (u32::from(x) + u32::from(width)).min(u32::from(buffer.area.right())) as u16;
+    let mut x = x;
+    for grapheme in text.graphemes(true) {
+        if grapheme.contains(char::is_control) {
+            continue;
+        }
+        let cells = display_width(grapheme);
+        if cells == 0 {
+            continue;
+        }
+        if cells > right.saturating_sub(x) {
+            break;
+        }
+        buffer[(x, y)]
+            .set_symbol(inline_symbol(grapheme))
+            .set_style(style);
+        for covered in x + 1..x + cells {
+            buffer[(covered, y)].reset();
+        }
+        x += cells;
+    }
+}
+
+/// Writes `text` clipped at column `right`; returns the next free column.
+pub(crate) fn put_segment_inline(
+    buffer: &mut Buffer,
+    x: u16,
+    y: u16,
+    right: u16,
+    text: &str,
+    style: Style,
+) -> u16 {
+    let width = display_width(text).min(right.saturating_sub(x));
+    put_text_inline(buffer, x, y, width, text, style);
     x.saturating_add(width)
 }
 
@@ -44,10 +103,10 @@ pub(crate) fn put_elided(
 ) -> u16 {
     let available = right.saturating_sub(x);
     if display_width(text) <= available || available == 0 {
-        return put_segment(buffer, x, y, right, text, style);
+        return put_segment_inline(buffer, x, y, right, text, style);
     }
     let ellipsis_width = display_width(ellipsis).min(available);
-    let next = put_segment(
+    let next = put_segment_inline(
         buffer,
         x,
         y,
@@ -55,7 +114,7 @@ pub(crate) fn put_elided(
         text,
         style,
     );
-    put_segment(buffer, next, y, right, ellipsis, style)
+    put_segment_inline(buffer, next, y, right, ellipsis, style)
 }
 
 /// Writes `value` in decimal without allocating; returns the next column.
@@ -78,7 +137,7 @@ pub(crate) fn put_number(
         }
     }
     match std::str::from_utf8(&digits[start..]) {
-        Ok(text) => put_segment(buffer, x, y, right, text, style),
+        Ok(text) => put_segment_inline(buffer, x, y, right, text, style),
         Err(_) => x,
     }
 }
@@ -109,7 +168,7 @@ pub(crate) fn put_bar(
     let mut x = x;
     for cell in 0..total {
         let (text, style) = if cell < filled { full } else { empty };
-        x = put_segment(buffer, x, y, right, text, style);
+        x = put_segment_inline(buffer, x, y, right, text, style);
     }
     x
 }

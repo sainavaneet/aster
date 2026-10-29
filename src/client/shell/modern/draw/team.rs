@@ -11,7 +11,9 @@ use crate::client::shell::modern::model::rows::Tier;
 use crate::client::shell::team_rows::TeamLineRef;
 use crate::client::shell::team_sidebar::{TeamRenderContext, TeamRow, TeamSidebar};
 use crate::client::shell::ShellHitMap;
-use crate::ui::chrome::draw::{display_width, put_elided, put_number, put_segment};
+use crate::ui::chrome::draw::{
+    display_width, put_elided, put_number, put_segment_inline as put_segment,
+};
 
 const LEAD_INDENT: u16 = 1;
 const GUTTER_X: u16 = 1;

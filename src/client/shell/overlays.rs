@@ -67,7 +67,7 @@ pub(crate) fn render_client_overlay(
         }
         ClientShellOverlay::Rename(v) => render_rename_overlay(b, v, p),
         ClientShellOverlay::ConfirmClose(v) => render_confirm_close_overlay(b, v, p),
-        ClientShellOverlay::Help(v) => render_help_overlay(b, v, k, p),
+        ClientShellOverlay::Help(v) => render_help_overlay(b, v, k, flow.offered, p),
         ClientShellOverlay::OrbitFlow(v) => render_flow_overlay(b, v, s, flow, p),
         ClientShellOverlay::Navigator(v) => {
             render_navigator_overlay(b, v, endpoints, active_endpoint_id, p)
@@ -93,9 +93,10 @@ pub(crate) fn render_global_menu(
     launcher: Rect,
     menu: &ClientGlobalMenuOverlay,
     snapshot: &ClientShellSnapshot,
+    offer_flow: bool,
     palette: &Palette,
 ) -> Option<OverlayRender> {
-    let items = super::super::global_menu::global_menu_items(snapshot);
+    let items = super::super::global_menu::global_menu_items(snapshot, offer_flow);
     let screen = buffer.area;
     let width = items
         .iter()
@@ -1058,14 +1059,18 @@ fn render_navigator_overlay(
 fn help_lines(
     keybinds: &LiveKeybindConfig,
     query: &str,
+    offer_flow: bool,
     palette: &Palette,
 ) -> Vec<(usize, ratatui::text::Line<'static>)> {
     use ratatui::text::{Line, Span};
 
-    let groups = crate::input::filter_keybind_help_groups(
-        crate::input::keybind_help_groups(&keybinds.keybinds, &keybinds.prefix),
-        query,
-    );
+    let mut groups = crate::input::keybind_help_groups(&keybinds.keybinds, &keybinds.prefix);
+    if offer_flow {
+        if let Some((_, entries)) = groups.iter_mut().find(|(name, _)| *name == "global") {
+            entries.push(crate::input::orbit_flow_help_entry(&keybinds.keybinds));
+        }
+    }
+    let groups = crate::input::filter_keybind_help_groups(groups, query);
     let key_width = groups
         .iter()
         .flat_map(|(_, entries)| entries.iter().map(|(key, _)| key.chars().count()))
@@ -1168,6 +1173,7 @@ fn render_help_overlay(
     b: &mut Buffer,
     h: &ClientHelpOverlay,
     k: &LiveKeybindConfig,
+    offer_flow: bool,
     p: &Palette,
 ) -> Option<OverlayRender> {
     use ratatui::widgets::{Paragraph, Widget, Wrap};
@@ -1229,7 +1235,7 @@ fn render_help_overlay(
     };
 
     let body = Rect::new(i.x, i.y + 3, i.width, i.height.saturating_sub(5));
-    let lines = help_lines(k, &h.query, p);
+    let lines = help_lines(k, &h.query, offer_flow, p);
     let viewport_rows = usize::from(body.height.max(1));
     let wrapped_rows = |width: u16| {
         let width = usize::from(width.max(1));

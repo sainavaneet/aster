@@ -335,27 +335,21 @@ impl App {
                     terminal.map_or("unknown", |terminal| state_name(terminal.state))
                 };
                 let mut shell_steps = task.shell_steps(self.orbit_step_total(task));
-                // Who ran each step: a parallel step's own agent, the current
-                // worker for the active step, else the roster member's terminal.
-                // The pane exists only while that terminal sits in one.
+                // Who ran each step is what the ledger recorded for that kind of
+                // step; an owner that was never recorded stays absent (and the
+                // client cannot focus it). The pane exists only while that
+                // terminal sits in one.
                 for step in &mut shell_steps.steps {
-                    let terminal = task
+                    let source = task
                         .steps
                         .iter()
-                        .find(|source| source.index == usize::from(step.index))
-                        .and_then(|source| source.parallel.as_ref()?.worker_id.clone())
-                        .or_else(|| {
-                            (step.state == "active" && step.parallel.is_none())
-                                .then(|| task.worker_id.clone())
-                        })
-                        .or_else(|| {
-                            self.orbit_team
-                                .roster
-                                .member(&step.member)
-                                .and_then(|(_, member)| member.terminal_id.clone())
-                        });
+                        .find(|source| source.index == usize::from(step.index));
+                    let roster = self.orbit_team.roster.member(&step.member).map(|(_, m)| m);
+                    let (terminal, model) =
+                        step_owner(source, step.state == "active", &task.worker_id, roster);
                     step.pane_id = terminal.as_ref().and_then(|id| pane_ids.get(id)).cloned();
                     step.worker_terminal_id = terminal;
+                    step.model = model.filter(|model| !model.is_empty());
                 }
                 OrbitShellActiveTask {
                     task_id: task.task_id.clone(),
@@ -405,9 +399,115 @@ impl App {
     }
 }
 
+/// The terminal and model that ran a step: what the ledger recorded for that
+/// kind of step. A parallel step runs in its own agent once launched; the
+/// integrator is the terminal the integration recorded; a relay step is the
+/// current worker while active, else the roster member it names. An owner that
+/// was never recorded stays absent rather than guessed from the roster.
+fn step_owner(
+    source: Option<&super::steps::Step>,
+    active: bool,
+    task_worker: &str,
+    roster: Option<&crate::app::orbit_team::roster::Member>,
+) -> (Option<String>, Option<String>) {
+    let roster_model = roster.and_then(|member| member.model.clone());
+    match source {
+        Some(source) if source.parallel.is_some() => {
+            let parallel = source.parallel.as_ref();
+            (
+                parallel.and_then(|parallel| parallel.worker_id.clone()),
+                parallel
+                    .and_then(|parallel| parallel.model.clone())
+                    .or(roster_model),
+            )
+        }
+        Some(source) if source.integrate.is_some() => (
+            source
+                .integrate
+                .as_ref()
+                .and_then(|integrate| integrate.worker_id.clone()),
+            roster_model,
+        ),
+        _ => (
+            if active {
+                Some(task_worker.to_owned())
+            } else {
+                roster.and_then(|member| member.terminal_id.clone())
+            },
+            roster_model,
+        ),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod owners {
+        use super::super::*;
+        use crate::app::orbit_notifications::parallel::{Integrate, Parallel};
+        use crate::app::orbit_notifications::steps::Step;
+        use crate::app::orbit_team::roster::Member;
+
+        fn member() -> Member {
+            serde_json::from_value(serde_json::json!({
+                "name": "ada", "kind": "codex", "model": "gpt-5", "terminal_id": "term_roster"
+            }))
+            .unwrap()
+        }
+
+        fn step() -> Step {
+            Step::active(0, "ada", "codex", 1)
+        }
+
+        #[test]
+        fn a_relay_step_is_the_current_worker_while_active_else_the_roster_member() {
+            let roster = member();
+            let (terminal, model) = step_owner(Some(&step()), true, "term_now", Some(&roster));
+            assert_eq!(terminal.as_deref(), Some("term_now"));
+            assert_eq!(model.as_deref(), Some("gpt-5"));
+            let (terminal, _) = step_owner(Some(&step()), false, "term_now", Some(&roster));
+            assert_eq!(terminal.as_deref(), Some("term_roster"));
+            let (terminal, model) = step_owner(Some(&step()), false, "term_now", None);
+            assert_eq!((terminal, model), (None, None));
+        }
+
+        #[test]
+        fn an_unlaunched_parallel_step_has_no_owner_and_ignores_the_roster() {
+            let mut parallel = step();
+            parallel.parallel = Some(
+                serde_json::from_value::<Parallel>(serde_json::json!({
+                    "prompt": "p", "files": [], "phase": "waiting"
+                }))
+                .unwrap(),
+            );
+            let roster = member();
+            let (terminal, _) = step_owner(Some(&parallel), true, "term_now", Some(&roster));
+            assert_eq!(terminal, None, "no launched agent, no pane to focus");
+            parallel.parallel.as_mut().unwrap().worker_id = Some("term_branch".into());
+            parallel.parallel.as_mut().unwrap().model = Some("opus".into());
+            let (terminal, model) = step_owner(Some(&parallel), true, "term_now", Some(&roster));
+            assert_eq!(terminal.as_deref(), Some("term_branch"));
+            assert_eq!(model.as_deref(), Some("opus"), "the step's own model wins");
+        }
+
+        #[test]
+        fn the_integrator_is_the_recorded_integration_terminal_not_the_task_worker() {
+            let mut integrator = step();
+            integrator.integrate = Some(
+                serde_json::from_value::<Integrate>(serde_json::json!({
+                    "phase": "waiting", "patches": [], "repo_root": "/r"
+                }))
+                .unwrap(),
+            );
+            let roster = member();
+            let (terminal, _) = step_owner(Some(&integrator), true, "term_now", Some(&roster));
+            assert_eq!(terminal, None, "not yet found, so absent");
+            integrator.integrate.as_mut().unwrap().worker_id = Some("term_integrator".into());
+            let (terminal, _) = step_owner(Some(&integrator), true, "term_now", Some(&roster));
+            assert_eq!(terminal.as_deref(), Some("term_integrator"));
+        }
+    }
 
     #[test]
     fn shorten_keeps_short_text_and_collapses_whitespace() {

@@ -16,7 +16,7 @@ use ratatui::{
 use crate::api::schema::AgentStatus;
 use crate::client::shell::animation::{blend_color, AgentRowAnimationPhase};
 use crate::client::shell::team_sidebar::TeamRenderContext;
-use crate::ui::chrome::draw::{display_width, put_number, put_segment};
+use crate::ui::chrome::draw::{display_width, put_number, put_segment_inline as put_segment};
 use crate::ui::chrome::state::{StateCounts, StateKind};
 
 /// States a role header rolls up, most urgent first.

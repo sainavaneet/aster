@@ -38,6 +38,12 @@ fn entry(key: impl Into<String>, label: &'static str) -> KeybindHelpEntry {
     (key.into(), Cow::Borrowed(label))
 }
 
+/// The flow view's line for the help overlay's global group; callers add it
+/// only while the session offers the view.
+pub(crate) fn orbit_flow_help_entry(keybinds: &Keybinds) -> KeybindHelpEntry {
+    entry(binding_label(&keybinds.orbit_flow), "orbit flow")
+}
+
 fn binding_label(bindings: &ActionKeybinds) -> String {
     bindings.label().unwrap_or_else(|| "unset".to_owned())
 }

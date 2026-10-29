@@ -7,11 +7,22 @@ use crossterm::event::{MouseButton, MouseEventKind};
 use super::modern::model::flow::{inner_of, FlowKey, FlowLayout};
 use super::*;
 
+/// Whether help, the global menu and the mobile menu offer the flow view: a
+/// modern session with `ui.flow_view` on and an Orbit team to show.
+pub(super) fn flow_offered(config: &ClientShellConfig, snapshot: &ClientShellSnapshot) -> bool {
+    config.flow_view && config.chrome.is_modern() && snapshot.orbit.is_some()
+}
+
 impl ClientShellState {
+    /// The flow view is a modern surface behind its own switch.
+    pub(super) fn flow_view_enabled(&self) -> bool {
+        self.config.flow_view && self.config.chrome.is_modern()
+    }
+
     /// Opens the flow view on the task that needs you most, else the first.
     /// Inert when `ui.flow_view` is off or the session has no Orbit team.
     pub(super) fn open_orbit_flow(&mut self, outcome: &mut ClientShellInput) {
-        if !self.config.flow_view || !self.config.chrome.is_modern() {
+        if !self.flow_view_enabled() {
             return;
         }
         let Some(orbit) = self.snapshot.as_deref().and_then(|s| s.orbit.as_ref()) else {
@@ -37,6 +48,7 @@ impl ClientShellState {
     pub(super) fn refresh_flow_layout(
         overlay: &mut Option<ClientShellOverlay>,
         snapshot: &ClientShellSnapshot,
+        attention: Option<&modern::model::team::PaneAttention>,
         serial: u64,
         area: Rect,
     ) {
@@ -78,7 +90,8 @@ impl ClientShellState {
         if flow.layout.as_ref().is_some_and(|layout| layout.key == key) {
             return;
         }
-        let layout = FlowLayout::build(orbit, flow.task, key);
+        let mut layout = FlowLayout::build(orbit, flow.task, key);
+        layout.project_live(orbit, snapshot, attention);
         if flow.default_step {
             flow.default_step = false;
             let task = orbit.active_tasks.get(flow.task);

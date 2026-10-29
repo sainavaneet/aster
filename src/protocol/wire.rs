@@ -1096,6 +1096,9 @@ pub struct OrbitShellStep {
     /// worker stopped, so a client cannot focus a pane that is gone.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pane_id: Option<String>,
+    /// The model the step's agent runs, when known.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -1994,6 +1997,7 @@ mod tests {
                 finished_at_ms: None,
                 worker_terminal_id: None,
                 pane_id: None,
+                model: None,
             }],
             step_total: Some(2),
             parallel: Some(OrbitShellParallel { done: 1, total: 2 }),
@@ -2065,6 +2069,7 @@ mod tests {
             finished_at_ms: None,
             worker_terminal_id: Some("term_9".into()),
             pane_id: Some("w1:p2".into()),
+            model: None,
         };
         let encoded = serde_json::to_value(&identified).unwrap();
         assert_eq!(encoded["pane_id"], "w1:p2");
@@ -2073,6 +2078,7 @@ mod tests {
         let bare = OrbitShellStep {
             worker_terminal_id: None,
             pane_id: None,
+            model: None,
             ..identified
         };
         let encoded = serde_json::to_value(&bare).unwrap();

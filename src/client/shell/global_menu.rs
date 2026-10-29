@@ -21,6 +21,7 @@ pub(super) fn global_menu_item_has_badge(
 
 pub(super) fn global_menu_items(
     snapshot: &ClientShellSnapshot,
+    offer_flow: bool,
 ) -> Vec<(&'static str, ClientGlobalMenuAction)> {
     let mut items = vec![
         (
@@ -36,6 +37,15 @@ pub(super) fn global_menu_items(
             ClientGlobalMenuAction::Binding(crate::input::KeybindAction::ReloadConfig),
         ),
     ];
+    if offer_flow {
+        items.insert(
+            2,
+            (
+                "orbit flow",
+                ClientGlobalMenuAction::Binding(crate::input::KeybindAction::OrbitFlow),
+            ),
+        );
+    }
     if snapshot.update_available.is_some() || snapshot.latest_release_notes_available {
         items.push((
             if snapshot.update_available.is_some() {
@@ -65,11 +75,13 @@ impl ClientShellState {
     }
 
     pub(super) fn move_global_menu_selection(&mut self, delta: isize) {
-        let item_count = self
-            .snapshot
-            .as_deref()
-            .map(global_menu_items)
-            .map_or(0, |items| items.len());
+        let item_count = self.snapshot.as_deref().map_or(0, |snapshot| {
+            global_menu_items(
+                snapshot,
+                super::flow_view::flow_offered(&self.config, snapshot),
+            )
+            .len()
+        });
         let Some(ClientShellOverlay::GlobalMenu(menu)) = self.overlay.as_mut() else {
             return;
         };
@@ -83,9 +95,12 @@ impl ClientShellState {
         outcome: &mut ClientShellInput,
     ) {
         let Some(action) = self.snapshot.as_deref().and_then(|snapshot| {
-            global_menu_items(snapshot)
-                .get(index)
-                .map(|(_, action)| *action)
+            global_menu_items(
+                snapshot,
+                super::flow_view::flow_offered(&self.config, snapshot),
+            )
+            .get(index)
+            .map(|(_, action)| *action)
         }) else {
             return;
         };

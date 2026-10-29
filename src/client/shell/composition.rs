@@ -751,10 +751,19 @@ impl ClientShellState {
             occlusion.cover(bar);
         }
         // The flow view's layout is brought up to date before it is drawn; with
-        // the view closed none of this runs.
+        // the view closed none of this runs. A live config change that makes the
+        // view ineligible closes an open one.
+        if matches!(self.overlay, Some(ClientShellOverlay::OrbitFlow(_)))
+            && !self.flow_view_enabled()
+        {
+            self.overlay = None;
+        }
         Self::refresh_flow_layout(
             &mut self.overlay,
             snapshot,
+            self.team_sidebar
+                .as_ref()
+                .map(|team| &team.modern.attention),
             self.snapshot_serial,
             Rect::new(0, 0, frame.width, frame.height),
         );
@@ -764,6 +773,7 @@ impl ClientShellState {
             spinner: self.animations.spinner_index(self.config.animations, now),
             now_unix_ms: frame_unix_ms,
             selected_pane: flow_pane,
+            offered: super::flow_view::flow_offered(&self.config, snapshot),
         };
         if let Some(overlay) = self.overlay.as_ref() {
             let mut composed = frame.to_ratatui_buffer()?;
@@ -779,6 +789,7 @@ impl ClientShellState {
                     self.hits.global_launcher,
                     menu,
                     snapshot,
+                    super::flow_view::flow_offered(&self.config, snapshot),
                     &self.config.palette,
                 )?;
                 occlusion.cover(rendered.area);
