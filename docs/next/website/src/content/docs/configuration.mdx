@@ -783,6 +783,23 @@ characters); `polaris` and `orbit` are reserved, and member names are unique
 across the team. At most 8 roles, 4 members per role, and 4096 bytes of role
 prompt.
 
+### Orbit services
+
+Use `orbit_service_start` for servers and watchers, and jobs for commands that
+finish. For example, `aster orbit service-start '{"name":"web","command":"python3 -m http.server 8000","ready_url":"http://localhost:8000"}'`.
+Services survive job completion and stop only on `orbit_service_stop` or server
+shutdown (or when their command exits). Starting an existing name stops its old
+process group before launching the replacement. Optional `cwd` is relative to
+the project directory, or absolute. Choose `ready_url` (HTTP success via curl)
+or `ready_log` (a literal output substring); `timeout_ms` defaults to 30000.
+Readiness timeout marks the service `timed_out` without stopping it.
+
+`aster orbit service-list` and `orbit_activity.services` show pid, uptime,
+readiness, status, and the last 20 output lines. Capture retains the most recent
+4 MiB per service and reports truncation. `aster orbit service-stop '{"name":"web"}'`
+requests process-group termination. Services belong to the current server session
+and are not restored after a restart.
+
 ### Orbit jobs and workers
 
 Polaris can use `orbit_exec` to run a tracked, noninteractive command in the

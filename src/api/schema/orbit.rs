@@ -329,3 +329,23 @@ pub struct OrbitAgentApprovalParams {
     /// Worker terminal_id, name, or pane ID inside the bound Orbit tab.
     pub name: String,
 }
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct OrbitServiceStartParams {
+    pub name: String,
+    pub command: String,
+    #[serde(default)]
+    pub cwd: Option<String>,
+    #[serde(default)]
+    pub ready_url: Option<String>,
+    #[serde(default)]
+    pub ready_log: Option<String>,
+    #[serde(default)]
+    pub timeout_ms: Option<u64>,
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct OrbitServiceStopParams {
+    pub name: String,
+}
