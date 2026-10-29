@@ -11,6 +11,34 @@ fn reply(id: String, result: Result<Value, String>) -> String {
     }
 }
 impl App {
+    pub(crate) async fn shutdown_orbit_services(&mut self) {
+        self.orbit_services.shutdown().await;
+    }
+    pub(super) fn handle_orbit_service_start(
+        &mut self,
+        id: String,
+        params: OrbitServiceStartParams,
+    ) -> String {
+        let cwd = match self.orbit_job_cwd() {
+            Ok(cwd) => cwd,
+            Err(e) => return reply(id, Err(e)),
+        };
+        reply(id, self.orbit_services.start(cwd, params))
+    }
+    pub(super) fn handle_orbit_service_stop(
+        &mut self,
+        id: String,
+        params: OrbitServiceStopParams,
+    ) -> String {
+        reply(id, self.orbit_services.stop(&params.name))
+    }
+    pub(super) fn handle_orbit_service_list(&mut self, id: String) -> String {
+        if let Err(e) = self.orbit_job_cwd() {
+            return reply(id, Err(e));
+        }
+        reply(id, Ok(self.orbit_services.list()))
+    }
+
     pub(super) fn orbit_job_cwd(&mut self) -> Result<PathBuf, String> {
         let (ws, _, _) = self
             .resolve_orbit_pane(None)
@@ -105,6 +133,7 @@ impl App {
             .filter(|agent| agent.tab_id == tab_id)
             .collect();
         let mut activity = self.orbit_task_activity();
+        activity["services"] = self.orbit_services.list();
         activity["jobs"] = self.orbit_jobs.list();
         activity["agents"] = json!(agents);
         activity["stale_panes"] = json!(self.orbit_stale_panes());

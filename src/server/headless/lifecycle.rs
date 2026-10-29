@@ -337,6 +337,7 @@ impl HeadlessServer {
     /// close client connections, remove socket files, and clean up.
     pub(super) async fn complete_shutdown(&mut self) -> io::Result<()> {
         info!("completing server shutdown");
+        self.app.shutdown_orbit_services().await;
         // The Orbit ledger and roster are written off the event loop; make
         // sure the last state is on disk before the process exits.
         self.app.flush_orbit_files();

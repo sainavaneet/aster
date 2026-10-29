@@ -3071,6 +3071,64 @@
           ],
           "type": "object"
         },
+        "OrbitServiceStartParams": {
+          "additionalProperties": false,
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "cwd": {
+              "default": null,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "ready_log": {
+              "default": null,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ready_url": {
+              "default": null,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "timeout_ms": {
+              "default": null,
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "command"
+          ],
+          "type": "object"
+        },
+        "OrbitServiceStopParams": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
         "OrbitSplitParams": {
           "additionalProperties": false,
           "properties": {
@@ -7560,6 +7618,54 @@
             },
             "params": {
               "$ref": "#/schemas/request/$defs/OrbitDecisionsParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "orbit.service_start",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/OrbitServiceStartParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "orbit.service_stop",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/OrbitServiceStopParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "orbit.service_list",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/EmptyParams"
             }
           },
           "required": [

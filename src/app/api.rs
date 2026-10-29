@@ -984,6 +984,13 @@ impl App {
             Method::OrbitTaskCancel(params) => {
                 return self.handle_orbit_task_cancel(request.id, params)
             }
+            Method::OrbitServiceStart(params) => {
+                return self.handle_orbit_service_start(request.id, params)
+            }
+            Method::OrbitServiceStop(params) => {
+                return self.handle_orbit_service_stop(request.id, params)
+            }
+            Method::OrbitServiceList(_) => return self.handle_orbit_service_list(request.id),
             Method::OrbitExec(params) => return self.handle_orbit_exec(request.id, params),
             Method::OrbitJobStatus(params) => {
                 return self.handle_orbit_job_status(request.id, params)
