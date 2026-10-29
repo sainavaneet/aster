@@ -460,14 +460,15 @@ today. The lead row is clickable like today; every member row keeps its existing
   not an alarm. Needs-you tasks show the bar in `state_approval`, because waiting is the signal. Computed per frame from `created_at_ms` with
   integer compares; no allocation.
 - **Relay strip** (row 3): up to 8 nodes from `steps` (`●` done, spinner/`◐` active, `○` pending, `✗` failed)
-  joined by `━`, then `step N/M`; at wide tier ` → codex` names the next member's kind. Without `steps` data
+  joined by `━` (the strip window is cosmetic; if more than 8 steps exist the nodes elide the middle with `…`), then `step N/M` from `FlowSummary`; at wide tier ` → codex` names the next member's kind. Without `steps` data
   (older server) the row is omitted and nothing else changes.
-- **Parallel**: `‖ parallel 1/2` counts finished steps; wide tier appends one state glyph per branch.
+- **Parallel**: `‖ parallel 1/2` counts finished steps over **all** parallel steps (`OrbitShellParallel`, not the visible window); wide tier appends one state glyph per branch.
   `integrating` replaces it with `⊕ integrating` while the integrate step is active.
 - **Approval**: `⚑` (peach) leads the card row, replaces the state glyph, and puts the card in `needs you`
   even when the worker state says `working`.
-- Lane headers toggle collapse with the same click/keyboard mechanism as groups today (the
-  `collapsed_team_groups` set, keys `lane:needs_you` etc.).
+- Lane headers toggle collapse by click, through a new hit-target type (section 6.6). Lane collapse state is a
+  separate `collapsed_lanes: LaneSet` (a `u8` bit set of `Lane`), not strings in `collapsed_team_groups`, so a lane
+  can never collide with a role named `needs_you`.
 - Task rows still focus the worker's pane on click; recent rows stay non-interactive as today.
 
 ### 5.5 Tab bar
@@ -557,6 +558,14 @@ At 120 columns parallel steps sit side by side, then the integrator:
 
 - Source: `OrbitShellActiveTask.steps` (+ `step_total`). Handoff notes are the redacted first line of `done`
   (and `next` is shown on the arrow row). Without `steps` the overlay shows one node (lead → worker).
+- **Completion and identity stay visible under truncation.** The header always shows `parallel 3/4 done` and
+  `step 2/5` from `FlowSummary` (all steps), never from the rendered rows. Every step row keeps
+  `member·kind` as its leftmost, last-to-drop field; when a step has flow focus its row is expanded with the
+  same identity plus its note, and when width is short the **note** is truncated first, then the age, then the
+  model, member/kind are retained before other fields. At widths too small to fit that identity, clip by display width within the row; never overflow or assume arbitrary identities fit. Steps outside the note window render as identity-only rows (state glyph,
+  member, kind); steps beyond the identity list collapse into one `… N more before/after` row that is not
+  focusable but whose count comes from `steps_omitted`. Parallel branches show a branch counter (`3/4`) on the
+  `┬ parallel` row even when only some branches fit on screen at 80 columns.
 - Entry points: `keys.orbit_flow`, the global menu, the work header (modified click or an explicit `flow` link at wide tier),
   and the task row context menu. All absent under `ui.style = "classic"`; the key is inert and not listed in help there.
 - `ui.orbit_flow = false` removes the entry points while staying modern.
@@ -633,10 +642,36 @@ ui.style (config) ──► ClientShellConfig.chrome: Chrome { style, glyphs, ro
    render entry points ────┴──► match chrome.style { Classic => existing fn (untouched), Modern => modern::draw::… }
 ```
 
-`style` is read at **five dispatch points only**: `render_team_panel`, `render_tab_bar`, the pane-header pass in
-`composition.rs`, `render_visible_notification`/`render_mode_bar`, and the overlay opener. Everything modern is
-in new files. Classic function bodies are not edited (section 9). Shared pure helpers
-(`age_text`, `put_number`, `blend_color`) are moved/re-exported, not changed.
+`style` is read **only at the dispatch points in the table below**, one per surface. Each is a single `match`
+(or an early `if chrome.style == Classic { return existing(..) }`) whose classic arm calls the existing function with
+its existing arguments. Everything modern is in new files. Classic function bodies are not edited (section 9).
+Shared pure helpers (`age_text`, `put_number`, `blend_color`) are moved/re-exported, not changed. Style is
+client-local configuration (`ClientShellConfig::from_config`); a remote or cloud endpoint is drawn with the
+local client's style.
+
+| Surface | Dispatch point (classic arm = existing fn) | Phase |
+|---|---|---|
+| Expanded sidebar, team tree and work board | `render_team_panel` / `render_team_line` (`team_sidebar.rs`) | 2 |
+| Expanded sidebar, flat agent list and workspace rows | glyph/color indirection only: `agent_status_icon_and_color`, `status_icon`, `status_color` take `&Chrome` and return the classic values unchanged when classic; row layout code is not dispatched | 2 |
+| Collapsed sidebar | top of `render_collapsed_sidebar` (`sidebar.rs:47`): `if classic { existing body }`; its entry list `collapsed_entries` is shared | 2 |
+| Multi-endpoint sidebar (`endpoint_sidebar.rs`) | classic until phase 6; then glyph/color indirection only | 6 |
+| Tab bar | top of `render_tab_bar` (`tabs.rs`); `tab_bar_status_width` unchanged | 3 |
+| Pane headers | the header pass in `composition.rs`: `if classic { skip }` (classic draws nothing there; the server-drawn border row stays as is) | 3 |
+| Mobile layout | `render_mobile_header` and the `MobileItem` builders (`mobile.rs`): classic arm is the current body; modern adds the attention chip and glyph/role indirection only | 3 |
+| Mode bar | top of `render_mode_bar` (`render.rs:31`) | 5 |
+| Toasts: card, mobile banners, copy feedback, config diagnostic | `render_visible_notification[_with_phase]`, `render_mobile_notification_banner[_with_phase]`, `render_notification_card_with_phase` (`notifications.rs`); `status.rs` functions are not dispatched (P15 is a separate fix) | 5 |
+| Overlays | opener for `OrbitFlow` (absent when classic); `help_lines`, global menu and settings rows add entries only when modern; every other overlay is not dispatched | 1, 4 |
+| `aster orbit activity` | entry of the render function in `cli/orbit_activity.rs`: `match style`; classic arm is today's function. Style/glyphs come from `Config::load()` (the same loader other CLI commands use); an unreadable config yields the defaults, as everywhere else. Machine-readable output (JSON) is never styled | 5 |
+| Window title, OS notifications, sound, pane surface content | not style-aware | none |
+
+`chrome` is passed to the classic helpers that need glyph/color indirection through `ClientShellConfig` (already
+passed to every renderer), with minimal signature plumbing where the current helper does not receive config. Preserve the classic helper result and characterize it; do not assume every existing helper already accepts `ClientShellConfig`. Two guards keep the table honest:
+
+- the architecture script (section 6.5) gains a check that `modern::` (and `ui::chrome::` role/glyph
+  lookups) are referenced **only** from the files in this table, to flag unlisted direct references; definition/config wiring needs an explicit allowlist and indirect aliases still require review; and
+- each row has a golden test that renders the surface with `style = classic` and compares it with the phase-0
+  fixture (section 9), including mobile (width <= 64), the collapsed sidebar, and the CLI output captured with a
+  fixed activity payload.
 
 ### 6.2 Module layout
 
@@ -675,6 +710,34 @@ or a sibling `shell_view_steps.rs` if it would pass 400 lines.
 | `FlowModel` | overlay open, snapshot change while open, resize | the overlay value | flow draw |
 | age text, age bar, spinner/pulse phase | **per frame**, stack buffers and integer compares | nowhere | draw |
 
+#### Cache keys and invalidation
+
+Rule: **every precomputed value that depends on width, height, theme, style, glyphs, collapse state or the
+snapshot lives in a struct with an explicit key holding exactly those inputs.** The owning `refresh_*` compares
+the frame's inputs with the key before the frame is drawn and rebuilds on mismatch; draw only reads. Values
+that are plain arithmetic clamps of a rect (truncation to the width given, drop-order tiers, alignment) are
+**not** cached: they are integer compares in draw. Nothing is keyed on the animation tick or on the clock except
+the done-lane expiry deadline.
+
+| Precomputed value | Depends on | Key (all compared in `refresh_*`) | Rebuilt when |
+|---|---|---|---|
+| `ChromeRoles`, `GlyphSet` | palette, `ui.style`, `ui.glyphs` | the three inputs | config reload, theme change |
+| `ModernTeam`, `Lanes`, `FlowSummary` | `orbit` facts | `orbit` projection (`same_facts`) | orbit projection change |
+| `TeamRows` (lines, heights, gaps, lane truncation `+N`, spacer rows) | snapshot, collapsed groups, **collapsed lanes**, sidebar content width, **sidebar section height**, density tier (derived from width), sort, `sidebar_work`, agents config, `style`, `glyphs`, done-lane expiry | existing `TeamRowsKey` plus `collapsed_lanes`, `section_height`, `style`, `glyphs` | any key field differs or `now_ms >= expires_at_ms` |
+| `TabActivity`, `AttentionSummary`, `PaneHeaders` (full, untiered strings) | snapshot, style, glyphs, roles | `snapshot_serial`, `style`, `glyphs`, palette/roles revision | those change; **not** width, because header tiers and chip truncation are draw-time arithmetic over the rect |
+| Collapsed sidebar entries | snapshot, sort | `snapshot_serial`, sort | those change; row count clipped to the area at draw |
+| Mobile header strings | snapshot, width tier | `snapshot_serial`, actual width tier, style, glyphs, palette revision | those change |
+| `FlowModel` rows (wrapped notes, column split) | active task, selected step, overlay inner width **and height**, glyphs | `(endpoint_id, task_id, selected_step_index, snapshot_serial, inner_width, inner_height, style, glyphs)` held in the overlay | open, snapshot change while open, **terminal resize**, task switch, selected-step change |
+| Notification card text and glyph | event | built once at creation (`notification_policy.rs`) | never; card geometry is arithmetic against the area each frame |
+| CLI table | one activity payload | none (one-shot process) | n/a; terminal width is read once at start |
+
+Classic must not start rebuilding more often than today: `section_height` and the modern key fields are stored as
+`0` / constants when `style = classic`, so the classic key compares equal exactly as it does now. Height arrives
+at `refresh_team_rows` from the layout already computed for the frame (`expanded_sidebar_sections`), so the
+check needs no extra layout pass. Tests (phase 2 onward) resize width and height across every tier boundary
+(`<22`, `22..31`, `>=32` wide; `height` 29/30 for spacers; overflow that adds or removes `+N`) and assert that
+the rows rebuild exactly once per change and zero times between identical frames (`row_builds()` counter).
+
 `compose()` already takes `&mut self` and fills `hits`; the header pass only reads models and the animation
 frame and writes cells. Time-dependent facts are limited to ages, the age bar buckets and the done-lane expiry,
 which `TeamRows::expires_at_ms` already handles.
@@ -701,10 +764,50 @@ the client blits that surface, then knows every pane's `rect`/`inner_rect` (`Pan
 - `HOT_PATH_SOURCES` already recursively covers `src/ui/**`; add `src/client/shell/modern/draw/**`. Apply the new allocation rules only to `src/ui/chrome/draw.rs`, `src/ui/chrome/age.rs`, and `src/client/shell/modern/draw/**`, not configuration-time role derivation or model builders.
 - A new check forbids, outside `#[cfg(test)]`, in those draw/age sources: `format!(`, `.to_string()`, `.to_owned()`,
   `.clone()`, `vec!`, `String::`, `Vec::`, `.collect`, `Box::new`, `HashMap`/`HashSet` construction, `std::fs`, `Instant::now`, `SystemTime`.
+- A dispatch-whitelist check: `modern::` paths and `ui::chrome` role/glyph lookups may appear only in the files named in the section 6.1 table (plus `modern/**` itself), as a direct-reference regression guard. Explicitly allow definition/wiring files (`chrome/**`, shell module/config/state, CLI wiring) and test modules; helper age imports are not role/glyph dispatch. Test aliases, grouped imports, whitespace and `crate::`/`super::` forms. A lexical whitelist cannot prove surface coverage or detect arbitrary re-exported aliases; pair it with review and surface goldens.
 - Its scanner reuses the existing comment/literal masking, with unit tests like the existing
   `test_scanner_*` ones. `src/client/shell/modern/model/**` is deliberately outside it.
 
 This makes the directory the rule: if code needs to allocate it cannot live in `draw/`.
+
+### 6.6 Hit targets for new clickable elements
+
+Today `ShellHitMap` (`state.rs`) has `team_groups: Vec<(Rect, usize)>` (the `usize` is a group index where
+`groups.len()` means the `other` group and `groups.len() + 1` the work header, see `group_key`) and
+`team_agents: Vec<(Rect, usize)>` (a cached line index resolved by `line_pane_id`). A lane header cannot be
+expressed as a group index without changing what that integer means, so it gets its own type instead:
+
+```rust
+pub(super) enum ChromeTarget {
+    Lane(Lane),                          // toggle collapse of a work lane
+    Attention,                           // attention chip: focus the oldest needs-you pane
+    FlowOpen { task: u16 },              // work header / task row "flow" link
+    FlowTask(u16),                       // flow overlay: task chip
+    FlowStep { task: u16, step: u16 },   // flow overlay: step row, focuses its worker pane
+}
+// Task ordinals resolve through a retained snapshot/task-id table; stale-generation events are discarded.
+// ShellHitMap { .. , chrome_targets: Vec<(Rect, ChromeTarget)> }   // empty unless modern draws
+```
+
+- Layout/update prepares the bounded `chrome_targets` storage and its capacity before drawing. Draw writes only into prepared slots (or an explicitly capacity-checked reusable vector, with no growth); it must never allocate through `push`. Modern records into `hits.chrome_targets`; classic never does, so the vector is empty and the existing
+  `mouse.rs` branches (`team_groups` at the left-click handler, then `team_agents`, then `agents`) behave exactly as
+  today. The modern lookup is one extra `find` placed **after** the endpoint-agent and `team_groups` checks and
+  before `team_agents`, guarded by `!chrome_targets.is_empty()`.
+- Role headers and the `other` header keep pushing `team_groups` with the same group index; member, lead and task
+  rows keep pushing `team_agents` with the line index. The classic work header (group index `groups.len() + 1`) is
+  only produced by the classic draw. In modern the work header is a label with no click target; its lanes are
+  `ChromeTarget::Lane`.
+- The flow overlay keeps its own hit rectangles inside the overlay value (as `settings_tabs` and the other overlays
+  do) and uses `FlowTask`/`FlowStep` there; `FlowOpen` is the only flow target on the shell. Tab role chips and pane
+  headers add no targets: they sit inside the existing tab and pane-border rectangles. The toast and the mode bar
+  keep their current targets.
+- Every place that clears hits when mouse capture is off (`render.rs`, the `!config.mouse_capture` block, and
+  `state.rs` where `team_groups` is cleared) also clears `chrome_targets`.
+- Keyboard: lane headers are not focus targets (neither are group headers today). Selection and reveal keep using
+  the cached `rows.lines` order (P19), so a lane header or `Gap` line can never desynchronize them.
+- Tests: for each target kind, a rect at every density tier resolves to the right target at its first and last
+  cell and to nothing one cell outside; classic produces no `chrome_targets`; the existing group/agent hit tests
+  pass unedited.
 
 ## 7. Data contract: additive fields only
 
@@ -724,10 +827,17 @@ pub struct OrbitShellMember {
 pub struct OrbitShellActiveTask {
     // existing: task_id, worker_terminal_id, role, title, state, created_at_ms, blocked, awaiting_approval
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub steps: Vec<OrbitShellStep>,            // at most 8; empty for an unrelayed task
+    pub steps: Vec<OrbitShellStep>,            // identity for at most 32 steps; notes only inside the 8-step window; empty for an unrelayed task
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub step_total: Option<u16>,               // pipeline length, as orbit_step_line computes it
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel: Option<OrbitShellParallel>,  // totals over ALL parallel steps, not the window
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub steps_omitted: Option<OrbitShellOmitted>, // steps beyond the 32-step identity list
 }
+
+pub struct OrbitShellParallel { pub done: u16, pub total: u16 }
+pub struct OrbitShellOmitted { pub before: u16, pub after: u16 }
 
 pub struct OrbitShellStep {
     pub index: u16,
@@ -745,9 +855,13 @@ pub struct OrbitShellStep {
 
 - `OrbitShellView::same_facts` destructures every field exhaustively, so the compiler forces the new fields
   into the equality that decides whether a snapshot is re-sent. Nested member/task equality derives include the added fields automatically; the exhaustive top-level destructure alone does not enforce nested comparison. Struct literals in `shell_view.rs`, `client/shell/tests/team_sidebar.rs` and `client/shell/tests/work_board.rs` need explicit new fields. Keep `Eq` on `OrbitShellStep`; test mutations of each added fact.
-- **Bounded step window.** Preserve original step indices and the active step when truncating to eight; `step_total` is the full count, with checked/saturating conversion to `u16`. Show omitted-step indicators. A first-eight-only cap would hide later active steps. Parallel branch summaries must distinguish the visible window from total completion; do not imply eight is the full pipeline. Derive this window at projection change, never while drawing.
+- **Identity is bounded; detail is windowed.** Two limits, applied when the view is projected, never while drawing:
+  - `steps` carries **identity for every step up to 32** (`index`, `member`, `kind`, `state`, `parallel`, `integrate`). `step_total` is the full count (checked/saturating conversion to `u16`). Use a contiguous window of at most 32 original indices containing the active/fan-out/integrate set, then nearest neighbors; clamp the window at pipeline ends. Beyond that window, excess is reported through `step_total` and omitted before/after counts. Never take the first 32 unconditionally. If the required set cannot fit contiguously, retain active steps first and explicitly mark incomplete identity coverage; do not fabricate complete flow data.
+  - Heavy text (`note`, `next`, timestamps) is filled only for a **window of at most 8 steps** that prioritizes: every active step; every step of the current parallel fan-out and the integrate step (a fan-out is at most `MAX_PARALLEL = 4`); then the nearest finished/pending steps by index until 8. If the required set exceeds eight, retain active steps first, then the current fan-out/integrator, and leave the rest identity-only; the cap is unconditional. Original `index` values are preserved, so gaps are visible.
+  - Two summaries make completion independent of the window. `OrbitShellActiveTask.parallel: Option<OrbitShellParallel { done: u16, total: u16 }>` counts **all** parallel steps of the task, in or out of the window (`done` = steps with `done`/`handed_off`; `total` includes failed). `steps_omitted: Option<OrbitShellOmitted { before: u16, after: u16 }>` counts steps beyond the 32-step identity list. A first-N cap is therefore never the source of any total.
+- The client builds `FlowSummary` with the lanes (at projection change): `parallel_done`, `parallel_total`, `relay_current_index`, `relay_total`, `omitted_before/after`, and one preformatted `member·kind` string per step. The sidebar strip (`parallel 3/4`, `step 2/5`) and the flow header read these, never a count of the visible window. Relay `step N/M` uses the retained active step's original index and `step_total`; it does not claim a total completed count, which omitted identities cannot establish. If no active index is available, show the total without inventing N.
 - **Privacy.** `note`/`next` are worker-authored text. They go through the existing `display_text`
-  (`redact_secrets` then `shorten`, `shell_view.rs`) exactly like `title` and `summary`, are capped at 8 steps x 2
+  (`redact_secrets` then `shorten`, `shell_view.rs`) exactly like `title` and `summary`, are capped at 8 windowed steps x 2
   strings per task, and exist only for active tasks (at most `MAX_ACTIVE_TASKS = 32`). Handoff `changed_files`, `known_issues` and full prompts are **not** projected.
 - **Skew.** New client + old server: missing fields default; model and step rows are omitted, the rest renders. Old client + new server: unknown JSON fields are ignored (no `deny_unknown_fields`). A new
   `state` string is opaque (`StateKind::Unknown`).
@@ -776,18 +890,21 @@ Build: config, roles, glyphs, drawing helpers, enforcement. **No visible change*
 
 ### Phase 2: sidebar (team tree as role cards, lanes)
 
-- Wire/server: `model`, `steps`, `step_total` (section 7) in `wire.rs` and `app/orbit_notifications/shell_view.rs`; tests: JSON round-trip, old payload decodes, `same_facts` sensitivity, redaction of notes, step cap.
-- Client models `modern/model/{team,lanes}.rs` built in `TeamSidebar::build` (so one build per orbit projection change). `TeamRowsKey` gains `style`/`glyphs`; `TeamLineRef` gains `LaneHeader { lane, collapsed }` and `Gap` (blank row, tall layouts only).
-- Draw: `modern/draw/{sidebar,lanes}.rs`, dispatched from `render_team_line` in `team_sidebar.rs`. Hit map reuses `hits.team_agents` / `hits.team_groups` unchanged; lane collapse reuses `collapsed_team_groups`.
+- Wire/server: `model`, `steps`, `step_total`, `parallel`, `steps_omitted` (section 7) in `wire.rs` and `app/orbit_notifications/shell_view.rs`; tests: JSON round-trip, old payload decodes, `same_facts` sensitivity, redaction of notes, the 32-step identity cap and 8-step note window (active/fan-out/integrate priority with the unconditional eight-detail cap), `parallel`/`steps_omitted` totals correct when the window is truncated.
+- Client models `modern/model/{team,lanes}.rs` built in `TeamSidebar::build` (so one build per orbit projection change). `TeamRowsKey` gains `style`, `glyphs`, `collapsed_lanes` and `section_height` (see "Cache keys and invalidation" in section 6.3; `refresh_team_rows` receives the section height); `TeamLineRef` gains `LaneHeader { lane, collapsed }` and `Gap` (blank row, tall layouts only).
+- Draw: `modern/draw/{sidebar,lanes}.rs`, dispatched from `render_team_line` in `team_sidebar.rs`. Role and `other` headers keep `hits.team_groups` (`usize` group index) and task/member rows keep
+  `hits.team_agents` (line index), so their classic handling in `mouse.rs` is untouched. Lane headers and every
+  other new clickable element use the new `hits.chrome_targets` (section 6.6); lane collapse state is `collapsed_lanes`.
 - **Fix P19 first, in classic too and behavior-preserving:** make `row_index_of` read the cached `rows.lines` instead of recomputing order, guarded by a test that compares old and new results over many states.
-- Collapsed sidebar (`render_collapsed_sidebar`) takes the glyph/role set and the attention marker.
+- Collapsed sidebar: dispatch at the top of `render_collapsed_sidebar` (section 6.1 table); modern takes the glyph/role set and the attention marker.
+- `ShellHitMap.chrome_targets` and `ChromeTarget::Lane` (section 6.6), `collapsed_lanes` state, and the `mouse.rs` lookup.
 - Bench: add the Orbit-populated scenario (R roles x M members, T tasks, 1 and 15+ panes) to `render_scale_benchmark.rs`; record **classic** numbers before modern lands.
 - Tests: buffer snapshots at 80 and 120 and widths 18/25/35 for light/dark/terminal themes; animations full/reduced/off; keyboard navigation parity (`pane_order` unchanged); mouse hit rectangles for every row kind; collapsed groups and lanes; 32 active tasks; missing `steps`/`model` (old server); a member without a live agent.
 
 ### Phase 3: tab bar, pane headers, per-role activity
 
 - `modern/model/{tabs,pane_header}.rs` built in `set_snapshot`; stored in `ClientShellState.chrome_cache`, invalidated on `snapshot_serial` and config change.
-- `modern/draw/{tabs,pane_header}.rs`; dispatch in `render_tab_bar` (`tabs.rs`) and the header pass in `composition.rs` (section 6.4). The attention chip is also wired into `mobile.rs` header.
+- `modern/draw/{tabs,pane_header}.rs`; dispatch in `render_tab_bar` (`tabs.rs`) and the header pass in `composition.rs` (section 6.4). The attention chip (`ChromeTarget::Attention`) is also wired into the `mobile.rs` header through its dispatch point (section 6.1); mobile classic golden fixtures are part of the phase.
 - No server change. No geometry change.
 - Tests: header tiers at 27/44/56/70 columns; junction cells never overwritten (split layouts 2x1, 2x2, nested); panes without a top border; zoomed pane; popup pane skipped; focused/unfocused/blocked/recent; tab overflow with chips; mouse: tab hit rects and pane-border drag handles unchanged; CJK member and task names by display width.
 - Bench: client composition at 1 and 15+ panes with headers on.
@@ -797,12 +914,12 @@ Build: config, roles, glyphs, drawing helpers, enforcement. **No visible change*
 - `ClientShellOverlayKind::OrbitFlow` + `ClientShellOverlay::OrbitFlow(..)` (`state.rs`), input in `overlay_input.rs`, draw in `modern/draw/flow.rs`, model `modern/model/flow.rs`.
 - Entry points: `keys.orbit_flow` (default chosen in this phase after checking the default keymap for conflicts), global menu item (`global_menu.rs`), task row context menu (`context_menu.rs`), and `ui.orbit_flow` (bool, default true). Config reference rows for both; help overlay lists the shortcut in modern only.
 - Data: `ClientShellSnapshot.orbit` (`steps`, `step_total`); optional fields only if something is still missing after phase 2 (decided by the section 7 review, not now).
-- Tests: overlay open/close/focus restore; navigation with keyboard and mouse; width tiers at 80/120/200; stacked vs side-by-side parallel; relay with 8 steps; empty `steps`; snapshot update while open; reduced/off motion; light/dark.
+- Tests: overlay open/close/focus restore; navigation with keyboard and mouse; width tiers at 80/120/200; stacked vs side-by-side parallel; relay with 8 and with 40 steps (totals and member/kind still shown, focus on an identity-only step); fan-out of 4 with the window cut at 8; empty `steps`; resize while open rebuilds `FlowModel`; snapshot update while open; reduced/off motion; light/dark.
 
 ### Phase 5: notifications, toasts, status line, CLI
 
 - `modern/draw/{toast,status}.rs`: modern toast card, mode bar chip style, attention chip. Event kind → glyph/state mapping built where the notification is created (`notification_policy.rs`), not per frame.
-- `src/cli/orbit_activity.rs`: lanes, glyphs, shared `age` from `ui::chrome::age`; `ui.glyphs` honored; classic output unchanged (CLI golden tests).
+- `src/cli/orbit_activity.rs`: dispatch at the render entry (section 6.1; style and glyphs from `Config::load()`), lanes, glyphs, shared `age` from `ui::chrome::age`; `ui.glyphs` honored; classic output unchanged (CLI golden tests).
 - P15 (`status.rs` byte-length widths): separate `fix:` commit before the phase, applies to both styles (R9).
 - Tests: toast geometry at short areas, all positions, reduced/off, CJK titles; mode bar at 50/64/80/120 columns; CLI output golden for classic and modern, TTY vs pipe, ASCII glyphs.
 
@@ -821,7 +938,7 @@ Build: config, roles, glyphs, drawing helpers, enforcement. **No visible change*
 2. **Classic bodies are not edited.** The dispatch picks a function; classic functions keep their code. The only
    edits to classic files are the dispatch `match`, moving pure helpers (`age_text`, `put_number`) to `ui/chrome`
    with the old names re-exported, and the behavior-preserving `row_index_of` change (guarded by an old-vs-new equivalence test).
-3. **Style is part of every cache key** (`TeamRowsKey`, `chrome_cache`), so a live switch rebuilds, never mixes.
+3. **Style is part of every cache key** (`TeamRowsKey`, `chrome_cache`; table in section 6.3), so a live switch rebuilds, never mixes. Every surface has exactly one dispatch point (section 6.1 table), including mobile, the collapsed sidebar and the CLI, and the architecture script flags direct references outside its explicit surface/definition/wiring allowlist.
 4. **No geometry in the style.** `layout.rs`, `compute_view` and `apply_pane_chrome` are not style-aware; a test
    asserts identical `ClientShellLayout`, pane rects and PTY sizes for both styles at several widths.
 5. **Frozen wire contract.** Classic ignores the new fields; the frozen fixtures decode unedited.
@@ -841,7 +958,7 @@ Frequency x cardinality for every new piece of work:
 | Team draw | per frame | visible rows only (`render_measured_agent_list` is windowed: it draws only the rows that fit) | O(visible rows x width), no allocation |
 | Tab draw | per frame | visible tabs | O(width) |
 | Pane header pass | per frame with a surface | panes (1 to 50+) | one `&str` hash lookup + O(header width) |
-| Flow draw | per frame while open | steps <= 8 x tasks selected | O(rows x width) |
+| Flow draw | per frame while open | identities <= 32, detailed steps <= 8 x tasks selected | O(rows x width) |
 
 Budgets (enforced by reporting, not by wall-clock CI): modern chrome at 1 pane adds <= 10% of today's client
 composition median (about +15 us), and at 15+ panes with the Orbit scenario adds <= 15% over classic in the
@@ -903,7 +1020,7 @@ The plan is feasible subject to these implementation gates; phase 0 changes docu
    not proof: indirect calls, buffer writers, iterator helpers and lock acquisition still need review.
 4. **Benchmark: feasible, pending phase-2 measurement.** Reuse the existing fixed-geometry harness; build
    deterministic bounded Orbit fixtures outside timed samples. Measure classic/modern with the same role,
-   task and pane counts, including 32 tasks and eight visible steps; report fixture construction separately.
+   task and pane counts, including 32 tasks, 32 projected identities and eight detailed steps per task; report fixture construction separately.
    Exercise hidden workspaces and active panes at 1 and 15+ panes. Runtime cost cannot be claimed before the
    scenario exists. Preserve retained/hidden early exits; do not rebuild models on animation ticks.
 5. **Config/docs: feasible.** Enum `values` lists must match serde declaration order exactly, including
@@ -923,6 +1040,32 @@ The plan is feasible subject to these implementation gates; phase 0 changes docu
 8. **Validation scope.** Config-reference check, docs contract tests and existing hot-path architecture
    tests pass on the phase-0 tree. Full Rust fmt/clippy/nextest are deferred to implementation phases because
    this commit changes only this design document. No dependencies or server commands are needed.
+
+### Round 1 review fixes
+
+The added optional `parallel`/`steps_omitted` JSON objects remain additive; derive `Eq` and serde on
+all new nested structs and test missing values, nonempty round trips, each summary mutation and frozen
+fixtures unchanged. No new codec, endpoint method or server-owned presentation state is warranted.
+
+Corrected the identity window to retain later active steps, made the eight-detail cap unconditional,
+and replaced an uncomputable relay-completed total with the active original index. Test 40-step relays
+with activity beyond index 32, omitted counts on both ends, and summaries independent of either window.
+Clamp counts consistently on overflow; never wrap indices. If indices exceed `u16`, mark the projection
+incomplete rather than aliasing two steps to one identity. Member/kind display strings must be bounded
+and sanitized at projection time too; identity-only does not imply unbounded payloads.
+
+Corrected cache keys for palette revision, actual mobile width tier and selected flow step. Keep stable
+endpoint/task/step identities across reordered snapshots; task ordinals in hit targets must resolve via
+the matching retained snapshot, with stale-generation events discarded. Lane state is client-only and
+its bitset avoids role-name collisions. Prepare hit storage during update/layout: existing allocating
+hit vectors do not authorize a new per-row allocation path. Overlay input takes priority over shell hits;
+clear targets on mouse-disable, endpoint switch and style switch. Test these transitions and target bounds.
+
+The dispatch whitelist is feasible only as a bounded lexical guard with definition/config/module wiring
+exceptions and scanner characterization tests. It cannot establish complete dispatch coverage by itself.
+The existing six scanner tests pass; the proposed new whitelist remains unimplemented and unproven until
+phase 1. Config-reference and seven docs contract tests pass again. No Rust code changed; no new render
+benchmark was needed for this documentation correction (phase-0 medians below remain the baseline).
 
 Phase-0 review benchmark reruns (microseconds; columns are 1 / 15 panes):
 
