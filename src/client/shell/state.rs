@@ -13,6 +13,7 @@ pub(crate) enum ClientShellKeybindingSource {
 }
 
 pub(crate) struct ClientShellConfig {
+    pub(super) polaris: crate::config::PolarisConfig,
     pub(super) sidebar_width: u16,
     pub(super) sidebar_min_width: u16,
     pub(super) sidebar_max_width: u16,
@@ -25,10 +26,11 @@ pub(crate) struct ClientShellConfig {
     pub(super) agents: crate::config::AgentsSidebarConfig,
     pub(super) agent_panel_sort: crate::config::AgentPanelSortConfig,
     pub(super) status_indicators: crate::config::StatusIndicatorStyle,
+    pub(super) animations: crate::config::UiAnimationsConfig,
     pub(super) sound_enabled: bool,
     pub(super) toast_delivery: crate::config::ToastDelivery,
     pub(super) toast_delay_seconds: u64,
-    pub(super) toast_position: crate::config::ToastHerdrPosition,
+    pub(super) toast_position: crate::config::ToastAsterPosition,
     pub(super) copy_on_select: bool,
     pub(super) clipboard_toast_enabled: bool,
     pub(super) clipboard_toast_position: crate::config::ToastClipboardPosition,
@@ -383,6 +385,7 @@ pub(super) struct ClientGlobalMenuOverlay {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ClientSettingsSection {
+    Polaris,
     Theme,
     Indicators,
     Sound,
@@ -397,10 +400,12 @@ impl ClientSettingsSection {
         Self::Sound,
         Self::Toast,
         Self::Integrations,
+        Self::Polaris,
     ];
 
     pub(super) fn label(self) -> &'static str {
         match self {
+            Self::Polaris => "Polaris",
             Self::Theme => "theme",
             Self::Indicators => "indicators",
             Self::Sound => "sound",
@@ -412,6 +417,7 @@ impl ClientSettingsSection {
 
 #[derive(Debug)]
 pub(super) struct ClientSettingsOverlay {
+    pub(super) polaris: crate::config::PolarisConfig,
     pub(super) section: ClientSettingsSection,
     pub(super) selected: usize,
     pub(super) original_theme_name: String,
@@ -702,6 +708,7 @@ pub(super) struct ClientVisibleEndpointNotice {
     pub(super) key: ClientEndpointNoticeKey,
     pub(super) title: String,
     pub(super) body: String,
+    pub(super) shown_at: std::time::Instant,
     pub(super) deadline: std::time::Instant,
 }
 
@@ -746,6 +753,7 @@ pub(super) struct ClientPendingNotification {
 pub(super) struct ClientVisibleNotification {
     pub(super) endpoint_id: ClientEndpointId,
     pub(super) event: SemanticNotification,
+    pub(super) shown_at: std::time::Instant,
     pub(super) deadline: std::time::Instant,
 }
 
@@ -858,6 +866,7 @@ pub(super) struct ClientCopyModeState {
 
 pub(crate) struct ClientShellState {
     pub(super) machine_diagnostics: super::machine_diagnostics::MachineDiagnostics,
+    pub(super) animations: super::animation::ClientAnimationClock,
     pub(super) config: ClientShellConfig,
     pub(super) snapshot: Option<Box<ClientShellSnapshot>>,
     pub(super) active_snapshot_generation: Option<u64>,
@@ -914,7 +923,7 @@ pub(crate) struct ClientShellState {
     /// The host tty's erase character is `^H`: a raw 0x08 is Backspace, not
     /// Ctrl+H (MobaXterm, PuTTY-style terminals; tmux reads VERASE the same way).
     pub(super) host_erase_is_ctrl_h: bool,
-    /// The focused pane asks for every key as an escape code, so Herdr pushed
+    /// The focused pane asks for every key as an escape code, so Aster pushed
     /// report-all to the host; plain text input then reaches it as text.
     pub(super) host_reports_all_keys: bool,
     pub(super) replaying_url_click: bool,
@@ -1031,6 +1040,7 @@ impl ClientShellState {
         }
         Self {
             machine_diagnostics: Default::default(),
+            animations: super::animation::ClientAnimationClock::new(std::time::Instant::now()),
             config,
             snapshot: None,
             active_snapshot_generation: None,
@@ -1880,12 +1890,15 @@ impl ClientShellState {
 
     pub(crate) fn timer_delay(&self, now: std::time::Instant) -> std::time::Duration {
         let default = std::time::Duration::from_millis(100);
-        self.selection_autoscroll_deadline
+        let delay = self
+            .selection_autoscroll_deadline
             .into_iter()
             .chain(self.selection_repaint_deadline)
             .min()
             .map(|deadline| deadline.saturating_duration_since(now).min(default))
-            .unwrap_or(default)
+            .unwrap_or(default);
+        self.animation_timer_delay(now)
+            .map_or(delay, |animation| animation.min(delay))
     }
 
     pub(crate) fn invalidate_pane_surface(&mut self) {

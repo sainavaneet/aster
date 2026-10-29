@@ -29,6 +29,9 @@ fn navigate_update_status_uses_released_desktop_and_mobile_placement() {
     assert!(state.hits.tab_scroll_right.is_empty());
 
     state.config.tab_bar_position = crate::config::TabBarPositionConfig::Top;
+    let now = std::time::Instant::now()
+        .checked_sub(std::time::Duration::from_secs(1))
+        .unwrap_or_else(std::time::Instant::now);
     state.visible_notification = Some(ClientVisibleNotification {
         endpoint_id: ClientEndpointId::Local,
         event: SemanticNotification {
@@ -40,9 +43,10 @@ fn navigate_update_status_uses_released_desktop_and_mobile_placement() {
             workspace_id: None,
             tab_id: None,
             pane_id: None,
-            position: Some(crate::config::ToastHerdrPosition::BottomRight),
+            position: Some(crate::config::ToastAsterPosition::BottomRight),
         },
-        deadline: std::time::Instant::now(),
+        shown_at: now,
+        deadline: now + std::time::Duration::from_secs(5),
     });
     let top = state.compose(106, 30).expect("top-tab update shell");
     assert!(row_text(&top, 29).contains("update ready"));

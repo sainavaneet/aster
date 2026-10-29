@@ -14,7 +14,7 @@ env:
 
 jobs:
   validate-release-source:
-    if: github.repository == 'herdrdev/herdr' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'sainavaneet/aster' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     outputs:
       preview_commit: ${{ steps.source.outputs.preview_commit }}
@@ -48,7 +48,7 @@ jobs:
 
   flake-check:
     needs: validate-release-source
-    if: github.repository == 'herdrdev/herdr'
+    if: github.repository == 'sainavaneet/aster'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,7 +72,7 @@ jobs:
 
   build:
     needs: validate-release-source
-    if: github.repository == 'herdrdev/herdr'
+    if: github.repository == 'sainavaneet/aster'
     permissions:
       contents: read
     strategy:
@@ -80,27 +80,27 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
-            name: herdr-linux-x86_64
+            name: aster-linux-x86_64
             libghostty_vt_optimize: ReleaseFast
             libghostty_vt_simd: 'true'
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
-            name: herdr-linux-aarch64
+            name: aster-linux-aarch64
             libghostty_vt_optimize: ReleaseFast
             libghostty_vt_simd: 'true'
           - target: x86_64-apple-darwin
             os: macos-latest
-            name: herdr-macos-x86_64
+            name: aster-macos-x86_64
             libghostty_vt_optimize: ReleaseFast
             libghostty_vt_simd: 'true'
           - target: aarch64-apple-darwin
             os: macos-latest
-            name: herdr-macos-aarch64
+            name: aster-macos-aarch64
             libghostty_vt_optimize: ReleaseFast
             libghostty_vt_simd: 'true'
           - target: x86_64-pc-windows-msvc
             os: windows-2022
-            name: herdr-windows-x86_64.zip
+            name: aster-windows-x86_64.zip
             libghostty_vt_optimize: ReleaseFast
             libghostty_vt_simd: 'true'
 
@@ -174,7 +174,7 @@ jobs:
       - name: Package artifact
         if: runner.os != 'Windows'
         shell: bash
-        run: cp target/${{ matrix.target }}/release/herdr ${{ matrix.name }}
+        run: cp target/${{ matrix.target }}/release/aster ${{ matrix.name }}
 
       - name: Package artifact
         if: runner.os == 'Windows'
@@ -182,13 +182,13 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $package = Join-Path $env:RUNNER_TEMP "Microsoft.Windows.Console.ConPTY.nupkg"
-          $stage = Join-Path $env:RUNNER_TEMP "herdr-windows-x86_64"
+          $stage = Join-Path $env:RUNNER_TEMP "aster-windows-x86_64"
           .\scripts\package_windows_conpty.ps1 `
-            -HerdrExe target\${{ matrix.target }}\release\herdr.exe `
+            -AsterExe target\${{ matrix.target }}\release\aster.exe `
             -PackagePath $package `
             -StageDir $stage `
             -OutputPath ${{ matrix.name }}
-          $version = (& (Join-Path $stage "herdr.exe") --version | Out-String).Trim()
+          $version = (& (Join-Path $stage "aster.exe") --version | Out-String).Trim()
           $tagVersion = $env:GITHUB_REF_NAME -replace '^v', ''
           if ($version -notmatch [regex]::Escape($tagVersion) -or $version -match "preview") {
             throw "Packaged Windows binary has unexpected version identity: $version"
@@ -202,7 +202,7 @@ jobs:
 
   validate-release-inputs:
     needs: validate-release-source
-    if: github.repository == 'herdrdev/herdr'
+    if: github.repository == 'sainavaneet/aster'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -231,7 +231,7 @@ jobs:
 
   release:
     needs: [build, flake-check, validate-release-inputs]
-    if: github.repository == 'herdrdev/herdr' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'sainavaneet/aster' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -252,16 +252,16 @@ jobs:
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           files: |
-            herdr-linux-x86_64/herdr-linux-x86_64
-            herdr-linux-aarch64/herdr-linux-aarch64
-            herdr-macos-x86_64/herdr-macos-x86_64
-            herdr-macos-aarch64/herdr-macos-aarch64
-            herdr-windows-x86_64.zip/herdr-windows-x86_64.zip
+            aster-linux-x86_64/aster-linux-x86_64
+            aster-linux-aarch64/aster-linux-aarch64
+            aster-macos-x86_64/aster-macos-x86_64
+            aster-macos-aarch64/aster-macos-aarch64
+            aster-windows-x86_64.zip/aster-windows-x86_64.zip
           body_path: RELEASE_NOTES.md
 
   update-nix-package:
     needs: release
-    if: github.repository == 'herdrdev/herdr' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'sainavaneet/aster' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 2
     continue-on-error: true
@@ -271,17 +271,17 @@ jobs:
       - *require-release-admins
       - name: Trigger stable Nix package update
         env:
-          GH_TOKEN: ${{ secrets.HERDR_NIX_DISPATCH_TOKEN }}
+          GH_TOKEN: ${{ secrets.ASTER_NIX_DISPATCH_TOKEN }}
           GH_HOST: github.com
         run: |
-          if ! gh workflow run update-check.yml --repo herdrdev/herdr-nix --ref main; then
-            echo "::warning::Nix update could not be triggered. The Herdr release is already published; run update-check manually in herdrdev/herdr-nix."
+          if ! gh workflow run update-check.yml --repo sainavaneet/aster-nix --ref main; then
+            echo "::warning::Nix update could not be triggered. The Aster release is already published; run update-check manually in sainavaneet/aster-nix."
             exit 1
           fi
 
   close-released-issues:
     needs: [release, validate-release-source]
-    if: github.repository == 'herdrdev/herdr' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'sainavaneet/aster' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
@@ -323,7 +323,7 @@ jobs:
           fi
 
           RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${VERSION}"
-          RELEASE_COMMENT_MARKER="<!-- herdr:released:v${VERSION} -->"
+          RELEASE_COMMENT_MARKER="<!-- aster:released:v${VERSION} -->"
           RELEASE_COMMENT="${RELEASE_COMMENT_MARKER}"$'\n'"Released in [v${VERSION}](${RELEASE_URL})."
 
           issue_has_comment_marker() {
@@ -413,7 +413,7 @@ jobs:
 
   update-latest-json:
     needs: [release, validate-release-source]
-    if: github.repository == 'herdrdev/herdr' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'sainavaneet/aster' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     concurrency:
       group: docs-publish-master

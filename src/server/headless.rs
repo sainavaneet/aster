@@ -1,9 +1,9 @@
-//! Headless server mode — runs the herdr event loop without a real terminal.
+//! Headless server mode — runs the aster event loop without a real terminal.
 //!
 //! The server:
 //! - Does not enter raw mode or read stdin
-//! - Creates and listens on both `herdr.sock` (existing JSON API) and
-//!   `herdr-client.sock` (new binary protocol)
+//! - Creates and listens on both `aster.sock` (existing JSON API) and
+//!   `aster-client.sock` (new binary protocol)
 //! - Initializes AppState and all PTYs from session restore or fresh state
 //! - Runs the main event loop (drain events, drain API requests, scheduled tasks)
 //! - Renders to a virtual ratatui Buffer in memory
@@ -188,7 +188,7 @@ enum AltScreenReadConflict {
     Defer,
 }
 
-/// The headless server — runs the herdr event loop without a real terminal.
+/// The headless server — runs the aster event loop without a real terminal.
 pub struct HeadlessServer {
     app: app::App,
     #[cfg(unix)]
@@ -268,7 +268,7 @@ fn spawn_windows_client_accept_thread(
     should_quit: Arc<AtomicBool>,
     server_event_tx: mpsc::Sender<ServerEvent>,
 ) -> io::Result<std::thread::JoinHandle<()>> {
-    crate::thread_spawn::spawn_named("herdr-client-accept", move || {
+    crate::thread_spawn::spawn_named("aster-client-accept", move || {
         let mut next_client_id = 1_u64;
         while !should_quit.load(Ordering::Acquire) {
             let stream = match listener.accept() {
@@ -293,7 +293,7 @@ fn spawn_windows_client_accept_thread(
 
             let should_quit = should_quit.clone();
             let server_event_tx = server_event_tx.clone();
-            let spawned = crate::thread_spawn::spawn_named("herdr-client-conn", move || {
+            let spawned = crate::thread_spawn::spawn_named("aster-client-conn", move || {
                 if let Err(err) = crate::server::client_transport::handle_client_handshake(
                     stream,
                     client_id,
@@ -435,6 +435,19 @@ impl HeadlessServer {
             crate::render_prof::event("loop.tick");
             crate::render_prof::flush_if_due();
             self.app.reap_finished_detached_processes();
+            if !self.shutting_down && self.app.start_pending_polaris(Instant::now()) {
+                needs_render = true;
+                needs_full_render = true;
+            }
+            if !self.shutting_down && self.app.supervise_orbit_team(Instant::now()) {
+                needs_render = true;
+                needs_full_render = true;
+            }
+
+            if !self.shutting_down {
+                self.app.pump_orbit_notifications_at(Instant::now());
+                self.forward_orbit_human_notices();
+            }
 
             // If shutdown has been initiated, complete it and exit.
             if self.shutting_down {
@@ -1217,11 +1230,12 @@ impl HeadlessServer {
                 ) else {
                     return foreground_changed | geometry_changed;
                 };
-                if let Err(err) = apply_client_pane_input_events(
-                    runtime,
-                    &[protocol::ClientPaneInputEvent::Paste(path)],
-                ) {
-                    warn!(client_id, pane_id, err = %err, "client shell clipboard image paste failed");
+                let events = [protocol::ClientPaneInputEvent::Paste(path)];
+                match apply_client_pane_input_events(runtime, &events) {
+                    Ok(_) => self.note_client_pane_input(runtime_pane_id, &events, Instant::now()),
+                    Err(err) => {
+                        warn!(client_id, pane_id, err = %err, "client shell clipboard image paste failed")
+                    }
                 }
                 true
             }
@@ -1457,7 +1471,7 @@ impl HeadlessServer {
 
     /// Renders `ui.window_title` against the foreground client view. `None` means
     /// window titles are disabled or every token resolved empty, which leaves
-    /// the client on Herdr's default title.
+    /// the client on Aster's default title.
     fn configured_window_title(&self) -> Option<String> {
         self.foreground_window_title_target()
             .map_or_else(
@@ -1471,7 +1485,7 @@ impl HeadlessServer {
     }
 
     /// Pushes the configured outer window title to the foreground client when it
-    /// changed. Herdr consumes each pane's own `OSC 0`/`OSC 2`, so without this
+    /// changed. Aster consumes each pane's own `OSC 0`/`OSC 2`, so without this
     /// the host terminal title never follows the session — which is what window
     /// managers read for tab and group bar labels.
     fn sync_window_title(&mut self) {
@@ -1539,7 +1553,7 @@ impl HeadlessServer {
         };
         let set_title = title.is_some();
         // An explicit title suppresses `ui.window_title` until it is cleared,
-        // and clearing restores the configured title rather than only "herdr".
+        // and clearing restores the configured title rather than only "aster".
         self.api_window_title = title.clone();
         let title = title.or_else(|| self.configured_window_title());
         let changed = self.send_window_title(title);
@@ -2097,7 +2111,9 @@ impl HeadlessServer {
                 else {
                     return false;
                 };
-                if let Some(runtime) = self.runtime_for_terminal_id_string(terminal_id) {
+                let terminal_id = terminal_id.clone();
+                self.note_terminal_attach_input(&terminal_id, &data, Instant::now());
+                if let Some(runtime) = self.runtime_for_terminal_id_string(&terminal_id) {
                     if let Err(err) = apply_terminal_attach_input(runtime, data) {
                         warn!(client_id, terminal_id = %terminal_id, err = %err);
                     }
@@ -2109,7 +2125,7 @@ impl HeadlessServer {
                 size,
                 max,
             } => {
-                let detail = format!("Input message is {size} bytes; Herdr's limit is {max} bytes");
+                let detail = format!("Input message is {size} bytes; Aster's limit is {max} bytes");
                 let message = if matches!(
                     self.clients.get(&client_id).map(|client| &client.mode),
                     Some(ClientConnectionMode::ClientShell)
@@ -2448,7 +2464,7 @@ impl HeadlessServer {
                 );
                 let scroll_changed = runtime.scroll_metrics() != scroll_before;
                 if keyboard_forwarded {
-                    self.note_interactive_input(runtime_pane_id, Instant::now());
+                    self.note_client_pane_input(runtime_pane_id, &events, Instant::now());
                 }
                 if let Err(err) = input_result {
                     warn!(client_id, pane_id, err = %err, "targeted client shell input failed");
@@ -2537,7 +2553,7 @@ impl HeadlessServer {
                 );
                 let scroll_changed = runtime.scroll_metrics() != scroll_before;
                 if keyboard_forwarded {
-                    self.note_interactive_input(popup_pane_id, Instant::now());
+                    self.note_client_pane_input(popup_pane_id, &events, Instant::now());
                 }
                 if let Err(err) = input_result {
                     warn!(client_id, terminal_id, err = %err, "targeted client popup input failed");
@@ -3035,10 +3051,39 @@ impl HeadlessServer {
             return changed;
         }
         let alt_screen_read_spec = self.alt_screen_read_spec(&msg.request);
-        if matches!(&msg.request.method, api::schema::Method::AgentPrompt(_)) {
+        if matches!(
+            &msg.request.method,
+            api::schema::Method::AgentPrompt(_) | api::schema::Method::OrbitAgentPrompt(_)
+        ) {
             let deferred_changed = self
                 .app
                 .handle_deferred_agent_api_request(msg.request, msg.respond_to);
+            return changed | deferred_changed;
+        }
+        if matches!(
+            &msg.request.method,
+            api::schema::Method::OrbitAgentApprove(_) | api::schema::Method::OrbitAgentDeny(_)
+        ) {
+            let deferred_changed = self
+                .app
+                .handle_deferred_orbit_approval(msg.request, msg.respond_to);
+            return changed | deferred_changed;
+        }
+        if matches!(
+            &msg.request.method,
+            api::schema::Method::OrbitRoute(_) | api::schema::Method::OrbitDecisions(_)
+        ) {
+            self.app
+                .handle_deferred_orbit_decision(msg.request, msg.respond_to);
+            return changed;
+        }
+        if matches!(
+            &msg.request.method,
+            api::schema::Method::OrbitAgentStart(params) if params.worktree_branch().is_some()
+        ) {
+            let deferred_changed = self
+                .app
+                .handle_deferred_orbit_start(msg.request, msg.respond_to);
             return changed | deferred_changed;
         }
         if matches!(
@@ -3125,7 +3170,7 @@ impl HeadlessServer {
         let _ = msg.respond_to.send(response);
 
         // Forward new toast state only when a client-local delivery mode is selected.
-        // Herdr delivery renders the toast in-frame and must not ask clients to
+        // Aster delivery renders the toast in-frame and must not ask clients to
         // show a terminal or system notification.
         let toast_after = self.app.state.toast.clone();
         let forwarded_toast_from_state = if should_forward_toast_to_clients(

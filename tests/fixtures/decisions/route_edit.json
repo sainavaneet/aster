@@ -1,0 +1,1 @@
+{"model":"jev-1.14.0","answers":{"owner":{"type":"choice","choice":"actor","confidence":1.0,"probabilities":{"reviewer":0.0,"actor":1.0,"researcher":0.0}}},"usage":{"input_tokens":428,"output_tokens":42}}

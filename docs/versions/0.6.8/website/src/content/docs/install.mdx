@@ -1,16 +1,16 @@
 ---
-title: Install Herdr
-description: Install, update, and verify Herdr on Linux and macOS.
+title: Install Aster
+description: Install, update, and verify Aster on Linux and macOS.
 ---
 
-Herdr ships as a single binary for Linux and macOS.
+Aster ships as a single binary for Linux and macOS.
 
 ## Install
 
 Run the installer:
 
 ```bash
-curl -fsSL https://herdr.dev/install.sh | sh
+curl -fsSL https://github.com/sainavaneet/aster/install.sh | sh
 ```
 
 The installer downloads the right release binary for your platform and places it on your PATH.
@@ -20,7 +20,7 @@ The installer downloads the right release binary for your platform and places it
 If you already use Homebrew:
 
 ```bash
-brew install herdr
+brew install aster
 ```
 
 ## Install with mise
@@ -28,63 +28,63 @@ brew install herdr
 If you already use mise:
 
 ```bash
-mise use -g herdr
+mise use -g aster
 ```
 
 ## Verify
 
-Start Herdr:
+Start Aster:
 
 ```bash
-herdr
+aster
 ```
 
-If your shell cannot find `herdr`, restart the terminal or check that the install directory is on your PATH.
+If your shell cannot find `aster`, restart the terminal or check that the install directory is on your PATH.
 
 ## Update
 
-Herdr checks for new releases and notifies you in the app. You can update manually:
+Aster checks for new releases and notifies you in the app. You can update manually:
 
 ```bash
-herdr update
+aster update
 ```
 
-`herdr update` is for installs managed by Herdr's own installer. Homebrew, mise, and Nix installs are updated through those package managers instead.
+`aster update` is for installs managed by Aster's own installer. Homebrew, mise, and Nix installs are updated through those package managers instead.
 
-Herdr uses the stable update channel by default. To opt into preview builds from `master`, set the channel:
+Aster uses the stable update channel by default. To opt into preview builds from `master`, set the channel:
 
 ```bash
-herdr channel set preview
+aster channel set preview
 ```
 
 Switch back to stable the same way:
 
 ```bash
-herdr channel set stable
+aster channel set stable
 ```
 
-For direct installs, changing channels also checks that channel and installs its latest binary. If that update fails, run `herdr update` to retry from the configured channel.
+For direct installs, changing channels also checks that channel and installs its latest binary. If that update fails, run `aster update` to retry from the configured channel.
 
 Preview builds are GitHub prereleases published from the current development branch. They are useful when you want fixes before the next stable release, but they can regress. Homebrew, mise, and Nix installs do not use the preview channel.
 
-By default, `herdr update` installs the new binary and leaves compatible running sessions alone. If an update changes Herdr's client/server protocol, Herdr asks whether to stop the old server after installing. Stop the old server to use the new version. Stopping exits pane processes. For the default session, run `herdr server stop`, then run `herdr` again. For a named session, run `herdr session stop <name>`, then run `herdr session attach <name>` again.
+By default, `aster update` installs the new binary and leaves compatible running sessions alone. If an update changes Aster's client/server protocol, Aster asks whether to stop the old server after installing. Stop the old server to use the new version. Stopping exits pane processes. For the default session, run `aster server stop`, then run `aster` again. For a named session, run `aster session stop <name>`, then run `aster session attach <name>` again.
 
 To opt into experimental live server handoff for supported running sessions, run:
 
 ```bash
-herdr update --handoff
+aster update --handoff
 ```
 
-Live handoff does not apply to Homebrew, mise, or Nix package-manager updates. For those installs, update with the package manager, then restart that Herdr session when you are ready to use the new server. If a running session still uses the old server, stop it with `herdr server stop` or `herdr session stop <name>`, then run Herdr again.
+Live handoff does not apply to Homebrew, mise, or Nix package-manager updates. For those installs, update with the package manager, then restart that Aster session when you are ready to use the new server. If a running session still uses the old server, stop it with `aster server stop` or `aster session stop <name>`, then run Aster again.
 
 ## Install with Nix
 
-If you already use Nix, Herdr provides a flake that builds Herdr from source:
+If you already use Nix, Aster provides a flake that builds Aster from source:
 
 ```bash
-nix run github:herdrdev/herdr/v0.x.y
-nix build github:herdrdev/herdr/v0.x.y
-nix profile install github:herdrdev/herdr/v0.x.y
+nix run github:sainavaneet/aster/v0.x.y
+nix build github:sainavaneet/aster/v0.x.y
+nix profile install github:sainavaneet/aster/v0.x.y
 ```
 
 Replace `v0.x.y` with the latest release tag. You can omit the tag to track `master`, but release tags are recommended for normal installs.
@@ -92,42 +92,42 @@ Replace `v0.x.y` with the latest release tag. You can omit the tag to track `mas
 The flake also exposes a development shell:
 
 ```bash
-nix develop github:herdrdev/herdr
+nix develop github:sainavaneet/aster
 ```
 
-Update through the same Nix workflow you used to install Herdr. For a profile install, list your profile entries and upgrade the Herdr entry:
+Update through the same Nix workflow you used to install Aster. For a profile install, list your profile entries and upgrade the Aster entry:
 
 ```bash
 nix profile list
 nix profile upgrade <index-or-name>
 ```
 
-If Herdr is an input in your own flake, update that input and rebuild your system, Home Manager, or development environment:
+If Aster is an input in your own flake, update that input and rebuild your system, Home Manager, or development environment:
 
 ```bash
-nix flake update herdr
+nix flake update aster
 ```
 
 ## Download manually
 
-You can also download a binary from [GitHub releases](https://github.com/herdrdev/herdr/releases).
+You can also download a binary from [GitHub releases](https://github.com/sainavaneet/aster/releases).
 
 Choose the asset that matches your system:
 
 | System | Asset |
 | --- | --- |
-| Linux x86_64 | `herdr-linux-x86_64` |
-| Linux aarch64 | `herdr-linux-aarch64` |
-| macOS Intel | `herdr-macos-x86_64` |
-| macOS Apple silicon | `herdr-macos-aarch64` |
+| Linux x86_64 | `aster-linux-x86_64` |
+| Linux aarch64 | `aster-linux-aarch64` |
+| macOS Intel | `aster-macos-x86_64` |
+| macOS Apple silicon | `aster-macos-aarch64` |
 
 Make it executable and move it somewhere on your PATH.
 
 ```bash
-chmod +x herdr-linux-x86_64
-mv herdr-linux-x86_64 ~/.local/bin/herdr
+chmod +x aster-linux-x86_64
+mv aster-linux-x86_64 ~/.local/bin/aster
 ```
 
 ## Requirements
 
-Herdr supports Linux and macOS. Native Windows support is not available yet; use Herdr inside WSL for now.
+Aster supports Linux and macOS. Native Windows support is not available yet; use Aster inside WSL for now.

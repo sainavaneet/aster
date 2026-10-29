@@ -8,6 +8,7 @@ use crate::api::schema::{
 };
 use crate::app::App;
 
+use super::prompt_error::PromptSubmitError;
 use super::responses::{encode_error, encode_error_body, encode_success};
 
 const AGENT_PROMPT_SUBMIT_DELAY: Duration = Duration::from_millis(300);
@@ -33,6 +34,18 @@ fn append_codex_paste_boundary(runtime: &crate::terminal::TerminalRuntime, text:
 }
 
 impl App {
+    /// Shared validated submission path for server-owned notifications/assignments.
+    /// Errors are typed so callers can decide whether a later attempt may succeed.
+    pub(crate) fn queue_orbit_prompt(
+        &mut self,
+        id: String,
+        params: &AgentPromptParams,
+    ) -> Result<std::sync::mpsc::Receiver<std::io::Result<()>>, PromptSubmitError> {
+        let validated = self.validate_agent_prompt(id, params)?;
+        self.submit_agent_prompt(validated, params)
+            .map(|(_, _, ack)| ack)
+    }
+
     pub(super) fn handle_agent_list(&mut self, id: String) -> String {
         encode_success(
             id,
@@ -84,13 +97,23 @@ impl App {
         request: crate::api::schema::Request,
         respond_to: std::sync::mpsc::Sender<String>,
     ) -> bool {
-        let crate::api::schema::Method::AgentPrompt(params) = request.method else {
-            return false;
+        let params = match request.method {
+            crate::api::schema::Method::AgentPrompt(params) => params,
+            crate::api::schema::Method::OrbitAgentPrompt(params) => {
+                match self.orbit_agent_prompt_params(&request.id, params, false) {
+                    Ok(params) => params,
+                    Err(response) => {
+                        let _ = respond_to.send(response);
+                        return true;
+                    }
+                }
+            }
+            _ => return false,
         };
-        let validated = match self.validate_agent_prompt(request.id, &params) {
+        let validated = match self.validate_agent_prompt(request.id.clone(), &params) {
             Ok(validated) => validated,
-            Err(response) => {
-                let _ = respond_to.send(response);
+            Err(error) => {
+                let _ = respond_to.send(error.to_response(request.id));
                 return true;
             }
         };
@@ -102,7 +125,7 @@ impl App {
             std::sync::mpsc::Receiver<std::io::Result<()>>,
         )>();
         let waiter_respond_to = respond_to.clone();
-        let spawned = crate::thread_spawn::spawn_named("herdr-agent-prompt", move || {
+        let spawned = crate::thread_spawn::spawn_named("aster-agent-prompt", move || {
             let Ok((id, agent, completion)) = handoff_rx.recv() else {
                 return;
             };
@@ -125,12 +148,13 @@ impl App {
             ));
             return true;
         }
+        let id = validated.id.clone();
         match self.submit_agent_prompt(validated, &params) {
             Ok(submission) => {
                 let _ = handoff_tx.send(submission);
             }
-            Err(response) => {
-                let _ = respond_to.send(response);
+            Err(error) => {
+                let _ = respond_to.send(error.to_response(id));
             }
         }
         true
@@ -141,17 +165,23 @@ impl App {
         &self,
         id: String,
         params: &AgentPromptParams,
-    ) -> Result<ValidatedAgentPrompt, String> {
+    ) -> Result<ValidatedAgentPrompt, PromptSubmitError> {
         if params.text.is_empty() {
-            return Err(encode_error(
-                id,
+            return Err(PromptSubmitError::terminal(
                 "empty_agent_prompt",
                 "agent prompt must not be empty",
             ));
         }
         let resolved = match self.resolve_agent_target(&params.target) {
             Ok(resolved) => resolved,
-            Err(err) => return Err(encode_error_body(id, self.agent_target_error_body(err))),
+            Err(err) => {
+                let is_missing = matches!(
+                    err,
+                    crate::app::terminal_targets::TerminalTargetError::NotFound { .. }
+                );
+                let body = self.agent_target_error_body(err);
+                return Err(PromptSubmitError::from_target_body(is_missing, body));
+            }
         };
         let Some(terminal_id) = self
             .state
@@ -160,14 +190,13 @@ impl App {
             .and_then(|workspace| workspace.terminal_id(resolved.pane_id))
             .cloned()
         else {
-            return Err(agent_not_found(id, &params.target));
+            return Err(PromptSubmitError::not_found(&params.target));
         };
         let Some(terminal) = self.state.terminals.get(&terminal_id) else {
-            return Err(agent_not_found(id, &params.target));
+            return Err(PromptSubmitError::not_found(&params.target));
         };
         if terminal.state == crate::detect::AgentState::Blocked {
-            return Err(encode_error(
-                id,
+            return Err(PromptSubmitError::retryable(
                 "agent_blocked",
                 format!(
                     "agent {} is blocked and requires interactive input",
@@ -176,17 +205,16 @@ impl App {
             ));
         }
         let Some(expected_agent) = terminal.effective_known_agent() else {
-            return Err(agent_not_ready(id, &params.target));
+            return Err(PromptSubmitError::not_ready(&params.target));
         };
         if terminal.managed_agent_launch_pending() {
-            return Err(agent_not_ready(id, &params.target));
+            return Err(PromptSubmitError::not_ready(&params.target));
         }
         let Some(runtime) = self.lookup_runtime_sender(resolved.ws_idx, resolved.pane_id) else {
-            return Err(agent_not_found(id, &params.target));
+            return Err(PromptSubmitError::not_found(&params.target));
         };
         if !super::super::agents::runtime_hosts_agent(runtime, expected_agent) {
-            return Err(encode_error(
-                id,
+            return Err(PromptSubmitError::retryable(
                 "agent_not_ready",
                 format!(
                     "agent {} is no longer the pane foreground process",
@@ -195,7 +223,7 @@ impl App {
             ));
         }
         let Some(agent) = self.agent_info(resolved.ws_idx, resolved.pane_id) else {
-            return Err(agent_not_found(id, &params.target));
+            return Err(PromptSubmitError::not_found(&params.target));
         };
         Ok(ValidatedAgentPrompt {
             id,
@@ -216,7 +244,7 @@ impl App {
             crate::api::schema::AgentInfo,
             std::sync::mpsc::Receiver<std::io::Result<()>>,
         ),
-        String,
+        PromptSubmitError,
     > {
         let ValidatedAgentPrompt {
             id,
@@ -226,7 +254,7 @@ impl App {
             agent,
         } = validated;
         let Some(runtime) = self.lookup_runtime_sender(ws_idx, pane_id) else {
-            return Err(agent_not_found(id, &params.target));
+            return Err(PromptSubmitError::not_found(&params.target));
         };
         #[cfg(windows)]
         let submit_deadline = params
@@ -240,11 +268,14 @@ impl App {
             let focus = match crate::ghostty::encode_focus(crate::ghostty::FocusEvent::Gained) {
                 Ok(focus) => focus,
                 Err(err) => {
-                    return Err(encode_error(id, "agent_prompt_failed", err.to_string()));
+                    return Err(PromptSubmitError::terminal(
+                        "agent_prompt_failed",
+                        err.to_string(),
+                    ));
                 }
             };
             if let Err(err) = runtime.try_send_bytes(Bytes::from(focus)) {
-                return Err(encode_error(id, "agent_prompt_failed", err.to_string()));
+                return Err(PromptSubmitError::from_try_send(&err));
             }
         }
         let (text, enter) =
@@ -264,7 +295,7 @@ impl App {
                 AGENT_PROMPT_SUBMIT_DELAY,
                 submit_deadline,
             )
-            .map_err(|err| encode_error(id.clone(), "agent_prompt_failed", err.to_string()))?;
+            .map_err(|err| PromptSubmitError::from_queue_error(&err))?;
         Ok((id, agent, completion))
     }
 
@@ -385,17 +416,30 @@ impl App {
         id: String,
         params: AgentSendKeysParams,
     ) -> String {
-        let resolved = match self.resolve_agent_target(&params.target) {
-            Ok(resolved) => resolved,
-            Err(err) => return encode_error_body(id, self.agent_target_error_body(err)),
-        };
+        match self.send_agent_keys(&id, &params.target, &params.keys) {
+            Ok(()) => encode_success(id, ResponseResult::Ok {}),
+            Err(response) => response,
+        }
+    }
+
+    /// Sends key presses to the agent `target` hosts; `Err` is an encoded error
+    /// response. Shared by `agent.send_keys` and Orbit approvals.
+    pub(super) fn send_agent_keys(
+        &mut self,
+        id: &str,
+        target: &str,
+        keys: &[String],
+    ) -> Result<(), String> {
+        let resolved = self
+            .resolve_agent_target(target)
+            .map_err(|err| encode_error_body(id.to_owned(), self.agent_target_error_body(err)))?;
         let Some(terminal_id) = self
             .state
             .workspaces
             .get(resolved.ws_idx)
             .and_then(|workspace| workspace.terminal_id(resolved.pane_id))
         else {
-            return agent_not_found(id, &params.target);
+            return Err(agent_not_found(id.to_owned(), target));
         };
         let Some(expected_agent) = self
             .state
@@ -403,26 +447,25 @@ impl App {
             .get(terminal_id)
             .and_then(|terminal| terminal.effective_known_agent())
         else {
-            return agent_not_ready(id, &params.target);
+            return Err(agent_not_ready(id.to_owned(), target));
         };
         let Some(runtime) = self.lookup_runtime_sender(resolved.ws_idx, resolved.pane_id) else {
-            return agent_not_found(id, &params.target);
+            return Err(agent_not_found(id.to_owned(), target));
         };
         if !super::super::agents::runtime_hosts_agent(runtime, expected_agent) {
-            return agent_not_ready(id, &params.target);
+            return Err(agent_not_ready(id.to_owned(), target));
         }
-        let encoded = match super::super::api_helpers::encode_api_keys(runtime, &params.keys) {
-            Ok(encoded) => encoded,
-            Err(key) => {
-                return encode_error(id, "invalid_key", format!("unsupported key {key}"));
-            }
-        };
+        let encoded = super::super::api_helpers::encode_api_keys(runtime, keys).map_err(|key| {
+            encode_error(
+                id.to_owned(),
+                "invalid_key",
+                format!("unsupported key {key}"),
+            )
+        })?;
         let bytes: Vec<u8> = encoded.into_iter().flatten().collect();
-        if let Err(err) = runtime.try_send_bytes(Bytes::from(bytes)) {
-            return encode_error(id, "agent_send_keys_failed", err.to_string());
-        }
-
-        encode_success(id, ResponseResult::Ok {})
+        runtime
+            .try_send_bytes(Bytes::from(bytes))
+            .map_err(|err| encode_error(id.to_owned(), "agent_send_keys_failed", err.to_string()))
     }
 }
 
@@ -566,6 +609,7 @@ mod tests {
             agent: Some(Agent::Pi),
             state: AgentState::Idle,
             visible_blocker: false,
+            visible_idle: false,
             visible_working: false,
             process_exited: true,
             observed_at,

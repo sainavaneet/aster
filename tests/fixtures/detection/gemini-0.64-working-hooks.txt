@@ -1,0 +1,67 @@
+   → Read lines 1-300 of 397 from src/client/shell/agent_s…
+  ✓  ReadFile  src/client/shell/tabs.rs
+   → Read lines 1-300 of 406 from src/client/shell/tabs.rs
+  ✓  ReadFile  src/client/shell/agent_sidebar.rs
+   → Read lines 301-397 of 397 from src/client/shell/agent_side…
+  ✓  ReadFile  src/client/shell/tabs.rs
+   → Read lines 301-406 of 406 from src/client/shell/tabs.rs
+  ✓  ReadFile  src/client/shell/notifications.rs
+   → Read lines 1-300 of 480 from src/client/shell/notification…
+  ✓  ReadFile  src/ui/sidebar.rs
+  ✓  ReadFile  src/ui/sidebar/tokens.rs
+   → Read lines 1-300 of 588 from src/ui/sidebar/tokens.rs
+  ✓  ReadFile  src/client/shell/notifications.rs → Read lines 301-480 of 480 from src/client/shell/notifications.rs
+  ✓  ReadFile  src/client/shell/render.rs
+  ✓  ReadFile  src/client/shell/sidebar.rs → Read lines 1-400 of 789 from src/client/shell/sidebar.rs
+  ✓  ReadFile  src/.../shell/endpoint_sidebar.rs → Read lines 1-400 of 650 from src/client/shell/endpoint_sidebar.rs
+  ✓  ReadFile  src/.../shell/endpoint_notices.rs
+  ✓  ReadFile  src/client/shell/composition.rs → Read lines 1-400 of 816 from src/client/shell/composition.rs
+  ✓  ReadFile  src/client/shell/endpoint_agents.rs
+  ✓  ReadFile  src/.../endpoint_agent_state.rs → Read lines 1-400 of 479 from src/client/shell/endpoint_agent_state.rs
+  ✓  ReadFile  src/.../notification_policy.rs
+  ✓  ReadFile  src/client/shell/config.rs → Read lines 1-400 of 567 from src/client/shell/config.rs
+  ✓  ReadFile  src/client/shell/composition.rs → Read lines 401-816 of 816 from src/client/shell/composition.rs
+  ✓  ReadFile  src/client/shell/state.rs → Read lines 301-900 of 1898 from src/client/shell/state.rs
+  ✓  ReadFile  src/client/shell/state.rs → Read lines 901-1500 of 1898 from src/client/shell/state.rs
+  ✓  ReadFile  src/client/shell/state.rs → Read lines 1501-1898 of 1898 from src/client/shell/state.rs
+  ✓  ReadFile  src/client/mod.rs → Read lines 251-1200 of 2392 from src/client/mod.rs
+  ✓  ReadFile  src/client/mod.rs → Read lines 1201-1800 of 2392 from src/client/mod.rs
+  ✓  ReadFile  src/config.rs → Read lines 1-400 of 462 from src/config.rs
+  ✓  ReadFile  src/config.rs → Read lines 401-462 of 462 from src/config.rs
+  ✓  ReadFile  src/client/mod.rs → Read lines 1801-2392 of 2392 from src/client/mod.rs
+  ✓  ReadFile  src/config/model.rs → Read lines 1-400 of 2118 from src/config/model.rs
+  ✓  ReadFile  src/config/model.rs → Read lines 401-800 of 2118 from src/config/model.rs
+  ✓  FindFiles  '**/*' within docs → Found 1080 matching file(s)
+
+      (Output saved to: /Users/navaneet/.gemini/tmp/feat-tui-animations/tool-outputs/session-64364140-eff7-4c0f-9973-8d887a0f7fa7/glob__call_214051.txt)
+
+  ✓  SearchText  'orbit|Orbit|delivery|Delivery' within src → Found 100 matches (limited)
+  ✓  ReadFile  src/config/model.rs → Read lines 801-1500 of 2118 from src/config/model.rs
+  ✓  ReadFile  src/config/model.rs → Read lines 1501-2118 of 2118 from src/config/model.rs
+  ✓  FindFiles  '**/*' within docs/next → Found 72 matching file(s)
+  ✓  ReadFile  src/ui.rs
+  ✓  ReadFile  src/protocol/mod.rs
+  ✓  ReadFile  src/protocol/wire.rs → Read lines 1-600 of 3676 from src/protocol/wire.rs
+  ✓  ReadFile  src/protocol/endpoint.rs → Read lines 1-400 of 421 from src/protocol/endpoint.rs
+  ✓  ReadFile  src/client/shell/sidebar.rs → Read lines 401-789 of 789 from src/client/shell/sidebar.rs
+  ✓  ReadFile  src/client/shell/config.rs → Read lines 401-567 of 567 from src/client/shell/config.rs
+  ✓  ReadFile  src/ui/sidebar/tokens.rs → Read lines 301-588 of 588 from src/ui/sidebar/tokens.rs
+  ✓  ReadFile  src/client/shell/settings.rs → Read lines 1-400 of 401 from src/client/shell/settings.rs
+  ✓  ReadFile  src/config/write.rs
+  ✓  ReadFile  src/ui/status.rs
+  ✓  SearchText  'SemanticNotification|Toast|Notification' within src → Found 100 matches (limited)
+  ⊶  SearchText  'SemanticNotificationEvent|SemanticNotificationKind' within src
+  ⊶  ReadFile  docs/.../docs/configuration.mdx
+  ⊶  ReadFile  docs/.../data/config-reference.json
+  ⊶  ReadFile  scripts/docs_translation_parity.py
+
+
+ ⠋ Executing Hooks: claude-mem (1/2), if [ -f '/Users/navaneet/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '/Users/navaneet/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '/Users/navaneet/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '/Users/navaneet/.orca/agent
+? for shortcuts
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Shift+Tab to accept edits                                                                                                                                                                                                              2 GEMINI.md files · 101 skills
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+ >   Type your message or @path/to/file
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+ workspace (/directory)                                                                                branch                                                                       sandbox                                                                     /model
+ ~/.aster/worktrees/aster/feat-tui-animations                                                          feat/tui-animations                                                          no sandbox                                                          gemini-4-argon

@@ -1,5 +1,6 @@
 use crossterm::event::{KeyCode, KeyModifiers};
 
+mod decisions;
 mod io;
 mod keybinds;
 mod model;
@@ -11,6 +12,10 @@ mod window_title;
 mod write;
 
 pub use self::{
+    decisions::{
+        DecisionApprovalsConfig, DecisionProviderKind, DecisionReportSanityConfig,
+        PolarisDecisionsConfig,
+    },
     io::{
         config_diagnostic_summary, config_dir, config_path, load_live_config,
         remove_keybinding_config_sections, remove_section_key, state_dir, upsert_section_bool,
@@ -22,11 +27,13 @@ pub use self::{
         IndexedKeybind, KeyCombo, Keybinds, LiveKeybindConfig,
     },
     model::{
-        validated_sidebar_bounds, AgentPanelSortConfig, Config, ConfigReloadReport,
-        ConfigReloadStatus, HostCursorModeConfig, NewTerminalCwdConfig, PaneBordersConfig,
-        ShellModeConfig, SidebarCollapsedModeConfig, StatusIndicatorStyle, TabBarPositionConfig,
-        ToastClipboardPosition, ToastConfig, ToastDelivery, ToastHerdrPosition,
-        UpdateChannelConfig, MAX_TOAST_DELAY_SECONDS,
+        parse_worker_permission_mode, validated_sidebar_bounds, AgentPanelSortConfig, Config,
+        ConfigReloadReport, ConfigReloadStatus, HostCursorModeConfig, NewTerminalCwdConfig,
+        OrbitNotifyEvent, PaneBordersConfig, PermissionModeError, PolarisConfig,
+        PolarisTeamRoleConfig, PolarisWorkersConfig, ShellModeConfig, SidebarCollapsedModeConfig,
+        StatusIndicatorStyle, TabBarPositionConfig, ToastAsterPosition, ToastClipboardPosition,
+        ToastConfig, ToastDelivery, UiAnimationsConfig, UpdateChannelConfig,
+        MAX_TOAST_DELAY_SECONDS,
     },
     sidebar::{
         AgentSidebarToken, AgentsSidebarConfig, SidebarConfig, SidebarTokenStyle,
@@ -38,6 +45,8 @@ pub use self::{
     window_title::{WindowTitlePart, WindowTitleTemplate, WindowTitleToken},
 };
 
+#[cfg(test)]
+pub(crate) use self::decisions::DEFAULT_DENY_PATTERNS;
 pub(crate) use self::keybinds::parse_key_combo;
 pub(crate) use self::write::{update_file_at, write_edit, ConfigEdit};
 pub(crate) use self::{
@@ -53,7 +62,7 @@ pub(crate) use self::{
 
 pub(crate) use self::{keybinds::CommandKeybindType, model::KeysConfig};
 
-pub const CONFIG_PATH_ENV_VAR: &str = "HERDR_CONFIG_PATH";
+pub const CONFIG_PATH_ENV_VAR: &str = "ASTER_CONFIG_PATH";
 
 pub(crate) fn is_keybinding_config_diagnostic(diagnostic: &str) -> bool {
     if diagnostic.starts_with("config parse error:") || diagnostic.starts_with("config read error:")
@@ -106,7 +115,7 @@ impl Config {
         self.validated_keybinds().1
     }
 
-    /// Parsed keybinds for Herdr actions.
+    /// Parsed keybinds for Aster actions.
     pub fn keybinds(&self) -> Keybinds {
         self.validated_keybinds().3
     }

@@ -1,44 +1,44 @@
 ---
 title: Persistence and remote access
-description: Detach from Herdr, reattach later, use named sessions, and connect over SSH.
+description: Detach from Aster, reattach later, use named sessions, and connect over SSH.
 ---
 
-Herdr keeps panes running in a background server. Your terminal client can detach and reconnect later.
+Aster keeps panes running in a background server. Your terminal client can detach and reconnect later.
 
-For the local, SSH, and `herdr --remote` workflows, see [How to work with Herdr](/docs/how-to-work/).
+For the local, SSH, and `aster --remote` workflows, see [How to work with Aster](/docs/how-to-work/).
 
 ## Detach and reattach
 
-Start Herdr:
+Start Aster:
 
 ```bash
-herdr
+aster
 ```
 
 Detach the client with `ctrl+b q`.
 
-Your panes and agents keep running. Reattach by running Herdr again:
+Your panes and agents keep running. Reattach by running Aster again:
 
 ```bash
-herdr
+aster
 ```
 
 If you want to end the session and stop its panes, stop the default server:
 
 ```bash
-herdr server stop
+aster server stop
 ```
 
 ## Named sessions
 
-Use named sessions when you want independent Herdr servers.
+Use named sessions when you want independent Aster servers.
 
 ```bash
-herdr session list
-herdr session attach work
-herdr session attach side-project
-herdr session stop work
-herdr session delete side-project
+aster session list
+aster session attach work
+aster session attach side-project
+aster session stop work
+aster session delete side-project
 ```
 
 A named session has its own panes, tabs, workspaces, sockets, and runtime state. It still shares the same global config file.
@@ -46,30 +46,30 @@ A named session has its own panes, tabs, workspaces, sockets, and runtime state.
 Use `--json` for scripts:
 
 ```bash
-herdr session list --json
-herdr session stop work --json
-herdr session delete side-project --json
+aster session list --json
+aster session stop work --json
+aster session delete side-project --json
 ```
 
 ## Remote attach over SSH
 
-Run Herdr on a server and attach from any SSH client:
+Run Aster on a server and attach from any SSH client:
 
 ```bash
 ssh you@server
-herdr
+aster
 ```
 
-In this mode your shell is remote, Herdr runs on the remote host, and panes keep running there after you detach.
+In this mode your shell is remote, Aster runs on the remote host, and panes keep running there after you detach.
 
 You can also attach through SSH from your local machine:
 
 ```bash
-herdr --remote workbox
-herdr --remote ssh://you@server:2222
+aster --remote workbox
+aster --remote ssh://you@server:2222
 ```
 
-In this mode your local Herdr is a thin client. It connects over SSH, starts or attaches to the remote Herdr server, and streams the UI back to your local terminal.
+In this mode your local Aster is a thin client. It connects over SSH, starts or attaches to the remote Aster server, and streams the UI back to your local terminal.
 
 For repeat targets, use your SSH config:
 
@@ -83,17 +83,17 @@ Host workbox
 Then attach with:
 
 ```bash
-herdr --remote workbox
+aster --remote workbox
 ```
 
-Remote attach supports Linux and macOS hosts on x86_64 and aarch64. Herdr checks the remote platform, prefers a matching `herdr` already on the remote `PATH`, then checks `~/.local/bin/herdr`. If no matching binary exists, interactive runs prompt to install one to `~/.local/bin/herdr`; non-interactive runs fail instead of modifying the host. If `~/.local/bin` is not on the remote `PATH`, Herdr warns after install.
+Remote attach supports Linux and macOS hosts on x86_64 and aarch64. Aster checks the remote platform, prefers a matching `aster` already on the remote `PATH`, then checks `~/.local/bin/aster`. If no matching binary exists, interactive runs prompt to install one to `~/.local/bin/aster`; non-interactive runs fail instead of modifying the host. If `~/.local/bin` is not on the remote `PATH`, Aster warns after install.
 
-When your local and remote platforms match, Herdr can copy the current local binary. Otherwise it downloads the matching release asset from `https://herdr.dev/latest.json`.
+When your local and remote platforms match, Aster can copy the current local binary. Otherwise it downloads the matching release asset from `https://raw.githubusercontent.com/sainavaneet/aster/master/distribution/latest.json`.
 
-For local builds or custom binaries, set `HERDR_REMOTE_BINARY` to a local file path before running remote attach.
+For local builds or custom binaries, set `ASTER_REMOTE_BINARY` to a local file path before running remote attach.
 
 ```bash
-HERDR_REMOTE_BINARY=target/release/herdr herdr --remote workbox
+ASTER_REMOTE_BINARY=target/release/aster aster --remote workbox
 ```
 
 ## Remote named sessions
@@ -101,23 +101,23 @@ HERDR_REMOTE_BINARY=target/release/herdr herdr --remote workbox
 Use `--session` with `--remote` to attach to a named session on the remote host:
 
 ```bash
-herdr --remote workbox --session agents
+aster --remote workbox --session agents
 ```
 
 ## Direct terminal attach
 
-Full Herdr attach opens the whole workspace UI. Direct attach opens one server-owned terminal in your current terminal.
+Full Aster attach opens the whole workspace UI. Direct attach opens one server-owned terminal in your current terminal.
 
 Attach by agent target:
 
 ```bash
-herdr agent attach reviewer
+aster agent attach reviewer
 ```
 
 Attach by terminal ID:
 
 ```bash
-herdr terminal attach term_abc123
+aster terminal attach term_abc123
 ```
 
 Direct attach streams the current rendered terminal state, then live ANSI frames. Input goes straight to that terminal.
@@ -127,15 +127,15 @@ Detach with `ctrl+b q`. Send a literal `ctrl+b` with `ctrl+b ctrl+b`.
 Only one writable direct attach client owns input and resize for a terminal. Use `--takeover` to replace an existing owner:
 
 ```bash
-herdr terminal attach term_abc123 --takeover
+aster terminal attach term_abc123 --takeover
 ```
 
 ## Single-process escape hatch
 
-Use `--no-session` to run Herdr without the background server/client split:
+Use `--no-session` to run Aster without the background server/client split:
 
 ```bash
-herdr --no-session
+aster --no-session
 ```
 
 This is mainly an escape hatch for debugging or compatibility. The default persistent session mode is the normal path.

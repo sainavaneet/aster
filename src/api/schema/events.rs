@@ -82,6 +82,8 @@ pub enum Subscription {
     PaneScrollChanged { pane_id: String },
     #[serde(rename = "layout.updated")]
     LayoutUpdated {},
+    #[serde(rename = "orbit.notice")]
+    OrbitNotice {},
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
@@ -218,6 +220,7 @@ pub enum EventKind {
     PaneAgentDetected,
     PaneAgentStatusChanged,
     LayoutUpdated,
+    OrbitNotice,
 }
 
 impl EventKind {
@@ -249,6 +252,7 @@ impl EventKind {
             EventKind::PaneAgentDetected => "pane.agent_detected",
             EventKind::PaneAgentStatusChanged => "pane.agent_status_changed",
             EventKind::LayoutUpdated => "layout.updated",
+            EventKind::OrbitNotice => "orbit.notice",
         }
     }
 }
@@ -281,6 +285,7 @@ pub const KNOWN_EVENT_KINDS: &[EventKind] = &[
     EventKind::PaneAgentDetected,
     EventKind::PaneAgentStatusChanged,
     EventKind::LayoutUpdated,
+    EventKind::OrbitNotice,
 ];
 
 pub const PLUGIN_HOOK_EVENT_KINDS: &[EventKind] = &[
@@ -552,5 +557,18 @@ pub enum EventData {
     },
     LayoutUpdated {
         layout: super::panes::PaneLayoutSnapshot,
+    },
+    /// A human-facing Orbit notification: a report delivered to Polaris, an
+    /// Aster notice, a blocked worker, or a failed delivery. Never carries a
+    /// report summary, prompt text, or token.
+    OrbitNotice {
+        /// `report`, `notice`, `blocked`, or `failed`.
+        kind: String,
+        /// The worker's display name.
+        worker: String,
+        task_id: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pane_id: Option<String>,
+        message: String,
     },
 }

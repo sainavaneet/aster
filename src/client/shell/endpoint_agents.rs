@@ -7,29 +7,42 @@ pub(super) fn render_collapsed(
     endpoints: &[ClientShellEndpoint],
     active_endpoint_id: &ClientEndpointId,
     config: &ClientShellConfig,
+    animation: super::animation::AnimationFrame<'_>,
     hits: &mut ShellHitMap,
 ) {
     let rows = agent_rows(endpoints, active_endpoint_id, config);
     for (index, row) in rows.into_iter().take(area.height as usize).enumerate() {
         let rect = Rect::new(area.x, area.y + index as u16, area.width, 1);
+        let phase = animation.agent_row(&row.endpoint_id, &row.agent.pane_id, row.agent.status);
         if row.agent.focused {
             buffer.set_style(rect, Style::default().bg(config.palette.active_row_bg));
+        } else if phase.status_flash > 0.0 || phase.recency_highlight > 0.0 {
+            let bg = super::animation::blend_color(
+                config.palette.sidebar_bg,
+                config.palette.surface0,
+                phase.status_flash.max(phase.recency_highlight * 0.65),
+                &config.palette,
+            );
+            buffer.set_style(rect, Style::default().bg(bg));
         }
         let initial = row.machine_label.chars().next().unwrap_or('?');
+        let (icon_glyph, status_fg) = super::agent_sidebar::agent_status_icon_and_color(
+            row.agent.status,
+            config.status_indicators,
+            &config.palette,
+            phase,
+        );
         put_text(
             buffer,
             rect.x,
             rect.y,
             rect.width,
-            &format!(
-                "{initial}{}",
-                status_icon(row.agent.status, config.status_indicators)
-            ),
+            &format!("{initial}{icon_glyph}"),
             Style::default()
                 .fg(if row.stale {
                     config.palette.overlay0
                 } else {
-                    status_color(row.agent.status, &config.palette)
+                    status_fg
                 })
                 .add_modifier(if row.stale {
                     Modifier::DIM
@@ -49,6 +62,7 @@ pub(super) fn render_expanded(
     endpoints: &[ClientShellEndpoint],
     active_endpoint_id: &ClientEndpointId,
     config: &ClientShellConfig,
+    animation: super::animation::AnimationFrame<'_>,
     agent_scroll: &mut usize,
     hits: &mut ShellHitMap,
 ) {
@@ -72,7 +86,8 @@ pub(super) fn render_expanded(
         hits,
         |row| row.agent.rows.len(),
         |buffer, rect, row, hits| {
-            super::agent_sidebar::render_agent_row(buffer, rect, &row.agent, config);
+            let phase = animation.agent_row(&row.endpoint_id, &row.agent.pane_id, row.agent.status);
+            super::agent_sidebar::render_agent_row(buffer, rect, &row.agent, config, phase);
             if row.stale {
                 buffer.set_style(
                     rect,

@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 mod actions;
 mod agent_sidebar;
 mod aggregate_navigation;
+pub(crate) mod animation;
 mod machine_diagnostics;
 mod workspace_navigation;
 use workspace_navigation::{PendingWorkspaceHighlight, WorkspaceNavigationTarget};

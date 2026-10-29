@@ -14,7 +14,7 @@ pub(crate) fn toast_notify_kind(delivery: config::ToastDelivery) -> Option<proto
     match delivery {
         config::ToastDelivery::Terminal => Some(protocol::NotifyKind::Toast),
         config::ToastDelivery::System => Some(protocol::NotifyKind::SystemToast),
-        config::ToastDelivery::Off | config::ToastDelivery::Herdr => None,
+        config::ToastDelivery::Off | config::ToastDelivery::Aster => None,
     }
 }
 
@@ -51,6 +51,24 @@ pub(crate) fn toast_message_from_state_change(
                 ))
             })
         })
+}
+
+/// An Orbit notice as a custom client notification, so it is shown immediately
+/// and, with a worker pane, focuses that pane when activated.
+pub(crate) fn orbit_semantic_notification(
+    notice: app::OrbitHumanNotice,
+) -> protocol::SemanticNotification {
+    protocol::SemanticNotification {
+        kind: protocol::SemanticNotificationKind::Custom,
+        title: notice.title,
+        body: (!notice.body.is_empty()).then_some(notice.body),
+        sound: None,
+        agent: None,
+        workspace_id: notice.workspace_id,
+        tab_id: notice.tab_id,
+        pane_id: notice.pane_id,
+        position: None,
+    }
 }
 
 fn toast_event_text(kind: app::state::ToastKind) -> &'static str {
@@ -91,15 +109,15 @@ mod tests {
         let root = state.workspaces[0].tabs[0].root_pane;
         let terminal_id = state.workspaces[0].terminal_id(root).cloned().unwrap();
         let temp_root = std::env::temp_dir().join(format!(
-            "herdr-forwarded-toast-context-{}-{}",
+            "aster-forwarded-toast-context-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_nanos()
         ));
-        let stale_cwd = temp_root.join("__herdr_original__");
-        let live_cwd = temp_root.join("__herdr_projects__");
+        let stale_cwd = temp_root.join("__aster_original__");
+        let live_cwd = temp_root.join("__aster_projects__");
         std::fs::create_dir_all(&stale_cwd).unwrap();
         std::fs::create_dir_all(&live_cwd).unwrap();
         init_repo(&stale_cwd);
@@ -143,7 +161,7 @@ mod tests {
 
         assert_eq!(
             message.as_deref(),
-            Some("codex finished: __herdr_projects__ · 1")
+            Some("codex finished: __aster_projects__ · 1")
         );
 
         for (_, runtime) in terminal_runtimes.drain() {

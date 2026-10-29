@@ -1,38 +1,38 @@
 ---
 title: Configuration
-description: Configure Herdr keybindings, themes, sidebar behavior, notifications, and advanced options.
+description: Configure Aster keybindings, themes, sidebar behavior, notifications, and advanced options.
 ---
 
-Herdr works without a config file. Add one when you want custom keys, themes, sidebar layouts, notifications, or advanced behavior.
+Aster works without a config file. Add one when you want custom keys, themes, sidebar layouts, notifications, or advanced behavior.
 
 The [Config reference](/docs/config-reference/) lists every setting and keybinding, with types, defaults, and allowed values. This page covers setup, common recipes, and configuration structures that need more explanation than a reference row.
 
 ## Config file
 
-Herdr reads config from:
+Aster reads config from:
 
 ```text
-Linux and macOS: ~/.config/herdr/config.toml
-Windows:          %APPDATA%\herdr\config.toml
+Linux and macOS: ~/.config/aster/config.toml
+Windows:          %APPDATA%\aster\config.toml
 ```
 
-Run `herdr --help` to see the resolved config path for your system.
+Run `aster --help` to see the resolved config path for your system.
 
 Print the full default config:
 
 ```bash
-herdr --default-config
+aster --default-config
 ```
 
 Save it as your config if you want a complete starting point:
 
 ```bash
-herdr --default-config > ~/.config/herdr/config.toml
+aster --default-config > ~/.config/aster/config.toml
 ```
 
-If a config value is invalid, Herdr falls back to a safe default and shows a startup warning.
+If a config value is invalid, Aster falls back to a safe default and shows a startup warning.
 
-Herdr shows first-run setup when `onboarding` is missing or true. Continuing from onboarding writes `onboarding = false` and opens settings on the integrations tab. Set `onboarding = false` to skip that flow after setup.
+Aster shows first-run setup when `onboarding` is missing or true. Continuing from onboarding writes `onboarding = false` and opens settings on the integrations tab. Set `onboarding = false` to skip that flow after setup.
 
 ```toml
 onboarding = false
@@ -43,10 +43,10 @@ onboarding = false
 Reload a running server after editing `config.toml`:
 
 ```bash
-herdr server reload-config
+aster server reload-config
 ```
 
-You can also open the global menu in Herdr and choose `reload config`.
+You can also open the global menu in Aster and choose `reload config`.
 
 Reload applies most UI settings without restarting panes. Startup-only settings still need a restart.
 
@@ -66,16 +66,16 @@ With one attached client, all tabs follow its size. With multiple clients, each 
 
 ## Terminal defaults
 
-Set the executable Herdr uses for newly created interactive panes:
+Set the executable Aster uses for newly created interactive panes:
 
 ```toml
 [terminal]
 default_shell = "nu"
 ```
 
-When unset or empty, Herdr uses `$SHELL`, then `/bin/sh` on Unix. On Windows it uses `pwsh.exe` (PowerShell 7) when it resolves on `PATH`, and otherwise the inbox `powershell.exe` (Windows PowerShell 5.1). This is an executable name or path, not a shell command line. Existing panes keep their current shell until they are recreated. Custom command keybinding strings run through `/bin/sh -c` for pane commands and `/bin/sh -lc` for detached commands on Unix; on Windows they run through `cmd.exe /d /c`.
+When unset or empty, Aster uses `$SHELL`, then `/bin/sh` on Unix. On Windows it uses `pwsh.exe` (PowerShell 7) when it resolves on `PATH`, and otherwise the inbox `powershell.exe` (Windows PowerShell 5.1). This is an executable name or path, not a shell command line. Existing panes keep their current shell until they are recreated. Custom command keybinding strings run through `/bin/sh -c` for pane commands and `/bin/sh -lc` for detached commands on Unix; on Windows they run through `cmd.exe /d /c`.
 
-Set how Herdr starts newly created interactive pane shells:
+Set how Aster starts newly created interactive pane shells:
 
 ```toml
 [terminal]
@@ -91,24 +91,24 @@ Set the working directory policy for new panes, tabs, and workspaces:
 new_cwd = "follow"
 ```
 
-`new_cwd = "follow"` keeps the default behavior and inherits the source pane or workspace. When there is no source workspace, Herdr starts in `$HOME`. Use `"home"` to always start in `$HOME`, `"current"` to use Herdr's process directory, or a fixed path such as `"~/Projects"`. Explicit `--cwd` values from the CLI or socket API still take precedence.
+`new_cwd = "follow"` keeps the default behavior and inherits the source pane or workspace. When there is no source workspace, Aster starts in `$HOME`. Use `"home"` to always start in `$HOME`, `"current"` to use Aster's process directory, or a fixed path such as `"~/Projects"`. Explicit `--cwd` values from the CLI or socket API still take precedence.
 
 ## Worktrees
 
-Set the root directory Herdr uses for Git worktree checkouts created from the sidebar:
+Set the root directory Aster uses for Git worktree checkouts created from the sidebar:
 
 ```toml
 [worktrees]
-directory = "~/.herdr/worktrees"
+directory = "~/.aster/worktrees"
 ```
 
-Herdr creates checkouts under `<directory>/<repo>/<branch-slug>`. For sibling-style checkouts, set this to a directory such as `~/Projects/herdr-worktrees`. Relative values are resolved to an absolute path when the app applies the config.
+Aster creates checkouts under `<directory>/<repo>/<branch-slug>`. For sibling-style checkouts, set this to a directory such as `~/Projects/aster-worktrees`. Relative values are resolved to an absolute path when the app applies the config.
 
-Worktree actions are available from Git workspace rows. `New worktree` creates a checkout. It checks out an existing local branch when the entered branch exists; otherwise, it creates the branch. It then opens the checkout as a new Herdr workspace and groups it under the source workspace. `Open worktree...` lists existing Git worktree checkouts for that repo. Choosing an already-open checkout focuses it, while choosing a closed checkout opens it in the same group.
+Worktree actions are available from Git workspace rows. `New worktree` creates a checkout. It checks out an existing local branch when the entered branch exists; otherwise, it creates the branch. It then opens the checkout as a new Aster workspace and groups it under the source workspace. `Open worktree...` lists existing Git worktree checkouts for that repo. Choosing an already-open checkout focuses it, while choosing a closed checkout opens it in the same group.
 
-Grouped worktrees still behave like normal Herdr workspaces: they can be focused, renamed, closed, and contain their own tabs and panes. The parent row is the original workspace. Closing the parent row closes the whole Herdr group, but it does not delete checkout folders or branches.
+Grouped worktrees still behave like normal Aster workspaces: they can be focused, renamed, closed, and contain their own tabs and panes. The parent row is the original workspace. Closing the parent row closes the whole Aster group, but it does not delete checkout folders or branches.
 
-To delete a worktree checkout, use `Delete worktree checkout...` on a grouped child workspace. Herdr runs `git worktree remove`, first asking Git to remove safely. If Git refuses because the checkout has modified or untracked files, Herdr asks again before running the forced remove. Branches are not deleted.
+To delete a worktree checkout, use `Delete worktree checkout...` on a grouped child workspace. Aster runs `git worktree remove`, first asking Git to remove safely. If Git refuses because the checkout has modified or untracked files, Aster asks again before running the forced remove. Branches are not deleted.
 
 ## Remote attach
 
@@ -119,13 +119,13 @@ Remote attach manages its SSH connection with temporary keepalives and, where su
 manage_ssh_config = true
 ```
 
-When enabled, `herdr --remote` writes a private temporary SSH config that includes your user and system SSH configs first, then adds fallback `ServerAliveInterval` and `ServerAliveCountMax` values. Your own keepalive settings win. Linux and macOS clients also use a private per-attach OpenSSH control socket to reuse the first authenticated connection; Windows OpenSSH does not. Set `manage_ssh_config = false` to run remote attach through plain `ssh` without Herdr's generated config or control socket.
+When enabled, `aster --remote` writes a private temporary SSH config that includes your user and system SSH configs first, then adds fallback `ServerAliveInterval` and `ServerAliveCountMax` values. Your own keepalive settings win. Linux and macOS clients also use a private per-attach OpenSSH control socket to reuse the first authenticated connection; Windows OpenSSH does not. Set `manage_ssh_config = false` to run remote attach through plain `ssh` without Aster's generated config or control socket.
 
 ## Keybindings
 
 For a guided introduction to the prefix and a vetted prefix-free setup, see [Keyboard](/docs/keyboard/).
 
-Herdr has a prefix mode similar to tmux. The default prefix is `ctrl+b`. Keybinding strings are explicit: `prefix+n` means press the configured prefix and then `n`; `ctrl+alt+n` is a direct terminal-mode shortcut.
+Aster has a prefix mode similar to tmux. The default prefix is `ctrl+b`. Keybinding strings are explicit: `prefix+n` means press the configured prefix and then `n`; `ctrl+alt+n` is a direct terminal-mode shortcut.
 
 A small keybinding override looks like this:
 
@@ -151,7 +151,7 @@ prefix = ["ctrl+space", "ctrl+s"]
 
 Every configured prefix enters the same prefix mode and starts every `prefix+...` action. The first entry is the primary prefix shown in the status bar; the in-app help panel at `prefix+?` lists all of them.
 
-The default keymap is prefix-first so Herdr does not steal input from shells, editors, tmux, or terminal apps. Search `keys.` in the [Config reference](/docs/config-reference/) to see every action and default binding. The in-app help panel at `prefix+?` shows the active bindings.
+The default keymap is prefix-first so Aster does not steal input from shells, editors, tmux, or terminal apps. Search `keys.` in the [Config reference](/docs/config-reference/) to see every action and default binding. The in-app help panel at `prefix+?` shows the active bindings.
 
 A binding may also be an array when one action needs multiple shortcuts:
 
@@ -172,7 +172,7 @@ resize_pane_right = "ctrl+shift+alt+right"
 
 Key strings accept plain keys, modifier combinations such as `ctrl+a`, `shift+n`, `alt+1`, `cmd+k`, and special keys such as `enter`, `tab`, `esc`, `left`, `right`, `up`, and `down`. Named punctuation such as `minus`, `comma`, `ampersand`, `plus`, and `backtick` is also accepted. Plain direct printable keys such as `n` are unsafe because they intercept typing; use `prefix+n` unless you intentionally want a direct binding. The `navigate_workspace_*` and `navigate_pane_*` fields are navigate-mode-only and may use plain keys such as `j` or `k`; they must not use `prefix+`, `esc`, `enter`, `tab`, `shift+tab`, `left`, `right`, or unmodified `1` through `9`. Left and right arrows are permanent aliases for pane-left and pane-right navigation. These navigate-mode shortcuts are independent from general action bindings such as `focus_pane_down = "prefix+j"`; when both use the same key, the navigate-mode shortcut wins while navigate mode is open. Alt, Cmd/Super, and punctuation with modifiers depend on your terminal and tmux settings.
 
-If you have old custom keybindings and want the new defaults, run `herdr config reset-keys`. Herdr backs up `config.toml`, removes `[keys]` and `[[keys.command]]`, and uses built-in v2 defaults after restart or `herdr server reload-config`.
+If you have old custom keybindings and want the new defaults, run `aster config reset-keys`. Aster backs up `config.toml`, removes `[keys]` and `[[keys.command]]`, and uses built-in v2 defaults after restart or `aster server reload-config`.
 
 ## Indexed jumps
 
@@ -207,7 +207,7 @@ exits. `width` and `height` are optional; omit them for the default half-size
 popup, use numbers for terminal cells, or use strings like `"80%"` for a
 percentage of the terminal area. Dimensions include the popup border, and
 values smaller than the popup minimum are clamped. Popup commands do not receive
-`HERDR_PANE_ID`; use `HERDR_ACTIVE_PANE_ID` for the underlying tiled pane.
+`ASTER_PANE_ID`; use `ASTER_ACTIVE_PANE_ID` for the underlying tiled pane.
 
 On Unix and macOS, a popup command can also provide an ad-hoc terminal without
 adding a split or tab:
@@ -242,9 +242,9 @@ description = "apply layout"
 
 `description` is optional. When set, it appears in the keybind help panel (opened with `prefix+?`) instead of the default `'custom command'` label.
 
-Custom commands receive `HERDR_SOCKET_PATH`, `HERDR_BIN_PATH`, `HERDR_ACTIVE_WORKSPACE_ID`, `HERDR_ACTIVE_TAB_ID`, `HERDR_ACTIVE_PANE_ID`, and `HERDR_ACTIVE_PANE_CWD` when those values are available. Shell commands run from the focused pane's working directory when Herdr can detect it.
+Custom commands receive `ASTER_SOCKET_PATH`, `ASTER_BIN_PATH`, `ASTER_ACTIVE_WORKSPACE_ID`, `ASTER_ACTIVE_TAB_ID`, `ASTER_ACTIVE_PANE_ID`, and `ASTER_ACTIVE_PANE_CWD` when those values are available. Shell commands run from the focused pane's working directory when Aster can detect it.
 
-On Windows, custom command strings use `cmd.exe /d /c`, so environment variables use `%HERDR_BIN_PATH%` syntax. To run PowerShell syntax, invoke it explicitly, for example `powershell.exe -NoProfile -Command "..."`.
+On Windows, custom command strings use `cmd.exe /d /c`, so environment variables use `%ASTER_BIN_PATH%` syntax. To run PowerShell syntax, invoke it explicitly, for example `powershell.exe -NoProfile -Command "..."`.
 
 ## Theme
 
@@ -255,11 +255,11 @@ Choose a built-in theme:
 name = "catppuccin"
 ```
 
-Search `theme.name` in the [Config reference](/docs/config-reference/) for every built-in theme. Use `terminal` when you want Herdr UI colors to follow your host terminal's ANSI palette.
+Search `theme.name` in the [Config reference](/docs/config-reference/) for every built-in theme. Use `terminal` when you want Aster UI colors to follow your host terminal's ANSI palette.
 
-On Unix, Herdr also re-reads the host terminal's colors when redrawing after a resize or `SIGWINCH`. If your theme switcher changes terminal colors through OSC without a light/dark notification, send `kill -WINCH <client-pid>` after applying the new palette. Target the attached Herdr client, not the server; existing panes stay running. Direct `herdr terminal attach` sessions leave palette queries to the attached application.
+On Unix, Aster also re-reads the host terminal's colors when redrawing after a resize or `SIGWINCH`. If your theme switcher changes terminal colors through OSC without a light/dark notification, send `kill -WINCH <client-pid>` after applying the new palette. Target the attached Aster client, not the server; existing panes stay running. Direct `aster terminal attach` sessions leave palette queries to the attached application.
 
-To let Herdr switch its own UI theme when the host terminal reports a light/dark appearance change, enable theme auto-switching:
+To let Aster switch its own UI theme when the host terminal reports a light/dark appearance change, enable theme auto-switching:
 
 ```toml
 [theme]
@@ -269,7 +269,7 @@ light_name = "catppuccin-latte"
 dark_name = "catppuccin"
 ```
 
-`auto_switch` defaults to `false`, so existing theme configs keep manual behavior. If `light_name` or `dark_name` is omitted, Herdr uses the matching built-in sibling for the configured `name` when one exists, such as `tokyo-night`/`tokyo-night-day` or `gruvbox`/`gruvbox-light`. Manual theme selection in Settings disables `auto_switch`.
+`auto_switch` defaults to `false`, so existing theme configs keep manual behavior. If `light_name` or `dark_name` is omitted, Aster uses the matching built-in sibling for the configured `name` when one exists, such as `tokyo-night`/`tokyo-night-day` or `gruvbox`/`gruvbox-light`. Manual theme selection in Settings disables `auto_switch`.
 
 You can override individual colors:
 
@@ -309,7 +309,7 @@ The active palette is applied in this order: built-in theme, `[theme.custom]`, t
 
 ## UI and sidebar
 
-The sidebar is the main Herdr dashboard. Search `ui.` in the [Config reference](/docs/config-reference/) for sizing, collapsed mode, Agent panel ordering, mouse behavior, pane borders, and other presentation settings.
+The sidebar is the main Aster dashboard. Search `ui.` in the [Config reference](/docs/config-reference/) for sizing, collapsed mode, Agent panel ordering, mouse behavior, pane borders, and other presentation settings.
 
 `ui.pane_borders` accepts `"auto"` (the default, borders only for split panes), `"always"` (also frame a single pane), or `"off"`. A single-pane frame requires `ui.pane_outer_borders = true`, because all its edges are outer edges. Existing boolean values remain valid: `true` means `"auto"` and `false` means `"off"`.
 
@@ -324,20 +324,20 @@ tab_bar_right = [
   { type = "hostname" },
   { type = "datetime", format = "%H:%M" },
   { type = "text", text = "prod" },
-  { type = "command", command = "~/.config/herdr/status.sh", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "command", command = "~/.config/aster/status.sh", interval_seconds = 5, timeout_seconds = 2 },
 ]
 tab_bar_right_separator = " · "
 ```
 
-The status area is empty by default. Add `zoom` to show a fixed `ZOOM` pill while the active tab is zoomed; the existing per-tab `Z` markers remain independent. `hostname`, `datetime`, and `command` resolve on the Herdr server, so `herdr --remote` shows the remote machine's values. Datetime entries use `strftime` formatting; directives that require a UTC offset or Unix timestamp, such as `%z` and `%s`, are rejected because the value is server-local wall-clock time.
+The status area is empty by default. Add `zoom` to show a fixed `ZOOM` pill while the active tab is zoomed; the existing per-tab `Z` markers remain independent. `hostname`, `datetime`, and `command` resolve on the Aster server, so `aster --remote` shows the remote machine's values. Datetime entries use `strftime` formatting; directives that require a UTC offset or Unix timestamp, such as `%z` and `%s`, are rejected because the value is server-local wall-clock time.
 
-Command entries run immediately and then at `interval_seconds` without blocking rendering or overlapping a previous run. The interval can be 1–31,536,000 seconds and the timeout can be 1–3,600 seconds. Herdr uses the last line of successful output, removes ESC-prefixed terminal control sequences instead of interpreting styles, clears the entry after failure, empty output, or `timeout_seconds`, and provides the same active workspace, tab, pane, socket, binary, and working-directory context as custom command keybindings. Commands are supported on Linux, macOS, and Windows, using `/bin/sh -lc` on Linux and macOS and `cmd.exe /d /c` on Windows.
+Command entries run immediately and then at `interval_seconds` without blocking rendering or overlapping a previous run. The interval can be 1–31,536,000 seconds and the timeout can be 1–3,600 seconds. Aster uses the last line of successful output, removes ESC-prefixed terminal control sequences instead of interpreting styles, clears the entry after failure, empty output, or `timeout_seconds`, and provides the same active workspace, tab, pane, socket, binary, and working-directory context as custom command keybindings. Commands are supported on Linux, macOS, and Windows, using `/bin/sh -lc` on Linux and macOS and `cmd.exe /d /c` on Windows.
 
 Separators appear only between visible entries. Set `tab_bar_right_separator = ""` for direct concatenation. On a narrow tab row, the complete status area yields to the tabs and their controls.
 
 ### Outer terminal window title
 
-Herdr emulates the terminals in its panes, so an `OSC 0`/`OSC 2` title written inside a pane stops at Herdr. Herdr writes its own title to the terminal it runs in, which is what window managers and terminal tab bars read:
+Aster emulates the terminals in its panes, so an `OSC 0`/`OSC 2` title written inside a pane stops at Aster. Aster writes its own title to the terminal it runs in, which is what window managers and terminal tab bars read:
 
 ```toml
 [ui]
@@ -346,7 +346,7 @@ window_title = "{hostname}: {workspace}"
 
 Tokens are `{hostname}`, `{workspace}`, `{tab}`, `{pane}` (the focused pane's manual name), and `{terminal_title}` (the focused pane's own terminal title with spinner frames stripped). Write `{{` and `}}` for literal braces. A token with no value renders empty.
 
-The title renders on the Herdr server, so `{hostname}` names the machine the panes run on, including when you attach with `herdr --remote` or run `herdr` over SSH. Set `window_title = ""` to leave the outer terminal title alone.
+The title renders on the Aster server, so `{hostname}` names the machine the panes run on, including when you attach with `aster --remote` or run `aster` over SSH. Set `window_title = ""` to leave the outer terminal title alone.
 
 `client.window_title.set` overrides the configured title until `client.window_title.clear` hands it back.
 
@@ -355,9 +355,10 @@ Agent status uses compact colored dots by default. To distinguish blocked, worki
 ```toml
 [ui]
 status_indicators = "symbols"
+animations = "full"
 ```
 
-The symbols are static, so this option does not enable spinner animation.
+`ui.animations` controls terminal UI motion: `"full"` (the default) cycles a spinner for working agents, pulses blocked agents, sweeps a tab whose agent reports or becomes blocked, flashes and briefly highlights an agent whose status changes, and slides toasts in and fades them out. `"reduced"` keeps only the one-shot flashes, highlights, and toast fades, and shows static status symbols. `"off"` disables all motion. Animations redraw only while an effect is running.
 
 ### Sidebar row layouts
 
@@ -401,7 +402,7 @@ Space rows accept these built-in tokens:
 - `git_status` — Git ahead and behind counts when nonzero.
 - `$name` — custom workspace metadata named `name`.
 
-Tokens render in their configured order. Herdr normally separates adjacent values with ` · ` and uses a single space after `state_icon`. Missing values and their separators disappear; a row disappears when none of its tokens have a value. Existing custom rows remain unchanged, so add `machine` explicitly if you want machine identity in a custom multi-machine layout. Each layout may contain at most 16 rows, with at most 16 tokens in each row.
+Tokens render in their configured order. Aster normally separates adjacent values with ` · ` and uses a single space after `state_icon`. Missing values and their separators disappear; a row disappears when none of its tokens have a value. Existing custom rows remain unchanged, so add `machine` explicitly if you want machine identity in a custom multi-machine layout. Each layout may contain at most 16 rows, with at most 16 tokens in each row.
 
 A token entry can also be an inline style table:
 
@@ -467,13 +468,13 @@ rows = [
 ```
 
 ```bash
-herdr pane report-metadata <pane_id> \
+aster pane report-metadata <pane_id> \
   --source my-agent-hook \
   --token model=opus \
   --token summary="reviewing authentication"
 ```
 
-Use `herdr workspace report-metadata` in the same way for custom Space tokens. Unreported custom tokens disappear.
+Use `aster workspace report-metadata` in the same way for custom Space tokens. Unreported custom tokens disappear.
 
 Metadata reporters provide values only; styling stays in the local sidebar configuration. See [CLI reference: report metadata](/docs/cli-reference/#panes) for limits, clearing, sequencing, and expiry.
 
@@ -481,26 +482,26 @@ Sidebar row settings affect only the expanded desktop sidebar. Collapsed and mob
 
 ## Notifications
 
-Herdr can notify you when a background agent finishes or needs input:
+Aster can notify you when a background agent finishes or needs input:
 
 ```toml
 [ui.toast]
-delivery = "herdr"
+delivery = "aster"
 delay_seconds = 1
 
-[ui.toast.herdr]
+[ui.toast.aster]
 position = "bottom-right"
 ```
 
-Choose `herdr` for an in-app toast, `terminal` for an outer-terminal notification that also works over SSH, `system` for the local OS notification service, or `off` to disable popups. Herdr suppresses popups for the active tab. Search `ui.toast` in the [Config reference](/docs/config-reference/) for positions, delay behavior, and clipboard feedback settings.
+Choose `aster` for an in-app toast, `terminal` for an outer-terminal notification that also works over SSH, `system` for the local OS notification service, or `off` to disable popups. Aster suppresses popups for the active tab. Search `ui.toast` in the [Config reference](/docs/config-reference/) for positions, delay behavior, and clipboard feedback settings.
 
 On macOS, `system` tries `terminal-notifier` first and falls back to `/usr/bin/osascript` when it is unavailable or fails. The fallback appears as Script Editor in Notification Center and cannot activate the hosting terminal. Install `terminal-notifier` with `brew install terminal-notifier`. For a supported, detected terminal, it can activate the terminal app when you click the notification. Alternatively, choose `terminal` to let a supported outer terminal own the notification.
 
-On Windows, `system` notifications remain in Notification Center. Clicking one selects its originating pane in the running Herdr client and brings its terminal window forward when Windows exposes that window. A click cannot reopen a closed client or select a pane from a restarted server. Windows Terminal can bring the owning window forward, but cannot reliably select a different outer terminal tab.
+On Windows, `system` notifications remain in Notification Center. Clicking one selects its originating pane in the running Aster client and brings its terminal window forward when Windows exposes that window. A click cannot reopen a closed client or select a pane from a restarted server. Windows Terminal can bring the owning window forward, but cannot reliably select a different outer terminal tab.
 
 ## Sound
 
-Sound notifications play through the local Herdr client. Custom sounds must be mp3 files; Herdr resolves relative paths from the config file's directory.
+Sound notifications play through the local Aster client. Custom sounds must be mp3 files; Aster resolves relative paths from the config file's directory.
 
 ```toml
 [ui.sound]
@@ -525,17 +526,17 @@ Search the [Config reference](/docs/config-reference/) for scrollback limits, ne
 
 ## Kitty graphics
 
-Applications and plugins integrate through the standard Kitty graphics protocol emitted in pane terminal output. Herdr renders these images by default in compatible outer terminals. The external socket pane-overlay API has been removed; there is no replacement socket image API.
+Applications and plugins integrate through the standard Kitty graphics protocol emitted in pane terminal output. Aster renders these images by default in compatible outer terminals. The external socket pane-overlay API has been removed; there is no replacement socket image API.
 
 Popups, menus, and notifications crop images around the area they cover; the rest of each image stays visible and the covered part returns when the overlay closes. Images do not dim with dialog backgrounds.
 
-Herdr automatically chooses eligible file transports, with no application changes or environment switches. On local Unix Ghostty clients, it can send image data through temporary files instead of encoding it into terminal output. A small file-consumption probe checks support first. Other terminals, SSH-launched clients, and nested multiplexers retain inline output for this last-hop optimization.
+Aster automatically chooses eligible file transports, with no application changes or environment switches. On local Unix Ghostty clients, it can send image data through temporary files instead of encoding it into terminal output. A small file-consumption probe checks support first. Other terminals, SSH-launched clients, and nested multiplexers retain inline output for this last-hop optimization.
 
-For eligible local clients, native RGBA images travel from server to client as paths to Herdr-owned snapshots rather than pixel bytes. Unsupported clients and failed transfers fall back to inline delivery. Remote server paths are never forwarded to the local terminal. Herdr keeps image placement, clipping, and visibility under its control.
+For eligible local clients, native RGBA images travel from server to client as paths to Aster-owned snapshots rather than pixel bytes. Unsupported clients and failed transfers fall back to inline delivery. Remote server paths are never forwarded to the local terminal. Aster keeps image placement, clipping, and visibility under its control.
 
-On Linux, whole-file, uncompressed RGBA uploads can use copy-on-write snapshots before Herdr reads their pixels. This requires filesystem support for cloning into Herdr's private `/var/tmp` store. Unsupported filesystems, temporary-file uploads, shared memory, and other formats use the normal loader. Snapshots are limited to 16 MiB each and 64 MiB total; animation and unsupported clients read their pixels when needed. Herdr never relies on a mutable producer path after accepting an image.
+On Linux, whole-file, uncompressed RGBA uploads can use copy-on-write snapshots before Aster reads their pixels. This requires filesystem support for cloning into Aster's private `/var/tmp` store. Unsupported filesystems, temporary-file uploads, shared memory, and other formats use the normal loader. Snapshots are limited to 16 MiB each and 64 MiB total; animation and unsupported clients read their pixels when needed. Aster never relies on a mutable producer path after accepting an image.
 
-PNG uploads retain full decoding and validation. Herdr does not defer corrupt-image validation to the outer terminal.
+PNG uploads retain full decoding and validation. Aster does not defer corrupt-image validation to the outer terminal.
 
 To disable Kitty graphics rendering:
 
@@ -546,11 +547,11 @@ kitty_graphics = false
 
 The legacy `experimental.kitty_graphics` setting remains accepted for existing configurations. `terminal.kitty_graphics` takes precedence when both are set.
 
-Changing this setting requires restarting the affected Herdr server or reattaching the client. In remote sessions, the server's setting controls Kitty graphics parsing, while the local client's setting controls output to the outer terminal.
+Changing this setting requires restarting the affected Aster server or reattaching the client. In remote sessions, the server's setting controls Kitty graphics parsing, while the local client's setting controls output to the outer terminal.
 
 ## Agent session restore
 
-Herdr resumes supported Agent conversations after a server restart by default:
+Aster resumes supported Agent conversations after a server restart by default:
 
 ```toml
 [session]
@@ -558,7 +559,7 @@ resume_agents_on_restore = true
 startup_per_agent_delay_ms = 100
 ```
 
-Automatic restores start one agent at a time, 100 milliseconds apart by default, to reduce startup contention. The first eligible agent starts immediately. Set `startup_per_agent_delay_ms = 0` to disable spacing. Manual launches and explicit terminal attaches are unaffected. Restart the Herdr server to apply changes.
+Automatic restores start one agent at a time, 100 milliseconds apart by default, to reduce startup contention. The first eligible agent starts immediately. Set `startup_per_agent_delay_ms = 0` to disable spacing. Manual launches and explicit terminal attaches are unaffected. Restart the Aster server to apply changes.
 
 Only panes with a valid native session reference from an official integration can resume; other panes restore as normal shells. See [Session state and restore](/docs/session-state/) for supported Agents and persistence behavior.
 
@@ -576,14 +577,14 @@ Restricting `cjk_ime_agents` avoids showing an extra hardware cursor in unrelate
 
 ## Prefix input source switching
 
-On macOS and Windows, Herdr can temporarily switch to an ASCII-capable input source while prefix commands and prefix-launched modes are active:
+On macOS and Windows, Aster can temporarily switch to an ASCII-capable input source while prefix commands and prefix-launched modes are active:
 
 ```toml
 [experimental]
 switch_ascii_input_source_in_prefix = true
 ```
 
-On macOS this switches to the current ASCII-capable keyboard layout; on Windows it switches the IME to English (ASCII) input. Herdr restores the previous input source when returning to terminal input or entering a text field. This setting has no effect on other platforms.
+On macOS this switches to the current ASCII-capable keyboard layout; on Windows it switches the IME to English (ASCII) input. Aster restores the previous input source when returning to terminal input or entering a text field. This setting has no effect on other platforms.
 
 :::caution[Windows support is Korean IME only]
 On Windows, support is currently limited to the Korean IME. With an IME for any other language, this setting leaves the input source unchanged.
@@ -593,12 +594,12 @@ On Windows, support is currently limited to the Korean IME. With an IME for any 
 
 | Variable | Purpose |
 | --- | --- |
-| `HERDR_CONFIG_PATH` | Override the config file path. |
-| `HERDR_SESSION` | Select a named session for CLI commands. |
-| `HERDR_SOCKET_PATH` | Low-level socket path override. |
-| `HERDR_PROCESS_DETECTION` | Linux process detection strategy: `native` (default) or opt-in `child-groups`. |
-| `HERDR_LOG` | Set log filtering, for example `HERDR_LOG=herdr=debug`. |
-| `HERDR_DISABLE_SOUND` | Disable sound playback even when `[ui.sound] enabled = true`. |
+| `ASTER_CONFIG_PATH` | Override the config file path. |
+| `ASTER_SESSION` | Select a named session for CLI commands. |
+| `ASTER_SOCKET_PATH` | Low-level socket path override. |
+| `ASTER_PROCESS_DETECTION` | Linux process detection strategy: `native` (default) or opt-in `child-groups`. |
+| `ASTER_LOG` | Set log filtering, for example `ASTER_LOG=aster=debug`. |
+| `ASTER_DISABLE_SOUND` | Disable sound playback even when `[ui.sound] enabled = true`. |
 
 ## Logs
 
@@ -607,9 +608,795 @@ Logs are useful when diagnosing startup warnings, integration state, or socket A
 Common log files:
 
 ```text
-~/.config/herdr/herdr.log
-~/.config/herdr/herdr-client.log
-~/.config/herdr/herdr-server.log
+~/.config/aster/aster.log
+~/.config/aster/aster-client.log
+~/.config/aster/aster-server.log
 ```
 
 Logs rotate automatically. Include the current log and rotated siblings when reporting issues.
+
+## Polaris lead agent
+
+Polaris opens alongside an **Orbit** tab for project work. Orbit starts with a
+shell and supports normal Aster split panes and worker agents. Polaris uses
+the bundled Orbit MCP server to inspect the bound work tab, run shell commands,
+read output, and split panes. Its basic pane tools are `orbit_inspect`, `orbit_run`,
+`orbit_read`, and `orbit_split`. They preserve user focus and reject panes
+outside Orbit. A saved workspace/tab identity keeps targeting stable across
+renames and reordering; a missing bound tab reports an error instead of guessing.
+Startup reuses the bound Orbit tab and preserves Polaris focus.
+
+The same operations are available as `aster orbit <operation> [JSON arguments]`:
+`aster orbit inspect` or `aster orbit run '{"command":"pwd"}'`. Run acknowledges
+queued input, not command completion. Inspect output with `aster orbit read`.
+Busy shells are rejected. Polaris receives the MCP configuration automatically
+on a fresh launch.
+Existing running agents receive the updated instructions on their next fresh
+launch. Orbit is a work area, not a separate permission or security boundary.
+
+Polaris opens with Claude and Fable 5.1 by default. In **Settings → Polaris**,
+choose whether to open the lead agent on startup or start with a shell. This
+applies to the next startup and does not interrupt running agents.
+
+```toml
+[polaris]
+enabled = true
+provider = "claude"
+model = "fable"
+```
+
+The model value is the Claude CLI alias. Keep `provider = "claude"` for this
+first Polaris configuration.
+`[polaris.workers]` limits which worker kinds and models Polaris may start; see
+[Worker kinds and models](#worker-kinds-and-models).
+
+### Team roles
+
+Polaris works like a CEO: it keeps the overview and routes each request to the
+**team role** responsible for it, and only that role. A role (for example
+`reviewer` or `actor`) is a permanent tab in the Polaris workspace, named after
+the role (`Reviewer`, `Actor`) and placed after the Polaris tab and before the
+Orbit tab. Its members, one to four Claude or Codex agents such as a Claude and
+a Codex reviewer, are panes inside that tab: the first member takes the tab's
+first pane, the second is split to the right, and further members below. Click
+into a role's tab to talk to a member directly, or ask Polaris, which assigns
+the work to the role. Scratch workers in the Orbit tab remain for one-off work.
+
+Each role tab is bound like the Orbit tab, by workspace and stable tab number,
+so renaming or reordering tabs never breaks it. Members never exit:
+
+- After a restart, a member whose pane held a native agent session resumes that
+  conversation in the same pane (Aster's agent session restore), with its model,
+  permission mode, and role instructions added to the resume command. A member
+  without a resumable session is launched fresh in its saved pane.
+- When a member's agent exits, it is relaunched in the same pane after
+  5 seconds, continuing the session it reported. A relaunch that exits within
+  15 seconds of resuming starts fresh the next time. After 3 relaunches within
+  10 minutes the member is left stopped; you get a notification (through
+`ui.toast.delivery`), Polaris gets a
+  notice marked `origin: server`, and `orbit_team_define` for the role restarts it.
+- At startup a role whose tab is missing gets a new tab, rebound in place, and a
+  "role tab recreated" notification. At runtime a closed role tab is not
+  reopened until the next startup or `orbit_team_define`.
+- Terminal ids survive restarts and relaunches in the same pane, so open
+  assignments survive too; while a member is being relaunched its assignments
+  are not marked `worker_lost`.
+
+What does not resume: a member's in-flight turn, its shell history beyond what
+the agent restores itself, and a member whose agent never reported a session
+(it starts a new conversation). Panes you split inside a role tab stay ordinary
+panes, though a free shell there may host a member that needs a new pane.
+
+Members are started with role instructions: the member and role names, the
+area, the role's `prompt`, the other members of the role, to answer questions
+about the area when you type in its pane, and to report assignments with the
+command Aster supplies. Claude members receive them with
+`--append-system-prompt`; Codex members with `-c developer_instructions=…`,
+Codex's configuration override for extra developer instructions. Claude members
+are also launched with the `--allowedTools` rule that pre-allows their report
+command (see [Worker reports to Polaris](#worker-reports-to-polaris)). Codex
+members are not pre-trusted: codex-cli 0.165.0 ignores a
+`-c projects."<path>".trust_level="trusted"` override, so a Codex member started
+in a folder you have not trusted in Codex stops at Codex's folder-trust dialog,
+which Polaris relays as a blocked worker; trust the project once in Codex to
+avoid it. Member kinds
+and models are checked against [`[polaris.workers]`](#worker-kinds-and-models);
+members do not count toward `max_concurrent`.
+
+Polaris manages the team with three tools, also available from a shell:
+
+| Tool | CLI | Purpose |
+| --- | --- | --- |
+| `orbit_team_define {name, area, prompt?, members}` | `aster orbit team-define` | Create or replace a role. The first definition creates its tab without moving your focus. |
+| `orbit_team_remove {name, stop_members?, force?}` | `aster orbit team-remove` | Retire a role. Refused while a member has an assignment awaiting its report, unless `force` cancels it. `stop_members` also closes the tab. |
+| `orbit_team_list` | `aster orbit team-list` | Roles, areas, tabs, and members with `pane_id`, `terminal_id`, `state`, `agent_status`, and `open_tasks`. |
+
+```sh
+aster orbit team-define '{"name":"reviewer","area":"Code review","prompt":"Review strictly; never edit files.","members":[{"name":"reviewer-claude","kind":"claude","model":"opus"},{"name":"reviewer-codex","kind":"codex"}]}'
+aster orbit agent-assign '{"role":"reviewer","kind":"codex","prompt":"Review the parser change"}'
+```
+
+`orbit_agent_assign`, `orbit_agent_prompt`, and `orbit_agent_status` accept
+`role` instead of `name`: an assignment goes to an idle member of the role
+without an open assignment (`kind` prefers one kind) and tells the member it
+acts for that role; status returns every member. `orbit_inspect {"role": …}`
+inspects a role's tab, and `orbit_activity` lists the team grouped by role.
+`orbit_agent_stop` refuses members: retire a role with `orbit_team_remove`;
+`force` stops a member in place and the supervisor relaunches it. Scratch
+`orbit_agent_start` refuses a member's name.
+
+The roster is saved as `orbit-team.json` (versioned, written atomically with
+mode 0600, off the event loop) in the session data directory. A roster from a
+newer Aster build still loads: fields this build does not know are kept and
+written back unchanged, a member whose kind this build cannot run is listed in
+`orbit_team_list` with `"unsupported": true` (state `unsupported`) and is never
+launched or picked for a role assignment, and a member session this build cannot
+read is dropped so the member starts fresh. A roster that is not valid JSON, has
+another version, or breaks the role rules is left untouched and reported;
+team changes are refused until it is fixed. To start every new session with a
+team, declare roles in config. They seed the roster only when the session has
+none yet; afterwards the roster is the source of truth, and config reload does
+not change it.
+
+```toml
+[[polaris.team]]
+name = "reviewer"
+area = "Code review of every change"
+prompt = "Review strictly and cite file and line; never edit files."
+
+[[polaris.team.members]]
+name = "reviewer-claude"
+kind = "claude"
+model = "opus"
+permission_mode = "plan"
+
+[[polaris.team.members]]
+name = "reviewer-codex"
+kind = "codex"
+```
+
+Names follow agent-name rules (lowercase letters, digits, `-`, `_`; at most 32
+characters); `polaris` and `orbit` are reserved, and member names are unique
+across the team. At most 8 roles, 4 members per role, and 4096 bytes of role
+prompt.
+
+### Orbit jobs and workers
+
+Polaris can use `orbit_exec` to run a tracked, noninteractive command in the
+bound project's directory. It returns a `job_id`; `orbit_job_status` returns
+the actual exit code, state, and captured output. These processes run separately
+from the visible terminal shells and do not inherit their interactive aliases
+or current directory changes. Use `orbit_run` when terminal input is intended.
+
+Output is paginated by byte offset. Follow `next_offset` while `has_more` is
+true; `output_base64` preserves exact bytes across UTF-8 boundaries. Each job
+captures up to 4 MiB and explicitly reports truncation. The server retains the
+latest 32 jobs and allows four concurrent jobs. History is in memory and does
+not survive a server restart. Commands default to a 30-minute timeout.
+
+`orbit_job_cancel` cancels an owned process job and its process group. Git
+review tasks cancel cooperatively after their bounded operation finishes.
+Cancellation requests do not mean the job has already stopped: poll its status.
+
+Use `orbit_agent_start` in an idle Orbit pane. Its required `name` also becomes
+the visible pane title automatically after the launch is accepted. Then poll `orbit_agent_status`
+before sending a task with `orbit_agent_assign`. Split first if the root pane
+is occupied. Worker status and prompt calls accept a stable `terminal_id`,
+name, or pane ID. Worker startup and prompt admission are not task completion;
+use status and `orbit_read` to inspect progress and approval requests.
+
+#### Worker kinds and models
+
+Polaris chooses each worker's `kind` and, optionally, its `model` per task, for
+example Codex for reviews and Claude for edits. `model` is the agent CLI's own
+model name, such as `opus` or `fable` for Claude and `gpt-5-codex` for Codex;
+model overrides and defaults apply to Claude and Codex workers. The
+`[polaris.workers]` section limits what Polaris may start:
+
+```toml
+[polaris.workers]
+kinds = ["claude", "codex"]          # default: ["claude", "codex"]
+max_concurrent = 4                   # default 4; 0 = unlimited
+[polaris.workers.models]
+claude = ["fable", "opus", "sonnet"] # default: empty table = any model
+codex = []                           # empty = any
+[polaris.workers.defaults]
+claude = "fable"                     # optional default model per kind
+```
+
+`orbit_agent_start` rejects a kind outside `kinds` or a model outside the
+kind's non-empty list, naming the allowed values in the error. Without a
+`model`, the kind's default is used when one is configured. A model starting
+with `-` is always refused, even when any model is allowed. A start is refused
+while the bound Orbit tab's live agents, not counting Polaris, plus worktree
+starts still in progress reach `max_concurrent`. `orbit_activity` reports the allowed kinds as `kinds`, each
+with its executable, whether it is found on the server's `PATH` (`installed`),
+its allowed models, and its default model. The `Worker kinds` section of
+`aster orbit activity` shows the same list. Changes apply on config reload.
+
+`permission_mode` sets a Claude worker's `--permission-mode`: `manual`,
+`acceptEdits`, `auto`, `plan`, or `dontAsk`. Use `manual` to make a worker ask
+before every tool call, for example to review its actions or to exercise
+approvals when your own Claude settings use `defaultMode = "auto"`. Without
+one, `[polaris.workers] permission_mode` applies when set; otherwise the
+worker inherits your Claude settings. `bypassPermissions` is always refused
+with `orbit_permission_mode_refused`, and other kinds refuse the parameter with
+`orbit_permission_mode_unsupported` (Codex's approval flags have no equivalent
+mode). Claude workers are also launched with an `--allowedTools` rule for
+their report command only (see
+[Worker reports to Polaris](#worker-reports-to-polaris)). Codex workers are not
+pre-trusted: codex-cli 0.165.0 ignores command-line project trust overrides, so
+a Codex worker in a folder or worktree Codex has not trusted shows Codex's
+folder-trust dialog first. The mode is shown as `worker.permission_mode` in `orbit_inspect` and
+`orbit_agent_status`, and reuse only returns a worker started with the
+requested (or configured) mode.
+
+```toml
+[polaris.workers]
+permission_mode = "manual"           # optional; Claude workers only
+```
+
+`orbit_diff` creates a review job comparing the current project with the
+initial Git snapshot for this server run. The snapshot includes existing dirty
+and non-ignored untracked files using a private Git index; it does not stage
+files in the user's index. Later external edits also appear, so the comparison
+does not prove which agent authored a change. Review output is bounded like
+other jobs. Files ignored by Git are not included.
+
+`orbit_activity` lists job and worker states. For a live terminal view:
+
+```sh
+aster orbit activity --watch
+```
+
+The activity view shows output-inspection and cancellation commands. Closing
+the view leaves jobs running. All commands also support explicit session
+selection, for example `aster --session orbit-tools orbit activity --watch`.
+
+#### Worker lifecycle and layout
+
+`orbit_agent_start` reuses workers by default: when an idle Orbit worker of the
+same kind has no assignment awaiting its report, was not started in a worktree,
+and (when a `model` is requested) was launched with that model, it returns that
+worker with `reused: true` and its `pane_id` instead of starting another, even
+at the `max_concurrent` limit. Pass `"reuse": false` to always start a new
+worker. Workers restored after a server restart match only requests without a
+model, and a restored worker whose directory is a linked Git worktree or lies
+under the `[worktrees] directory` root is never reused: it is shown as isolated
+with `worktree: {path, branch, recovered: true}` (`branch` is `null` when its
+`HEAD` is detached or unreadable).
+
+`orbit_agent_assign` gives a worker one assignment at a time: a worker with an
+assignment still awaiting its report is refused with `orbit_worker_assigned`,
+naming the task, so two quick starts that reuse the same worker cannot prompt it
+twice. A report the worker already made does not block a new assignment.
+
+`orbit_agent_stop {"name":"reviewer"}` stops a finished worker and closes its
+pane, ending its process tree. With `"close_pane": false` it ends only the
+agent's foreground process group (SIGTERM, then SIGKILL after 1.5 s), waits up
+to 5 s for the pane to return to its shell, and clears the pane title. Only a
+foreground job that is the worker's agent is signalled, and SIGKILL reaches only
+processes still in that job's process group. A worker with an assignment still
+awaiting its report is refused, naming the task IDs; `"force": true` cancels
+those assignments first, so a late report is rejected. Reports the worker
+already made are never cancelled: they keep their place in the delivery queue,
+reach Polaris as usual, and are listed in `pending_deliveries`. The lead,
+agents outside the Orbit tab, and panes with neither a worker nor a live agent
+(`orbit_not_a_worker`) are always refused, and Orbit's last pane is never
+closed. The result is `{stopped, pane_id, closed, cancelled_tasks,
+pending_deliveries}`.
+
+When a worker's agent exits on its own, its pane title becomes
+`<name> (exited)`. `orbit_inspect` marks that pane `stale: true`,
+`orbit_activity` lists it under `stale_panes`, and `aster orbit activity`
+shows it under "Exited worker panes". This applies to workers started in the
+bound Orbit tab during the current server run and, after a restart, to Orbit
+panes still titled `<name> (exited)` with no agent. When another agent starts in
+a stale pane, the `(exited)` title is cleared.
+
+Polaris arranges Orbit with scoped layout tools that refuse the lead pane and
+panes outside Orbit and leave the user's focus unchanged:
+`orbit_pane_resize {"pane_id":"w1:p3","direction":"left","amount":20}` moves the
+nearest split by `amount` terminal cells (1 to 200, default 10),
+`orbit_pane_zoom {"pane_id":"w1:p3","zoomed":true}` zooms or restores a pane
+inside the Orbit tab, and `orbit_pane_close {"pane_id":"w1:p3"}` closes a pane.
+A zoomed tab shows its focused pane, so the zoomed pane is focused in the Orbit
+tab while zoomed; restoring it focuses the Orbit tab's previously focused pane
+again, and the `layout.updated` event and the result carry that final focus.
+`orbit_pane_close` refuses a pane hosting a live worker unless `"force": true`,
+which stops the worker like `orbit_agent_stop` and cancels its assignments still
+awaiting a report; reports it already made keep delivering and are listed in
+`pending_deliveries`. It never removes a worktree.
+
+#### Worktree isolation
+
+For edits that could conflict, `orbit_agent_start` accepts `"worktree": true`
+(a generated `worktree/<adjective>-<noun>-<suffix>` branch) or
+`"worktree": "<branch>"`. The Orbit project directory must be inside a Git
+repository. Aster creates the worktree from `HEAD` with the same machinery as
+`aster worktree create`, under the `[worktrees] directory` root
+(`<directory>/<repo>/<branch-slug>`), opens a new Orbit pane whose shell starts
+in it without changing focus, and starts the worker there. The result includes
+`worktree: {path, branch}`; `orbit_inspect` and `orbit_agent_status` show it,
+and each `orbit_agent_assign` to that worker names its branch and path in the
+instructions. Isolated workers are never reused. The new pane is reserved for
+the start until its worker launches, so no other `orbit_agent_start` can use it
+(`orbit_pane_reserved`). If the launch fails, the pane is closed only when it is
+still an unlabelled shell with no agent, and the worktree is removed, along with
+its branch when this start created it.
+`orbit_agent_stop {"name":"editor","remove_worktree":true}` closes the pane
+and removes the worktree; the branch is kept. A worktree with uncommitted or
+untracked files is refused with Git's message unless `"discard_changes": true`,
+which removes it and discards those changes; `"force"` never does.
+
+```toml
+[worktrees]
+directory = "~/.aster/worktrees"
+```
+
+### Worker reports to Polaris
+
+`orbit_agent_assign {"name":"reviewer","prompt":"Review these changes"}`
+submits a task with a unique ID and explicit, session-scoped reporting instructions.
+Workers must execute the supplied `aster orbit agent-report` command with a
+`completed`, `failed`, or `blocked` outcome and a summary. The command starts
+with the executable and carries no credentials:
+
+```sh
+/path/to/aster orbit agent-report '{"task_id":"…","worker_id":"…","outcome":"completed","summary":"…","tests_run":false}'
+```
+
+The instructions give it as data (`executable`, `arguments`, and
+`json_argument`) and tell the worker to run it as one command in exactly that
+form, with no environment assignments, `cd`, or pipes around it. This command is part
+of the assignment even for read-only reviews. Merely becoming idle or printing
+“done” does not report completion. `orbit_agent_prompt` remains an untracked
+message; use assignment for work requiring a reply.
+
+Besides `outcome` and `summary`, a report may carry optional structured fields
+so Polaris can act on facts instead of prose:
+
+| Field | Meaning | Bounds |
+| --- | --- | --- |
+| `tests_run` | Whether the worker ran the project's tests | `true` or `false` |
+| `checks` | Tests, lints, or builds run: `{"name", "status", "detail"}` with status `passed`, `failed`, or `skipped` | at most 20; name ≤ 120 bytes, detail ≤ 500 bytes |
+| `changed_files` | Paths changed, relative to the project (no leading `/`, drive, or `..`) | at most 200, each ≤ 512 bytes |
+| `branch` | Git branch holding the changes | ≤ 200 bytes of letters, digits, `. _ - / +` |
+| `job_ids` | Orbit job IDs the worker started | at most 20, each ≤ 128 bytes |
+| `blocked_on` | What the worker needs to continue; used with outcome `blocked` | ≤ 500 bytes |
+
+Every string must be a single line without control characters and must not
+contain a delivery marker; a report breaking a bound is refused with an error
+naming the field. The assignment's example `json_argument` includes
+`"tests_run": false`, and workers are told to set it honestly. Polaris receives
+the fields in the report's JSON header line and, after the fenced summary, in a
+fenced “Facts” block (`tests_run`, one line per check, the changed-file count
+with up to 20 paths, `branch`, `job_ids`, `blocked_on`), all inside the
+worker-provided framing. One delivered report is kept to 8 KiB by cutting the
+lists, each with a “… N more” line. Polaris is told to run the tests itself
+before accepting edits when `tests_run` is false or missing.
+
+The server captures the worker's terminal identity at assignment time. The
+lead is bound by terminal ID, recorded when Polaris starts or is first found by
+the `polaris` name, and saved in the ledger; renaming Polaris does not break
+assignment or delivery. Only when the bound terminal no longer exists does Aster
+look up `polaris` by name again and record the new binding.
+
+Each assignment has a fresh random token. Aster writes it, with the session's
+API socket path on a second line, to a per-task token file,
+`orbit-tokens/<task_id>` in the session data directory (directory mode 0700,
+file mode 0600), so it never appears in the worker's prompt, the command, or
+process argument lists. `aster orbit agent-report` finds the file by the
+`task_id` in its JSON argument and reports to that socket; without a file it
+falls back to `ASTER_ORBIT_TOKEN`, then to a `token` field in the JSON (both
+still accepted, for example for assignments made before an upgrade). The
+`orbit_agent_report` tool resolves the token the same way, so `token` is
+optional there. The file lives as long as the ledger can answer a report for
+the task, as a task or as a tombstone, so a late report still learns that the
+task was cancelled or resolved, and an identical retry (or one adding the
+structured fields) still authenticates. It is removed once the task's tombstone
+is dropped, and a restarted server removes files of tasks it no longer holds. The file is readable only by your user, the same trust level as
+the session socket. The ledger keeps only the token's SHA-256 hash. A report with a
+missing or wrong token, another worker's ID, or an unknown task is refused with
+the same “assignment not found or token invalid” error. Assignments saved before
+tokens existed still accept reports without one. A report is also refused
+unless its `worker_id` terminal is inside the bound Orbit tab when it reports.
+Refused reports are rate limited to 30 per worker terminal per 60 seconds (“too
+many reports”); accepted reports are never limited, so refused attempts made
+with a worker's ID cannot block that worker's genuine report.
+
+Claude workers that Orbit starts, scratch workers and team members alike
+(including members resumed after a restart), are launched with
+`--allowedTools "Bash(/path/to/aster orbit agent-report:*)"`, the exact
+executable of the running server. That pre-allows the report command, and
+nothing else, in every permission mode including `manual`, so reporting never
+waits on a permission dialog. Polaris itself gets no such rule. Codex workers
+run the same command through their shell under Codex's own approval policy. An
+executable path containing spaces needs shell quoting, which a prefix rule
+cannot match; install Aster at a path without spaces for prompt-free reports.
+
+The token is not a defense against a hostile process sharing your account.
+Anything running as your user can read the token file, and anyone who can reach
+the session socket can read terminal output. It prevents
+guessed task IDs and accidental reports to the wrong assignment, not a
+deliberate attacker with local access.
+
+Reports queue while Polaris is busy, blocked, or absent, within bounds (see
+“Delivery deadlines” below). Polaris receives them
+through the acknowledged prompt path without changing focus, and only when it is
+idle, still running its agent (a Polaris pane sitting at a shell waits without
+spending attempts), not launching, has had no keystrokes or paste from a client
+for 2 seconds, and either shows its idle prompt on screen or has been
+continuously idle for 10 seconds (for agents whose detection never reports a
+visible prompt). Printable input typed into the Polaris pane without Enter
+counts as an unsent draft: the quiet window becomes 60 seconds until Enter,
+Ctrl+C, Ctrl+U, or Esc clears it, or Polaris starts working. A pause longer than
+60 seconds in the middle of a draft is the accepted residual risk.
+Reports ready at the same time arrive in one prompt, up to five reports or
+2 KiB, each with its own delivery marker on its first line; a single larger
+report goes in a prompt of its own. Claude Code collapses a large paste into
+`[Pasted text #N +M lines]`, which hides the marker, so keeping prompts small
+keeps delivery verifiable; more reports simply mean more prompts. Prompts to the
+same lead are spaced 3 seconds apart. Each summary is fenced as worker-provided data. After assigning,
+Polaris should continue other work rather than poll: results arrive as prompts.
+Identical report retries do not send another notification; conflicting results
+are rejected. A retry with the same `outcome` and `summary` that adds structured
+fields to a report accepted without any is an enrichment: Aster stores the
+fields and updates `updated_at`, and Polaris sees them if the report has not
+been delivered yet, but an already delivered report is not sent again. Any other
+change, including different structured fields, is a conflict. A matching report is accepted even when the assignment write was
+not acknowledged, because the report proves the worker received it.
+
+Each assignment has a submission state (`pending`, `submitted`, `uncertain`,
+`confirmed_by_report`) and a delivery state. Delivery starts at
+`awaiting_report`, moves to `queued` when the worker reports, then `submitting`
+and `submitted`. “submitted” means the PTY acknowledged input, not proof the
+model read it. Other outcomes are `uncertain`, `failed`, `cancelled`,
+`worker_lost`, `unreported`, and `timed_out`. Busy Polaris time is not counted
+as a delivery attempt. A temporary refusal, such as a full input queue, is
+retried after 3, 6, 12 seconds and so on, up to five attempts. A prompt whose
+PTY acknowledgement does not arrive within 30 seconds becomes `uncertain`.
+After an uncertain write, Aster treats Polaris going to work afterwards as proof
+of delivery; otherwise it checks Polaris's screen for that delivery's marker
+once Polaris is idle; a collapsed-paste placeholder (`[Pasted text #N`) newer
+than the one on screen before the write also counts as proof. It is never resent
+blindly, is requeued at most once, and a second uncertain write fails. A
+requeued delivery, including one that was in flight during a restart or whose
+lead pane disappeared, carries a “Possible duplicate” line right after its
+marker so Polaris can discard a repeat. While a lead has an uncertain delivery,
+further reports to it wait.
+
+**Delivery deadlines.** No delivery waits forever; each bound ends in a visible
+outcome:
+
+- A queued report whose lead is absent, or whose pane does not run its agent
+  (for example it sits at a shell), for `polaris.delivery.lead_absent_timeout_ms`
+  (default 30 minutes) in a row becomes `failed` with the reason in `error`,
+  and you get a `failed` notification. A busy or blocked Polaris that is still
+  running is not absent.
+- An `uncertain` delivery whose lead never becomes idle enough to check its
+  screen (it stays blocked, unknown, or absent) is treated as unverifiable after
+  10 minutes: it is requeued once as a possible duplicate, and a second such
+  delivery fails.
+- The interruption check defers at most 10 times in a row (5 minutes); after
+  that the delivery goes through the normal gate without asking.
+- A notice held for a decision is released as “ask the user” after the decision
+  `timeout_ms` plus 2 seconds, even if the decision never answers.
+
+These clocks run while the server runs and start again after a restart.
+
+```toml
+[polaris.delivery]
+lead_absent_timeout_ms = 1800000
+```
+
+Aster watches workers that have not reported. A worker whose terminal or agent
+disappears becomes `worker_lost`. A worker idle for 5 minutes receives one
+reminder restating its report command; still idle and unreported 5 minutes
+later, the assignment becomes `unreported`. `orbit_agent_assign` accepts an
+optional `timeout_ms` (default 2 hours, maximum 24 hours) after which it becomes
+`timed_out`. In each case Polaris receives a notice marked `origin: server`,
+showing that Aster, not the worker, produced it.
+
+**Late reports.** A worker may still finish after Aster gave up on it. A report
+whose task ID, worker ID, and token are valid for an assignment Aster resolved
+as `timed_out`, `unreported`, or `worker_lost` is accepted, stored, marked
+`"late": true` (with `late_from` naming the earlier state), and delivered once,
+its marker followed by “Late report: Aster had already marked this task
+<state>; Polaris was notified earlier.” This also works after the assignment was
+evicted to a tombstone: it returns to the ledger when there is room, and
+otherwise is delivered as a standalone server notice carrying the worker's
+report; a ledger full of active assignments refuses it with an error and the
+worker retries later. Identical retries are recognised and never delivered
+again. A cancelled assignment still refuses every report.
+
+`orbit_task_status {"task_id":"…"}` returns one assignment with timestamps,
+attempts, deadline, report, and last error. `orbit_task_cancel` abandons an
+unresolved assignment; the worker's later report is rejected. From a shell:
+
+```sh
+aster orbit task-status '{"task_id":"ID"}'
+aster orbit task-cancel '{"task_id":"ID"}'
+```
+
+`orbit_activity` lists assignments with their states, attempts, and origin,
+plus `lead` (`terminal_id`, `present`, `state`, `visible_idle`,
+`visible_working`, `queued_reports`) and `lead_error` when Polaris failed to
+start.
+
+The ledger holds up to 64 entries, assignments and server notices alike, and is
+saved as `orbit-tasks.json` in the session data directory, so reports still
+reach Polaris after a server restart. A delivery that was in flight during a
+restart becomes `uncertain`, and a worker whose terminal no longer exists
+becomes `worker_lost`. When the ledger is full, the oldest resolved entry is
+evicted; identical late reports for it are still accepted. If none is resolved,
+the oldest server notice still waiting to be delivered gives way to a new
+notice (counted as a warning in `ledger_error`), and new assignments are refused.
+
+The ledger is written off the event loop: changes are serialized and handed to
+a writer thread that saves at most every 250 ms (atomically: temporary file,
+fsync, rename) and writes everything pending before the server stops or hands
+over to a new server. A failed save is reported in `ledger_error` and retried.
+`orbit-tasks.json`, `orbit-team.json`, `orbit-binding.json`, and
+`orbit-decisions.jsonl` are created with mode 0600; the `orbit-tokens`
+directory must be a real directory with mode 0700 (a symlink or a directory
+other users can open is refused, and the assignment fails with that reason).
+
+Loading tolerates a ledger written by a newer build. Each entry is read on its
+own: one this build cannot read (an unknown state, a damaged record) is skipped
+and kept in `orbit-tasks.json.skipped-<time>`, the rest load, and
+`ledger_error` carries a warning with the count; unknown fields of readable
+entries are kept and written back. Report fields or facts this build cannot
+read are dropped from the stored report, keeping its outcome and summary. Only
+a file that is not JSON, has another version, or has the wrong shape is kept
+aside as `orbit-tasks.json.corrupt-<time>`; the server then starts with an empty
+ledger and `orbit_activity` reports `ledger_error`.
+Workers already prompted using the old untracked command must receive a new
+assignment to use reporting.
+
+Trust model: access to the session socket is trusted project access, the same as
+running `aster` yourself. The per-task token stops a worker from guessing task
+IDs or misreporting another worker's assignment, and the scope check and rate
+limit contain mistakes; none of these is a user authentication boundary.
+
+**Failure-injection demo.** After `cargo build`, run
+`scripts/orbit_failure_demo.sh` to watch these states on a throwaway session.
+It uses a fake Claude for Polaris and its workers, so no model runs, and walks
+through a delivered report, a killed worker (`worker_lost` with a server notice),
+a lead busy for 20 seconds (`queued`, then delivered), duplicate, conflicting,
+and bad-token reports, a cancelled task, and a server restart mid-task, printing
+`aster orbit activity` after each step. It exits non-zero if any expected state
+is not reached in time and deletes the session on exit.
+
+### Notifications
+
+Aster can tell you about Orbit events without watching Polaris. Notifications
+use the [Notifications](#notifications) delivery you chose in `ui.toast.delivery`
+(`aster`, `terminal`, or `system`); with the default `off`, none are shown.
+
+```toml
+[polaris.notify]
+events = ["report", "notice", "blocked", "failed"]   # default: all four
+```
+
+- `report`: a worker's report was delivered to Polaris.
+- `notice`: Aster sent Polaris a notice because a worker was lost, stayed idle
+  without reporting, or timed out.
+- `blocked`: a worker with an open assignment, or one Orbit started with no
+  assignment, has been blocked on a prompt for 30 seconds.
+- `failed`: a delivery to Polaris failed.
+
+Each notification names the worker and task only, never a report summary,
+prompt text, or token, and appears once per task and event; `blocked` appears
+once per blocked stretch. Selecting it focuses the worker's pane. An empty list
+turns Orbit notifications off.
+
+Each notification is also published to API clients as an `orbit.notice` event
+(subscribe with `{"type":"orbit.notice"}`) with `{kind, worker, task_id, pane_id,
+message}`, whatever `ui.toast.delivery` is. `events` filters both.
+
+### Approvals
+
+A Claude worker's own report command never prompts: Orbit pre-allows exactly
+that command when it launches the worker (see
+[Worker reports to Polaris](#worker-reports-to-polaris)). A permission prompt
+from an Orbit worker therefore always means real work waiting for a decision.
+
+A worker that stays blocked on an approval prompt for 30 seconds while it has
+an open assignment is reported to Polaris once per blocked stretch, as a notice
+marked `origin: server` that names the worker, pane, and task and quotes the
+visible prompt's question and option labels (at most 200 characters). Command
+bodies are left out, and secret-looking values are replaced with `<redacted>`:
+token-like values (32 or more hex digits), provider keys (`sk-`, `sk_live_`,
+`sk_test_`, `rk_live_`, `ghp_`, `gho_`, `ghs_`, `ghu_`, `github_pat_`, `glpat-`,
+`xoxa-`/`xoxb-`/`xoxp-`/`xoxr-`/`xoxs-`, `AKIA`, and `ASIA` keys, each also when
+the terminal wrapped it onto the next line), JWTs (`eyJ….eyJ….`), values of
+`password=`, `passwd=`, `token=`, `secret=`, and `api_key=` (also with a prefix
+such as `DB_PASSWORD=`), everything after `Authorization:`, bearer tokens, and
+`-----BEGIN` blocks. The assignment stays open.
+
+Startup dialogs are relayed too. A worker started with `orbit_agent_start` that
+is blocked for 30 seconds with no assignment, for example on Claude's folder
+trust dialog in a fresh worktree, is reported to Polaris once per blocked
+stretch as a standalone notice marked `origin: server`. Its `task_id` is
+`worker-<terminal_id>-<since_ms>/server-notice`, its `notice_for` is `null`,
+and its summary names the worker and pane and quotes the visible prompt with
+the same redaction. The `blocked` notification fires for it as well. Worker
+records are runtime-only, so unassigned agents Aster did not start in this
+server run (most workers restored after a restart) are listed but not relayed.
+
+Blocked workers appear in `orbit_activity` as `blocked_workers` (`name`,
+`pane_id`, `task_id`, `null` without an assignment, and `since_ms`, when the
+blocked stretch began, or `null` for an unassigned agent without a worker
+record) and under **Blocked workers** in `aster orbit activity`.
+
+Answer the prompt in the worker's pane. Polaris may answer it only when you
+allow it:
+
+```toml
+[polaris.approvals]
+lead_may_approve = false   # default false
+```
+
+With `lead_may_approve = true`, `orbit_agent_approve {"name":"reviewer"}` and
+`orbit_agent_deny` (also `aster orbit agent-approve` and `agent-deny`) send the
+answer for the worker's agent: `1` (the first, "Yes" option) or Esc for Claude,
+`y` or Esc for Codex. They wait up to 3 seconds and return `answered` and the
+worker's `state`; poll the worker's status if it has not left `blocked` yet.
+Keys are sent only while the worker's screen shows a permission prompt (Claude's
+`bash_permission_prompt` or `generic_permission_prompt`, Codex's
+`live_strong_blocker` or `weak_blocker` detection rules); any other blocked
+dialog, such as plan mode, folder trust, or a picker, is refused with
+`orbit_approval_unsupported_prompt` naming the rule. They also refuse Polaris
+itself, workers outside Orbit, workers that are not blocked ("no pending
+approval"), other agent kinds, and every request while `lead_may_approve` is
+false, telling Polaris to ask you instead.
+Aster logs only the worker and task IDs of an answer. Changes apply on config
+reload.
+
+### Decisions
+
+Aster has a typed decision layer in front of Orbit. It answers four questions:
+whether a blocked worker's permission prompt can be approved, whether a worker
+report answers its assignment, which team role should own a request, and whether
+now is a good moment to type reports into Polaris. A fixed set of rules always
+runs first. A provider is asked only when you configure one and turn the
+decision on. With the default `provider = "rules"`, nothing leaves your machine.
+
+```toml
+[polaris.decisions]
+provider = "rules"                 # or "jev" (TypeSafe AI's Jev model)
+model = "jev-latest"
+api_key_env = "TYPESAFE_API_KEY"   # read from the Aster server's environment
+# api_key_file = "~/.config/aster/typesafe.key"   # used when the variable is unset
+endpoint = "https://api.typesafe.ai"
+timeout_ms = 3000
+
+[polaris.decisions.approvals]
+enabled = false
+approve_min = 0.90
+ask_or_deny_max = 0.10
+low_risk_min = 0.85
+high_risk_max = 0.02
+allow_patterns = []                # for example ["date", "cargo test*"]
+# deny_patterns = [...]            # default list below
+
+[polaris.decisions.report_sanity]
+enabled = false
+followup_min = 0.80
+score_min = 2.5
+
+[polaris.decisions.routing]
+enabled = false
+accept_min = 0.75
+
+[polaris.decisions.interruption]
+enabled = false
+deliver_min = 0.70
+```
+
+**Approvals.** Approval decisions are made only while
+`polaris.approvals.lead_may_approve` is true and the worker sits on a permission
+prompt that `orbit_agent_approve` could answer. They run when the blocked notice
+is created, after the worker has been blocked for 30 seconds. The notice is held
+until the decision is made, for at most `timeout_ms` plus 2 seconds. The rules
+read the command shown in the prompt, in this order:
+
+1. The Orbit report command of this server is approved: exactly the server's
+   own executable (matched as the whole first word) followed by
+   `orbit agent-report` and exactly one argument that is a JSON object. No
+   environment assignments are accepted before the executable, not even
+   `ASTER_*` ones, because they could redirect the report socket or enable
+   trace files. Shell operators, redirections, substitutions, or extra
+   arguments disqualify it; such a command falls through to the rules below.
+2. `deny_patterns` send the prompt to you. They match anywhere in the command,
+   ignoring case, and `*` matches any text. The default list covers `rm -rf`,
+   `rm -fr`, `git push --force`/`-f`, `git reset --hard`, `sudo`, `curl … | sh`
+   and `wget … | sh`, `~/.ssh`, `id_rsa`, `.env`, and `*.pem`. Aster never denies
+   a prompt on its own.
+3. `allow_patterns` approve a command they match as a whole. The command must be
+   one simple command, so `cargo test*` never approves `cargo test; rm -rf ~`.
+4. Anything else goes to the provider when `approvals.enabled` is true, and to
+   you otherwise.
+
+The provider is asked one call with four questions: `action` (approve, deny,
+ask_user), `risk` (five levels from harmless read-only to destructive), and two
+yes/no checks. Aster approves only when all four thresholds hold:
+
+- p(approve) is at least `approve_min`.
+- p(ask_user) + p(deny) is at most `ask_or_deny_max`.
+- At least `low_risk_min` of the risk probability is in levels 0 and 1.
+- At most `high_risk_max` of it is in levels 3 and 4.
+
+The model's own `confidence` value is ignored, because in testing it was
+sometimes low when the answer was clear. The defaults come from live
+measurements. `date` scored 0.99 and is approved. `cargo test` scored 0.53, and
+the report command (as the model sees it) 0.64, so both go to you. Destructive
+or secret-reading commands scored at most 0.06. An HTTP error, timeout, rate
+limit, missing or unsafe key, or malformed answer always means "ask the user".
+
+Before sending the approval keys, Aster checks again that the worker still shows
+the same command, then answers through the same path and checks as
+`orbit_agent_approve`. The notice to Polaris ends with a line such as
+`Decision: approve (jev, p=0.99, risk 0.0)` or
+`Decision: ask the user (rules: deny pattern 'rm -rf')`.
+
+**Report checks.** With `report_sanity.enabled`, each worker report for an
+assignment made in this server run is checked against the assignment prompt.
+The check asks for an `answers_assignment` score (0 to 4) and a `needs_followup`
+probability. A report is flagged when `needs_followup` is at least
+`followup_min` or the score is below `score_min`. A flagged report is delivered
+with `Decision: report may be incomplete (score 2.1, follow-up 0.89)`, and its
+task in `orbit_activity` gets `sanity` (`score`, `followup`, `flagged`). A check
+never blocks delivery, and a failed check flags nothing.
+
+**Routing.** `orbit_route {"request": "…"}` (also `aster orbit route`) returns
+`{role, probability, accepted}` over the team roles. `accepted` is true when the
+probability is at least `accept_min`. Nothing is assigned: Polaris confirms and
+then uses `orbit_agent_assign`. Routing was once confidently wrong in testing,
+which is why every suggestion is confirmed.
+
+**Interruption.** With `interruption.enabled`, the check runs only after the
+normal delivery gate already allows typing into an idle Polaris. Aster asks a
+`deliver_now` question about the lead's state, the last 500 characters of its
+screen, the report outcomes, and whether anything is blocked. An answer below
+`deliver_min` defers the batch by 30 seconds, and Aster asks again after that,
+at most 10 times in a row (5 minutes) before the delivery goes ahead through the
+normal gate. It can never deliver earlier or bypass the gate, and an error lets
+the delivery go ahead.
+
+**Journal.** Every decision is appended to `orbit-decisions.jsonl` in the
+session data directory as one JSON object per line. Each object has `ts`,
+`kind`, `provider`, `subject`, `inputs_summary` (redacted, at most 1 KiB),
+`answers`, `thresholds`, `action`, `latency_ms`, and `error`. The file is
+created with mode 0600 and rotated at 5 MiB, keeping one `.1`. Lines this
+build cannot read (damaged, or from a newer build) are skipped when the journal
+is read; unknown fields are ignored. The last 50
+entries are listed as `decisions` in `orbit_activity`, by the `orbit_decisions`
+tool, and by `aster orbit decisions`. `aster orbit decisions --check` calls
+`GET /v1/models` with the configured key and endpoint and reports `ok` or the
+error. It works with either provider and never prints the key.
+
+**Privacy.** With `provider = "jev"`, the following is sent to the endpoint:
+
+- For an approval: the worker's name and kind, the first 500 characters of the
+  assignment prompt, the command and the prompt's question and options, and
+  the policy text.
+- For a report check: the assignment prompt, plus the report's outcome,
+  summary, `tests_run`, checks, number of changed files, and `blocked_on`.
+- For routing: the request and the roles' names and areas.
+- For interruption: the end of Polaris's screen and the report outcomes.
+
+Report tokens and other secret-looking values are replaced with `<redacted>`
+before anything is sent or journaled. This uses the same redaction as blocked
+notices (see above). The rules read the unredacted command locally. A command
+that redaction would change, that cannot be read from the prompt, or that is
+longer than 500 characters is never sent to the provider for approval: the
+prompt goes to you, because the provider would judge a different command than
+the one that runs.
+
+The API key is read on the decision thread for each call and written to a
+temporary header file with mode 0600, which curl reads with `--header @file`.
+The file is removed after the call. The key never appears in process arguments,
+logs, the journal, or activity. Each call runs on its own thread, so Aster's
+event loop never waits for one. Changes apply on config reload.

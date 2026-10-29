@@ -1,7 +1,7 @@
 id = "claude"
-version = "2026.10.11.1"
+version = "2026.10.29.1"
 min_engine_version = 2
-updated_at = "2026-10-11T00:00:00Z"
+updated_at = "2026-10-29T00:00:00Z"
 aliases = ["claude-code"]
 
 [[rules]]
@@ -190,19 +190,26 @@ all = [
   ] },
 ]
 
+# A permission dialog replaces the composer, so the prompt-box region falls back
+# to the transcript above it, where an echoed user message ("❯ Run …") satisfies
+# live_prompt_box. The dialog itself is the only thing after the last horizontal
+# rule, so this rule outranks live_prompt_box (950) without affecting screens
+# that show a composer: there the region holds only the status lines. Claude
+# 2.1.312 renders "Esc to cancel · Tab to amend" and a fourth "No" option.
 [[rules]]
 id = "generic_permission_prompt"
 state = "blocked"
-priority = 840
+priority = 960
 region = "after_last_horizontal_rule"
 visible_blocker = true
-contains = ["do you want to proceed?", "esc to cancel"]
+contains = ["do you want to proceed?"]
 all = [
   { any = [
     { line_regex = ['(?i)^\s*❯?\s*1\.\s*yes\b'] },
-    { line_regex = ['(?i)^\s*2\.\s*yes\b'] },
-    { line_regex = ['(?i)^\s*2\.\s*no\b'] },
-    { line_regex = ['(?i)^\s*3\.\s*no\b'] },
+    { line_regex = ['(?i)^\s*❯?\s*2\.\s*yes\b'] },
+    { line_regex = ['(?i)^\s*❯?\s*2\.\s*no\b'] },
+    { line_regex = ['(?i)^\s*❯?\s*3\.\s*no\b'] },
+    { line_regex = ['(?i)^\s*❯?\s*4\.\s*no\b'] },
   ] },
 ]
 

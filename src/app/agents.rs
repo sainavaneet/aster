@@ -12,7 +12,7 @@ const INVALID_AGENT_TIMEOUT_MESSAGE: &str =
     "agent start timeout must be greater than 3000ms and at most 300000ms";
 const INVALID_AGENT_NAME_MESSAGE: &str = "agent name must start with a lowercase letter and contain only lowercase letters, digits, '-' or '_' (1-32 characters)";
 
-fn valid_agent_name(name: &str) -> bool {
+pub(super) fn valid_agent_name(name: &str) -> bool {
     let mut chars = name.chars();
     matches!(chars.next(), Some('a'..='z'))
         && name.len() <= 32
@@ -191,8 +191,10 @@ impl App {
             .terminal_runtimes
             .get(&terminal_id)
             .ok_or_else(|| AgentStartError::TargetUnavailable(params.pane_id.clone()))?;
+        // A freshly split pane may not have finished starting its shell; callers
+        // can retry that, unlike a pane that already hosts an agent.
         let shell_name = available_shell_name(runtime)
-            .ok_or_else(|| AgentStartError::TargetBusy(params.pane_id.clone()))?;
+            .ok_or_else(|| AgentStartError::ShellNotReady(params.pane_id.clone()))?;
 
         let mut argv = vec![crate::detect::interactive_agent_executable(kind).to_string()];
         argv.extend(params.args);
@@ -263,6 +265,12 @@ impl App {
             AgentStartError::TargetBusy(target) => crate::api::schema::ErrorBody {
                 code: "agent_pane_busy".into(),
                 message: format!("agent target pane {target} is not an available shell"),
+            },
+            AgentStartError::ShellNotReady(target) => crate::api::schema::ErrorBody {
+                code: "agent_shell_starting".into(),
+                message: format!(
+                    "agent target pane {target} has no ready shell yet; retry in a moment"
+                ),
             },
             AgentStartError::TargetUnavailable(target) => crate::api::schema::ErrorBody {
                 code: "agent_pane_unavailable".into(),
@@ -420,7 +428,7 @@ impl App {
     }
 }
 
-fn available_shell_name(runtime: &crate::terminal::TerminalRuntime) -> Option<String> {
+pub(super) fn available_shell_name(runtime: &crate::terminal::TerminalRuntime) -> Option<String> {
     #[cfg(test)]
     if runtime.child_pid().is_none() {
         return Some("sh".into());
@@ -439,7 +447,9 @@ pub(super) fn runtime_hosts_agent(
     live_runtime_agent(runtime) == Some(expected)
 }
 
-fn live_runtime_agent(runtime: &crate::terminal::TerminalRuntime) -> Option<crate::detect::Agent> {
+pub(super) fn live_runtime_agent(
+    runtime: &crate::terminal::TerminalRuntime,
+) -> Option<crate::detect::Agent> {
     let job = crate::detect::foreground_job(runtime.child_pid()?)?;
     crate::detect::identify_agent_in_job(&job)
         .map(|(agent, _)| agent)
@@ -457,6 +467,8 @@ pub(super) enum AgentStartError {
     InvalidTimeout,
     TargetNotFound(String),
     TargetBusy(String),
+    /// The pane's shell has not finished starting (retryable).
+    ShellNotReady(String),
     TargetUnavailable(String),
     InputFailed(String),
     DuplicateName {

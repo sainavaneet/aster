@@ -43,6 +43,7 @@ impl ClientShellState {
         now: std::time::Instant,
     ) {
         if self.visible_notification.is_none() {
+            notification.shown_at = now;
             notification.deadline = now + notification_duration(notification.event.kind);
             self.visible_notification = Some(notification);
             return;
@@ -57,6 +58,7 @@ impl ClientShellState {
         let Some(mut notification) = self.queued_notifications.pop_front() else {
             return false;
         };
+        notification.shown_at = now;
         notification.deadline = now + notification_duration(notification.event.kind);
         self.visible_notification = Some(notification);
         true
@@ -193,6 +195,27 @@ impl ClientShellState {
             }
             let target_active =
                 self.notification_target_is_active(&pending.endpoint_id, &pending.event);
+            let tab_id = pending
+                .event
+                .tab_id
+                .as_deref()
+                .filter(|_| self.config.animations.allows_looping_motion());
+            if let Some(tab_id) = tab_id {
+                let sweep_status = match pending.event.kind {
+                    SemanticNotificationKind::NeedsAttention => {
+                        Some(crate::api::schema::AgentStatus::Blocked)
+                    }
+                    SemanticNotificationKind::Finished | SemanticNotificationKind::Custom => {
+                        Some(crate::api::schema::AgentStatus::Done)
+                    }
+                    SemanticNotificationKind::UpdateInstalled => None,
+                };
+                if let Some(status) = sweep_status {
+                    self.animations
+                        .record_tab_report(&pending.endpoint_id, tab_id, status, now);
+                    repaint = true;
+                }
+            }
             let suppress_external = target_active && self.outer_focused != Some(false);
             if let Some(sound) = pending.event.sound {
                 let suppress_sound =
@@ -210,18 +233,19 @@ impl ClientShellState {
 
             match self.config.toast_delivery {
                 crate::config::ToastDelivery::Off => {}
-                crate::config::ToastDelivery::Herdr if !target_active => {
+                crate::config::ToastDelivery::Aster if !target_active => {
                     self.queue_visible_notification(
                         ClientVisibleNotification {
                             endpoint_id: pending.endpoint_id,
                             event: pending.event,
+                            shown_at: now,
                             deadline: now,
                         },
                         now,
                     );
                     repaint = true;
                 }
-                crate::config::ToastDelivery::Herdr => {}
+                crate::config::ToastDelivery::Aster => {}
                 crate::config::ToastDelivery::Terminal if !suppress_external => {
                     effects.push(ClientShellNotificationEffect::Terminal {
                         title: pending.event.title,

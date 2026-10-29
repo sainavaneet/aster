@@ -54,6 +54,8 @@ pub(super) fn render_agent_panel(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    endpoint_id: &ClientEndpointId,
+    animation: super::animation::AnimationFrame<'_>,
     agent_scroll: &mut usize,
     hits: &mut ShellHitMap,
 ) {
@@ -81,8 +83,9 @@ pub(super) fn render_agent_panel(
         hits,
         |row| row.rows.len(),
         |buffer, rect, row, hits| {
+            let phase = animation.agent_row(endpoint_id, &row.pane_id, row.status);
             hits.agents.push((rect, row.pane_id.clone()));
-            render_agent_row(buffer, rect, row, config);
+            render_agent_row(buffer, rect, row, config, phase);
         },
     );
 }
@@ -318,33 +321,91 @@ pub(super) fn agent_row(
     })
 }
 
+pub(super) fn agent_status_icon_and_color(
+    status: crate::api::schema::AgentStatus,
+    indicator_style: crate::config::StatusIndicatorStyle,
+    palette: &Palette,
+    phase: super::animation::AgentRowAnimationPhase,
+) -> (&'static str, ratatui::style::Color) {
+    let base_color = status_color(status, palette);
+    let icon = if status == crate::api::schema::AgentStatus::Working {
+        super::animation::working_spinner_glyph(phase.spinner_index, indicator_style)
+    } else {
+        status_icon(status, indicator_style)
+    };
+    let mut color =
+        if status == crate::api::schema::AgentStatus::Blocked && phase.blocked_pulse > 0.0 {
+            super::animation::blend_color(
+                base_color,
+                palette.surface1,
+                phase.blocked_pulse * 0.65,
+                palette,
+            )
+        } else {
+            base_color
+        };
+    if phase.status_flash > 0.0 {
+        color =
+            super::animation::blend_color(color, palette.text, phase.status_flash * 0.75, palette);
+    }
+    (icon, color)
+}
+
 pub(super) fn render_agent_row(
     buffer: &mut Buffer,
     rect: Rect,
     row: &AgentRow,
     config: &ClientShellConfig,
+    phase: super::animation::AgentRowAnimationPhase,
 ) {
     let palette = &config.palette;
-    let row_style = if row.focused {
-        Style::default().bg(palette.active_row_bg)
+    let base_bg = if row.focused {
+        palette.active_row_bg
     } else {
-        Style::default()
+        palette.sidebar_bg
     };
-    let name_style = if row.focused {
-        Style::default()
-            .fg(palette.text)
-            .add_modifier(Modifier::BOLD)
+    let row_bg = if phase.status_flash > 0.0 {
+        Some(super::animation::blend_color(
+            base_bg,
+            palette.surface1,
+            (phase.status_flash * 0.85).max(phase.recency_highlight * 0.55),
+            palette,
+        ))
+    } else if phase.recency_highlight > 0.0 {
+        Some(super::animation::blend_color(
+            base_bg,
+            palette.surface0,
+            phase.recency_highlight * 0.65,
+            palette,
+        ))
+    } else if row.focused {
+        Some(palette.active_row_bg)
     } else {
-        Style::default()
-            .fg(palette.subtext0)
-            .add_modifier(Modifier::BOLD)
+        None
     };
-    let status_style = Style::default().fg(status_color(row.status, palette));
+    let row_style = row_bg.map_or_else(Style::default, |bg| Style::default().bg(bg));
+    let name_fg = if row.focused {
+        palette.text
+    } else if phase.status_flash > 0.0 || phase.recency_highlight > 0.0 {
+        super::animation::blend_color(
+            palette.subtext0,
+            palette.text,
+            phase.status_flash.max(phase.recency_highlight * 0.75),
+            palette,
+        )
+    } else {
+        palette.subtext0
+    };
+    let name_style = Style::default().fg(name_fg).add_modifier(Modifier::BOLD);
+    let (icon_glyph, status_fg) =
+        agent_status_icon_and_color(row.status, config.status_indicators, palette, phase);
+    let status_style = if phase.status_flash > 0.25 {
+        Style::default().fg(status_fg).add_modifier(Modifier::BOLD)
+    } else {
+        Style::default().fg(status_fg)
+    };
     let secondary = Style::default().fg(palette.overlay0);
-    let icon = (
-        status_icon(row.status, config.status_indicators),
-        Style::default().fg(status_color(row.status, palette)),
-    );
+    let icon = (icon_glyph, status_style);
     let rows = if row.rows.is_empty() {
         vec![vec![crate::ui::ResolvedToken {
             kind: crate::ui::ResolvedTokenKind::StateIcon,
@@ -370,6 +431,33 @@ pub(super) fn render_agent_row(
             Rect::new(rect.x, rect.y + index as u16, rect.width, 1),
             buffer,
         );
+    }
+    if rect.width > 0 && (phase.status_flash > 0.0 || phase.recency_highlight > 0.0) {
+        let bar_color = if phase.status_flash > 0.0 {
+            super::animation::blend_color(
+                status_color(row.status, palette),
+                palette.text,
+                phase.status_flash * 0.6,
+                palette,
+            )
+        } else {
+            super::animation::blend_color(
+                palette.surface_dim,
+                palette.accent,
+                phase.recency_highlight,
+                palette,
+            )
+        };
+        let bar_glyph = if phase.status_flash > 0.35 || phase.recency_highlight > 0.45 {
+            "▎"
+        } else {
+            "▏"
+        };
+        for y in rect.y..rect.bottom() {
+            if let Some(cell) = buffer.cell_mut((rect.x, y)) {
+                cell.set_symbol(bar_glyph).set_fg(bar_color);
+            }
+        }
     }
 }
 

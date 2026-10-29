@@ -88,7 +88,7 @@ fn server_integrity_requires_startup_consent_on_both_endpoints() {
     };
 
     let directory = std::env::temp_dir().join(format!(
-        "herdr-server-integrity-{}-{}",
+        "aster-server-integrity-{}-{}",
         std::process::id(),
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -101,9 +101,9 @@ fn server_integrity_requires_startup_consent_on_both_endpoints() {
         directory,
     };
     let app_dir = if cfg!(debug_assertions) {
-        "herdr-dev"
+        "aster-dev"
     } else {
-        "herdr"
+        "aster"
     };
     let session_dir = server
         .directory
@@ -111,8 +111,8 @@ fn server_integrity_requires_startup_consent_on_both_endpoints() {
         .join("sessions")
         .join("integrity-test");
     let endpoints = [
-        session_dir.join("herdr.sock"),
-        session_dir.join("herdr-client.sock"),
+        session_dir.join("aster.sock"),
+        session_dir.join("aster-client.sock"),
     ];
 
     // Reuse the named session after stopping, proving consent is process-local.
@@ -134,7 +134,7 @@ fn server_integrity_requires_startup_consent_on_both_endpoints() {
             configuration,
         )
         .unwrap();
-        let mut command = Command::new(env!("CARGO_BIN_EXE_herdr"));
+        let mut command = Command::new(env!("CARGO_BIN_EXE_aster"));
         command.args(["--session", "integrity-test", "server"]);
         if allow_unelevated {
             command.arg("--allow-unelevated-clients");
@@ -147,15 +147,15 @@ fn server_integrity_requires_startup_consent_on_both_endpoints() {
             .stdout(Stdio::null())
             .creation_flags(CREATE_NO_WINDOW);
         for name in [
-            "HERDR_SOCKET_PATH",
-            "HERDR_CLIENT_SOCKET_PATH",
-            "HERDR_CONFIG_PATH",
-            "HERDR_SESSION",
-            "HERDR_WORKSPACE",
-            "HERDR_TAB",
-            "HERDR_PANE",
-            "HERDR_TERMINAL",
-            "HERDR_STARTUP_CWD",
+            "ASTER_SOCKET_PATH",
+            "ASTER_CLIENT_SOCKET_PATH",
+            "ASTER_CONFIG_PATH",
+            "ASTER_SESSION",
+            "ASTER_WORKSPACE",
+            "ASTER_TAB",
+            "ASTER_PANE",
+            "ASTER_TERMINAL",
+            "ASTER_STARTUP_CWD",
         ] {
             command.env_remove(name);
         }

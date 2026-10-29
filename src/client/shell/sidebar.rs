@@ -49,6 +49,8 @@ pub(crate) fn render_collapsed_sidebar(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    endpoint_id: &ClientEndpointId,
+    animation: super::super::animation::AnimationFrame<'_>,
     selected_workspace_id: Option<&str>,
     hits: &mut ShellHitMap,
 ) {
@@ -145,8 +147,17 @@ pub(crate) fn render_collapsed_sidebar(
             detail_content.width,
             1,
         );
+        let phase = animation.agent_row(endpoint_id, &agent.pane_id, agent.agent_status);
         if agent.focused {
             buffer.set_style(rect, Style::default().bg(palette.active_row_bg));
+        } else if phase.status_flash > 0.0 || phase.recency_highlight > 0.0 {
+            let bg = super::super::animation::blend_color(
+                palette.sidebar_bg,
+                palette.surface0,
+                phase.status_flash.max(phase.recency_highlight * 0.65),
+                palette,
+            );
+            buffer.set_style(rect, Style::default().bg(bg));
         }
         put_text(
             buffer,
@@ -160,13 +171,19 @@ pub(crate) fn render_collapsed_sidebar(
                 palette.overlay0
             }),
         );
+        let (icon_glyph, status_fg) = super::super::agent_sidebar::agent_status_icon_and_color(
+            agent.agent_status,
+            config.status_indicators,
+            palette,
+            phase,
+        );
         put_text(
             buffer,
             rect.x.saturating_add(2),
             rect.y,
             rect.width.saturating_sub(2),
-            status_icon(agent.agent_status, config.status_indicators),
-            Style::default().fg(status_color(agent.agent_status, palette)),
+            icon_glyph,
+            Style::default().fg(status_fg),
         );
         hits.agents.push((rect, pane_id));
     }
@@ -435,6 +452,8 @@ pub(crate) fn render_sidebar(
         detail_area,
         snapshot,
         config,
+        state.active_endpoint_id,
+        state.animation,
         state.agent_scroll,
         hits,
     );

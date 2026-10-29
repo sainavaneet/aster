@@ -1,0 +1,80 @@
+#!/bin/bash
+# Fake `codex` for Orbit integration tests: a mixed-kind worker beside the fake
+# Claude (tests/fixtures/orbit/claude), which documents the shared protocol.
+#
+# Aster identifies it as Codex from its process argv (`bash .../codex`). The
+# bundled Codex manifest classifies state from the terminal title: a title
+# without a braille spinner is idle (`osc_title_idle`), and one starting with a
+# spinner frame such as `⠋` is working (`osc_title_working`). The screen carries
+# no Codex composer, prompt marker, or timer line, so no screen rule applies.
+# It never talks to a model.
+#
+# Identity: the value of `--model` (`orbit.agent_start {model}`). Files in
+# $ORBIT_FAKE_STATE:
+#   <name>.pid      this process id
+#   <name>.argv     its launch arguments, each terminated by a NUL byte
+#   <name>.mode     write `busy` to show the working title, `idle` to return
+#   <name>.prompts  every submitted prompt as read from the PTY, each preceded
+#                   by `=== prompt N ===`; the screen shows only its first line
+set -u
+name=agent
+previous=
+for argument in "$@"; do
+    case $previous in --model) name=$argument ;; esac
+    previous=$argument
+done
+state_dir=${ORBIT_FAKE_STATE:?ORBIT_FAKE_STATE must name a writable directory}
+mode_file="$state_dir/$name.mode"
+log="$state_dir/$name.prompts"
+printf '%s\n' "$$" >"$state_dir/$name.pid"
+printf '%s\0' "$@" >"$state_dir/$name.argv"
+: >>"$log"
+# Raw input like a real TUI agent; keep output newline translation.
+stty raw -echo opost onlcr 2>/dev/null
+printf '\033[?2004h'
+
+current_mode() {
+    if [ -f "$mode_file" ] && [ "$(cat "$mode_file")" = busy ]; then echo busy; else echo idle; fi
+}
+draw() {
+    if [ "$1" = busy ]; then
+        printf '\033]0;⠋ fake-codex\007'
+    else
+        printf '\033]0;fake-codex\007'
+    fi
+}
+
+printf 'fake codex (%s) ready\n' "$name"
+draw "$(current_mode)"
+(
+    shown=$(current_mode)
+    while sleep 0.2; do
+        wanted=$(current_mode)
+        [ "$wanted" = "$shown" ] && continue
+        shown=$wanted
+        draw "$wanted"
+    done
+) &
+trap 'kill $! 2>/dev/null; stty sane 2>/dev/null; printf "\033[?2004l"' EXIT
+
+# Prompts arrive as bracketed pastes followed by Enter; see the fake Claude.
+paste_start=$'\033[200~'
+paste_end=$'\033[201'
+count=0
+pending=
+while IFS= read -r -d '~' chunk; do
+    pending+=$chunk
+    case $pending in
+    *"$paste_end") ;;
+    *) pending+='~'; continue ;;
+    esac
+    prompt=${pending%"$paste_end"}
+    pending=
+    prompt=${prompt//"$paste_start"/}
+    while [[ $prompt == [$'\r\n']* ]]; do prompt=${prompt:1}; done
+    [ -z "$prompt" ] && continue
+    count=$((count + 1))
+    printf '=== prompt %s ===\n%s\n' "$count" "$prompt" >>"$log"
+    printf 'received prompt %s, %s bytes: %s\n' "$count" "${#prompt}" "${prompt%%$'\n'*}"
+    draw "$(current_mode)"
+done

@@ -20,7 +20,7 @@ fn indicator_index(style: crate::config::StatusIndicatorStyle) -> usize {
 fn toast_index(delivery: crate::config::ToastDelivery) -> usize {
     match delivery {
         crate::config::ToastDelivery::Off => 0,
-        crate::config::ToastDelivery::Herdr => 1,
+        crate::config::ToastDelivery::Aster => 1,
         crate::config::ToastDelivery::Terminal => 2,
         crate::config::ToastDelivery::System => 3,
     }
@@ -34,6 +34,7 @@ pub(super) fn integration_needs_install(info: &crate::api::schema::IntegrationIn
 impl ClientShellState {
     pub(super) fn open_settings_overlay(&mut self) {
         self.overlay = Some(ClientShellOverlay::Settings(ClientSettingsOverlay {
+            polaris: self.config.polaris.clone(),
             section: ClientSettingsSection::Theme,
             selected: theme_index(&self.config.theme_name),
             original_theme_name: self.config.theme_name.clone(),
@@ -47,6 +48,7 @@ impl ClientShellState {
 
     fn selected_index_for_settings_section(&self, section: ClientSettingsSection) -> usize {
         match section {
+            ClientSettingsSection::Polaris => usize::from(!self.config.polaris.enabled),
             ClientSettingsSection::Theme => theme_index(&self.config.theme_name),
             ClientSettingsSection::Indicators => indicator_index(self.config.status_indicators),
             ClientSettingsSection::Sound => usize::from(!self.config.sound_enabled),
@@ -98,6 +100,7 @@ impl ClientShellState {
             Some(ClientShellOverlay::Settings(settings)) => match settings.section {
                 ClientSettingsSection::Theme => crate::config::THEME_NAMES.len(),
                 ClientSettingsSection::Indicators | ClientSettingsSection::Sound => 2,
+                ClientSettingsSection::Polaris => 2,
                 ClientSettingsSection::Toast => 4,
                 ClientSettingsSection::Integrations => settings.integrations.len(),
             },
@@ -188,6 +191,9 @@ impl ClientShellState {
         let section = settings.section;
         let selected = settings.selected;
         match section {
+            ClientSettingsSection::Polaris => {
+                self.save_settings_edit(crate::config::ConfigEdit::Polaris(selected == 0), outcome);
+            }
             ClientSettingsSection::Theme => {
                 let Some(name) = crate::config::THEME_NAMES.get(selected).copied() else {
                     return;
@@ -213,7 +219,7 @@ impl ClientShellState {
             ClientSettingsSection::Toast => {
                 let delivery = match selected {
                     0 => crate::config::ToastDelivery::Off,
-                    1 => crate::config::ToastDelivery::Herdr,
+                    1 => crate::config::ToastDelivery::Aster,
                     2 => crate::config::ToastDelivery::Terminal,
                     _ => crate::config::ToastDelivery::System,
                 };

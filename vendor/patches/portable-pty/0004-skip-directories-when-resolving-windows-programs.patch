@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: herdr maintainers <maintainers@herdr.dev>
+From: aster maintainers <maintainers@aster.dev>
 Date: Wed, 14 Oct 2026 00:00:00 +0000
 Subject: [PATCH] skip directories when resolving Windows programs
 
@@ -10,7 +10,7 @@ directory because `Path::exists()` is true for directories, so
 Require a regular file for both the exact name and the PATHEXT candidates so
 the real executable is found, matching CreateProcessW's own PATH search.
 
-Herdr issue: https://github.com/herdrdev/herdr/issues/5267
+Aster issue: https://github.com/asterdev/aster/issues/5267
 Vendored base: portable-pty 0.9.0
 ---
 diff --git a/vendor/portable-pty/src/cmdbuilder.rs b/vendor/portable-pty/src/cmdbuilder.rs
@@ -45,22 +45,22 @@ index e4a9edc7..81ebd723 100644
 +        use std::os::windows::ffi::OsStringExt;
 +
 +        let root = std::env::temp_dir().join(format!(
-+            "herdr-portable-pty-search-path-{}",
++            "aster-portable-pty-search-path-{}",
 +            std::process::id()
 +        ));
 +        let shadow_dir = root.join("shadow");
 +        let real_dir = root.join("real");
-+        std::fs::create_dir_all(shadow_dir.join("herdrprobe")).expect("create shadow directory");
-+        std::fs::create_dir_all(shadow_dir.join("herdrprobe.EXE"))
++        std::fs::create_dir_all(shadow_dir.join("asterprobe")).expect("create shadow directory");
++        std::fs::create_dir_all(shadow_dir.join("asterprobe.EXE"))
 +            .expect("create shadow extension directory");
 +        std::fs::create_dir_all(&real_dir).expect("create real directory");
 +        let source = std::path::PathBuf::from(std::env::var_os("SystemRoot").expect("SystemRoot"))
 +            .join("System32")
 +            .join("where.exe");
-+        let executable = real_dir.join("herdrprobe.exe");
++        let executable = real_dir.join("asterprobe.exe");
 +        std::fs::copy(&source, &executable).expect("copy probe executable");
 +
-+        let mut cmd = CommandBuilder::new("herdrprobe");
++        let mut cmd = CommandBuilder::new("asterprobe");
 +        cmd.env(
 +            "PATH",
 +            std::env::join_paths([&shadow_dir, &real_dir]).expect("join PATH"),

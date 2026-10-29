@@ -113,6 +113,7 @@ impl ClientShellConfig {
     pub(crate) fn from_config(config: &Config) -> Self {
         let theme_runtime = crate::app::client_theme_runtime_from_config(config);
         Self {
+            polaris: config.polaris.clone(),
             sidebar_width: config.ui.sidebar_width,
             sidebar_min_width: config.ui.sidebar_min_width,
             sidebar_max_width: config.ui.sidebar_max_width,
@@ -125,10 +126,11 @@ impl ClientShellConfig {
             agents: config.ui.sidebar.agents.clone(),
             agent_panel_sort: config.ui.agent_panel_sort,
             status_indicators: config.ui.status_indicators,
+            animations: config.ui.animations,
             sound_enabled: config.ui.sound.enabled,
             toast_delivery: config.ui.toast.delivery,
             toast_delay_seconds: config.ui.toast.delay_seconds,
-            toast_position: config.ui.toast.herdr.position,
+            toast_position: config.ui.toast.aster.position,
             copy_on_select: config.ui.copy_on_select,
             clipboard_toast_enabled: config.ui.toast.clipboard.enabled,
             clipboard_toast_position: config.ui.toast.clipboard.position,
@@ -315,6 +317,10 @@ impl ClientShellConfig {
         let invalid_section =
             |section: &str| invalid_sections.iter().any(|invalid| invalid == section);
 
+        if !invalid_section("polaris") {
+            self.polaris = config.polaris.clone();
+        }
+
         if !invalid_section("keys")
             && self.keybinding_source != ClientShellKeybindingSource::Endpoint
         {
@@ -352,10 +358,11 @@ impl ClientShellConfig {
                 self.agents = ui.sidebar.agents.clone();
                 self.agent_panel_sort = ui.agent_panel_sort;
                 self.status_indicators = ui.status_indicators;
+                self.animations = ui.animations;
                 self.sound_enabled = ui.sound.enabled;
                 self.toast_delivery = ui.toast.delivery;
                 self.toast_delay_seconds = ui.toast.delay_seconds;
-                self.toast_position = ui.toast.herdr.position;
+                self.toast_position = ui.toast.aster.position;
                 self.copy_on_select = ui.copy_on_select;
                 self.clipboard_toast_enabled = ui.toast.clipboard.enabled;
                 self.clipboard_toast_position = ui.toast.clipboard.position;
@@ -523,7 +530,7 @@ mod tests {
     #[test]
     fn initial_surface_size_uses_persisted_endpoint_chrome() {
         let path = std::env::temp_dir().join(format!(
-            "herdr-initial-shell-preferences-{}.json",
+            "aster-initial-shell-preferences-{}.json",
             std::process::id()
         ));
         let _ = std::fs::remove_file(&path);

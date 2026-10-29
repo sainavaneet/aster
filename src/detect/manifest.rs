@@ -809,6 +809,23 @@ fn read_remote_manifest(agent: Agent, bundled: &AgentManifest) -> Option<LoadedM
     }
 }
 
+impl DetectionExplain {
+    /// The highest-priority matched `blocked` rule that reads the screen rather
+    /// than the OSC title or progress, naming which dialog is on screen. A title
+    /// such as Codex's "Action Required" says only that something is blocked.
+    pub fn blocked_screen_rule(&self) -> Option<&str> {
+        self.evaluated_rules
+            .iter()
+            .filter(|rule| {
+                rule.matched
+                    && rule.state == AgentState::Blocked
+                    && !rule.region.starts_with("osc_")
+            })
+            .max_by_key(|rule| rule.priority)
+            .map(|rule| rule.id.as_str())
+    }
+}
+
 pub fn agent_state_label(state: AgentState) -> &'static str {
     match state {
         AgentState::Idle => "idle",

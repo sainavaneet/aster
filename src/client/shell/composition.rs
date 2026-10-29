@@ -54,10 +54,18 @@ impl ClientShellState {
                 && self.endpoint_status(&self.active_endpoint_id)
                     == Some(ClientEndpointStatus::Online)
         });
+        let now = self
+            .last_composed_at
+            .unwrap_or_else(std::time::Instant::now);
         let mut render_state = render::ShellRenderState {
             machine_diagnostics: &self.machine_diagnostics,
             endpoints: &self.endpoints,
             active_endpoint_id: &self.active_endpoint_id,
+            animation: super::animation::AnimationFrame::new(
+                &self.animations,
+                self.config.animations,
+                now,
+            ),
             collapsed_endpoints: &self.collapsed_endpoints,
             collapsed_groups: &self.collapsed_groups,
             remote_collapsed_groups: &self.remote_collapsed_groups,
@@ -136,12 +144,19 @@ impl ClientShellState {
             &self.config.palette,
         );
         if let Some(notice) = &self.visible_endpoint_notice {
-            self.hits.notification_toast = endpoint_notices::render_notice(
+            let phase = super::animation::notification_transition_phase(
+                notice.shown_at,
+                notice.deadline,
+                now,
+                self.config.animations,
+            );
+            self.hits.notification_toast = endpoint_notices::render_notice_with_phase(
                 &mut buffer,
                 Rect::new(0, 0, cols, rows),
                 notice,
                 1,
                 &self.config.palette,
+                phase,
             );
         }
         FrameData::from_ratatui_buffer_with_hyperlinks(&buffer, None, &[])
@@ -152,7 +167,8 @@ impl ClientShellState {
         cols: u16,
         rows: u16,
     ) -> Option<crate::client::frame_output::ComposedFrame> {
-        self.last_composed_at = Some(std::time::Instant::now());
+        let now = std::time::Instant::now();
+        self.last_composed_at = Some(now);
         self.selection_repaint_deadline = None;
         if self.last_composed_size != Some((cols, rows)) && self.mode == ClientShellMode::Navigate {
             self.reveal_navigation_workspace = true;
@@ -214,6 +230,11 @@ impl ClientShellState {
                 machine_diagnostics: &self.machine_diagnostics,
                 endpoints: &self.endpoints,
                 active_endpoint_id: &self.active_endpoint_id,
+                animation: super::animation::AnimationFrame::new(
+                    &self.animations,
+                    self.config.animations,
+                    now,
+                ),
                 collapsed_endpoints: &self.collapsed_endpoints,
                 collapsed_groups: &self.collapsed_groups,
                 remote_collapsed_groups: &self.remote_collapsed_groups,
@@ -492,40 +513,56 @@ impl ClientShellState {
                 1
             });
             if let Some(notice) = self.visible_endpoint_notice.as_ref() {
+                let phase = super::animation::notification_transition_phase(
+                    notice.shown_at,
+                    notice.deadline,
+                    now,
+                    self.config.animations,
+                );
                 self.hits.notification_toast = if layout.mobile_header.is_empty() {
-                    endpoint_notices::render_notice(
+                    endpoint_notices::render_notice_with_phase(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notice,
                         u16::from(has_config_diagnostic) + lifecycle_offset,
                         &self.config.palette,
+                        phase,
                     )
                 } else {
-                    endpoint_notices::render_mobile_banner(
+                    endpoint_notices::render_mobile_banner_with_phase(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notice,
                         has_config_diagnostic || lifecycle_offset > 0,
                         &self.config.palette,
+                        phase,
                     )
                 };
             } else if let Some(notification) = self.visible_notification.as_ref() {
+                let phase = super::animation::notification_transition_phase(
+                    notification.shown_at,
+                    notification.deadline,
+                    now,
+                    self.config.animations,
+                );
                 self.hits.notification_toast = if layout.mobile_header.is_empty() {
-                    notifications::render_visible_notification(
+                    notifications::render_visible_notification_with_phase(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notification,
                         self.config.toast_position,
                         u16::from(has_config_diagnostic) + lifecycle_offset,
                         &self.config.palette,
+                        phase,
                     )
                 } else {
-                    notifications::render_mobile_notification_banner(
+                    notifications::render_mobile_notification_banner_with_phase(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notification,
                         has_config_diagnostic || lifecycle_offset > 0,
                         &self.config.palette,
+                        phase,
                     )
                 };
             }
@@ -625,12 +662,19 @@ impl ClientShellState {
                 );
             }
             if let Some(notice) = self.visible_endpoint_notice.as_ref() {
-                self.hits.notification_toast = endpoint_notices::render_mobile_banner(
+                let phase = super::animation::notification_transition_phase(
+                    notice.shown_at,
+                    notice.deadline,
+                    now,
+                    self.config.animations,
+                );
+                self.hits.notification_toast = endpoint_notices::render_mobile_banner_with_phase(
                     &mut composed,
                     Rect::new(0, 0, cols, rows),
                     notice,
                     active_lifecycle.is_some(),
                     &self.config.palette,
+                    phase,
                 );
             }
             frame.replace_from_ratatui_buffer_preserving_effects(&composed, None);

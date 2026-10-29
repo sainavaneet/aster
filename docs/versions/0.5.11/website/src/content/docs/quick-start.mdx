@@ -1,15 +1,15 @@
 ---
 title: Quick start
-description: Create your first Herdr workspace and run agents in persistent terminal panes.
+description: Create your first Aster workspace and run agents in persistent terminal panes.
 ---
 
-Start Herdr from any project directory:
+Start Aster from any project directory:
 
 ```bash
-herdr
+aster
 ```
 
-Herdr launches or attaches to your default background session. If you detach, agents keep running.
+Aster launches or attaches to your default background session. If you detach, agents keep running.
 
 ## Create a workspace
 
@@ -25,7 +25,7 @@ Start your agent in the root pane.
 pi
 ```
 
-Herdr detects supported agents automatically. The sidebar shows whether each agent is `working`, `blocked`, `done`, or `idle`.
+Aster detects supported agents automatically. The sidebar shows whether each agent is `working`, `blocked`, `done`, or `idle`.
 
 ## Navigate
 
@@ -41,40 +41,40 @@ Common actions:
 | New workspace | `n` |
 | Detach client | `q` |
 
-After detaching, run `herdr` again to reattach to the same session.
+After detaching, run `aster` again to reattach to the same session.
 
 ## Use the mouse
 
-Herdr is mouse-native. You can click panes, tabs, workspaces, and agents; drag borders; select text; and use right-click menus.
+Aster is mouse-native. You can click panes, tabs, workspaces, and agents; drag borders; select text; and use right-click menus.
 
 ## Manage named sessions
 
-Named sessions are separate Herdr server namespaces. Use them when you want fully separate runtime state.
+Named sessions are separate Aster server namespaces. Use them when you want fully separate runtime state.
 
 ```bash
-herdr session list
-herdr session attach work
-herdr session attach side-project
-herdr session stop work
-herdr session delete side-project
+aster session list
+aster session attach work
+aster session attach side-project
+aster session stop work
+aster session delete side-project
 ```
 
 Workspaces are usually enough. Use named sessions when you need isolation between sets of panes, sockets, and persistent state.
 
 ## Attach from another machine
 
-Start Herdr on a server, detach, and come back over SSH later.
+Start Aster on a server, detach, and come back over SSH later.
 
 ```bash
 ssh you@server
-herdr
+aster
 ```
 
 You can also attach through SSH from your local terminal:
 
 ```bash
-herdr --remote workbox
-herdr --remote ssh://you@server:2222
+aster --remote workbox
+aster --remote ssh://you@server:2222
 ```
 
 For repeat targets, put the host in your SSH config.

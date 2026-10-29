@@ -30,7 +30,7 @@ def release_assets(version: str) -> dict[str, str]:
     normalized = version.removeprefix("v")
     return {
         **default_release_assets(normalized),
-        "windows-x86_64": f"https://github.com/herdrdev/herdr/releases/download/v{normalized}/herdr-windows-x86_64.zip",
+        "windows-x86_64": f"https://github.com/sainavaneet/aster/releases/download/v{normalized}/aster-windows-x86_64.zip",
     }
 
 
@@ -48,9 +48,9 @@ def release_assets_with_digests() -> list[dict[str, str]]:
     return [
         {
             "name": (
-                "herdr-windows-x86_64.zip"
+                "aster-windows-x86_64.zip"
                 if target == "windows-x86_64"
-                else f"herdr-{target}"
+                else f"aster-{target}"
             ),
             "url": f"https://example.com/{target}{'.zip' if target == 'windows-x86_64' else ''}",
             "digest": f"sha256:{digest * 64}",
@@ -127,11 +127,11 @@ class ChangelogScriptTests(unittest.TestCase):
         self.assertEqual(
             manifest["assets"],
             {
-                "linux-x86_64": "https://github.com/herdrdev/herdr/releases/download/v0.1.1/herdr-linux-x86_64",
-                "linux-aarch64": "https://github.com/herdrdev/herdr/releases/download/v0.1.1/herdr-linux-aarch64",
-                "macos-x86_64": "https://github.com/herdrdev/herdr/releases/download/v0.1.1/herdr-macos-x86_64",
-                "macos-aarch64": "https://github.com/herdrdev/herdr/releases/download/v0.1.1/herdr-macos-aarch64",
-                "windows-x86_64": "https://github.com/herdrdev/herdr/releases/download/v0.1.1/herdr-windows-x86_64.zip",
+                "linux-x86_64": "https://github.com/sainavaneet/aster/releases/download/v0.1.1/aster-linux-x86_64",
+                "linux-aarch64": "https://github.com/sainavaneet/aster/releases/download/v0.1.1/aster-linux-aarch64",
+                "macos-x86_64": "https://github.com/sainavaneet/aster/releases/download/v0.1.1/aster-macos-x86_64",
+                "macos-aarch64": "https://github.com/sainavaneet/aster/releases/download/v0.1.1/aster-macos-aarch64",
+                "windows-x86_64": "https://github.com/sainavaneet/aster/releases/download/v0.1.1/aster-windows-x86_64.zip",
             },
         )
         self.assertEqual(manifest["releases"]["0.1.1"]["assets"], manifest["assets"])
@@ -310,7 +310,7 @@ class ChangelogScriptTests(unittest.TestCase):
             path.unlink(missing_ok=True)
 
     def test_load_product_announcement_rejects_missing_file(self) -> None:
-        path = Path(tempfile.gettempdir()) / "herdr-missing-product-announcement.json"
+        path = Path(tempfile.gettempdir()) / "aster-missing-product-announcement.json"
         path.unlink(missing_ok=True)
         with self.assertRaisesRegex(ChangelogError, "file not found"):
             load_product_announcement(path)
@@ -407,7 +407,7 @@ class ChangelogScriptTests(unittest.TestCase):
             )
 
     def test_manifest_from_release_payload_rejects_missing_asset(self) -> None:
-        with self.assertRaisesRegex(ChangelogError, "missing asset herdr-macos-aarch64"):
+        with self.assertRaisesRegex(ChangelogError, "missing asset aster-macos-aarch64"):
             manifest_from_release_payload(
                 {
                     "tagName": "v0.1.1",
@@ -415,9 +415,9 @@ class ChangelogScriptTests(unittest.TestCase):
                     "isPrerelease": False,
                     "body": "### Fixed\n- One\n",
                     "assets": [
-                        {"name": "herdr-linux-x86_64", "url": "https://example.com/linux-x86_64"},
-                        {"name": "herdr-linux-aarch64", "url": "https://example.com/linux-aarch64"},
-                        {"name": "herdr-macos-x86_64", "url": "https://example.com/macos-x86_64"},
+                        {"name": "aster-linux-x86_64", "url": "https://example.com/linux-x86_64"},
+                        {"name": "aster-linux-aarch64", "url": "https://example.com/linux-aarch64"},
+                        {"name": "aster-macos-x86_64", "url": "https://example.com/macos-x86_64"},
                     ],
                 },
                 "0.1.1",

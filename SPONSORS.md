@@ -1,9 +1,9 @@
 # Past sponsors
 
-herdr's sponsorship program is closed to new sponsors.
-This file permanently lists everyone who backed herdr.
+aster's sponsorship program is closed to new sponsors.
+This file permanently lists everyone who backed aster.
 
-→ Enterprise / partnership: hey@herdr.dev
+→ Enterprise / partnership: the repository Discussions page
 
 ## Gold
 
@@ -64,4 +64,4 @@ This file permanently lists everyone who backed herdr.
 
 ---
 
-Thank you to everyone who supported herdr. 🐑
+Thank you to everyone who supported aster. 🐑

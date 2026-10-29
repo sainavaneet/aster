@@ -1,0 +1,2 @@
+{"ts":1000,"kind":"approval","provider":"rules","subject":"task-1/blocked-1","inputs_summary":"worker: rc; kind: Claude; command: date; prompt: none","answers":null,"thresholds":{"approve_min":0.9},"action":"approve","latency_ms":0,"error":null}
+{"ts":2000,"kind":"report_sanity","provider":"jev","subject":"task-2","inputs_summary":"outcome: completed","answers":{"thorough":{"score":3.1}},"thresholds":{},"action":"deliver","latency_ms":412,"error":null}

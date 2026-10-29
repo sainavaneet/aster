@@ -1,14 +1,15 @@
 use super::*;
 use ratatui::widgets::{Clear, Widget};
 
-pub(super) fn render_mobile_banner(
+pub(super) fn render_mobile_banner_with_phase(
     buffer: &mut Buffer,
     area: Rect,
     notice: &ClientVisibleEndpointNotice,
     offset_for_warning: bool,
     palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
-    super::notifications::render_mobile_notice_banner(
+    super::notifications::render_mobile_notice_banner_with_phase(
         buffer,
         area,
         &notice.title,
@@ -16,6 +17,7 @@ pub(super) fn render_mobile_banner(
         palette.red,
         offset_for_warning,
         palette,
+        phase,
     )
 }
 
@@ -53,19 +55,20 @@ pub(super) fn render_lifecycle_banner(
     rect
 }
 
-pub(super) fn render_notice(
+pub(super) fn render_notice_with_phase(
     buffer: &mut Buffer,
     area: Rect,
     notice: &ClientVisibleEndpointNotice,
     top_offset: u16,
     palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
-    super::notifications::render_notification_card(
+    super::notifications::render_notification_card_with_phase(
         buffer,
         area,
         &notice.title,
         &notice.body,
-        crate::config::ToastHerdrPosition::TopRight,
+        crate::config::ToastAsterPosition::TopRight,
         top_offset,
         match notice.key.kind {
             ClientEndpointNoticeKind::Unsupported | ClientEndpointNoticeKind::Rejected => {
@@ -76,5 +79,6 @@ pub(super) fn render_notice(
             }
         },
         palette,
+        phase,
     )
 }

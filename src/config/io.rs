@@ -5,6 +5,7 @@ use tracing::warn;
 use super::{model::LoadedConfig, Config, CONFIG_PATH_ENV_VAR};
 
 const KNOWN_TOP_LEVEL_CONFIG_KEYS: &[&str] = &[
+    "polaris",
     "advanced",
     "experimental",
     "keys",
@@ -21,9 +22,9 @@ const KNOWN_TOP_LEVEL_CONFIG_KEYS: &[&str] = &[
 
 pub fn app_dir_name() -> &'static str {
     if cfg!(debug_assertions) {
-        "herdr-dev"
+        "aster-dev"
     } else {
-        "herdr"
+        "aster"
     }
 }
 
@@ -239,7 +240,7 @@ pub fn config_diagnostic_summary(diagnostics: &[String]) -> Option<String> {
         ""
     };
 
-    Some(format!("{target}{impact}; herdr config check"))
+    Some(format!("{target}{impact}; aster config check"))
 }
 
 pub fn load_live_config() -> Result<LoadedConfig, Vec<String>> {
@@ -310,6 +311,14 @@ fn load_live_config_from_str(content: &str) -> Result<LoadedConfig, Vec<String>>
         &mut diagnostics,
         &mut invalid_sections,
         |section| config.terminal = section,
+    );
+    load_live_section(
+        table,
+        "polaris",
+        "Polaris config",
+        &mut diagnostics,
+        &mut invalid_sections,
+        |section| config.polaris = section,
     );
     load_live_section(
         table,
@@ -769,10 +778,10 @@ mod tests {
     #[test]
     fn remove_section_key_removes_matching_key_from_section() {
         let content =
-            "[ui.toast]\nenabled = true\ndelivery = \"herdr\"\n[ui.sound]\nenabled = true\n";
+            "[ui.toast]\nenabled = true\ndelivery = \"aster\"\n[ui.sound]\nenabled = true\n";
         let updated = remove_section_key(content, "ui.toast", "enabled");
         assert!(!updated.contains("[ui.toast]\nenabled = true"));
-        assert!(updated.contains("delivery = \"herdr\""));
+        assert!(updated.contains("delivery = \"aster\""));
         assert!(updated.contains("[ui.sound]\nenabled = true"));
     }
 
@@ -788,7 +797,7 @@ mod tests {
 
         assert_eq!(
             config_diagnostic_summary(&diagnostics).as_deref(),
-            Some("config.toml; herdr config check")
+            Some("config.toml; aster config check")
         );
     }
 
@@ -801,7 +810,7 @@ mod tests {
 
         assert_eq!(
             config_diagnostic_summary(&diagnostics).as_deref(),
-            Some("config.toml has unknown keys; herdr config check")
+            Some("config.toml has unknown keys; aster config check")
         );
     }
 
@@ -814,7 +823,7 @@ mod tests {
 
         assert_eq!(
             config_diagnostic_summary(&diagnostics).as_deref(),
-            Some("config.toml; herdr config check")
+            Some("config.toml; aster config check")
         );
     }
 
@@ -827,7 +836,7 @@ mod tests {
 
         assert_eq!(
             config_diagnostic_summary(&diagnostics).as_deref(),
-            Some("config.toml invalid; using defaults; herdr config check")
+            Some("config.toml invalid; using defaults; aster config check")
         );
     }
 
@@ -836,14 +845,14 @@ mod tests {
         let startup = vec!["config read error: permission denied; using defaults".to_string()];
         assert_eq!(
             config_diagnostic_summary(&startup).as_deref(),
-            Some("config.toml unreadable; using defaults; herdr config check")
+            Some("config.toml unreadable; using defaults; aster config check")
         );
 
         let reload =
             vec!["config read error: permission denied; keeping current config".to_string()];
         assert_eq!(
             config_diagnostic_summary(&reload).as_deref(),
-            Some("config.toml unreadable; keeping current config; herdr config check")
+            Some("config.toml unreadable; keeping current config; aster config check")
         );
     }
 
@@ -856,7 +865,7 @@ mod tests {
 
         assert_eq!(
             config_diagnostic_summary(&diagnostics).as_deref(),
-            Some("config.toml invalid; keeping current config; herdr config check")
+            Some("config.toml invalid; keeping current config; aster config check")
         );
     }
 
@@ -864,7 +873,7 @@ mod tests {
     fn config_loaders_report_unreadable_path() {
         let _guard = crate::config::test_config_env_lock().lock().unwrap();
         let path =
-            std::env::temp_dir().join(format!("herdr-config-unreadable-{}", std::process::id()));
+            std::env::temp_dir().join(format!("aster-config-unreadable-{}", std::process::id()));
         std::fs::create_dir_all(&path).unwrap();
         std::env::set_var(CONFIG_PATH_ENV_VAR, &path);
 
@@ -883,6 +892,132 @@ mod tests {
 
         std::env::remove_var(CONFIG_PATH_ENV_VAR);
         let _ = std::fs::remove_dir_all(path);
+    }
+
+    #[test]
+    fn polaris_defaults_and_live_config_are_recognized() {
+        let defaults = Config::default();
+        assert!(defaults.polaris.enabled);
+        assert_eq!(defaults.polaris.provider, "claude");
+        assert_eq!(defaults.polaris.model, "fable");
+        assert_eq!(defaults.polaris.display_name(), "Claude · Fable 5.1");
+        let loaded = load_live_config_from_str(
+            "[polaris]\nenabled = false\nprovider = \"claude\"\nmodel = \"fable\"\n",
+        )
+        .unwrap();
+        assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+        assert!(!loaded.config.polaris.enabled);
+        assert_eq!(loaded.config.polaris.model, "fable");
+        let invalid = load_live_config_from_str("[polaris]\nenabled = \"yes\"\n").unwrap();
+        assert!(invalid.invalid_sections.iter().any(|s| s == "polaris"));
+    }
+
+    #[test]
+    fn polaris_workers_default_and_explicit_values_are_loaded() {
+        let defaults = Config::default().polaris.workers;
+        assert_eq!(defaults.kinds, ["claude", "codex"]);
+        assert_eq!(defaults.max_concurrent, 4);
+        assert!(defaults.models.is_empty());
+        assert!(defaults.defaults.is_empty());
+        let loaded = load_live_config_from_str(
+            "[polaris.workers]\nkinds = [\"claude\", \"gemini\"]\nmax_concurrent = 0\n\
+             [polaris.workers.models]\nclaude = [\"fable\", \"opus\"]\ncodex = []\n\
+             [polaris.workers.defaults]\nclaude = \"fable\"\n",
+        )
+        .unwrap();
+        assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+        let workers = loaded.config.polaris.workers;
+        assert!(loaded.config.polaris.enabled);
+        assert_eq!(workers.kinds, ["claude", "gemini"]);
+        assert_eq!(workers.max_concurrent, 0);
+        assert_eq!(workers.models["claude"], ["fable", "opus"]);
+        assert!(workers.models["codex"].is_empty());
+        assert_eq!(workers.defaults["claude"], "fable");
+        let invalid =
+            load_live_config_from_str("[polaris.workers]\nmax_concurrent = -1\n").unwrap();
+        assert!(invalid.invalid_sections.iter().any(|s| s == "polaris"));
+    }
+
+    #[test]
+    fn polaris_workers_permission_mode_is_validated_on_load() {
+        assert_eq!(Config::default().polaris.workers.permission_mode, None);
+        let loaded =
+            load_live_config_from_str("[polaris.workers]\npermission_mode = \"manual\"\n").unwrap();
+        assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+        assert_eq!(
+            loaded.config.polaris.workers.permission_mode.as_deref(),
+            Some("manual")
+        );
+        for value in ["bypassPermissions", "default"] {
+            let invalid = load_live_config_from_str(&format!(
+                "[polaris.workers]\npermission_mode = \"{value}\"\n"
+            ))
+            .unwrap();
+            assert!(
+                invalid.invalid_sections.iter().any(|s| s == "polaris"),
+                "{value}"
+            );
+            assert!(
+                invalid
+                    .diagnostics
+                    .iter()
+                    .any(|diagnostic| diagnostic.contains("Permission mode")),
+                "{:?}",
+                invalid.diagnostics
+            );
+        }
+    }
+
+    #[test]
+    fn polaris_notify_and_approvals_default_and_explicit_values_are_loaded() {
+        use crate::config::OrbitNotifyEvent;
+        let defaults = Config::default().polaris;
+        assert_eq!(defaults.notify.events, OrbitNotifyEvent::ALL);
+        assert!(!defaults.approvals.lead_may_approve);
+        let loaded = load_live_config_from_str(
+            "[polaris.notify]\nevents = [\"blocked\", \"failed\"]\n\
+             [polaris.approvals]\nlead_may_approve = true\n",
+        )
+        .unwrap();
+        assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+        let polaris = loaded.config.polaris;
+        assert_eq!(
+            polaris.notify.events,
+            [OrbitNotifyEvent::Blocked, OrbitNotifyEvent::Failed]
+        );
+        assert!(polaris.approvals.lead_may_approve);
+        let empty = load_live_config_from_str("[polaris.notify]\nevents = []\n").unwrap();
+        assert!(empty.config.polaris.notify.events.is_empty());
+        let invalid =
+            load_live_config_from_str("[polaris.notify]\nevents = [\"everything\"]\n").unwrap();
+        assert!(invalid.invalid_sections.iter().any(|s| s == "polaris"));
+    }
+
+    #[test]
+    fn polaris_decisions_load_and_invalid_values_reject_the_section() {
+        use crate::config::DecisionProviderKind;
+        let defaults = Config::default().polaris.decisions;
+        assert_eq!(defaults.provider, DecisionProviderKind::Rules);
+        let loaded = load_live_config_from_str(
+            "[polaris.decisions]\nprovider = \"jev\"\ntimeout_ms = 2000\n\
+             [polaris.decisions.approvals]\nenabled = true\nallow_patterns = [\"date\"]\n\
+             [polaris.decisions.routing]\nenabled = true\naccept_min = 0.8\n",
+        )
+        .unwrap();
+        assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+        let decisions = loaded.config.polaris.decisions;
+        assert_eq!(decisions.provider, DecisionProviderKind::Jev);
+        assert_eq!(decisions.timeout_ms, 2000);
+        assert!(decisions.approvals.enabled);
+        assert_eq!(decisions.approvals.allow_patterns, ["date"]);
+        assert_eq!(decisions.routing.accept_min, 0.8);
+        let invalid =
+            load_live_config_from_str("[polaris.decisions.approvals]\napprove_min = 2\n").unwrap();
+        assert!(invalid.invalid_sections.iter().any(|s| s == "polaris"));
+        assert!(invalid
+            .diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.contains("between 0 and 1")));
     }
 
     #[test]
@@ -922,7 +1057,7 @@ name = "catppucin"
 delivery = "system"
 
 [ui.toast]
-delivery = "herdr"
+delivery = "aster"
 "#,
         )
         .unwrap();
@@ -934,7 +1069,7 @@ delivery = "herdr"
         assert!(loaded.invalid_sections.is_empty());
         assert_eq!(
             loaded.config.ui.toast.delivery,
-            super::super::ToastDelivery::Herdr
+            super::super::ToastDelivery::Aster
         );
     }
 
@@ -993,7 +1128,7 @@ claude = [["terminal_title"]]
         assert!(!loaded.config.ui.mouse_capture);
         assert_eq!(
             loaded.config.ui.toast.delivery,
-            super::super::ToastDelivery::Herdr
+            super::super::ToastDelivery::Aster
         );
         assert!(loaded
             .config
@@ -1044,7 +1179,7 @@ mouse_captur = true
     fn startup_config_accepts_legacy_agent_panel_scope_without_warning() {
         let _guard = crate::config::test_config_env_lock().lock().unwrap();
         let path = std::env::temp_dir().join(format!(
-            "herdr-config-legacy-agent-panel-scope-{}.toml",
+            "aster-config-legacy-agent-panel-scope-{}.toml",
             std::process::id()
         ));
         std::fs::write(&path, "[ui]\nagent_panel_scope = \"all\"\n").unwrap();
@@ -1062,7 +1197,7 @@ mouse_captur = true
     fn startup_config_load_warns_about_unknown_top_level_sections() {
         let _guard = crate::config::test_config_env_lock().lock().unwrap();
         let path = std::env::temp_dir().join(format!(
-            "herdr-config-unknown-section-{}.toml",
+            "aster-config-unknown-section-{}.toml",
             std::process::id()
         ));
         std::fs::write(
@@ -1180,7 +1315,7 @@ mouse_capture = false
     fn config_load_recovers_from_a_mid_file_bom() {
         let _guard = crate::config::test_config_env_lock().lock().unwrap();
         let path = std::env::temp_dir().join(format!(
-            "herdr-config-mid-file-bom-{}.toml",
+            "aster-config-mid-file-bom-{}.toml",
             std::process::id()
         ));
         std::fs::write(

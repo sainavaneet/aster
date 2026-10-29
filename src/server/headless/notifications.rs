@@ -1,6 +1,16 @@
 use super::*;
 
 impl HeadlessServer {
+    /// Sends Orbit notices raised on the ledger tick to attached client shells.
+    /// The ledger raises none while `ui.toast.delivery` is `off`.
+    pub(super) fn forward_orbit_human_notices(&mut self) {
+        for notice in self.app.take_orbit_human_notices() {
+            self.send_to_client_shells(ServerMessage::SemanticNotification(
+                crate::server::notifications::orbit_semantic_notification(notice),
+            ));
+        }
+    }
+
     fn pane_effective_state(&self, pane_id: crate::layout::PaneId) -> crate::detect::AgentState {
         self.app
             .state
@@ -535,7 +545,7 @@ impl HeadlessServer {
                 self.send_to_client_shells(ServerMessage::SemanticNotification(
                     protocol::SemanticNotification {
                         kind: protocol::SemanticNotificationKind::UpdateInstalled,
-                        title: format!("Herdr v{version} available"),
+                        title: format!("Aster v{version} available"),
                         body: Some(crate::update::update_install_instruction(&install_command)),
                         sound: None,
                         agent: None,

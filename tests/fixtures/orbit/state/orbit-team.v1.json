@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "roles": [
+    {
+      "name": "reviewer",
+      "area": "Code review",
+      "prompt": "Be strict.",
+      "members": [
+        {
+          "name": "rc",
+          "kind": "claude",
+          "model": "opus",
+          "terminal_id": "term-rc",
+          "session": {
+            "source": "aster:claude",
+            "agent": "claude",
+            "kind": "id",
+            "value": "session-rc"
+          }
+        },
+        {
+          "name": "rx",
+          "kind": "codex"
+        }
+      ],
+      "tab": {
+        "workspace_id": "w1",
+        "tab_number": 2
+      }
+    }
+  ]
+}

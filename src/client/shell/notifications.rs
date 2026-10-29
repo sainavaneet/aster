@@ -7,7 +7,7 @@ use ratatui::{
     widgets::{Block, Borders, Clear, Paragraph, Widget},
 };
 
-pub(super) fn render_mobile_notice_banner(
+pub(super) fn render_mobile_notice_banner_with_phase(
     buffer: &mut Buffer,
     area: Rect,
     title: &str,
@@ -15,6 +15,7 @@ pub(super) fn render_mobile_notice_banner(
     dot_color: Color,
     offset_for_warning: bool,
     palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
     if area.is_empty() {
         return Rect::default();
@@ -25,20 +26,31 @@ pub(super) fn render_mobile_notice_banner(
             .height
             .saturating_sub(1u16.saturating_add(warning_offset));
     let rect = Rect::new(area.x, y, area.width, 1);
-    let background = palette.surface0;
+    let opacity = phase.opacity.clamp(0.15, 1.0);
+    let background =
+        super::animation::blend_color(palette.panel_bg, palette.surface0, opacity, palette);
+    let dot_fg = super::animation::blend_color(background, dot_color, opacity, palette);
+    let title_fg = super::animation::blend_color(background, palette.text, opacity, palette);
+    let body_fg = super::animation::blend_color(background, palette.overlay0, opacity, palette);
     Clear.render(rect, buffer);
     buffer.set_style(rect, Style::default().bg(background));
-    let mut x = rect.x;
+    let mut x = rect
+        .x
+        .saturating_add(phase.slide_offset_cols.min(rect.width.saturating_sub(1)));
     for (text, style) in [
         (" ", Style::default().bg(background)),
-        ("●", Style::default().fg(dot_color).bg(background)),
+        ("●", Style::default().fg(dot_fg).bg(background)),
         (" ", Style::default().bg(background)),
         (
             title,
             Style::default()
-                .fg(palette.text)
+                .fg(title_fg)
                 .bg(background)
-                .add_modifier(Modifier::BOLD),
+                .add_modifier(if opacity >= 0.45 {
+                    Modifier::BOLD
+                } else {
+                    Modifier::DIM
+                }),
         ),
     ] {
         x = super::render::put_segment(buffer, x, rect.y, rect.right(), text, style);
@@ -50,7 +62,7 @@ pub(super) fn render_mobile_notice_banner(
             rect.y,
             rect.right(),
             " · ",
-            Style::default().fg(palette.overlay0).bg(background),
+            Style::default().fg(body_fg).bg(background),
         );
         super::render::put_text(
             buffer,
@@ -58,18 +70,37 @@ pub(super) fn render_mobile_notice_banner(
             rect.y,
             rect.right().saturating_sub(x),
             body,
-            Style::default().fg(palette.overlay0).bg(background),
+            Style::default().fg(body_fg).bg(background),
         );
     }
     rect
 }
 
+#[cfg(test)]
 pub(super) fn render_mobile_notification_banner(
     buffer: &mut Buffer,
     area: Rect,
     notification: &ClientVisibleNotification,
     offset_for_warning: bool,
     palette: &Palette,
+) -> Rect {
+    render_mobile_notification_banner_with_phase(
+        buffer,
+        area,
+        notification,
+        offset_for_warning,
+        palette,
+        super::animation::NotificationTransitionPhase::SETTLED,
+    )
+}
+
+pub(super) fn render_mobile_notification_banner_with_phase(
+    buffer: &mut Buffer,
+    area: Rect,
+    notification: &ClientVisibleNotification,
+    offset_for_warning: bool,
+    palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
     let event = &notification.event;
     let title = match event.kind {
@@ -93,7 +124,7 @@ pub(super) fn render_mobile_notification_banner(
             palette.accent
         }
     };
-    render_mobile_notice_banner(
+    render_mobile_notice_banner_with_phase(
         buffer,
         area,
         &title,
@@ -101,18 +132,21 @@ pub(super) fn render_mobile_notification_banner(
         dot_color,
         offset_for_warning,
         palette,
+        phase,
     )
 }
 
-pub(super) fn render_notification_card(
+#[allow(clippy::too_many_arguments)]
+pub(super) fn render_notification_card_with_phase(
     buffer: &mut Buffer,
     area: Rect,
     title: &str,
     body: &str,
-    position: crate::config::ToastHerdrPosition,
+    position: crate::config::ToastAsterPosition,
     top_offset: u16,
     dot_color: Color,
     palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
     if area.is_empty() {
         return Rect::default();
@@ -124,66 +158,103 @@ pub(super) fn render_notification_card(
         .unwrap_or(u16::MAX)
         .min(area.width);
     let height: u16 = if body.is_empty() { 3 } else { 4 }.min(area.height);
+    let max_x = area.right().saturating_sub(width).max(area.x);
+    let slide = phase
+        .slide_offset_cols
+        .min(area.width.saturating_sub(width));
     let x = match position {
-        crate::config::ToastHerdrPosition::TopLeft
-        | crate::config::ToastHerdrPosition::BottomLeft => area.x,
-        crate::config::ToastHerdrPosition::TopRight
-        | crate::config::ToastHerdrPosition::BottomRight => area.right().saturating_sub(width),
-    };
+        crate::config::ToastAsterPosition::TopLeft
+        | crate::config::ToastAsterPosition::BottomLeft => area.x.saturating_add(slide),
+        crate::config::ToastAsterPosition::TopRight
+        | crate::config::ToastAsterPosition::BottomRight => {
+            area.right().saturating_sub(width).saturating_sub(slide)
+        }
+    }
+    .clamp(area.x, max_x);
     let max_y = area.bottom().saturating_sub(height).max(area.y);
     let y = match position {
-        crate::config::ToastHerdrPosition::TopLeft
-        | crate::config::ToastHerdrPosition::TopRight => area.y.saturating_add(top_offset),
-        crate::config::ToastHerdrPosition::BottomLeft
-        | crate::config::ToastHerdrPosition::BottomRight => area
+        crate::config::ToastAsterPosition::TopLeft
+        | crate::config::ToastAsterPosition::TopRight => area.y.saturating_add(top_offset),
+        crate::config::ToastAsterPosition::BottomLeft
+        | crate::config::ToastAsterPosition::BottomRight => area
             .bottom()
             .saturating_sub(height.saturating_add(top_offset)),
     }
     .clamp(area.y, max_y);
     let rect = Rect::new(x, y, width, height);
+    let opacity = phase.opacity.clamp(0.15, 1.0);
+    let border_fg =
+        super::animation::blend_color(palette.surface_dim, palette.overlay0, opacity, palette);
+    let dot_fg = super::animation::blend_color(palette.panel_bg, dot_color, opacity, palette);
+    let title_fg = super::animation::blend_color(palette.panel_bg, palette.text, opacity, palette);
+    let body_fg =
+        super::animation::blend_color(palette.panel_bg, palette.overlay0, opacity, palette);
     Clear.render(rect, buffer);
     let block = Block::default()
         .borders(Borders::ALL)
-        .border_style(Style::default().fg(palette.overlay0))
+        .border_style(Style::default().fg(border_fg))
         .style(Style::default().bg(palette.panel_bg));
     let inner = block.inner(rect);
     block.render(rect, buffer);
-    Paragraph::new(Line::from(vec![
-        Span::styled("●", Style::default().fg(dot_color)),
-        Span::raw(" "),
-        Span::styled(
-            title,
-            Style::default()
-                .fg(palette.text)
-                .add_modifier(Modifier::BOLD),
-        ),
-    ]))
-    .render(Rect::new(inner.x, inner.y, inner.width, 1), buffer);
-    if !body.is_empty() && inner.height > 1 {
-        Paragraph::new(Line::from(Span::styled(
-            body,
-            Style::default().fg(palette.overlay0),
-        )))
-        .render(
-            Rect::new(
-                inner.x.saturating_add(2),
-                inner.y + 1,
-                inner.width.saturating_sub(2),
-                1,
+    if inner.width > 0 && inner.height > 0 {
+        Paragraph::new(Line::from(vec![
+            Span::styled("●", Style::default().fg(dot_fg)),
+            Span::raw(" "),
+            Span::styled(
+                title,
+                Style::default()
+                    .fg(title_fg)
+                    .add_modifier(if opacity >= 0.45 {
+                        Modifier::BOLD
+                    } else {
+                        Modifier::DIM
+                    }),
             ),
-            buffer,
-        );
+        ]))
+        .render(Rect::new(inner.x, inner.y, inner.width, 1), buffer);
+        if !body.is_empty() && inner.height > 1 {
+            Paragraph::new(Line::from(Span::styled(body, Style::default().fg(body_fg)))).render(
+                Rect::new(
+                    inner.x.saturating_add(2),
+                    inner.y + 1,
+                    inner.width.saturating_sub(2),
+                    1,
+                ),
+                buffer,
+            );
+        }
     }
     rect
 }
 
+#[cfg(test)]
 pub(super) fn render_visible_notification(
     buffer: &mut Buffer,
     area: Rect,
     notification: &ClientVisibleNotification,
-    default_position: crate::config::ToastHerdrPosition,
+    default_position: crate::config::ToastAsterPosition,
     top_offset: u16,
     palette: &Palette,
+) -> Rect {
+    render_visible_notification_with_phase(
+        buffer,
+        area,
+        notification,
+        default_position,
+        top_offset,
+        palette,
+        super::animation::NotificationTransitionPhase::SETTLED,
+    )
+}
+
+pub(super) fn render_visible_notification_with_phase(
+    buffer: &mut Buffer,
+    area: Rect,
+    notification: &ClientVisibleNotification,
+    default_position: crate::config::ToastAsterPosition,
+    top_offset: u16,
+    palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
     let event = &notification.event;
     let dot_color = match event.kind {
@@ -193,7 +264,7 @@ pub(super) fn render_visible_notification(
             palette.accent
         }
     };
-    render_notification_card(
+    render_notification_card_with_phase(
         buffer,
         area,
         &event.title,
@@ -202,6 +273,7 @@ pub(super) fn render_visible_notification(
         top_offset,
         dot_color,
         palette,
+        phase,
     )
 }
 
@@ -210,6 +282,9 @@ mod tests {
     use super::*;
 
     fn notification() -> ClientVisibleNotification {
+        let now = std::time::Instant::now()
+            .checked_sub(std::time::Duration::from_secs(1))
+            .unwrap_or_else(std::time::Instant::now);
         ClientVisibleNotification {
             endpoint_id: ClientEndpointId::Local,
             event: SemanticNotification {
@@ -223,7 +298,8 @@ mod tests {
                 pane_id: None,
                 position: None,
             },
-            deadline: std::time::Instant::now(),
+            shown_at: now,
+            deadline: now + std::time::Duration::from_secs(5),
         }
     }
 
@@ -257,6 +333,7 @@ mod tests {
     #[test]
     fn unavailable_notification_target_stays_visible_and_reports_the_machine() {
         let mut state = ClientShellState::new(ClientShellConfig::from_config(&Config::default()));
+        let now = std::time::Instant::now();
         state.visible_notification = Some(ClientVisibleNotification {
             endpoint_id: ClientEndpointId::Local,
             event: SemanticNotification {
@@ -270,7 +347,8 @@ mod tests {
                 pane_id: Some("pane".into()),
                 position: None,
             },
-            deadline: std::time::Instant::now() + std::time::Duration::from_secs(5),
+            shown_at: now,
+            deadline: now + std::time::Duration::from_secs(5),
         });
         let mut outcome = ClientShellInput::default();
 
@@ -287,7 +365,7 @@ mod tests {
     #[test]
     fn immediate_finished_evidence_for_acknowledged_idle_never_toasts_or_sounds() {
         let mut config = ClientShellConfig::from_config(&Config::default());
-        config.toast_delivery = crate::config::ToastDelivery::Herdr;
+        config.toast_delivery = crate::config::ToastDelivery::Aster;
         config.toast_delay_seconds = 0;
         let mut state = ClientShellState::new(config);
         let mut snapshot = super::super::tests::snapshot();
@@ -411,7 +489,7 @@ mod tests {
     #[test]
     fn concurrent_endpoint_notifications_are_queued_in_arrival_order() {
         let mut config = Config::default();
-        config.ui.toast.delivery = crate::config::ToastDelivery::Herdr;
+        config.ui.toast.delivery = crate::config::ToastDelivery::Aster;
         let mut state = ClientShellState::new(ClientShellConfig::from_config(&config));
         let now = std::time::Instant::now();
         for title in ["first", "second"] {
@@ -459,8 +537,8 @@ mod tests {
         for height in [1, 2] {
             let area = Rect::new(3, 4, 8, height);
             for position in [
-                crate::config::ToastHerdrPosition::TopRight,
-                crate::config::ToastHerdrPosition::BottomRight,
+                crate::config::ToastAsterPosition::TopRight,
+                crate::config::ToastAsterPosition::BottomRight,
             ] {
                 let mut buffer = Buffer::empty(Rect::new(0, 0, 20, 10));
                 let rect = render_visible_notification(

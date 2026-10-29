@@ -341,9 +341,11 @@ pub(super) fn apply_client_terminal_input_events(
             }
             crate::raw_input::RawInputEvent::Paste(text) => {
                 runtime.scroll_reset();
+                let pasted = !text.is_empty();
                 runtime
                     .try_send_paste(text)
                     .map_err(|err| format!("targeted pane paste failed: {err}"))?;
+                *keyboard_forwarded |= pasted;
             }
             crate::raw_input::RawInputEvent::Mouse(_)
             | crate::raw_input::RawInputEvent::OuterFocusGained
@@ -526,5 +528,23 @@ mod tests {
                 ..
             }]
         ));
+    }
+
+    #[tokio::test]
+    async fn client_paste_counts_as_forwarded_user_input() {
+        let (runtime, mut rx) =
+            crate::terminal::TerminalRuntime::test_with_channel_and_scrollback_bytes(
+                20, 5, 0, b"", 4,
+            );
+        let forwarded =
+            apply_client_pane_input_events(&runtime, &[ClientPaneInputEvent::Paste("hi".into())])
+                .expect("paste input");
+        assert!(forwarded);
+        assert!(rx.try_recv().is_ok());
+
+        let forwarded =
+            apply_client_pane_input_events(&runtime, &[ClientPaneInputEvent::Paste(String::new())])
+                .expect("empty paste input");
+        assert!(!forwarded);
     }
 }

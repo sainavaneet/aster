@@ -1,19 +1,19 @@
 [package]
-name = "herdr"
+name = "aster"
 version = "0.9.5"
 edition = "2021"
 build = "build.rs"
 description = "terminal workspace manager for AI coding agents"
 license = "Apache-2.0"
-repository = "https://github.com/herdrdev/herdr"
-homepage = "https://herdr.dev"
+repository = "https://github.com/sainavaneet/aster"
+homepage = "https://github.com/sainavaneet/aster"
 keywords = ["terminal", "tui", "ai", "agents", "multiplexer"]
 categories = ["command-line-utilities"]
 include = [
     "src/**/*",
     "assets/sounds/*",
-    "docs/next/api/herdr-api.schema.json",
-    "skills/herdr/SKILL.md",
+    "docs/next/api/aster-api.schema.json",
+    "skills/aster/SKILL.md",
     "distribution/install.ps1",
     "README.md",
     "LICENSE",
@@ -33,6 +33,8 @@ clap = { version = "4.5", default-features = false, features = ["std", "help", "
 clap_complete = "4.5"
 crossterm = "0.29"
 ctrlc = { version = "3", features = ["termination"] }
+# Already in the lock (Linux zbus/tempfile); OS randomness for Orbit report tokens.
+getrandom = "0.4"
 interprocess = "2.4.2"
 jsonc-parser = { version = "0.33.1", default-features = false, features = ["cst", "serde_json"] }
 libc = "0.2"

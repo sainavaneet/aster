@@ -1,12 +1,15 @@
-use std::{collections::BTreeSet, num::NonZeroUsize};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    num::NonZeroUsize,
+};
 
 use crossterm::event::KeyModifiers;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
 use super::{
-    ActionKeybinds, BindingConfig, CommandKeybindConfig, IndexedKeybind, Keybinds, SidebarConfig,
-    SoundConfig, TabBarRightEntryConfig, ThemeConfig, DEFAULT_MOBILE_WIDTH_THRESHOLD,
-    DEFAULT_MOUSE_SCROLL_LINES, DEFAULT_SCROLLBACK_LIMIT_BYTES,
+    decisions::PolarisDecisionsConfig, ActionKeybinds, BindingConfig, CommandKeybindConfig,
+    IndexedKeybind, Keybinds, SidebarConfig, SoundConfig, TabBarRightEntryConfig, ThemeConfig,
+    DEFAULT_MOBILE_WIDTH_THRESHOLD, DEFAULT_MOUSE_SCROLL_LINES, DEFAULT_SCROLLBACK_LIMIT_BYTES,
 };
 
 pub const MAX_TOAST_DELAY_SECONDS: u64 = 3600;
@@ -40,8 +43,8 @@ impl Default for UpdateConfig {
     fn default() -> Self {
         Self {
             channel: default_update_channel(),
-            version_check: true,
-            manifest_check: true,
+            version_check: false,
+            manifest_check: false,
         }
     }
 }
@@ -63,7 +66,7 @@ fn default_update_channel_for_build(is_windows: bool, is_preview: bool) -> Updat
 pub enum ToastDelivery {
     #[default]
     Off,
-    Herdr,
+    Aster,
     Terminal,
     System,
 }
@@ -72,7 +75,7 @@ pub enum ToastDelivery {
     Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, schemars::JsonSchema, Default,
 )]
 #[serde(rename_all = "kebab-case")]
-pub enum ToastHerdrPosition {
+pub enum ToastAsterPosition {
     TopLeft,
     TopRight,
     BottomLeft,
@@ -122,6 +125,37 @@ impl StatusIndicatorStyle {
             Self::Dots => "dots",
             Self::Symbols => "symbols",
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum UiAnimationsConfig {
+    #[default]
+    Full,
+    Reduced,
+    Off,
+}
+
+impl UiAnimationsConfig {
+    #[cfg(test)]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Full => "full",
+            Self::Reduced => "reduced",
+            Self::Off => "off",
+        }
+    }
+
+    pub const fn is_enabled(self) -> bool {
+        !matches!(self, Self::Off)
+    }
+
+    /// Whether looping or travelling motion runs: spinners, sweeps, pulses,
+    /// and slides. `reduced` keeps only one-shot flashes and fades, so it never
+    /// keeps the animation clock running indefinitely.
+    pub const fn allows_looping_motion(self) -> bool {
+        matches!(self, Self::Full)
     }
 }
 
@@ -199,14 +233,14 @@ fn parse_right_click_passthrough_modifier(value: &str) -> Option<Option<KeyModif
 pub struct ToastConfig {
     pub delivery: ToastDelivery,
     pub delay_seconds: u64,
-    pub herdr: HerdrToastConfig,
+    pub aster: AsterToastConfig,
     pub clipboard: ClipboardToastConfig,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
-pub struct HerdrToastConfig {
-    pub position: ToastHerdrPosition,
+pub struct AsterToastConfig {
+    pub position: ToastAsterPosition,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -266,7 +300,7 @@ pub struct TerminalConfig {
 #[serde(default)]
 pub struct SessionConfig {
     /// Resume supported AI-agent panes into their native conversation sessions
-    /// when restoring a Herdr session. Default: true.
+    /// when restoring an Aster session. Default: true.
     pub resume_agents_on_restore: bool,
     /// Milliseconds between automatic agent restores. Zero disables spacing.
     pub startup_per_agent_delay_ms: u32,
@@ -308,9 +342,248 @@ pub fn validated_sidebar_bounds(min: u16, max: u16) -> Option<(u16, u16)> {
     }
 }
 
+/// Polaris is the lead agent opened with a new Aster session.
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisConfig {
+    pub enabled: bool,
+    pub provider: String,
+    pub model: String,
+    pub workers: PolarisWorkersConfig,
+    pub notify: PolarisNotifyConfig,
+    pub approvals: PolarisApprovalsConfig,
+    /// Bounds on how long a report waits for the lead.
+    pub delivery: PolarisDeliveryConfig,
+    /// The decision layer: rules first, then an optional provider.
+    pub decisions: Box<PolarisDecisionsConfig>,
+    /// Team roles that seed the Orbit roster when the session has none yet.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub team: Vec<PolarisTeamRoleConfig>,
+}
+
+/// One `[[polaris.team]]` role: a persistent Polaris tab whose members are
+/// resumed instead of relaunched. Seeds `orbit-team.json` on first start only.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisTeamRoleConfig {
+    /// Role name, for example reviewer; its tab is named Reviewer.
+    pub name: String,
+    /// What the role owns, in free text.
+    pub area: String,
+    /// Role instructions given to every member, at most 4096 bytes.
+    pub prompt: String,
+    /// At most four agents that live in the role's tab.
+    pub members: Vec<PolarisTeamMemberConfig>,
+}
+
+/// A member of a `[[polaris.team]]` role.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisTeamMemberConfig {
+    pub name: String,
+    pub kind: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub permission_mode: Option<String>,
+}
+
+impl Default for PolarisConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            provider: "claude".into(),
+            model: "fable".into(),
+            workers: PolarisWorkersConfig::default(),
+            notify: PolarisNotifyConfig::default(),
+            approvals: PolarisApprovalsConfig::default(),
+            delivery: PolarisDeliveryConfig::default(),
+            decisions: Box::default(),
+            team: Vec::new(),
+        }
+    }
+}
+
+/// Orbit events that raise a human notification through `ui.toast.delivery`.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisNotifyConfig {
+    /// Events that notify the user; an empty list disables Orbit notifications.
+    pub events: Vec<OrbitNotifyEvent>,
+}
+
+impl Default for PolarisNotifyConfig {
+    fn default() -> Self {
+        Self {
+            events: OrbitNotifyEvent::ALL.to_vec(),
+        }
+    }
+}
+
+/// One kind of Orbit event a user can be notified about.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OrbitNotifyEvent {
+    /// A worker report was delivered to Polaris.
+    Report,
+    /// Aster created a notice: a worker was lost, unreported, or timed out.
+    Notice,
+    /// A worker with an open assignment stayed blocked on a prompt.
+    Blocked,
+    /// A delivery to Polaris failed.
+    Failed,
+}
+
+impl OrbitNotifyEvent {
+    pub const ALL: [Self; 4] = [Self::Report, Self::Notice, Self::Blocked, Self::Failed];
+
+    /// The configuration and API name.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Report => "report",
+            Self::Notice => "notice",
+            Self::Blocked => "blocked",
+            Self::Failed => "failed",
+        }
+    }
+}
+
+/// Whether Polaris may answer a blocked worker's approval prompt itself.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisApprovalsConfig {
+    /// Allow `orbit_agent_approve` and `orbit_agent_deny`; otherwise the user answers.
+    pub lead_may_approve: bool,
+}
+
+/// Delivery deadlines for Orbit reports.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisDeliveryConfig {
+    /// How long a queued report waits while Polaris is absent or its pane does
+    /// not run its agent before the delivery fails and you are notified.
+    pub lead_absent_timeout_ms: u64,
+}
+
+/// The default `lead_absent_timeout_ms`: 30 minutes.
+pub const DEFAULT_LEAD_ABSENT_TIMEOUT_MS: u64 = 30 * 60 * 1000;
+
+impl Default for PolarisDeliveryConfig {
+    fn default() -> Self {
+        Self {
+            lead_absent_timeout_ms: DEFAULT_LEAD_ABSENT_TIMEOUT_MS,
+        }
+    }
+}
+
+/// Worker kinds and models Polaris may start with `orbit_agent_start`.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PolarisWorkersConfig {
+    /// Agent kinds Polaris may start as Orbit workers.
+    pub kinds: Vec<String>,
+    /// Maximum live Orbit workers, excluding the lead; 0 means unlimited.
+    pub max_concurrent: u32,
+    /// Allowed models per kind; a missing or empty list allows any model.
+    pub models: BTreeMap<String, Vec<String>>,
+    /// Model applied per kind when a start request names none.
+    pub defaults: BTreeMap<String, String>,
+    /// Claude `--permission-mode` applied when a start request names none;
+    /// absent inherits the user's Claude settings.
+    #[serde(
+        default,
+        deserialize_with = "deserialize_worker_permission_mode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub permission_mode: Option<String>,
+}
+
+impl Default for PolarisWorkersConfig {
+    fn default() -> Self {
+        Self {
+            kinds: vec!["claude".into(), "codex".into()],
+            max_concurrent: DEFAULT_MAX_CONCURRENT_WORKERS,
+            models: BTreeMap::new(),
+            defaults: BTreeMap::new(),
+            permission_mode: None,
+        }
+    }
+}
+
+const DEFAULT_MAX_CONCURRENT_WORKERS: u32 = 4;
+
+/// Claude `--permission-mode` values an Orbit worker may start with.
+pub const WORKER_PERMISSION_MODES: [&str; 5] = ["manual", "acceptEdits", "auto", "plan", "dontAsk"];
+/// Skips every permission check, so it is refused for Orbit workers.
+const BYPASS_PERMISSION_MODE: &str = "bypassPermissions";
+
+/// Why a worker permission mode was not accepted.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PermissionModeError {
+    /// `bypassPermissions`, in any letter case.
+    Refused,
+    /// Not one of `WORKER_PERMISSION_MODES`.
+    Unknown,
+}
+
+impl PermissionModeError {
+    pub fn message(self, value: &str) -> String {
+        let allowed = WORKER_PERMISSION_MODES.join(", ");
+        match self {
+            Self::Refused => format!(
+                "Permission mode {BYPASS_PERMISSION_MODE} is never allowed for Orbit workers; use one of: {allowed}"
+            ),
+            Self::Unknown => {
+                format!("Permission mode {value:?} is not supported; use one of: {allowed}")
+            }
+        }
+    }
+}
+
+/// The canonical worker permission mode for `value`, matched exactly.
+pub fn parse_worker_permission_mode(value: &str) -> Result<&'static str, PermissionModeError> {
+    if value.trim().eq_ignore_ascii_case(BYPASS_PERMISSION_MODE) {
+        return Err(PermissionModeError::Refused);
+    }
+    WORKER_PERMISSION_MODES
+        .into_iter()
+        .find(|mode| *mode == value)
+        .ok_or(PermissionModeError::Unknown)
+}
+
+fn deserialize_worker_permission_mode<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Option::<String>::deserialize(deserializer)?
+        .map(|value| {
+            parse_worker_permission_mode(&value)
+                .map(str::to_owned)
+                .map_err(|error| de::Error::custom(error.message(&value)))
+        })
+        .transpose()
+}
+
+impl PolarisConfig {
+    pub fn display_name(&self) -> String {
+        let provider = if self.provider == "claude" {
+            "Claude"
+        } else {
+            &self.provider
+        };
+        let model = if self.provider == "claude" && self.model == "fable" {
+            "Fable 5.1"
+        } else {
+            &self.model
+        };
+        format!("{provider} · {model}")
+    }
+}
+
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 pub struct Config {
+    pub polaris: PolarisConfig,
     pub onboarding: Option<bool>,
     pub theme: ThemeConfig,
     pub terminal: TerminalConfig,
@@ -369,7 +642,7 @@ pub struct KeysConfig {
     pub navigate_pane_up: BindingConfig,
     /// Focus the pane to the right in navigate mode. Default: "l". Right arrow is always an alias.
     pub navigate_pane_right: BindingConfig,
-    /// Detach the current client from its Herdr server. Default: "prefix+q".
+    /// Detach the current client from its Aster server. Default: "prefix+q".
     pub detach: BindingConfig,
     /// Reload config.toml in the running app/server. Default: "prefix+shift+r".
     pub reload_config: BindingConfig,
@@ -385,7 +658,7 @@ pub struct KeysConfig {
     pub next_agent: BindingConfig,
     /// Focus an agent by index 1-9. Unset by default.
     pub focus_agent: BindingConfig,
-    /// Local-client shortcut that sends a clipboard image to a remote Herdr session. Default: "ctrl+v".
+    /// Local-client shortcut that sends a clipboard image to a remote Aster session. Default: "ctrl+v".
     pub remote_image_paste: String,
     /// Create a new tab in the active workspace. Default: "prefix+c"
     pub new_tab: BindingConfig,
@@ -868,7 +1141,7 @@ pub struct IndexedKeysConfig {
 #[derive(Debug, Deserialize)]
 #[serde(default)]
 pub struct WorktreesConfig {
-    /// Root directory under which Herdr creates <repo>/<branch-slug> checkouts.
+    /// Root directory under which Aster creates <repo>/<branch-slug> checkouts.
     pub directory: String,
 }
 
@@ -946,9 +1219,9 @@ pub struct UiConfig {
     pub sidebar_start_collapsed: bool,
     /// Collapsed sidebar presentation. Default: compact.
     pub sidebar_collapsed_mode: SidebarCollapsedModeConfig,
-    /// Terminal width at or below which Herdr uses the mobile single-column layout. Default: 64.
+    /// Terminal width at or below which Aster uses the mobile single-column layout. Default: 64.
     pub mobile_width_threshold: u16,
-    /// Capture mouse input for Herdr's mouse UI. Default: true.
+    /// Capture mouse input for Aster's mouse UI. Default: true.
     pub mouse_capture: bool,
     /// Copy text selected with the mouse. Default: true.
     pub copy_on_select: bool,
@@ -993,11 +1266,13 @@ pub struct UiConfig {
     pub window_title: String,
     /// Agent sidebar ordering. Saved values are "spaces" or "priority". Default: "spaces".
     pub agent_panel_sort: AgentPanelSortConfig,
-    /// Retired setting that Herdr wrote before the workspace filter was removed.
+    /// Retired setting that Aster wrote before the workspace filter was removed.
     #[serde(rename = "agent_panel_scope")]
     _legacy_agent_panel_scope: Option<LegacyAgentPanelScopeConfig>,
     /// Agent status indicator style. Saved values are "dots" or "symbols". Default: "dots".
     pub status_indicators: StatusIndicatorStyle,
+    /// Terminal UI motion level: "full", "reduced", or "off". Default: "full".
+    pub animations: UiAnimationsConfig,
     /// Expanded sidebar row composition.
     pub sidebar: SidebarConfig,
     /// Accent color for highlights, borders, and navigation UI.
@@ -1059,7 +1334,7 @@ pub struct AdvancedConfig {
 #[derive(Debug, Deserialize)]
 #[serde(default)]
 pub struct RemoteConfig {
-    /// Add keepalive fallbacks and private connection reuse for `herdr --remote`.
+    /// Add keepalive fallbacks and private connection reuse for `aster --remote`.
     /// Set false to run plain ssh unchanged. Default: true.
     pub manage_ssh_config: bool,
 }
@@ -1075,7 +1350,7 @@ impl Default for RemoteConfig {
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 pub struct ExperimentalConfig {
-    /// Allow launching herdr inside an existing herdr pane. Default: false.
+    /// Allow launching aster inside an existing aster pane. Default: false.
     pub allow_nested: bool,
     /// Deprecated compatibility key for `terminal.kitty_graphics`.
     pub kitty_graphics: Option<bool>,
@@ -1190,7 +1465,7 @@ impl Default for KeysConfig {
 impl Default for WorktreesConfig {
     fn default() -> Self {
         Self {
-            directory: "~/.herdr/worktrees".into(),
+            directory: "~/.aster/worktrees".into(),
         }
     }
 }
@@ -1226,6 +1501,7 @@ impl Default for UiConfig {
             agent_panel_sort: AgentPanelSortConfig::Spaces,
             _legacy_agent_panel_scope: None,
             status_indicators: StatusIndicatorStyle::Dots,
+            animations: UiAnimationsConfig::Full,
             sidebar: SidebarConfig::default(),
             accent: "cyan".into(),
             toast: ToastConfig::default(),
@@ -1251,16 +1527,16 @@ impl Default for ToastConfig {
         Self {
             delivery: ToastDelivery::Off,
             delay_seconds: 1,
-            herdr: HerdrToastConfig::default(),
+            aster: AsterToastConfig::default(),
             clipboard: ClipboardToastConfig::default(),
         }
     }
 }
 
-impl Default for HerdrToastConfig {
+impl Default for AsterToastConfig {
     fn default() -> Self {
         Self {
-            position: ToastHerdrPosition::BottomRight,
+            position: ToastAsterPosition::BottomRight,
         }
     }
 }
@@ -1285,13 +1561,13 @@ impl<'de> Deserialize<'de> for ToastConfig {
             delivery: Option<ToastDelivery>,
             enabled: Option<bool>,
             delay_seconds: Option<u64>,
-            herdr: HerdrToastConfig,
+            aster: AsterToastConfig,
             clipboard: ClipboardToastConfig,
         }
 
         let raw = RawToastConfig::deserialize(deserializer)?;
         let legacy_delivery = match raw.enabled {
-            Some(true) => ToastDelivery::Herdr,
+            Some(true) => ToastDelivery::Aster,
             Some(false) | None => ToastDelivery::Off,
         };
         let delivery = raw.delivery.unwrap_or(legacy_delivery);
@@ -1305,7 +1581,7 @@ impl<'de> Deserialize<'de> for ToastConfig {
         Ok(Self {
             delivery,
             delay_seconds,
-            herdr: raw.herdr,
+            aster: raw.aster,
             clipboard: raw.clipboard,
         })
     }
@@ -1338,8 +1614,8 @@ mod tests {
     fn update_config_defaults_and_parses() {
         let default_config = Config::default();
         assert_eq!(default_config.update.channel, default_update_channel());
-        assert!(default_config.update.version_check);
-        assert!(default_config.update.manifest_check);
+        assert!(!default_config.update.version_check);
+        assert!(!default_config.update.manifest_check);
 
         let toml = r#"
 [update]
@@ -1493,6 +1769,23 @@ status_indicators = "symbols"
     }
 
     #[test]
+    fn ui_animations_defaults_to_full_and_parses_modes() {
+        assert_eq!(Config::default().ui.animations, UiAnimationsConfig::Full);
+
+        for (raw, expected) in [
+            ("full", UiAnimationsConfig::Full),
+            ("reduced", UiAnimationsConfig::Reduced),
+            ("off", UiAnimationsConfig::Off),
+        ] {
+            let config: Config = toml::from_str(&format!("[ui]\nanimations = {raw:?}\n")).unwrap();
+            assert_eq!(config.ui.animations, expected);
+            assert_eq!(config.ui.animations.as_str(), raw);
+        }
+
+        assert!(toml::from_str::<Config>("[ui]\nanimations = \"invalid\"").is_err());
+    }
+
+    #[test]
     fn pane_borders_legacy_booleans_map_to_modes() {
         let enabled: Config = toml::from_str("[ui]\npane_borders = true").unwrap();
         assert_eq!(enabled.ui.pane_borders, PaneBordersConfig::Auto);
@@ -1570,14 +1863,14 @@ tab_bar_right_separator = " · "
     #[test]
     fn worktrees_directory_defaults_and_parses() {
         let default_config = Config::default();
-        assert_eq!(default_config.worktrees.directory, "~/.herdr/worktrees");
+        assert_eq!(default_config.worktrees.directory, "~/.aster/worktrees");
 
         let toml = r#"
 [worktrees]
-directory = "~/Projects/herdr-worktrees"
+directory = "~/Projects/aster-worktrees"
 "#;
         let config: Config = toml::from_str(toml).unwrap();
-        assert_eq!(config.worktrees.directory, "~/Projects/herdr-worktrees");
+        assert_eq!(config.worktrees.directory, "~/Projects/aster-worktrees");
     }
 
     #[test]
@@ -1877,7 +2170,7 @@ mouse_scroll_lines = 0
 delivery = "terminal"
 delay_seconds = 2
 
-[ui.toast.herdr]
+[ui.toast.aster]
 position = "top-left"
 
 [ui.toast.clipboard]
@@ -1887,7 +2180,7 @@ position = "top-center"
         let config: Config = toml::from_str(toml).unwrap();
         assert_eq!(config.ui.toast.delivery, ToastDelivery::Terminal);
         assert_eq!(config.ui.toast.delay_seconds, 2);
-        assert_eq!(config.ui.toast.herdr.position, ToastHerdrPosition::TopLeft);
+        assert_eq!(config.ui.toast.aster.position, ToastAsterPosition::TopLeft);
         assert!(!config.ui.toast.clipboard.enabled);
         assert_eq!(
             config.ui.toast.clipboard.position,
@@ -1901,8 +2194,8 @@ position = "top-center"
         assert_eq!(config.ui.toast.delivery, ToastDelivery::Off);
         assert_eq!(config.ui.toast.delay_seconds, 1);
         assert_eq!(
-            config.ui.toast.herdr.position,
-            ToastHerdrPosition::BottomRight
+            config.ui.toast.aster.position,
+            ToastAsterPosition::BottomRight
         );
         assert!(config.ui.toast.clipboard.enabled);
         assert_eq!(
@@ -1922,13 +2215,13 @@ delivery = "system"
     }
 
     #[test]
-    fn toast_config_legacy_enabled_true_maps_to_herdr() {
+    fn toast_config_legacy_enabled_true_maps_to_aster() {
         let toml = r#"
 [ui.toast]
 enabled = true
 "#;
         let config: Config = toml::from_str(toml).unwrap();
-        assert_eq!(config.ui.toast.delivery, ToastDelivery::Herdr);
+        assert_eq!(config.ui.toast.delivery, ToastDelivery::Aster);
     }
 
     #[test]

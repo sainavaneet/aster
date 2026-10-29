@@ -3,6 +3,7 @@ pub(crate) enum ConfigEdit<'a> {
     Theme(&'a str),
     StatusIndicators(super::StatusIndicatorStyle),
     Sound(bool),
+    Polaris(bool),
     ToastDelivery(super::ToastDelivery),
 }
 
@@ -11,6 +12,7 @@ impl ConfigEdit<'_> {
         match self {
             Self::Theme(_) => "theme",
             Self::StatusIndicators(_) => "status indicators",
+            Self::Polaris(_) => "Polaris startup",
             Self::Sound(_) => "sound setting",
             Self::ToastDelivery(_) => "toast setting",
         }
@@ -29,13 +31,16 @@ impl ConfigEdit<'_> {
                 "status_indicators",
                 &format!("\"{}\"", style.as_str()),
             ),
+            Self::Polaris(enabled) => {
+                super::upsert_section_bool(content, "polaris", "enabled", enabled)
+            }
             Self::Sound(enabled) => {
                 super::upsert_section_bool(content, "ui.sound", "enabled", enabled)
             }
             Self::ToastDelivery(delivery) => {
                 let value = match delivery {
                     super::ToastDelivery::Off => "\"off\"",
-                    super::ToastDelivery::Herdr => "\"herdr\"",
+                    super::ToastDelivery::Aster => "\"aster\"",
                     super::ToastDelivery::Terminal => "\"terminal\"",
                     super::ToastDelivery::System => "\"system\"",
                 };
@@ -79,8 +84,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn polaris_toggle_preserves_provider_model_and_other_settings() {
+        let source = "[polaris]\nenabled = true\nprovider = \"claude\"\nmodel = \"fable\"\n\n[theme]\nname = \"nord\"\n";
+        let disabled = ConfigEdit::Polaris(false).apply(source);
+        let config: crate::config::Config = toml::from_str(&disabled).unwrap();
+        assert!(!config.polaris.enabled);
+        assert_eq!(config.polaris.provider, "claude");
+        assert_eq!(config.polaris.model, "fable");
+        assert!(disabled.contains("name = \"nord\""));
+        let enabled = ConfigEdit::Polaris(true).apply(&disabled);
+        assert!(
+            toml::from_str::<crate::config::Config>(&enabled)
+                .unwrap()
+                .polaris
+                .enabled
+        );
+    }
+
+    #[test]
     fn update_file_at_does_not_move_a_leading_bom_into_the_file() {
-        let dir = std::env::temp_dir().join(format!("herdr-config-bom-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("aster-config-bom-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.toml");
         std::fs::write(

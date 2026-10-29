@@ -26,7 +26,7 @@ fn integration_status(args: &[String]) -> std::io::Result<i32> {
         [] => false,
         [flag] if flag == "--outdated-only" => true,
         _ => {
-            eprintln!("usage: herdr integration status [--outdated-only]");
+            eprintln!("usage: aster integration status [--outdated-only]");
             return Ok(2);
         }
     };
@@ -147,13 +147,13 @@ fn parse_integration_target(
 ) -> std::io::Result<Option<IntegrationCommandTarget>> {
     let Some(target) = args.first().map(|arg| arg.as_str()) else {
         eprintln!(
-            "usage: herdr integration {action} <pi|omp|claude|codex|copilot|devin|droid|kimi|opencode|kilo|hermes|qodercli|qwen|letta|cursor|mastracode|grok>"
+            "usage: aster integration {action} <pi|omp|claude|codex|copilot|devin|droid|kimi|opencode|kilo|hermes|qodercli|qwen|letta|cursor|mastracode|grok>"
         );
         return Ok(None);
     };
     if args.len() != 1 {
         eprintln!(
-            "usage: herdr integration {action} <pi|omp|claude|codex|copilot|devin|droid|kimi|opencode|kilo|hermes|qodercli|qwen|letta|cursor|mastracode|grok>"
+            "usage: aster integration {action} <pi|omp|claude|codex|copilot|devin|droid|kimi|opencode|kilo|hermes|qodercli|qwen|letta|cursor|mastracode|grok>"
         );
         return Ok(None);
     }
@@ -192,42 +192,42 @@ fn parse_integration_target(
 }
 
 fn print_integration_help() {
-    eprintln!("herdr integration commands:");
-    eprintln!("  herdr integration install pi");
-    eprintln!("  herdr integration install omp");
-    eprintln!("  herdr integration install claude");
-    eprintln!("  herdr integration install codex");
-    eprintln!("  herdr integration install copilot");
-    eprintln!("  herdr integration install devin");
-    eprintln!("  herdr integration install droid");
-    eprintln!("  herdr integration install kimi");
-    eprintln!("  herdr integration install opencode");
-    eprintln!("  herdr integration install kilo");
-    eprintln!("  herdr integration install hermes");
-    eprintln!("  herdr integration install qodercli");
-    eprintln!("  herdr integration install qwen");
-    eprintln!("  herdr integration install letta");
-    eprintln!("  herdr integration install cursor");
-    eprintln!("  herdr integration install mastracode");
-    eprintln!("  herdr integration install antigravity-cli");
-    eprintln!("  herdr integration install grok");
-    eprintln!("  herdr integration uninstall pi");
-    eprintln!("  herdr integration uninstall omp");
-    eprintln!("  herdr integration uninstall claude");
-    eprintln!("  herdr integration uninstall codex");
-    eprintln!("  herdr integration uninstall copilot");
-    eprintln!("  herdr integration uninstall devin");
-    eprintln!("  herdr integration uninstall droid");
-    eprintln!("  herdr integration uninstall kimi");
-    eprintln!("  herdr integration uninstall opencode");
-    eprintln!("  herdr integration uninstall kilo");
-    eprintln!("  herdr integration uninstall hermes");
-    eprintln!("  herdr integration uninstall qodercli");
-    eprintln!("  herdr integration uninstall qwen");
-    eprintln!("  herdr integration uninstall letta");
-    eprintln!("  herdr integration uninstall cursor");
-    eprintln!("  herdr integration uninstall mastracode");
-    eprintln!("  herdr integration uninstall antigravity-cli");
-    eprintln!("  herdr integration uninstall grok");
-    eprintln!("  herdr integration status [--outdated-only]");
+    eprintln!("aster integration commands:");
+    eprintln!("  aster integration install pi");
+    eprintln!("  aster integration install omp");
+    eprintln!("  aster integration install claude");
+    eprintln!("  aster integration install codex");
+    eprintln!("  aster integration install copilot");
+    eprintln!("  aster integration install devin");
+    eprintln!("  aster integration install droid");
+    eprintln!("  aster integration install kimi");
+    eprintln!("  aster integration install opencode");
+    eprintln!("  aster integration install kilo");
+    eprintln!("  aster integration install hermes");
+    eprintln!("  aster integration install qodercli");
+    eprintln!("  aster integration install qwen");
+    eprintln!("  aster integration install letta");
+    eprintln!("  aster integration install cursor");
+    eprintln!("  aster integration install mastracode");
+    eprintln!("  aster integration install antigravity-cli");
+    eprintln!("  aster integration install grok");
+    eprintln!("  aster integration uninstall pi");
+    eprintln!("  aster integration uninstall omp");
+    eprintln!("  aster integration uninstall claude");
+    eprintln!("  aster integration uninstall codex");
+    eprintln!("  aster integration uninstall copilot");
+    eprintln!("  aster integration uninstall devin");
+    eprintln!("  aster integration uninstall droid");
+    eprintln!("  aster integration uninstall kimi");
+    eprintln!("  aster integration uninstall opencode");
+    eprintln!("  aster integration uninstall kilo");
+    eprintln!("  aster integration uninstall hermes");
+    eprintln!("  aster integration uninstall qodercli");
+    eprintln!("  aster integration uninstall qwen");
+    eprintln!("  aster integration uninstall letta");
+    eprintln!("  aster integration uninstall cursor");
+    eprintln!("  aster integration uninstall mastracode");
+    eprintln!("  aster integration uninstall antigravity-cli");
+    eprintln!("  aster integration uninstall grok");
+    eprintln!("  aster integration status [--outdated-only]");
 }

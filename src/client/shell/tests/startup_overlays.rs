@@ -372,7 +372,7 @@ fn startup_onboarding_shows_configured_prefix() {
 #[test]
 fn onboarding_completion_persists_and_opens_endpoint_integrations() {
     let path = std::env::temp_dir().join(format!(
-        "herdr-client-onboarding-{}-{}.toml",
+        "aster-client-onboarding-{}-{}.toml",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -479,7 +479,7 @@ fn unavailable_integration_list_does_not_wedge_settings() {
     let mut config =
         ClientShellConfig::from_config(&Config::default()).with_startup_onboarding(true);
     config.local_config_path = std::env::temp_dir().join(format!(
-        "herdr-client-onboarding-unavailable-{}-{}.toml",
+        "aster-client-onboarding-unavailable-{}-{}.toml",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -560,6 +560,9 @@ fn config_diagnostic_offsets_only_the_pane_rows_it_overlaps() {
     endpoint_snapshot.config_diagnostic = Some("one-line warning".into());
     state.set_snapshot(Box::new(endpoint_snapshot));
     state.set_pane_surface(surface());
+    let now = std::time::Instant::now()
+        .checked_sub(std::time::Duration::from_secs(1))
+        .unwrap_or_else(std::time::Instant::now);
     state.visible_notification = Some(ClientVisibleNotification {
         endpoint_id: ClientEndpointId::Local,
         event: SemanticNotification {
@@ -571,9 +574,10 @@ fn config_diagnostic_offsets_only_the_pane_rows_it_overlaps() {
             workspace_id: None,
             tab_id: None,
             pane_id: None,
-            position: Some(crate::config::ToastHerdrPosition::TopRight),
+            position: Some(crate::config::ToastAsterPosition::TopRight),
         },
-        deadline: std::time::Instant::now(),
+        shown_at: now,
+        deadline: now + std::time::Duration::from_secs(5),
     });
 
     state.compose(106, 20).expect("one-line frame");
@@ -599,7 +603,7 @@ fn config_diagnostic_offsets_only_the_pane_rows_it_overlaps() {
         .as_mut()
         .expect("visible notification")
         .event
-        .position = Some(crate::config::ToastHerdrPosition::BottomRight);
+        .position = Some(crate::config::ToastAsterPosition::BottomRight);
     state.compose(106, 20).expect("bottom notification frame");
     assert_eq!(state.hits.notification_toast.bottom(), 19);
 }
@@ -761,7 +765,7 @@ fn update_ready_menu_opens_client_owned_release_notes_and_dismisses_by_version()
         .join("\n");
     assert!(text.contains("v0.8.3"));
     assert!(text.contains("update ready"));
-    assert!(text.contains("detach, run herdr update"));
+    assert!(text.contains("detach, run aster update"));
     assert!(!state.hits.release_notes_scrollbar.is_empty());
     let outer = crate::ui::centered_popup_rect(
         Rect::new(0, 0, 106, 30),
@@ -978,7 +982,7 @@ fn coalesced_release_notes_open_and_mouse_uses_current_geometry() {
     };
     let metrics = crate::ui::release_notes_scroll_metrics(
         &notes,
-        "herdr update",
+        "aster update",
         stack.content,
         &state.config.palette,
     );
@@ -1312,5 +1316,38 @@ fn client_settings_preview_restore_and_endpoint_integrations_are_owned_by_overla
             ref integration_messages,
             ..
         })) if integration_messages == &["installed codex"]
+    ));
+}
+
+#[test]
+fn polaris_settings_show_provider_model_and_startup_choices() {
+    let mut state = ClientShellState::new(ClientShellConfig::from_config(&Config::default()));
+    state.set_snapshot(Box::new(snapshot()));
+    state.set_pane_surface(surface());
+    state.open_settings_overlay();
+    let mut outcome = ClientShellInput::default();
+    state.select_settings_section(ClientSettingsSection::Polaris, &mut outcome);
+    let frame = state.compose(106, 30).expect("Polaris settings");
+    let text = frame
+        .cells
+        .iter()
+        .map(|cell| cell.symbol.as_str())
+        .collect::<String>();
+    assert!(text.contains("Polaris"));
+    assert!(text.contains("Claude · Fable 5.1"));
+    assert!(text.contains("open Polaris on startup"));
+    assert!(text.contains("start with a shell"));
+    assert!(state
+        .hits
+        .settings_tabs
+        .iter()
+        .any(|(_, section)| *section == ClientSettingsSection::Polaris));
+    state.move_settings_selection(1);
+    assert!(matches!(
+        state.overlay,
+        Some(ClientShellOverlay::Settings(ClientSettingsOverlay {
+            selected: 1,
+            ..
+        }))
     ));
 }

@@ -126,10 +126,12 @@ pub(crate) fn integration_target_install_layout_available(
 }
 
 pub(crate) fn command_available(command: &str) -> bool {
-    let Some(paths) = std::env::var_os("PATH") else {
-        return false;
-    };
-    std::env::split_paths(&paths).any(|dir| {
+    std::env::var_os("PATH").is_some_and(|paths| command_available_in(&paths, command))
+}
+
+/// Whether `command` resolves to an executable file in the given `PATH` value.
+pub(crate) fn command_available_in(paths: &std::ffi::OsStr, command: &str) -> bool {
+    std::env::split_paths(paths).any(|dir| {
         command_path_candidates(&dir, command)
             .into_iter()
             .any(|path| executable_file_exists(&path))
@@ -370,7 +372,7 @@ pub(crate) fn integration_update_instructions(
         .iter()
         .map(|target| {
             format!(
-                "`herdr integration install {}`",
+                "`aster integration install {}`",
                 integration_target_label(*target)
             )
         })
@@ -394,13 +396,13 @@ pub(crate) fn print_outdated_update_notice() -> bool {
         .map(|integration| integration.target)
         .collect::<Vec<_>>();
     eprintln!(
-        "installed herdr integrations need updating; {}.",
+        "installed aster integrations need updating; {}.",
         integration_update_instructions(&targets).replace('`', "")
     );
     true
 }
 
-/// Whether the Herdr-owned Grok hook config exactly matches the installed
+/// Whether the Aster-owned Grok hook config exactly matches the installed
 /// integration. JSON formatting and object key order do not affect validity.
 fn grok_hook_config_is_valid(hook_path: &Path) -> bool {
     let Some(hooks_dir) = hook_path.parent() else {
@@ -468,9 +470,9 @@ pub(crate) fn integration_status_at(
 ) -> super::IntegrationStatus {
     let (mut state, installed_version) = integration_state_for_path(&path, expected_version);
 
-    // Grok only invokes the hook when the herdr-owned `hooks/herdr.json`
+    // Grok only invokes the hook when the aster-owned `hooks/aster.json`
     // registers it, so a current hook script with a missing or broken config
-    // is a nonfunctional install: report it as outdated so `herdr integration
+    // is a nonfunctional install: report it as outdated so `aster integration
     // status` flags it and a reinstall rewrites both files.
     if target == crate::api::schema::IntegrationTarget::Grok
         && state == super::IntegrationStatusKind::Current

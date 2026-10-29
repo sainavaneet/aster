@@ -1,11 +1,58 @@
 use super::*;
 
 impl HeadlessServer {
+    /// Single sink for client keystroke/text/paste input forwarded to a pane.
+    /// API submissions and server-synthesised writes bypass this function, so
+    /// the terminal's last-user-input time reflects only a human at a client.
     pub(super) fn note_interactive_input(&mut self, pane_id: crate::layout::PaneId, now: Instant) {
         self.interactive_input_deadlines
             .retain(|_, deadline| *deadline > now);
         self.interactive_input_deadlines
             .insert(pane_id, now + INTERACTIVE_RENDER_WINDOW);
+        let state = &mut self.app.state;
+        if let Some(terminal) = state
+            .workspaces
+            .iter()
+            .find_map(|workspace| workspace.terminal_id(pane_id))
+            .and_then(|terminal_id| state.terminals.get_mut(terminal_id))
+        {
+            terminal.record_user_input_at(now);
+        }
+    }
+
+    /// `note_interactive_input` plus the Orbit draft flag for the forwarded events.
+    pub(super) fn note_client_pane_input(
+        &mut self,
+        pane_id: crate::layout::PaneId,
+        events: &[crate::protocol::ClientPaneInputEvent],
+        now: Instant,
+    ) {
+        self.note_interactive_input(pane_id, now);
+        let state = &mut self.app.state;
+        if let Some(terminal) = state
+            .workspaces
+            .iter()
+            .find_map(|workspace| workspace.terminal_id(pane_id))
+            .and_then(|terminal_id| state.terminals.get_mut(terminal_id))
+        {
+            note_client_draft(terminal, events);
+        }
+    }
+
+    /// Raw bytes typed by a direct terminal-attach client.
+    pub(super) fn note_terminal_attach_input(
+        &mut self,
+        terminal_id: &str,
+        data: &[u8],
+        now: Instant,
+    ) {
+        if data.is_empty() {
+            return;
+        }
+        if let Some(terminal) = self.app.state.terminals.get_mut(terminal_id) {
+            terminal.record_user_input_at(now);
+            terminal.note_client_input_bytes(data);
+        }
     }
 
     pub(super) fn can_render_interactive(&self, now: Instant) -> bool {
@@ -1007,5 +1054,100 @@ impl HeadlessServer {
         self.app.full_redraw_pending = false;
         crate::render_prof::duration_since("full_render.total", full_started);
         debug!(cols, rows, foreground_client_id = ?self.foreground_client_id, "rendered virtual frame(s)");
+    }
+}
+
+/// Feeds client pane events to the terminal's draft flag in order. Keys map to
+/// the byte they stand for; releases, mouse events, and non-text keys are ignored.
+pub(super) fn note_client_draft(
+    terminal: &mut crate::terminal::TerminalState,
+    events: &[crate::protocol::ClientPaneInputEvent],
+) {
+    use crate::protocol::ClientPaneInputEvent;
+    for event in events {
+        match event {
+            ClientPaneInputEvent::Paste(text) if !text.is_empty() => terminal.note_client_paste(),
+            ClientPaneInputEvent::TextCommit(text) => {
+                terminal.note_client_input_bytes(text.as_bytes())
+            }
+            ClientPaneInputEvent::Key { .. } => {
+                let crate::raw_input::RawInputEvent::Key(key) = event.to_raw_input_event() else {
+                    continue;
+                };
+                let mut buffer = [0_u8; 4];
+                if let Some(bytes) = draft_key_bytes(key.as_key_event(), &mut buffer) {
+                    terminal.note_client_input_bytes(bytes);
+                }
+            }
+            ClientPaneInputEvent::Paste(_) | ClientPaneInputEvent::Mouse { .. } => {}
+        }
+    }
+}
+
+fn draft_key_bytes(key: crossterm::event::KeyEvent, buffer: &mut [u8; 4]) -> Option<&[u8]> {
+    use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
+    if key.kind == KeyEventKind::Release {
+        return None;
+    }
+    let control = key.modifiers.contains(KeyModifiers::CONTROL);
+    match key.code {
+        KeyCode::Enter => Some(b"\r"),
+        KeyCode::Esc => Some(b"\x1b"),
+        KeyCode::Char('c' | 'C') if control => Some(b"\x03"),
+        KeyCode::Char('u' | 'U') if control => Some(b"\x15"),
+        KeyCode::Char(_) if control || key.modifiers.contains(KeyModifiers::ALT) => None,
+        KeyCode::Char(ch) => Some(ch.encode_utf8(buffer).as_bytes()),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod draft_tests {
+    use super::*;
+    use crate::protocol::{ClientKeyCode, ClientKeyKind, ClientPaneInputEvent};
+
+    fn key(code: ClientKeyCode, modifiers: crossterm::event::KeyModifiers) -> ClientPaneInputEvent {
+        ClientPaneInputEvent::Key {
+            code,
+            modifiers: modifiers.bits(),
+            kind: ClientKeyKind::Press,
+            repeat_count: 1,
+            shifted_codepoint: None,
+            generated_text: None,
+            tracks_release: false,
+            physical_key_id: None,
+            windows_record: None,
+        }
+    }
+
+    fn draft_after(events: &[ClientPaneInputEvent]) -> bool {
+        let mut terminal = crate::terminal::TerminalState::new(
+            crate::terminal::TerminalId::alloc(),
+            "/tmp".into(),
+        );
+        note_client_draft(&mut terminal, events);
+        terminal.draft_pending()
+    }
+
+    #[test]
+    fn client_pane_events_set_and_clear_the_draft() {
+        use crossterm::event::KeyModifiers as M;
+        let typed = ClientPaneInputEvent::TextCommit("fix the".into());
+        assert!(draft_after(std::slice::from_ref(&typed)));
+        assert!(draft_after(&[key(ClientKeyCode::Char('x'), M::NONE)]));
+        assert!(draft_after(&[ClientPaneInputEvent::Paste("a\nb".into())]));
+        assert!(!draft_after(&[ClientPaneInputEvent::Paste(String::new())]));
+        for clear in [
+            key(ClientKeyCode::Enter, M::NONE),
+            key(ClientKeyCode::Esc, M::NONE),
+            key(ClientKeyCode::Char('c'), M::CONTROL),
+            key(ClientKeyCode::Char('u'), M::CONTROL),
+        ] {
+            assert!(!draft_after(&[typed.clone(), clear.clone()]), "{clear:?}");
+        }
+        // Navigation and Alt chords neither start nor end a draft.
+        assert!(!draft_after(&[key(ClientKeyCode::Left, M::NONE)]));
+        assert!(!draft_after(&[key(ClientKeyCode::Char('b'), M::ALT)]));
+        assert!(draft_after(&[typed, key(ClientKeyCode::Left, M::NONE)]));
     }
 }

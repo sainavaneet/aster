@@ -9,6 +9,8 @@ pub(crate) fn render_tab_bar(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    active_endpoint_id: &ClientEndpointId,
+    animation: super::super::animation::AnimationFrame<'_>,
     tab_scroll: &mut usize,
     reveal_focused_tab: &mut bool,
     tab_drag_insert_index: Option<usize>,
@@ -123,6 +125,48 @@ pub(crate) fn render_tab_bar(
             right_padding = padding.saturating_sub(left) as usize,
         );
         put_text(buffer, rect.x, rect.y, rect.width, &text, style);
+        // `off` keeps the tab bar exactly as it was before animations existed.
+        let has_working_agent = animation.mode().is_enabled()
+            && (tab.agent_status == crate::api::schema::AgentStatus::Working
+                || snapshot.agents.iter().any(|agent| {
+                    agent.tab_id == tab.tab_id
+                        && agent.agent_status == crate::api::schema::AgentStatus::Working
+                }));
+        if has_working_agent && rect.width >= 3 {
+            let spinner = animation.spinner_index();
+            let marker =
+                super::super::animation::working_spinner_glyph(spinner, config.status_indicators);
+            let marker_fg = if tab.focused {
+                panel_contrast_fg(palette)
+            } else {
+                status_color(crate::api::schema::AgentStatus::Working, palette)
+            };
+            let marker_bg = if tab.focused {
+                palette.accent
+            } else {
+                palette.surface0
+            };
+            put_text(
+                buffer,
+                rect.x,
+                rect.y,
+                1,
+                marker,
+                Style::default().fg(marker_fg).bg(marker_bg),
+            );
+        }
+        if let Some((sweep_phase, sweep_status)) =
+            animation.tab_sweep(active_endpoint_id, &tab.tab_id)
+        {
+            apply_tab_highlight_sweep(
+                buffer,
+                rect,
+                tab.focused,
+                sweep_phase,
+                sweep_status,
+                palette,
+            );
+        }
         hits.tabs.push((rect, tab.tab_id.clone()));
         first_visible.get_or_insert(index);
         last_visible = Some(index);
@@ -376,6 +420,50 @@ fn tab_label(tab: &ClientShellTab) -> String {
         format!("{} Z", tab.label)
     } else {
         tab.label.clone()
+    }
+}
+
+fn apply_tab_highlight_sweep(
+    buffer: &mut Buffer,
+    rect: Rect,
+    focused: bool,
+    phase: f32,
+    status: crate::api::schema::AgentStatus,
+    palette: &Palette,
+) {
+    if rect.width == 0 {
+        return;
+    }
+    let sweep_color = match status {
+        crate::api::schema::AgentStatus::Blocked => palette.red,
+        crate::api::schema::AgentStatus::Done => palette.green,
+        _ => palette.accent,
+    };
+    let base_bg = if focused {
+        palette.accent
+    } else {
+        palette.surface0
+    };
+    let center = phase.clamp(0.0, 1.0) * f32::from(rect.width.saturating_sub(1));
+    let radius = (f32::from(rect.width) * 0.35).max(1.5);
+    let envelope = (1.0 - (phase - 0.5).abs() * 1.4).clamp(0.25, 1.0);
+    for offset in 0..rect.width {
+        let distance = (f32::from(offset) - center).abs();
+        if distance > radius {
+            continue;
+        }
+        let intensity = ((1.0 - distance / radius) * envelope).clamp(0.0, 1.0);
+        if intensity <= 0.05 {
+            continue;
+        }
+        let bg =
+            super::super::animation::blend_color(base_bg, sweep_color, intensity * 0.75, palette);
+        if let Some(cell) = buffer.cell_mut((rect.x + offset, rect.y)) {
+            cell.set_bg(bg);
+            if !focused && intensity > 0.45 {
+                cell.set_fg(palette.text);
+            }
+        }
     }
 }
 

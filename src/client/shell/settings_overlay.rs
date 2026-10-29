@@ -128,6 +128,26 @@ pub(super) fn render_settings_overlay(
     );
     let mut choice_hits = Vec::new();
     match settings.section {
+        ClientSettingsSection::Polaris => {
+            render_choice_section(
+                buffer,
+                content,
+                "Polaris — your lead agent",
+                &settings.polaris.display_name(),
+                &["open Polaris on startup", "start with a shell"],
+                settings.selected,
+                palette,
+                &mut choice_hits,
+            );
+            put_text(
+                buffer,
+                content.x,
+                content.y.saturating_add(7),
+                content.width,
+                "Applies to the next startup. Running agents keep their settings.",
+                Style::default().fg(palette.overlay1).bg(palette.panel_bg),
+            );
+        }
         ClientSettingsSection::Theme => {
             let visible = usize::from(content.height);
             let scroll = settings.selected.saturating_sub(visible.saturating_sub(1));
@@ -188,7 +208,7 @@ pub(super) fn render_settings_overlay(
                 content,
                 "notification popups",
                 "choose where background popup notifications should appear",
-                &["off", "inside herdr", "via terminal", "via system"],
+                &["off", "inside aster", "via terminal", "via system"],
                 settings.selected,
                 palette,
                 &mut choice_hits,

@@ -179,9 +179,9 @@ impl ClientShellState {
         };
         let code = machine_diagnostic_code(profile_id);
         let command = if crate::remote::ssh_error_requires_authentication(error) {
-            format!("herdr machine reconnect {profile_id}")
+            format!("aster machine reconnect {profile_id}")
         } else {
-            format!("herdr machine status {profile_id}")
+            format!("aster machine status {profile_id}")
         };
         // A requested retry can report its diagnostic, but must not replace another notice.
         if self
@@ -191,6 +191,7 @@ impl ClientShellState {
         {
             return;
         }
+        let now = std::time::Instant::now();
         self.visible_endpoint_notice = Some(ClientVisibleEndpointNotice {
             key: ClientEndpointNoticeKey {
                 boot_id: "machine".into(),
@@ -199,7 +200,8 @@ impl ClientShellState {
             },
             title: format!("{}: {command}", self.endpoint_label(id)),
             body: error.clone(),
-            deadline: std::time::Instant::now() + std::time::Duration::from_secs(15),
+            shown_at: now,
+            deadline: now + std::time::Duration::from_secs(15),
         });
     }
 }

@@ -19,7 +19,7 @@ pub(crate) fn command() -> clap::Command {
 
 const PLUGIN_BUILD_OUTPUT_MAX_BYTES: usize = 64 * 1024;
 const PLUGIN_INSTALL_USAGE: &str =
-    "usage: herdr plugin install [--ref REF] [--yes|-y] <owner>/<repo>[/subdir...]";
+    "usage: aster plugin install [--ref REF] [--yes|-y] <owner>/<repo>[/subdir...]";
 
 pub(super) fn run_plugin_command(args: &[String]) -> std::io::Result<i32> {
     match args.first().map(String::as_str) {
@@ -30,7 +30,7 @@ pub(super) fn run_plugin_command(args: &[String]) -> std::io::Result<i32> {
         _ => {}
     }
     let (method, json) = match projection::parse(
-        command().bin_name("herdr plugin"),
+        command().bin_name("aster plugin"),
         args,
         bindings::from_matches,
     ) {
@@ -63,11 +63,11 @@ fn plugin_link(params: PluginLinkParams) -> std::io::Result<i32> {
 
 fn plugin_config_dir_command(args: &[String]) -> std::io::Result<i32> {
     let Some(plugin_id) = args.first() else {
-        eprintln!("usage: herdr plugin config-dir <plugin_id>");
+        eprintln!("usage: aster plugin config-dir <plugin_id>");
         return Ok(2);
     };
     if args.len() != 1 {
-        eprintln!("usage: herdr plugin config-dir <plugin_id>");
+        eprintln!("usage: aster plugin config-dir <plugin_id>");
         return Ok(2);
     }
     let path = crate::plugin_paths::plugin_config_dir(plugin_id);
@@ -388,11 +388,11 @@ fn install_github_plugin(
 
 fn plugin_uninstall(args: &[String]) -> std::io::Result<i32> {
     let Some(target) = args.first() else {
-        eprintln!("usage: herdr plugin uninstall <plugin_id|owner/repo[/subdir...]>");
+        eprintln!("usage: aster plugin uninstall <plugin_id|owner/repo[/subdir...]>");
         return Ok(2);
     };
     if args.len() != 1 {
-        eprintln!("usage: herdr plugin uninstall <plugin_id|owner/repo[/subdir...]>");
+        eprintln!("usage: aster plugin uninstall <plugin_id|owner/repo[/subdir...]>");
         return Ok(2);
     }
 
@@ -1047,7 +1047,7 @@ fn ensure_manifest_unchanged_after_build(
         return Ok(());
     }
     Err(io::Error::other(
-        "plugin build changed herdr-plugin.toml after install preview; aborting install",
+        "plugin build changed aster-plugin.toml after install preview; aborting install",
     ))
 }
 
@@ -1076,7 +1076,7 @@ fn run_plugin_build_command(
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    scrub_herdr_runtime_env(&mut child);
+    scrub_aster_runtime_env(&mut child);
 
     let mut child = match child.spawn() {
         Ok(child) => child,
@@ -1254,21 +1254,21 @@ fn read_tail_capped_output(mut reader: impl Read, cap: usize) -> CappedOutput {
     }
 }
 
-fn scrub_herdr_runtime_env(command: &mut Command) {
+fn scrub_aster_runtime_env(command: &mut Command) {
     for key in [
         crate::api::SOCKET_PATH_ENV_VAR,
         crate::server::socket_paths::CLIENT_SOCKET_PATH_ENV_VAR,
         crate::session::SESSION_ENV_VAR,
-        "HERDR_BIN_PATH",
-        "HERDR_ENV",
-        "HERDR_WORKSPACE_ID",
-        "HERDR_TAB_ID",
-        "HERDR_PANE_ID",
+        "ASTER_BIN_PATH",
+        "ASTER_ENV",
+        "ASTER_WORKSPACE_ID",
+        "ASTER_TAB_ID",
+        "ASTER_PANE_ID",
     ] {
         command.env_remove(key);
     }
     for (key, _) in std::env::vars_os() {
-        if key.to_string_lossy().starts_with("HERDR_PLUGIN_") {
+        if key.to_string_lossy().starts_with("ASTER_PLUGIN_") {
             command.env_remove(key);
         }
     }
@@ -1399,9 +1399,9 @@ mod tests {
             plugin_id: id.to_string(),
             name: "Test Plugin".to_string(),
             version: "0.1.0".to_string(),
-            min_herdr_version: crate::build_info::BASE_VERSION.to_string(),
+            min_aster_version: crate::build_info::BASE_VERSION.to_string(),
             description: None,
-            manifest_path: format!("/tmp/{id}/herdr-plugin.toml"),
+            manifest_path: format!("/tmp/{id}/aster-plugin.toml"),
             plugin_root: format!("/tmp/{id}"),
             enabled: true,
             platforms: None,
@@ -1418,7 +1418,7 @@ mod tests {
                 subdir: subdir.map(str::to_string),
                 requested_ref: None,
                 resolved_commit: Some("abc123".to_string()),
-                managed_path: Some(format!("/tmp/herdr/plugins/{id}")),
+                managed_path: Some(format!("/tmp/aster/plugins/{id}")),
                 installed_unix_ms: Some(42),
             },
             warnings: vec![],
@@ -1489,34 +1489,34 @@ mod tests {
 
     #[test]
     fn github_plugin_source_parses_root_repo() {
-        let source = GithubPluginSource::parse("ogulcancelik/herdr-plugin-examples").unwrap();
+        let source = GithubPluginSource::parse("ogulcancelik/aster-plugin-examples").unwrap();
         assert_eq!(source.owner, "ogulcancelik");
-        assert_eq!(source.repo, "herdr-plugin-examples");
+        assert_eq!(source.repo, "aster-plugin-examples");
         assert_eq!(source.subdir, None);
         assert_eq!(
             source.remote_url(),
-            "https://github.com/ogulcancelik/herdr-plugin-examples.git"
+            "https://github.com/ogulcancelik/aster-plugin-examples.git"
         );
     }
 
     #[test]
     fn github_plugin_source_parses_subdir() {
         let source =
-            GithubPluginSource::parse("ogulcancelik/herdr-plugin-examples/worktree-bootstrap")
+            GithubPluginSource::parse("ogulcancelik/aster-plugin-examples/worktree-bootstrap")
                 .unwrap();
         assert_eq!(source.owner, "ogulcancelik");
-        assert_eq!(source.repo, "herdr-plugin-examples");
+        assert_eq!(source.repo, "aster-plugin-examples");
         assert_eq!(source.subdir.as_deref(), Some("worktree-bootstrap"));
     }
 
     #[test]
     fn github_plugin_source_rejects_non_shorthand_sources() {
         for source in [
-            "https://github.com/ogulcancelik/herdr-plugin-examples",
-            "git@github.com:ogulcancelik/herdr-plugin-examples.git",
+            "https://github.com/ogulcancelik/aster-plugin-examples",
+            "git@github.com:ogulcancelik/aster-plugin-examples.git",
             "ogulcancelik",
-            "ogulcancelik/herdr-plugin-examples/../bad",
-            "ogulcancelik/herdr-plugin-examples//bad",
+            "ogulcancelik/aster-plugin-examples/../bad",
+            "ogulcancelik/aster-plugin-examples//bad",
         ] {
             assert!(
                 GithubPluginSource::parse(source).is_err(),
@@ -1528,19 +1528,19 @@ mod tests {
     #[test]
     fn github_source_lookup_matches_installed_plugin_source() {
         let source =
-            GithubPluginSource::parse("ogulcancelik/herdr-plugin-examples/agent-telegram-notify")
+            GithubPluginSource::parse("ogulcancelik/aster-plugin-examples/agent-telegram-notify")
                 .unwrap();
         let plugins = vec![
             github_plugin(
                 "examples.github-link-preview",
                 "ogulcancelik",
-                "herdr-plugin-examples",
+                "aster-plugin-examples",
                 Some("github-link-preview"),
             ),
             github_plugin(
                 "examples.agent-telegram-notify",
                 "ogulcancelik",
-                "herdr-plugin-examples",
+                "aster-plugin-examples",
                 Some("agent-telegram-notify"),
             ),
         ];
@@ -1551,11 +1551,11 @@ mod tests {
 
     #[test]
     fn github_source_lookup_requires_exact_subdir() {
-        let source = GithubPluginSource::parse("ogulcancelik/herdr-plugin-examples").unwrap();
+        let source = GithubPluginSource::parse("ogulcancelik/aster-plugin-examples").unwrap();
         let plugins = vec![github_plugin(
             "examples.agent-telegram-notify",
             "ogulcancelik",
-            "herdr-plugin-examples",
+            "aster-plugin-examples",
             Some("agent-telegram-notify"),
         )];
 
@@ -1564,11 +1564,11 @@ mod tests {
 
     #[test]
     fn github_source_lookup_ignores_owner_and_repo_case() {
-        let source = GithubPluginSource::parse("OGULCANCELIK/HERDR-PLUGIN-EXAMPLES").unwrap();
+        let source = GithubPluginSource::parse("OGULCANCELIK/ASTER-PLUGIN-EXAMPLES").unwrap();
         let plugins = vec![github_plugin(
             "examples.root",
             "ogulcancelik",
-            "herdr-plugin-examples",
+            "aster-plugin-examples",
             None,
         )];
 
@@ -1580,11 +1580,11 @@ mod tests {
 
     #[test]
     fn github_source_lookup_ignores_local_plugins() {
-        let source = GithubPluginSource::parse("ogulcancelik/herdr-plugin-examples").unwrap();
+        let source = GithubPluginSource::parse("ogulcancelik/aster-plugin-examples").unwrap();
         let mut plugin = github_plugin(
             "examples.local",
             "ogulcancelik",
-            "herdr-plugin-examples",
+            "aster-plugin-examples",
             None,
         );
         plugin.source = PluginSourceInfo::default();

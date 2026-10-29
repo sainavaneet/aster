@@ -33,22 +33,22 @@ function New-GauntletProcess($Exe, $Arguments, $Plan, [switch] $Capture) {
     $info.UseShellExecute = $false
     foreach ($argument in $Arguments) { $info.ArgumentList.Add([string]$argument) }
     foreach ($name in @($info.Environment.Keys)) {
-        if ($name -like 'HERDR_*' -or $name -in @('SSH_CONNECTION', 'SSH_TTY')) { $null = $info.Environment.Remove($name) }
+        if ($name -like 'ASTER_*' -or $name -in @('SSH_CONNECTION', 'SSH_TTY')) { $null = $info.Environment.Remove($name) }
     }
     if ($null -ne $Plan) {
-        $info.Environment['HERDR_CONFIG_PATH'] = $Plan.config
+        $info.Environment['ASTER_CONFIG_PATH'] = $Plan.config
         $info.Environment['XDG_CONFIG_HOME'] = $Plan.config_home
-        $info.Environment['HERDR_SESSION'] = $Plan.session
-        if ($Plan.profile -ne 'default') { $info.Environment['HERDR_WINDOWS_INPUT_PROBE'] = $Plan.profile }
-        if ($Plan.path -in @('herdr', 'herdr-remote')) { $info.Environment['HERDR_WINDOWS_INPUT_TRACE_FILE'] = $Plan.input_trace }
-        if ($Plan.path -in @('herdr', 'herdr-remote')) {
+        $info.Environment['ASTER_SESSION'] = $Plan.session
+        if ($Plan.profile -ne 'default') { $info.Environment['ASTER_WINDOWS_INPUT_PROBE'] = $Plan.profile }
+        if ($Plan.path -in @('aster', 'aster-remote')) { $info.Environment['ASTER_WINDOWS_INPUT_TRACE_FILE'] = $Plan.input_trace }
+        if ($Plan.path -in @('aster', 'aster-remote')) {
             # Enable the mapper's client-event trace so a report can distinguish a
             # terminal-issued paste from a bridge reaction (see README, #4314).
-            $info.Environment['HERDR_WINDOWS_INPUT_TRACE'] = '1'
-            $info.Environment['HERDR_LOG'] = 'herdr=info'
+            $info.Environment['ASTER_WINDOWS_INPUT_TRACE'] = '1'
+            $info.Environment['ASTER_LOG'] = 'aster=info'
         }
-        if ($Plan.path -eq 'herdr-remote') {
-            $info.Environment['HERDR_REMOTE_KEYBINDINGS'] = 'local'
+        if ($Plan.path -eq 'aster-remote') {
+            $info.Environment['ASTER_REMOTE_KEYBINDINGS'] = 'local'
         }
     }
     $info.RedirectStandardOutput = $Capture.IsPresent

@@ -11,7 +11,8 @@ name exact missing, stale, duplicated, or value-drifted entries.
 
 Open-ended surfaces (arrays of tables such as [[keys.command]]) are not
 enumerable per-key and are skipped; they are listed in SKIPPED_SUBTREES so
-the skip stays explicit.
+the skip stays explicit. Arrays of tables listed in TABLE_ARRAY_KEYS are
+documented as one row each (their fields are described in that row).
 """
 
 from __future__ import annotations
@@ -31,6 +32,8 @@ ROOT_STRUCT = "Config"
 # Dotted key prefixes that are open-ended (user-defined tables/arrays) and
 # therefore not enumerable in a flat reference table.
 SKIPPED_SUBTREES = ("keys.command",)
+# Arrays of tables documented as a single reference row.
+TABLE_ARRAY_KEYS = ("polaris.team",)
 
 FIELD_RE = re.compile(r"^\s*pub ([a-z_][a-z0-9_]*):\s*(.+?),?\s*$")
 STRUCT_RE = re.compile(r"^\s*pub(?:\(crate\))? struct ([A-Za-z0-9_]+)\s*\{\s*$")
@@ -233,6 +236,11 @@ def collect_entries(model: Model, struct_name: str = ROOT_STRUCT, prefix: str = 
         inner, is_vec = strip_wrappers(struct_field.rust_type)
         if inner in model.structs:
             if dotted in SKIPPED_SUBTREES:
+                continue
+            if is_vec and dotted in TABLE_ARRAY_KEYS:
+                entries.append(
+                    {"key": dotted, "rust_type": struct_field.rust_type, "doc": struct_field.doc}
+                )
                 continue
             if is_vec:
                 raise ValueError(

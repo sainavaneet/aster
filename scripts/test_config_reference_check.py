@@ -120,6 +120,24 @@ class CollectKeysTests(unittest.TestCase):
         self.assertNotIn("keys.command", keys)
         self.assertNotIn("keys.command.key", keys)
 
+    def test_listed_table_array_is_one_documented_row(self) -> None:
+        model = sample_model()
+        parse_file(
+            "pub struct PolarisConfig {\n"
+            "    /// Team roles.\n"
+            "    pub team: Vec<CommandKeybindConfig>,\n"
+            "}\n",
+            model,
+        )
+        model.structs["Config"].append(
+            StructField(name="polaris", rust_type="PolarisConfig", doc="")
+        )
+
+        keys = collect_keys(model)
+
+        self.assertIn("polaris.team", keys)
+        self.assertNotIn("polaris.team.key", keys)
+
     def test_unlisted_vec_of_struct_subtree_is_an_error(self) -> None:
         model = sample_model()
         parse_file(

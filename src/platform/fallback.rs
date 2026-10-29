@@ -59,7 +59,7 @@ pub(crate) fn remote_ssh_config_paths() -> super::RemoteSshConfigPaths {
 
 pub(crate) fn create_remote_ssh_config_dir(_control_socket_name: &str) -> std::io::Result<PathBuf> {
     for attempt in 0..100 {
-        let dir = std::env::temp_dir().join(format!("herdr-ssh-{}-{attempt}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("aster-ssh-{}-{attempt}", std::process::id()));
         match create_remote_private_dir(&dir) {
             Ok(()) => return Ok(dir),
             Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => continue,
@@ -68,7 +68,7 @@ pub(crate) fn create_remote_ssh_config_dir(_control_socket_name: &str) -> std::i
     }
     Err(std::io::Error::new(
         std::io::ErrorKind::AlreadyExists,
-        "failed to create private herdr ssh config directory",
+        "failed to create private aster ssh config directory",
     ))
 }
 
@@ -237,6 +237,11 @@ pub fn process_start_token(_pid: u32) -> Option<u64> {
 
 /// Unsupported platform stub.
 pub fn live_pane_process_group(_shell_pid: u32, _pid: u32, _start_token: u64) -> Option<u32> {
+    None
+}
+
+/// Unsupported platform stub.
+pub fn process_group_id(_pid: u32) -> Option<u32> {
     None
 }
 

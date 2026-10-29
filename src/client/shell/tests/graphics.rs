@@ -138,7 +138,7 @@ fn assert_graphics_cover(state: &mut ClientShellState, covered: Rect, cols: u16,
 
 #[test]
 fn notifications_and_clipboard_feedback_only_cover_their_drawn_corners() {
-    use crate::config::{ToastClipboardPosition as Clipboard, ToastHerdrPosition as Toast};
+    use crate::config::{ToastAsterPosition as Toast, ToastClipboardPosition as Clipboard};
     for (cols, rows) in [(106, 40), (40, 24)] {
         for position in [
             Toast::TopLeft,
@@ -151,6 +151,9 @@ fn notifications_and_clipboard_feedback_only_cover_their_drawn_corners() {
             state.sidebar_collapsed = true;
             state.set_snapshot(Box::new(snapshot()));
             state.set_pane_surface(surface());
+            let now = std::time::Instant::now()
+                .checked_sub(std::time::Duration::from_secs(1))
+                .unwrap_or_else(std::time::Instant::now);
             state.visible_notification = Some(ClientVisibleNotification {
                 endpoint_id: ClientEndpointId::Local,
                 event: SemanticNotification {
@@ -164,7 +167,8 @@ fn notifications_and_clipboard_feedback_only_cover_their_drawn_corners() {
                     pane_id: None,
                     position: Some(position),
                 },
-                deadline: std::time::Instant::now(),
+                shown_at: now,
+                deadline: now + std::time::Duration::from_secs(5),
             });
             state.compose(cols, rows).unwrap();
             let rect = state.hits.notification_toast;
@@ -212,6 +216,7 @@ fn endpoint_notice_and_multiline_diagnostic_cover_the_actual_rows() {
     let mut state = ClientShellState::new(ClientShellConfig::from_config(&Config::default()));
     state.set_snapshot(Box::new(snapshot()));
     state.set_pane_surface(surface());
+    let now = std::time::Instant::now();
     state.visible_endpoint_notice = Some(ClientVisibleEndpointNotice {
         key: ClientEndpointNoticeKey {
             boot_id: "boot-1".into(),
@@ -220,7 +225,8 @@ fn endpoint_notice_and_multiline_diagnostic_cover_the_actual_rows() {
         },
         title: "error".into(),
         body: "body".into(),
-        deadline: std::time::Instant::now(),
+        shown_at: now,
+        deadline: now + std::time::Duration::from_secs(5),
     });
     state.compose(106, 20).unwrap();
     let rect = state.hits.notification_toast;
@@ -310,6 +316,7 @@ fn every_dialog_and_menu_occludes_its_panel_not_the_whole_screen() {
         }),
         ClientShellOverlay::GlobalMenu(ClientGlobalMenuOverlay { highlighted: 0 }),
         ClientShellOverlay::Settings(ClientSettingsOverlay {
+            polaris: crate::config::PolarisConfig::default(),
             section: ClientSettingsSection::Theme,
             selected: 0,
             original_theme_name: String::new(),

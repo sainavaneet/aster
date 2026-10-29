@@ -53,6 +53,7 @@ fn detection_state(
         agent,
         state: AgentState::Idle,
         visible_blocker: false,
+        visible_idle: false,
         visible_working: false,
         process_exited,
         observed_at: at,
@@ -69,7 +70,7 @@ fn real_exit(app: &mut AppState, pane_id: PaneId, agent: Agent, at: Instant) {
 fn pi_report(app: &mut AppState, pane_id: PaneId, state: AgentState, seq: u64) {
     app.handle_app_event(AppEvent::HookStateReported {
         pane_id,
-        source: "herdr:pi".into(),
+        source: "aster:pi".into(),
         agent_label: "pi".into(),
         state,
         message: None,
@@ -86,7 +87,7 @@ fn pi_session_report(
 ) {
     app.handle_app_event(AppEvent::AgentSessionReported {
         pane_id,
-        source: "herdr:pi".into(),
+        source: "aster:pi".into(),
         agent_label: "pi".into(),
         seq: Some(seq),
         session_ref: Some(pi_session()),
@@ -97,7 +98,7 @@ fn pi_session_report(
 fn claude_session_report(app: &mut AppState, pane_id: PaneId, seq: u64) {
     app.handle_app_event(AppEvent::AgentSessionReported {
         pane_id,
-        source: "herdr:claude".into(),
+        source: "aster:claude".into(),
         agent_label: "claude".into(),
         seq: Some(seq),
         session_ref: Some(claude_session()),

@@ -150,6 +150,19 @@ mod tests {
     #[test]
     fn operation_ui_impact_preserves_existing_classification() {
         let expected = [
+            "orbit.agent_start",
+            "orbit.agent_prompt",
+            "orbit.agent_assign",
+            "orbit.run",
+            "orbit.split",
+            "orbit.agent_stop",
+            "orbit.pane_resize",
+            "orbit.pane_zoom",
+            "orbit.pane_close",
+            "orbit.agent_approve",
+            "orbit.agent_deny",
+            "orbit.team_define",
+            "orbit.team_remove",
             "server.reload_config",
             "server.reload_agent_manifests",
             "notification.show",

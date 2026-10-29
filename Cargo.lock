@@ -36,6 +36,48 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
+name = "aster"
+version = "0.9.5"
+dependencies = [
+ "base64",
+ "bincode",
+ "bytes",
+ "clap",
+ "clap_complete",
+ "crossterm",
+ "ctrlc",
+ "futures-util",
+ "getrandom 0.4.2",
+ "ghostty-vt",
+ "interprocess",
+ "jsonc-parser",
+ "libc",
+ "png",
+ "portable-pty",
+ "ratatui",
+ "regex",
+ "schemars",
+ "serde",
+ "serde_ignored",
+ "serde_json",
+ "sha2",
+ "signal-hook",
+ "time",
+ "tokio",
+ "toml",
+ "toml_edit 0.22.27",
+ "tracing",
+ "tracing-subscriber",
+ "unicode-segmentation",
+ "unicode-width",
+ "widestring",
+ "windows",
+ "windows-sys",
+ "wmi",
+ "zbus",
+]
+
+[[package]]
 name = "async-broadcast"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -775,47 +817,6 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
-
-[[package]]
-name = "herdr"
-version = "0.9.5"
-dependencies = [
- "base64",
- "bincode",
- "bytes",
- "clap",
- "clap_complete",
- "crossterm",
- "ctrlc",
- "futures-util",
- "ghostty-vt",
- "interprocess",
- "jsonc-parser",
- "libc",
- "png",
- "portable-pty",
- "ratatui",
- "regex",
- "schemars",
- "serde",
- "serde_ignored",
- "serde_json",
- "sha2",
- "signal-hook",
- "time",
- "tokio",
- "toml",
- "toml_edit 0.22.27",
- "tracing",
- "tracing-subscriber",
- "unicode-segmentation",
- "unicode-width",
- "widestring",
- "windows",
- "windows-sys",
- "wmi",
- "zbus",
-]
 
 [[package]]
 name = "hex"

@@ -28,15 +28,15 @@ esac
 case "$platform" in linux) platform_tag=l ;; macos) platform_tag=m ;; *) exit 2 ;; esac
 variant_tag=${variant:0:1}
 name="rps${platform_tag}${variant_tag}${scenario_tag}r${round}x$$"
-state="/var/tmp/herdr-release-perf-$name"
+state="/var/tmp/aster-release-perf-$name"
 xdg="$state/xdg"
 runtime="$state/run"
 gate="$state/start-output"
 out="$out_root/$variant/$scenario/r$round"
 mkdir -p "$xdg" "$runtime" "$out"
 
-launch_env=(env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_SOCKET_PATH -u HERDR_CLIENT_SOCKET_PATH -u HERDR_SESSION -u HERDR_STARTUP_CWD -u HERDR_WORKSPACE_ID -u HERDR_TAB_ID -u HERDR_PANE_ID XDG_CONFIG_HOME="$xdg" XDG_RUNTIME_DIR="$runtime" HERDR_DISABLE_SOUND=1 SHELL=/bin/sh)
-control_env=(env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_SOCKET_PATH -u HERDR_CLIENT_SOCKET_PATH -u HERDR_STARTUP_CWD -u HERDR_WORKSPACE_ID -u HERDR_TAB_ID -u HERDR_PANE_ID XDG_CONFIG_HOME="$xdg" XDG_RUNTIME_DIR="$runtime" HERDR_DISABLE_SOUND=1 SHELL=/bin/sh HERDR_SESSION="$name")
+launch_env=(env -u ASTER_BIN_PATH -u ASTER_ENV -u ASTER_SOCKET_PATH -u ASTER_CLIENT_SOCKET_PATH -u ASTER_SESSION -u ASTER_STARTUP_CWD -u ASTER_WORKSPACE_ID -u ASTER_TAB_ID -u ASTER_PANE_ID XDG_CONFIG_HOME="$xdg" XDG_RUNTIME_DIR="$runtime" ASTER_DISABLE_SOUND=1 SHELL=/bin/sh)
+control_env=(env -u ASTER_BIN_PATH -u ASTER_ENV -u ASTER_SOCKET_PATH -u ASTER_CLIENT_SOCKET_PATH -u ASTER_STARTUP_CWD -u ASTER_WORKSPACE_ID -u ASTER_TAB_ID -u ASTER_PANE_ID XDG_CONFIG_HOME="$xdg" XDG_RUNTIME_DIR="$runtime" ASTER_DISABLE_SOUND=1 SHELL=/bin/sh ASTER_SESSION="$name")
 
 cleaned=0
 cleanup() {
@@ -88,7 +88,7 @@ while IFS= read -r pane_id; do
 done < "$pane_file"
 touch "$gate"
 
-socket="$xdg/herdr/sessions/$name/herdr.sock"
+socket="$xdg/aster/sessions/$name/aster.sock"
 server_pid=
 for _ in $(seq 1 80); do
   server_pid=$(lsof -t "$socket" 2>/dev/null | head -n1 || true)

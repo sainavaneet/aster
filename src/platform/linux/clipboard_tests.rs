@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 
 fn hung_helper(case: &str) {
     let marker = std::env::temp_dir().join(format!(
-        "herdr-clipboard-hang-{}-{case}",
+        "aster-clipboard-hang-{}-{case}",
         std::process::id()
     ));
     let script = format!("echo $$ > '{}'; {case}", marker.display());
@@ -85,7 +85,7 @@ impl ForkingHelper {
     fn new(script: &str) -> Self {
         use std::os::unix::fs::PermissionsExt;
         let directory = std::env::temp_dir().join(format!(
-            "herdr-forking-clipboard-{}-{}",
+            "aster-forking-clipboard-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -11,7 +11,7 @@ use crate::workspace::Workspace;
 /// Current snapshot format version.
 pub(super) const SNAPSHOT_VERSION: u32 = 3;
 
-/// Serializable snapshot of the entire herdr session.
+/// Serializable snapshot of the entire aster session.
 #[derive(Serialize, Deserialize)]
 pub struct SessionSnapshot {
     /// Format version — used to detect incompatible changes.
@@ -98,6 +98,10 @@ pub struct TabSnapshot {
 
 #[derive(Serialize, Deserialize)]
 pub struct PaneSnapshot {
+    /// Identity of the terminal attached to this pane. Restore reuses it when
+    /// valid and unique so terminal-keyed references survive a restart.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub terminal_id: Option<String>,
     pub cwd: PathBuf,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
@@ -381,6 +385,7 @@ fn capture_tab(
         panes.insert(
             id.raw(),
             PaneSnapshot {
+                terminal_id: terminal_id.map(ToString::to_string),
                 cwd,
                 label,
                 agent_name,
@@ -528,11 +533,11 @@ mod tests {
 
     fn session_fixture(name: &str) -> &'static str {
         match name {
-            "current-herdr" => {
-                include_str!("../../tests/fixtures/session/current-herdr-session.json")
+            "current-aster" => {
+                include_str!("../../tests/fixtures/session/current-aster-session.json")
             }
-            "current-herdr-dev" => {
-                include_str!("../../tests/fixtures/session/current-herdr-dev-session.json")
+            "current-aster-dev" => {
+                include_str!("../../tests/fixtures/session/current-aster-dev-session.json")
             }
             "legacy-pre-tabs-v2" => {
                 include_str!("../../tests/fixtures/session/legacy-pre-tabs-v2.json")
@@ -634,7 +639,7 @@ mod tests {
     #[test]
     fn layout_fingerprint_survives_json_round_trip() {
         let mut snapshot = parse_snapshot(include_str!(
-            "../../tests/fixtures/session/current-herdr-session.json"
+            "../../tests/fixtures/session/current-aster-session.json"
         ))
         .unwrap();
         snapshot.collapsed_space_keys = ["z", "a", "m"].map(String::from).into();
@@ -700,7 +705,8 @@ mod tests {
         panes.insert(
             0,
             PaneSnapshot {
-                cwd: PathBuf::from("/home/can/Projects/herdr"),
+                terminal_id: None,
+                cwd: PathBuf::from("/home/can/Projects/aster"),
                 label: None,
                 agent_name: None,
                 managed_agent_kind: None,
@@ -712,6 +718,7 @@ mod tests {
         panes.insert(
             1,
             PaneSnapshot {
+                terminal_id: None,
                 cwd: PathBuf::from("/home/can/Projects/website"),
                 label: Some("website".into()),
                 agent_name: None,
@@ -726,7 +733,7 @@ mod tests {
             workspaces: vec![WorkspaceSnapshot {
                 id: Some("wproj".to_string()),
                 custom_name: Some("pi-mono".to_string()),
-                identity_cwd: PathBuf::from("/home/can/Projects/herdr"),
+                identity_cwd: PathBuf::from("/home/can/Projects/aster"),
                 worktree_space: None,
                 public_pane_numbers: HashMap::from([(0, 1), (1, 2)]),
                 next_public_pane_number: 3,
@@ -768,7 +775,7 @@ mod tests {
         assert_eq!(restored.workspaces[0].tabs[0].panes.len(), 2);
         assert_eq!(
             restored.workspaces[0].tabs[0].panes[&0].cwd,
-            PathBuf::from("/home/can/Projects/herdr")
+            PathBuf::from("/home/can/Projects/aster")
         );
         assert_eq!(
             restored.workspaces[0].tabs[0].panes[&1].label.as_deref(),
@@ -780,7 +787,7 @@ mod tests {
 
     #[test]
     fn current_session_fixture_parses() {
-        let snap = parse_snapshot(session_fixture("current-herdr")).unwrap();
+        let snap = parse_snapshot(session_fixture("current-aster")).unwrap();
 
         assert_eq!(snap.version, 3);
         assert_eq!(snap.workspaces.len(), 2);
@@ -797,7 +804,7 @@ mod tests {
 
     #[test]
     fn current_dev_session_fixture_parses_additive_fields() {
-        let snap = parse_snapshot(session_fixture("current-herdr-dev")).unwrap();
+        let snap = parse_snapshot(session_fixture("current-aster-dev")).unwrap();
 
         assert_eq!(snap.version, 3);
         assert_eq!(snap.workspaces.len(), 2);
@@ -872,7 +879,7 @@ mod tests {
         assert_eq!(ws.tabs[0].focused, Some(1));
         assert_eq!(ws.tabs[0].root_pane, Some(0));
         assert_eq!(ws.tabs[0].panes[&0].cwd, PathBuf::from("/tmp/pion"));
-        assert_eq!(ws.tabs[0].panes[&1].cwd, PathBuf::from("/tmp/herdr"));
+        assert_eq!(ws.tabs[0].panes[&1].cwd, PathBuf::from("/tmp/aster"));
     }
 
     #[test]
@@ -941,9 +948,9 @@ mod tests {
         let mut state = state_with_workspaces(&["main"]);
         state.workspaces[0].worktree_space = Some(crate::workspace::WorktreeSpaceMembership {
             key: "repo-key".into(),
-            label: "herdr".into(),
-            repo_root: PathBuf::from("/repo/herdr"),
-            checkout_path: PathBuf::from("/repo/herdr/worktree-a"),
+            label: "aster".into(),
+            repo_root: PathBuf::from("/repo/aster"),
+            checkout_path: PathBuf::from("/repo/aster/worktree-a"),
             is_linked_worktree: true,
         });
 
@@ -1069,7 +1076,7 @@ mod tests {
     async fn capture_prefers_live_shell_cwd_and_keeps_it_after_exit() {
         let old = std::env::current_dir().unwrap();
         let new = std::env::temp_dir().join(format!(
-            "herdr-persist-cwd-{}-{}",
+            "aster-persist-cwd-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -1176,14 +1183,14 @@ mod tests {
         let second_terminal_id = state.workspaces[0].tabs[0].panes[&second]
             .attached_terminal_id
             .clone();
-        state.terminals.get_mut(&second_terminal_id).unwrap().cwd = PathBuf::from("/tmp/herdr");
+        state.terminals.get_mut(&second_terminal_id).unwrap().cwd = PathBuf::from("/tmp/aster");
 
         let snapshot = capture_from_state(&state);
         let workspace = &snapshot.workspaces[0];
         let tab = &workspace.tabs[0];
         assert_eq!(workspace.identity_cwd, PathBuf::from("/tmp/pion"));
         assert_eq!(tab.panes[&root.raw()].cwd, PathBuf::from("/tmp/pion"));
-        assert_eq!(tab.panes[&second.raw()].cwd, PathBuf::from("/tmp/herdr"));
+        assert_eq!(tab.panes[&second.raw()].cwd, PathBuf::from("/tmp/aster"));
     }
 
     #[tokio::test]
@@ -1277,12 +1284,12 @@ mod tests {
             crate::detect::AgentState::Idle,
         );
         terminal.set_persisted_agent_session(crate::agent_resume::PersistedAgentSession {
-            source: "herdr:pi".into(),
+            source: "aster:pi".into(),
             agent: "pi".into(),
             session_ref: crate::agent_resume::AgentSessionRef::path(session_path.clone()).unwrap(),
         });
         terminal.set_hook_authority_with_session_ref(
-            "herdr:pi".into(),
+            "aster:pi".into(),
             "pi".into(),
             crate::detect::AgentState::Working,
             None,
@@ -1296,7 +1303,7 @@ mod tests {
             .as_ref()
             .expect("agent session should be captured");
 
-        assert_eq!(agent_session.source, "herdr:pi");
+        assert_eq!(agent_session.source, "aster:pi");
         assert_eq!(agent_session.agent, "pi");
         assert_eq!(
             agent_session.kind,
@@ -1352,7 +1359,7 @@ mod tests {
             .get_mut(&terminal_id)
             .unwrap()
             .set_persisted_agent_session(crate::agent_resume::PersistedAgentSession {
-                source: "herdr:opencode".into(),
+                source: "aster:opencode".into(),
                 agent: "opencode".into(),
                 session_ref: crate::agent_resume::AgentSessionRef::id("opencode-session").unwrap(),
             });
@@ -1363,7 +1370,7 @@ mod tests {
             .as_ref()
             .expect("persisted agent session should be captured");
 
-        assert_eq!(agent_session.source, "herdr:opencode");
+        assert_eq!(agent_session.source, "aster:opencode");
         assert_eq!(agent_session.agent, "opencode");
         assert_eq!(
             agent_session.kind,
@@ -1398,7 +1405,8 @@ mod tests {
         panes.insert(
             0,
             PaneSnapshot {
-                cwd: PathBuf::from("/tmp/this-directory-does-not-exist-for-herdr-test"),
+                terminal_id: None,
+                cwd: PathBuf::from("/tmp/this-directory-does-not-exist-for-aster-test"),
                 label: None,
                 agent_name: None,
                 managed_agent_kind: None,
@@ -1410,6 +1418,7 @@ mod tests {
         panes.insert(
             1,
             PaneSnapshot {
+                terminal_id: None,
                 cwd: std::env::var("HOME")
                     .map(PathBuf::from)
                     .unwrap_or_else(|_| PathBuf::from("/tmp")),
@@ -1460,7 +1469,7 @@ mod tests {
         assert_eq!(restored.workspaces.len(), 1);
         assert_eq!(
             restored.workspaces[0].tabs[0].panes[&0].cwd,
-            PathBuf::from("/tmp/this-directory-does-not-exist-for-herdr-test")
+            PathBuf::from("/tmp/this-directory-does-not-exist-for-aster-test")
         );
     }
 }

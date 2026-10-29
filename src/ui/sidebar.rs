@@ -16,6 +16,18 @@ use crate::app::AppState;
 use crate::detect::AgentState;
 use crate::terminal::TerminalRuntimeRegistry;
 
+pub(crate) const WORKING_SPINNER_GLYPHS: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
+
+pub(crate) const fn working_spinner_glyph(
+    phase: Option<u8>,
+    fallback: &'static str,
+) -> &'static str {
+    match phase {
+        Some(index) => WORKING_SPINNER_GLYPHS[(index as usize) % WORKING_SPINNER_GLYPHS.len()],
+        None => fallback,
+    }
+}
+
 pub(crate) struct AgentPanelEntry {
     pub ws_idx: usize,
     pub tab_idx: usize,

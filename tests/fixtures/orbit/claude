@@ -1,0 +1,153 @@
+#!/bin/bash
+# Fake `claude` for Orbit integration tests and scripts/orbit_failure_demo.sh.
+#
+# Aster identifies it as Claude from its process argv (`bash .../claude`), and the
+# bundled Claude manifest classifies its screen: an idle prompt box (`❯` between
+# two horizontal rules) is visible-idle, a `✻ Working… (… esc to interrupt)` line
+# is working. It never talks to a model.
+#
+# Identity: the value of `--model` (Polaris passes `[polaris] model`, workers
+# pass `orbit.agent_start {model}`) or of `--resume`. Like Claude's SessionStart
+# hook, it reports that identity as its session ID, so a restored session resumes
+# it with `claude --resume <name>`. Files in $ORBIT_FAKE_STATE:
+#   <name>.pid      this process id
+#   <name>.argv     its launch arguments, each terminated by a NUL byte
+#   <name>.mode     write `busy` to show the working indicator, `blocked` to show
+#                   a Bash permission prompt, `trust` to show a folder-trust
+#                   dialog (blocked, but not a permission prompt), `idle` to return
+#   <name>.prompts  every submitted prompt as read from the PTY, each preceded
+#                   by `=== prompt N ===`; the screen shows only its first line
+#                   and any report Facts:, tests_run:, and checks: lines
+#   <name>.answers  one line per answered dialog: `approve` for the `1` key,
+#                   `deny` for Esc, prefixed `trust-` on the folder-trust
+#                   dialog; answering returns the mode to idle
+#   <name>.command  the command the blocked Bash permission prompt shows
+#                   (default `rm -rf build`)
+#   <name>.collapse a byte count: like Claude Code, a prompt longer than it is
+#                   shown as `[Pasted text #N +M lines]` instead of its first
+#                   line, hiding any delivery marker
+set -u
+name=agent
+previous=
+for argument in "$@"; do
+    case $previous in --model | --resume) name=$argument ;; esac
+    previous=$argument
+done
+state_dir=${ORBIT_FAKE_STATE:?ORBIT_FAKE_STATE must name a writable directory}
+mode_file="$state_dir/$name.mode"
+log="$state_dir/$name.prompts"
+answers="$state_dir/$name.answers"
+collapse_file="$state_dir/$name.collapse"
+command_file="$state_dir/$name.command"
+pastes=0
+printf '%s\n' "$$" >"$state_dir/$name.pid"
+printf '%s\0' "$@" >"$state_dir/$name.argv"
+: >>"$log"
+if [ -n "${ASTER_BIN_PATH:-}" ] && [ -n "${ASTER_PANE_ID:-}" ]; then
+    "$ASTER_BIN_PATH" pane report-agent-session --source aster:claude --agent claude \
+        --agent-session-id "$name" --session-start-source startup "$ASTER_PANE_ID" \
+        </dev/null >/dev/null 2>&1 || true
+fi
+# Raw input like a real TUI agent (a canonical tty caps a line at 1024 bytes);
+# keep output newline translation for the plain printf drawing below.
+stty raw -echo opost onlcr 2>/dev/null
+printf '\033[?2004h'
+
+rule='────────────────────────────────────────────────────────────'
+current_mode() {
+    local mode=
+    [ -f "$mode_file" ] && mode=$(cat "$mode_file")
+    case $mode in busy | blocked | trust) echo "$mode" ;; *) echo idle ;; esac
+}
+clear_screen() {
+    printf '\033[2J\033[3J\033[H'
+}
+draw() {
+    case $1 in
+    busy) printf '\n✻ Working… (1s · esc to interrupt)\n' ;;
+    # Claude's Bash permission dialog, as the manifest's bash_permission_prompt sees it.
+    # Claude's folder-trust dialog, which the manifest sees as live_blocked_form.
+    trust) printf '\n%s\n Do you trust the files in this folder?\n\n ❯ 1. Yes, proceed\n   2. No, exit\n\n Enter to confirm · Esc to cancel\n' "$rule" ;;
+    blocked) printf '\n Bash command\n\n   %s\n   Remove build output\n\n Do you want to proceed?\n ❯ 1. Yes\n   2. Yes, and don'"'"'t ask again for rm commands\n   3. No, and tell Claude what to do differently (esc)\n\n Esc to cancel · Tab to amend\n' "$(cat "$command_file" 2>/dev/null || echo 'rm -rf build')" ;;
+    *) printf '\n%s\n❯ \n%s\n' "$rule" "$rule" ;;
+    esac
+}
+# Records the answer and closes the dialog like Claude does.
+answer() {
+    printf '%s\n' "$1" >>"$answers"
+    printf 'idle' >"$mode_file"
+    clear_screen
+    draw idle
+}
+
+printf 'fake claude (%s) ready\n' "$name"
+draw "$(current_mode)"
+# Mode changes are drawn by a watcher so the reader can block on input.
+(
+    shown=$(current_mode)
+    while sleep 0.2; do
+        wanted=$(current_mode)
+        [ "$wanted" = "$shown" ] && continue
+        shown=$wanted
+        # Clear so a stale working line or dialog never sits inside the detection region.
+        [ "$wanted" != busy ] && clear_screen
+        draw "$wanted"
+    done
+) &
+trap 'kill $! 2>/dev/null; stty sane 2>/dev/null; printf "\033[?2004l"' EXIT
+
+# Aster pastes each prompt in bracketed-paste mode and presses Enter after it, so
+# a submission is framed by the paste-end marker. Reading up to `~` keeps this
+# independent of whether the tty translates Enter (ICRNL). EOF means the pane closed.
+paste_start=$'\033[200~'
+paste_end=$'\033[201'
+count=0
+pending=
+# Between prompts the first byte is read alone so a blocked dialog can take a
+# single key (`1` approves, Esc declines); Aster never pastes into a blocked agent.
+while :; do
+    if [ -n "$pending" ]; then
+        IFS= read -r -d '~' chunk || break
+    else
+        IFS= read -r -n 1 first || break
+        # The Enter after a paste, or a line break: leading breaks are dropped anyway.
+        case $first in $'\r' | '') continue ;; esac
+        mode=$(current_mode)
+        if [ "$mode" = blocked ] || [ "$mode" = trust ]; then
+            prefix=
+            [ "$mode" = trust ] && prefix=trust-
+            case $first in
+            1) answer "${prefix}approve"; continue ;;
+            $'\033') answer "${prefix}deny"; continue ;;
+            esac
+        fi
+        chunk=
+        if [ "$first" != '~' ]; then
+            IFS= read -r -d '~' chunk || break
+            chunk=$first$chunk
+        fi
+    fi
+    pending+=$chunk
+    case $pending in
+    *"$paste_end") ;;
+    *) pending+='~'; continue ;;
+    esac
+    prompt=${pending%"$paste_end"}
+    pending=
+    prompt=${prompt//"$paste_start"/}
+    while [[ $prompt == [$'\r\n']* ]]; do prompt=${prompt:1}; done
+    [ -z "$prompt" ] && continue
+    count=$((count + 1))
+    printf '=== prompt %s ===\n%s\n' "$count" "$prompt" >>"$log"
+    # Echo only the first line (a delivery's marker) and a report's headline facts;
+    # the log is authoritative.
+    display=${prompt%%$'\n'*}
+    if [ -f "$collapse_file" ] && [ "${#prompt}" -gt "$(cat "$collapse_file")" ]; then
+        pastes=$((pastes + 1))
+        lines=$(printf '%s\n' "$prompt" | wc -l | tr -d ' ')
+        display="[Pasted text #$pastes +$lines lines]"
+    fi
+    printf 'received prompt %s (%s bytes): %s\n' "$count" "${#prompt}" "$display"
+    printf '%s\n' "$prompt" | grep -E '^(Facts:|tests_run: |checks: )' || true
+    draw "$(current_mode)"
+done

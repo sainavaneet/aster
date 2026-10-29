@@ -203,7 +203,6 @@ pub(crate) fn is_not_working_tree_remove_error(message: &str) -> bool {
     lower.contains("is not a working tree") || lower.contains("is not a worktree")
 }
 
-#[cfg(windows)]
 pub(crate) fn worktree_dirty_remove_message(path: &Path) -> String {
     format!(
         "fatal: '{}' contains modified or untracked files, use --force to delete it",
@@ -211,7 +210,6 @@ pub(crate) fn worktree_dirty_remove_message(path: &Path) -> String {
     )
 }
 
-#[cfg(any(windows, test))]
 pub(crate) fn checkout_has_dirty_files(
     path: &Path,
     trust_repository: bool,
@@ -258,6 +256,20 @@ pub(crate) fn build_worktree_add_new_branch_command(
     }
 }
 
+/// Deletes a local branch, used only for a branch the caller just created.
+pub(crate) fn build_branch_delete_command(
+    repo_root: &Path,
+    branch: &str,
+    trust_repository: bool,
+) -> WorktreeCommand {
+    let mut args = repository_git_args(repo_root, trust_repository);
+    args.extend(["branch".to_string(), "-D".to_string(), branch.to_string()]);
+    WorktreeCommand {
+        program: "git".to_string(),
+        args,
+    }
+}
+
 pub(crate) fn build_worktree_add_existing_branch_command(
     repo_root: &Path,
     path: &Path,
@@ -277,7 +289,7 @@ pub(crate) fn build_worktree_add_existing_branch_command(
     }
 }
 
-fn local_branch_exists(
+pub(crate) fn local_branch_exists(
     repo_root: &Path,
     branch: &str,
     trust_repository: bool,
@@ -576,7 +588,7 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos())
             .unwrap_or(0);
-        std::env::temp_dir().join(format!("herdr-{name}-{}-{nanos}", std::process::id()))
+        std::env::temp_dir().join(format!("aster-{name}-{}-{nanos}", std::process::id()))
     }
 
     fn run_git(repo: &Path, args: &[&str]) {
@@ -598,8 +610,8 @@ mod tests {
         let repo = unique_temp_path(name);
         std::fs::create_dir_all(&repo).unwrap();
         run_git(&repo, &["init", "--quiet"]);
-        run_git(&repo, &["config", "user.email", "herdr@example.invalid"]);
-        run_git(&repo, &["config", "user.name", "Herdr Test"]);
+        run_git(&repo, &["config", "user.email", "aster@example.invalid"]);
+        run_git(&repo, &["config", "user.name", "Aster Test"]);
         std::fs::write(repo.join("README.md"), "test\n").unwrap();
         run_git(&repo, &["add", "README.md"]);
         run_git(&repo, &["commit", "--quiet", "-m", "initial"]);
@@ -609,12 +621,12 @@ mod tests {
     #[test]
     fn trusted_repository_git_args_are_request_scoped() {
         assert_eq!(
-            repository_git_args(Path::new("/repo/herdr"), false),
-            ["-C", "/repo/herdr"]
+            repository_git_args(Path::new("/repo/aster"), false),
+            ["-C", "/repo/aster"]
         );
         assert_eq!(
-            repository_git_args(Path::new("/repo/herdr"), true),
-            ["-c", "safe.directory=/repo/herdr", "-C", "/repo/herdr",]
+            repository_git_args(Path::new("/repo/aster"), true),
+            ["-c", "safe.directory=/repo/aster", "-C", "/repo/aster",]
         );
     }
 
@@ -686,11 +698,11 @@ prunable stale
     #[test]
     fn expand_tilde_path_uses_home_when_available() {
         assert_eq!(
-            expand_tilde_path_from_env("~/.herdr/worktrees", false, |key| match key {
+            expand_tilde_path_from_env("~/.aster/worktrees", false, |key| match key {
                 "HOME" => Some("/home/me".into()),
                 _ => None,
             }),
-            PathBuf::from("/home/me/.herdr/worktrees")
+            PathBuf::from("/home/me/.aster/worktrees")
         );
         assert_eq!(
             expand_tilde_path_from_env("/tmp/worktrees", false, |_| None),
@@ -703,10 +715,10 @@ prunable stale
         assert_eq!(
             home_dir_from_env(true, |key| match key {
                 "HOME" => Some("~".into()),
-                "USERPROFILE" => Some(r"C:\Users\herdr".into()),
+                "USERPROFILE" => Some(r"C:\Users\aster".into()),
                 _ => None,
             }),
-            Ok(PathBuf::from(r"C:\Users\herdr"))
+            Ok(PathBuf::from(r"C:\Users\aster"))
         );
     }
 
@@ -715,10 +727,10 @@ prunable stale
         assert_eq!(
             home_dir_from_env(true, |key| match key {
                 "HOMEDRIVE" => Some("C:".into()),
-                "HOMEPATH" => Some(r"\Users\herdr".into()),
+                "HOMEPATH" => Some(r"\Users\aster".into()),
                 _ => None,
             }),
-            Ok(PathBuf::from(r"C:\Users\herdr"))
+            Ok(PathBuf::from(r"C:\Users\aster"))
         );
     }
 
@@ -735,7 +747,7 @@ prunable stale
         assert_eq!(
             home_dir_from_env(true, |key| match key {
                 "HOMEDRIVE" => Some("C:".into()),
-                "HOMEPATH" => Some("Users\\herdr".into()),
+                "HOMEPATH" => Some("Users\\aster".into()),
                 _ => None,
             }),
             Err(())
@@ -746,11 +758,11 @@ prunable stale
     #[test]
     fn non_windows_tilde_expansion_keeps_windows_separator_literal() {
         assert_eq!(
-            expand_tilde_path_from_env(r"~\.herdr\worktrees", false, |key| match key {
+            expand_tilde_path_from_env(r"~\.aster\worktrees", false, |key| match key {
                 "HOME" => Some("/home/me".into()),
                 _ => None,
             }),
-            PathBuf::from(r"~\.herdr\worktrees")
+            PathBuf::from(r"~\.aster\worktrees")
         );
     }
 
@@ -760,23 +772,23 @@ prunable stale
         fn env(key: &str) -> Option<OsString> {
             match key {
                 "HOME" => Some("~".into()),
-                "USERPROFILE" => Some(r"C:\Users\herdr".into()),
+                "USERPROFILE" => Some(r"C:\Users\aster".into()),
                 _ => None,
             }
         }
 
-        let default_path = expand_tilde_path_from_env("~/.herdr/worktrees", true, env);
+        let default_path = expand_tilde_path_from_env("~/.aster/worktrees", true, env);
         assert_eq!(
             default_path,
-            PathBuf::from(r"C:\Users\herdr\.herdr\worktrees")
+            PathBuf::from(r"C:\Users\aster\.aster\worktrees")
         );
         assert_eq!(
             default_path.display().to_string(),
-            r"C:\Users\herdr\.herdr\worktrees"
+            r"C:\Users\aster\.aster\worktrees"
         );
         assert_eq!(
-            expand_tilde_path_from_env(r"~\.herdr\worktrees", true, env),
-            PathBuf::from(r"C:\Users\herdr\.herdr\worktrees")
+            expand_tilde_path_from_env(r"~\.aster\worktrees", true, env),
+            PathBuf::from(r"C:\Users\aster\.aster\worktrees")
         );
     }
 
@@ -784,11 +796,11 @@ prunable stale
     fn default_checkout_path_appends_repo_and_branch_slug() {
         assert_eq!(
             default_checkout_path(
-                Path::new("/home/me/.herdr/worktrees"),
-                "herdr",
+                Path::new("/home/me/.aster/worktrees"),
+                "aster",
                 "worktree/brave-river",
             ),
-            PathBuf::from("/home/me/.herdr/worktrees/herdr/worktree-brave-river")
+            PathBuf::from("/home/me/.aster/worktrees/aster/worktree-brave-river")
         );
     }
 
@@ -821,8 +833,8 @@ prunable stale
     #[test]
     fn worktree_remove_command_preserves_branch_by_not_deleting_it() {
         let command = build_worktree_remove_command(
-            Path::new("/repo/herdr"),
-            Path::new("/w/herdr/issue-137"),
+            Path::new("/repo/aster"),
+            Path::new("/w/aster/issue-137"),
             false,
             false,
         );
@@ -831,10 +843,10 @@ prunable stale
             command.args,
             vec![
                 "-C",
-                "/repo/herdr",
+                "/repo/aster",
                 "worktree",
                 "remove",
-                "/w/herdr/issue-137"
+                "/w/aster/issue-137"
             ]
         );
     }
@@ -842,8 +854,8 @@ prunable stale
     #[test]
     fn forced_worktree_remove_command_uses_git_force_flag() {
         let command = build_worktree_remove_command(
-            Path::new("/repo/herdr"),
-            Path::new("/w/herdr/issue-137"),
+            Path::new("/repo/aster"),
+            Path::new("/w/aster/issue-137"),
             true,
             false,
         );
@@ -851,11 +863,11 @@ prunable stale
             command.args,
             vec![
                 "-C",
-                "/repo/herdr",
+                "/repo/aster",
                 "worktree",
                 "remove",
                 "--force",
-                "/w/herdr/issue-137"
+                "/w/aster/issue-137"
             ]
         );
     }
@@ -863,13 +875,13 @@ prunable stale
     #[test]
     fn dirty_remove_error_detection_matches_git_force_hint() {
         assert!(is_dirty_worktree_remove_error(
-            "fatal: '/w/herdr' contains modified or untracked files, use --force to delete it"
+            "fatal: '/w/aster' contains modified or untracked files, use --force to delete it"
         ));
         assert!(!is_dirty_worktree_remove_error(
-            "fatal: '/w/herdr' is a missing but already registered worktree"
+            "fatal: '/w/aster' is a missing but already registered worktree"
         ));
         assert!(!is_dirty_worktree_remove_error(
-            "fatal: '/w/herdr' contains a locked worktree, use --force only if you know why"
+            "fatal: '/w/aster' contains a locked worktree, use --force only if you know why"
         ));
     }
 
@@ -942,8 +954,8 @@ prunable stale
     #[test]
     fn worktree_add_command_creates_new_branch_from_base() {
         let command = build_worktree_add_new_branch_command(
-            Path::new("/repo/herdr"),
-            Path::new("/w/herdr/worktree-brave-river"),
+            Path::new("/repo/aster"),
+            Path::new("/w/aster/worktree-brave-river"),
             "worktree/brave-river",
             "HEAD",
             false,
@@ -953,12 +965,12 @@ prunable stale
             command.args,
             vec![
                 "-C",
-                "/repo/herdr",
+                "/repo/aster",
                 "worktree",
                 "add",
                 "-b",
                 "worktree/brave-river",
-                "/w/herdr/worktree-brave-river",
+                "/w/aster/worktree-brave-river",
                 "HEAD"
             ]
         );
@@ -967,8 +979,8 @@ prunable stale
     #[test]
     fn worktree_add_command_checks_out_existing_branch() {
         let command = build_worktree_add_existing_branch_command(
-            Path::new("/repo/herdr"),
-            Path::new("/w/herdr/worktree-brave-river"),
+            Path::new("/repo/aster"),
+            Path::new("/w/aster/worktree-brave-river"),
             "worktree/brave-river",
             false,
         );
@@ -977,10 +989,10 @@ prunable stale
             command.args,
             vec![
                 "-C",
-                "/repo/herdr",
+                "/repo/aster",
                 "worktree",
                 "add",
-                "/w/herdr/worktree-brave-river",
+                "/w/aster/worktree-brave-river",
                 "worktree/brave-river"
             ]
         );

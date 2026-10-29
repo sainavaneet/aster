@@ -13,6 +13,214 @@
       ]
     },
     {
+      "id": "polaris",
+      "title": "Polaris",
+      "keys": [
+        {
+          "key": "polaris.enabled",
+          "type": "boolean",
+          "default": "true",
+          "description": "Open Polaris, the lead agent, on startup. Changes apply to the next startup; running agents keep their settings."
+        },
+        {
+          "key": "polaris.provider",
+          "type": "string",
+          "default": "\"claude\"",
+          "description": "Agent provider for Polaris. The initial supported provider is Claude."
+        },
+        {
+          "key": "polaris.model",
+          "type": "string",
+          "default": "\"fable\"",
+          "description": "Claude model alias used by Polaris. The default fable selects Fable 5.1."
+        },
+        {
+          "key": "polaris.workers.kinds",
+          "type": "array of strings",
+          "default": "[\"claude\", \"codex\"]",
+          "description": "Agent kinds Polaris may start as Orbit workers with orbit_agent_start, such as claude, codex, or gemini. Other kinds are rejected with the allowed list. Applies on config reload."
+        },
+        {
+          "key": "polaris.workers.max_concurrent",
+          "type": "integer",
+          "default": "4",
+          "description": "Maximum live agents in the bound Orbit tab, excluding the lead, before orbit_agent_start refuses another worker. 0 means unlimited."
+        },
+        {
+          "key": "polaris.workers.models",
+          "type": "table of string arrays",
+          "default": "{}",
+          "description": "Allowed models per worker kind, for example claude = [\"fable\", \"opus\", \"sonnet\"]. A missing or empty list allows any model. Model overrides apply to Claude and Codex workers."
+        },
+        {
+          "key": "polaris.workers.defaults",
+          "type": "table of strings",
+          "default": "{}",
+          "description": "Model applied per worker kind when orbit_agent_start names none, for example claude = \"fable\". Applies to Claude and Codex workers."
+        },
+        {
+          "key": "polaris.workers.permission_mode",
+          "type": "string",
+          "default": "unset",
+          "description": "Claude --permission-mode for Orbit workers when orbit_agent_start names none: manual, acceptEdits, auto, plan, or dontAsk. Unset inherits your Claude settings. bypassPermissions is refused. Applies to Claude workers on config reload."
+        },
+        {
+          "key": "polaris.notify.events",
+          "type": "array of strings",
+          "default": "[\"report\", \"notice\", \"blocked\", \"failed\"]",
+          "values": [
+            "report",
+            "notice",
+            "blocked",
+            "failed"
+          ],
+          "description": "Orbit events that notify you through ui.toast.delivery: a worker report delivered to Polaris, an Aster notice (worker lost, unreported, or timed out), a worker blocked on a prompt for 30 seconds, and a failed delivery. One notification per task and event; an empty list disables them. Nothing is shown while ui.toast.delivery is off."
+        },
+        {
+          "key": "polaris.delivery.lead_absent_timeout_ms",
+          "type": "integer",
+          "default": "1800000",
+          "description": "How long a queued Orbit report waits while Polaris is absent or its pane does not run its agent before the delivery fails and you are notified (milliseconds, at least 1000)."
+        },
+        {
+          "key": "polaris.approvals.lead_may_approve",
+          "type": "boolean",
+          "default": "false",
+          "description": "Allow Polaris to answer a blocked Orbit worker's approval prompt with orbit_agent_approve or orbit_agent_deny. When false, those tools refuse and Polaris asks you to answer in the worker's pane."
+        },
+        {
+          "key": "polaris.decisions.provider",
+          "type": "string",
+          "default": "\"rules\"",
+          "description": "Where decisions beyond the rules come from: rules (never calls out) or jev (TypeSafe AI's Jev model over HTTPS). The rules for worker approvals always run first.",
+          "values": [
+            "rules",
+            "jev"
+          ]
+        },
+        {
+          "key": "polaris.decisions.model",
+          "type": "string",
+          "default": "\"jev-latest\"",
+          "description": "Jev model name."
+        },
+        {
+          "key": "polaris.decisions.api_key_env",
+          "type": "string",
+          "default": "\"TYPESAFE_API_KEY\"",
+          "description": "Environment variable of the Aster server holding the API key. Key material is never logged, journaled, or shown in activity."
+        },
+        {
+          "key": "polaris.decisions.api_key_file",
+          "type": "string",
+          "default": "unset",
+          "description": "File holding the API key, read when api_key_env is unset; ~ is expanded. Refused unless it is a regular file that group and others cannot read (chmod 600)."
+        },
+        {
+          "key": "polaris.decisions.endpoint",
+          "type": "string",
+          "default": "\"https://api.typesafe.ai\"",
+          "description": "API base URL: https, or http only for 127.0.0.1 or localhost."
+        },
+        {
+          "key": "polaris.decisions.timeout_ms",
+          "type": "integer",
+          "default": "3000",
+          "description": "Limit of one provider call in milliseconds, 100 to 30000. A timeout counts as no answer: the user is asked."
+        },
+        {
+          "key": "polaris.decisions.approvals.enabled",
+          "type": "boolean",
+          "default": "false",
+          "description": "Ask the provider about worker permission prompts no rule decides. Decisions are only made while polaris.approvals.lead_may_approve is true."
+        },
+        {
+          "key": "polaris.decisions.approvals.approve_min",
+          "type": "number",
+          "default": "0.90",
+          "description": "Minimum probability of approve for an automatic approval."
+        },
+        {
+          "key": "polaris.decisions.approvals.ask_or_deny_max",
+          "type": "number",
+          "default": "0.10",
+          "description": "Maximum combined probability of ask_user and deny for an automatic approval."
+        },
+        {
+          "key": "polaris.decisions.approvals.low_risk_min",
+          "type": "number",
+          "default": "0.85",
+          "description": "Minimum risk probability in levels 0 and 1 (read-only, low risk) for an automatic approval."
+        },
+        {
+          "key": "polaris.decisions.approvals.high_risk_max",
+          "type": "number",
+          "default": "0.02",
+          "description": "Maximum risk probability in levels 3 and 4 (sensitive, destructive) for an automatic approval."
+        },
+        {
+          "key": "polaris.decisions.approvals.allow_patterns",
+          "type": "array of strings",
+          "default": "[]",
+          "description": "Whole simple commands the rules approve; * matches any text. A command with shell operators, redirections, or substitutions never matches."
+        },
+        {
+          "key": "polaris.decisions.approvals.deny_patterns",
+          "type": "array of strings",
+          "default": "rm -rf, git push --force, git reset --hard, sudo, curl * | sh, ~/.ssh, .env, *.pem, and similar",
+          "description": "Text that always sends a prompt to the user, matched anywhere in the command ignoring case; * matches any text. Checked before allow_patterns. Never denies automatically."
+        },
+        {
+          "key": "polaris.decisions.report_sanity.enabled",
+          "type": "boolean",
+          "default": "false",
+          "description": "Check each worker report against its assignment with the provider and add a Decision line to flagged reports. Never blocks delivery."
+        },
+        {
+          "key": "polaris.decisions.report_sanity.followup_min",
+          "type": "number",
+          "default": "0.80",
+          "description": "needs_followup at or above this flags a report."
+        },
+        {
+          "key": "polaris.decisions.report_sanity.score_min",
+          "type": "number",
+          "default": "2.5",
+          "description": "answers_assignment score (0 to 4) below this flags a report."
+        },
+        {
+          "key": "polaris.decisions.routing.enabled",
+          "type": "boolean",
+          "default": "false",
+          "description": "Let orbit_route ask the provider which team role should own a request. Suggestions only; nothing is assigned."
+        },
+        {
+          "key": "polaris.decisions.routing.accept_min",
+          "type": "number",
+          "default": "0.75",
+          "description": "Minimum owner probability for orbit_route to return accepted true."
+        },
+        {
+          "key": "polaris.decisions.interruption.enabled",
+          "type": "boolean",
+          "default": "false",
+          "description": "Before typing a report batch into an idle Polaris, ask whether to deliver now. A low answer defers delivery by 30 seconds; it never delivers earlier."
+        },
+        {
+          "key": "polaris.decisions.interruption.deliver_min",
+          "type": "number",
+          "default": "0.70",
+          "description": "deliver_now below this defers delivery by 30 seconds."
+        },
+        {
+          "key": "polaris.team",
+          "type": "array of tables",
+          "default": "[]",
+          "description": "Team roles that seed the session's Orbit team roster on first start, when the session has no orbit-team.json yet. Each [[polaris.team]] entry has name (lowercase, like an agent name), area (free text), prompt (role instructions, at most 4096 bytes), and members: 1 to 4 tables with name, kind (claude or codex), and optional model and permission_mode, checked against [polaris.workers]. At most 8 roles. Each role gets its own tab before the Orbit tab; its members are resumed after a restart and relaunched when their agent exits. Later changes are made with orbit_team_define and orbit_team_remove; config reload does not change an existing roster."
+        }
+      ]
+    },
+    {
       "id": "server",
       "title": "Server",
       "keys": [
@@ -457,7 +665,7 @@
           "key": "update.channel",
           "type": "enum",
           "default": "\"stable\" (\"preview\" for Windows preview builds)",
-          "description": "Update channel used by background version checks and herdr update. Stable Windows builds default to stable; existing Windows preview installs stay on preview until explicitly switched. Homebrew, mise, and Nix installs ignore the preview channel.",
+          "description": "Update channel used by background version checks and aster update. Stable Windows builds default to stable; existing Windows preview installs stay on preview until explicitly switched. Homebrew, mise, and Nix installs ignore the preview channel.",
           "values": [
             "stable",
             "preview"
@@ -467,13 +675,13 @@
           "key": "update.version_check",
           "type": "boolean",
           "default": "true",
-          "description": "Check herdr.dev for new Herdr versions in the background."
+          "description": "Check github.com/sainavaneet/aster for new Aster versions in the background."
         },
         {
           "key": "update.manifest_check",
           "type": "boolean",
           "default": "true",
-          "description": "Check herdr.dev for remote agent-detection manifest updates in the background. Bundled manifests and local overrides still apply."
+          "description": "Check github.com/sainavaneet/aster for remote agent-detection manifest updates in the background. Bundled manifests and local overrides still apply."
         }
       ]
     },
@@ -587,7 +795,7 @@
           "key": "keys.detach",
           "type": "keybinding",
           "default": "\"prefix+q\"",
-          "description": "Detach the current client from its Herdr server."
+          "description": "Detach the current client from its Aster server."
         },
         {
           "key": "keys.reload_config",
@@ -635,7 +843,7 @@
           "key": "keys.remote_image_paste",
           "type": "string",
           "default": "\"ctrl+v\"",
-          "description": "Local-client shortcut that sends a clipboard image to a remote Herdr session."
+          "description": "Local-client shortcut that sends a clipboard image to a remote Aster session."
         },
         {
           "key": "keys.new_tab",
@@ -887,7 +1095,7 @@
           "key": "ui.sidebar_start_collapsed",
           "type": "boolean",
           "default": "false",
-          "description": "Start Herdr with the sidebar collapsed. Changes take effect on the next launch."
+          "description": "Start Aster with the sidebar collapsed. Changes take effect on the next launch."
         },
         {
           "key": "ui.sidebar_collapsed_mode",
@@ -903,13 +1111,13 @@
           "key": "ui.mobile_width_threshold",
           "type": "integer",
           "default": "64",
-          "description": "Terminal width at or below which Herdr uses the mobile single-column layout."
+          "description": "Terminal width at or below which Aster uses the mobile single-column layout."
         },
         {
           "key": "ui.mouse_capture",
           "type": "boolean",
           "default": "true",
-          "description": "Capture mouse input for Herdr's mouse UI."
+          "description": "Capture mouse input for Aster's mouse UI."
         },
         {
           "key": "ui.copy_on_select",
@@ -1038,7 +1246,7 @@
           "key": "ui.window_title",
           "type": "string",
           "default": "\"{hostname}: {workspace}\"",
-          "description": "Title Herdr writes to the terminal it runs in. Tokens: {hostname}, {workspace}, {tab}, {pane}, {terminal_title}. Empty leaves the outer title alone."
+          "description": "Title Aster writes to the terminal it runs in. Tokens: {hostname}, {workspace}, {tab}, {pane}, {terminal_title}. Empty leaves the outer title alone."
         },
         {
           "key": "ui.agent_panel_sort",
@@ -1058,6 +1266,17 @@
           "values": [
             "dots",
             "symbols"
+          ]
+        },
+        {
+          "key": "ui.animations",
+          "type": "enum",
+          "default": "\"full\"",
+          "description": "Terminal UI motion level. full enables working spinners, blocked pulses, tab sweeps, status flashes, recency highlights, and toast slide and fade transitions; reduced keeps only one-shot flashes, highlights, and toast fades; off disables all motion.",
+          "values": [
+            "full",
+            "reduced",
+            "off"
           ]
         },
         {
@@ -1106,10 +1325,10 @@
           "key": "ui.toast.delivery",
           "type": "enum",
           "default": "\"off\"",
-          "description": "Popup notification delivery. off disables popups, herdr shows in-app toasts, terminal asks the outer terminal for a desktop notification, system asks the OS notification service directly.",
+          "description": "Popup notification delivery. off disables popups, aster shows in-app toasts, terminal asks the outer terminal for a desktop notification, system asks the OS notification service directly.",
           "values": [
             "off",
-            "herdr",
+            "aster",
             "terminal",
             "system"
           ]
@@ -1118,13 +1337,13 @@
           "key": "ui.toast.delay_seconds",
           "type": "integer",
           "default": "1",
-          "description": "Seconds to wait before sending finished or needs-input agent notifications. Herdr notifies only if the pane is still in the same state when the delay expires. 0 is instant; valid values are 0 through 3600."
+          "description": "Seconds to wait before sending finished or needs-input agent notifications. Aster notifies only if the pane is still in the same state when the delay expires. 0 is instant; valid values are 0 through 3600."
         },
         {
-          "key": "ui.toast.herdr.position",
+          "key": "ui.toast.aster.position",
           "type": "enum",
           "default": "\"bottom-right\"",
-          "description": "In-app toast position, relative to the full Herdr frame.",
+          "description": "In-app toast position, relative to the full Aster frame.",
           "values": [
             "top-left",
             "top-right",
@@ -1434,7 +1653,7 @@
           "key": "session.resume_agents_on_restore",
           "type": "boolean",
           "default": "true",
-          "description": "Resume supported AI-agent panes into their native conversation sessions when restoring a Herdr session."
+          "description": "Resume supported AI-agent panes into their native conversation sessions when restoring an Aster session."
         },
         {
           "key": "session.startup_per_agent_delay_ms",
@@ -1451,8 +1670,8 @@
         {
           "key": "worktrees.directory",
           "type": "string",
-          "default": "\"~/.herdr/worktrees\"",
-          "description": "Root directory under which Herdr creates <repo>/<branch-slug> checkouts."
+          "default": "\"~/.aster/worktrees\"",
+          "description": "Root directory under which Aster creates <repo>/<branch-slug> checkouts, including isolated Orbit worker worktrees."
         }
       ]
     },
@@ -1464,7 +1683,7 @@
           "key": "remote.manage_ssh_config",
           "type": "boolean",
           "default": "true",
-          "description": "Add keepalive fallbacks and private connection reuse for `herdr --remote`. Set false to run plain ssh unchanged."
+          "description": "Add keepalive fallbacks and private connection reuse for `aster --remote`. Set false to run plain ssh unchanged."
         }
       ]
     },
@@ -1488,7 +1707,7 @@
           "key": "experimental.allow_nested",
           "type": "boolean",
           "default": "false",
-          "description": "Allow launching herdr inside an existing herdr pane."
+          "description": "Allow launching aster inside an existing aster pane."
         },
         {
           "key": "experimental.kitty_graphics",

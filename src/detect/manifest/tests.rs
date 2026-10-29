@@ -45,7 +45,7 @@ fn with_manifest_dirs<T>(name: &str, f: impl FnOnce() -> T) -> T {
     let old_config = std::env::var_os("XDG_CONFIG_HOME");
     let old_state = std::env::var_os("XDG_STATE_HOME");
     let base = std::env::temp_dir().join(format!(
-        "herdr-manifest-loader-{name}-{}",
+        "aster-manifest-loader-{name}-{}",
         std::process::id()
     ));
     let config_dir = base.join("config");
@@ -906,4 +906,72 @@ region = " top_non_empty_lines(1) "
 contains = ["active"]
 "#;
     assert!(parse_manifest(manifest).is_err());
+}
+
+/// Claude 2.1.312 renders a Bash permission dialog in place of the composer.
+/// The prompt-box region then falls back to the transcript, where the echoed
+/// user message ("❯ Run …") used to satisfy `live_prompt_box` and report idle
+/// while the worker was actually waiting for approval.
+#[test]
+fn claude_bash_permission_dialog_is_blocked_not_idle() {
+    let screen =
+        include_str!("../../../tests/fixtures/detection/claude-2.1.312-bash-permission-dialog.txt");
+    let explain = explain(Agent::Claude, screen);
+    assert_eq!(explain.state, AgentState::Blocked, "{explain:?}");
+    assert_eq!(
+        explain.matched_rule.as_ref().map(|rule| rule.id.as_str()),
+        Some("generic_permission_prompt")
+    );
+    assert!(explain.visible_blocker);
+    assert!(!explain.visible_idle);
+}
+
+#[test]
+fn claude_idle_composer_still_reads_idle_after_dialog_rule_change() {
+    let screen = include_str!("../../../tests/fixtures/detection/claude-2.1.312-idle-composer.txt");
+    let explain = explain(Agent::Claude, screen);
+    assert_eq!(explain.state, AgentState::Idle, "{explain:?}");
+    assert_eq!(
+        explain.matched_rule.as_ref().map(|rule| rule.id.as_str()),
+        Some("live_prompt_box")
+    );
+    assert!(explain.visible_idle);
+}
+
+/// Gemini CLI 0.64 shows a braille spinner line and a "✦  Working…" title while
+/// tools or hooks run, and no longer prints "esc to cancel", which left the
+/// worker reading as idle and eligible for idle-without-report reminders.
+#[test]
+fn gemini_working_screen_and_title_read_working_not_idle() {
+    let screen = include_str!("../../../tests/fixtures/detection/gemini-0.64-working-hooks.txt");
+    let by_screen = explain(Agent::Gemini, screen);
+    assert_eq!(by_screen.state, AgentState::Working, "{by_screen:?}");
+    assert_eq!(
+        by_screen.matched_rule.as_ref().map(|rule| rule.id.as_str()),
+        Some("spinner_line_working")
+    );
+    assert!(by_screen.visible_working);
+    let by_title = explain_with_input(
+        Agent::Gemini,
+        DetectionInput {
+            screen: " >   Type your message or @path/to/file\n",
+            osc_title: "✦  Working… (feat-tui-animations)",
+            osc_progress: "",
+        },
+    );
+    assert_eq!(by_title.state, AgentState::Working, "{by_title:?}");
+    assert_eq!(
+        by_title.matched_rule.as_ref().map(|rule| rule.id.as_str()),
+        Some("osc_title_working")
+    );
+    // An approval prompt still outranks the working title.
+    let blocked = explain_with_input(
+        Agent::Gemini,
+        DetectionInput {
+            screen: "│ Apply this change?\n❯ 1. Yes, allow once\n",
+            osc_title: "✦  Working… (feat-tui-animations)",
+            osc_progress: "",
+        },
+    );
+    assert_eq!(blocked.state, AgentState::Blocked, "{blocked:?}");
 }

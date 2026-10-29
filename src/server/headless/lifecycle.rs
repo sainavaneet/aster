@@ -69,6 +69,8 @@ impl HeadlessServer {
             }
         }
 
+        // The replacement server reads the Orbit ledger and roster at startup.
+        self.app.flush_orbit_files();
         let snapshot = crate::persist::capture(
             &self.app.state.workspaces,
             &self.app.state.terminals,
@@ -335,6 +337,9 @@ impl HeadlessServer {
     /// close client connections, remove socket files, and clean up.
     pub(super) async fn complete_shutdown(&mut self) -> io::Result<()> {
         info!("completing server shutdown");
+        // The Orbit ledger and roster are written off the event loop; make
+        // sure the last state is on disk before the process exits.
+        self.app.flush_orbit_files();
         self.reject_late_client_connections().await;
 
         // Send ServerShutdown to all remaining clients.

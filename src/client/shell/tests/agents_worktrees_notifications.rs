@@ -961,7 +961,7 @@ fn active_agent_view_controls_sidebar_order_and_focus_indices() {
 #[test]
 fn agent_sort_toggle_is_client_local_and_persists_per_endpoint() {
     let path = std::env::temp_dir().join(format!(
-        "herdr-shell-agent-sort-{}-{}.json",
+        "aster-shell-agent-sort-{}-{}.json",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -1261,7 +1261,7 @@ fn worktree_create_previews_the_endpoint_owned_checkout_path() {
         &state.overlay,
         Some(ClientShellOverlay::WorktreeCreate(create))
             if create.checkout_path
-                == "/tmp/herdr-worktrees/repo/feature-client-shell"
+                == "/tmp/aster-worktrees/repo/feature-client-shell"
     ));
     let submit = state.handle_input_bytes(b"\r");
     let [ClientShellAction::Endpoint { request, .. }] = &submit.actions[..] else {
@@ -1318,7 +1318,7 @@ fn worktree_action_errors_expire_without_more_input() {
         crate::input::KeybindMatch::Action(crate::input::KeybindAction::RemoveWorktree),
         &mut guard,
     );
-    let message = "This workspace is not a Herdr-managed worktree checkout.";
+    let message = "This workspace is not an Aster-managed worktree checkout.";
     assert_eq!(state.endpoint_error.as_deref(), Some(message));
 
     let deadline = state.endpoint_error_deadline.expect("deadline");
@@ -1357,7 +1357,7 @@ fn worktree_prepare_rejection_notice_expires() {
         &request_id,
         Err(ClientShellEndpointError {
             code: Some("not_git_worktree".into()),
-            message: "Herdr worktree actions require a workspace inside a Git work tree".into(),
+            message: "Aster worktree actions require a workspace inside a Git work tree".into(),
         }),
     );
     let notice = state
@@ -1530,7 +1530,7 @@ fn worktree_remove_escalates_recoverable_failure_to_force_confirmation() {
 #[test]
 fn semantic_notifications_use_client_policy_and_stable_navigation_targets() {
     let mut config = ClientShellConfig::from_config(&Config::default());
-    config.toast_delivery = crate::config::ToastDelivery::Herdr;
+    config.toast_delivery = crate::config::ToastDelivery::Aster;
     config.toast_delay_seconds = 0;
     let mut state = ClientShellState::new(config);
     let mut projected = snapshot();
@@ -1681,4 +1681,111 @@ fn semantic_notifications_use_client_policy_and_stable_navigation_targets() {
     assert!(repaint);
     assert!(state.visible_notification.is_none());
     assert_eq!(state.pending_notifications.len(), 1);
+}
+
+#[test]
+fn tui_animations_drive_tab_spinner_in_full_mode_and_stay_static_in_reduced_and_off_modes() {
+    let mut config = Config::default();
+    config.ui.toast.delivery = crate::config::ToastDelivery::Aster;
+    config.ui.toast.delay_seconds = 0;
+    config.ui.animations = crate::config::UiAnimationsConfig::Full;
+    let mut state = ClientShellState::new(ClientShellConfig::from_config(&config));
+
+    let now = std::time::Instant::now();
+    let mut initial = snapshot();
+    initial.tabs.push(ClientShellTab {
+        tab_id: "tab_2".into(),
+        workspace_id: "ws_1".into(),
+        number: 2,
+        label: "worker".into(),
+        custom_label: false,
+        zoomed: false,
+        focused: false,
+        agent_status: AgentStatus::Idle,
+    });
+    state.set_snapshot(Box::new(initial.clone()));
+    state.set_pane_surface(surface());
+
+    // Idle state: no active animations, no animation timer scheduled.
+    assert!(!state.has_active_animations(now));
+    assert_eq!(state.animation_timer_delay(now), None);
+
+    // Working agent activates spinner in sidebar and activity marker on tab.
+    let mut working = initial.clone();
+    working.revision = 2;
+    working.tabs[1].agent_status = AgentStatus::Working;
+    working.agents.push(ClientShellAgent {
+        pane_id: "pane_2".into(),
+        workspace_id: "ws_1".into(),
+        tab_id: "tab_2".into(),
+        name: Some("claude".into()),
+        display_agent: None,
+        agent: Some("claude".into()),
+        title: None,
+        terminal_title: None,
+        terminal_title_stripped: None,
+        agent_status: AgentStatus::Working,
+        state_change_seq: 1,
+        state_labels: Vec::new(),
+        tokens: Vec::new(),
+        focused: false,
+    });
+    state.set_snapshot(Box::new(working));
+    let mut working_surface = surface();
+    working_surface.projection_revision = 2;
+    state.set_pane_surface(working_surface);
+
+    let tick_now = std::time::Instant::now();
+    assert!(state.has_active_animations(tick_now));
+    let delay = state
+        .animation_timer_delay(tick_now)
+        .expect("working agent schedules animation clock");
+    assert!(delay <= crate::client::shell::animation::ANIMATION_TICK_INTERVAL);
+
+    let frame = state.compose(106, 24).expect("composed working frame");
+    let tab_row: String = frame.cells[..106]
+        .iter()
+        .map(|cell| cell.symbol.as_str())
+        .collect();
+    assert!(
+        crate::ui::WORKING_SPINNER_GLYPHS
+            .iter()
+            .any(|glyph| tab_row.contains(glyph)),
+        "expected working spinner marker in tab row, got: {tab_row:?}"
+    );
+
+    // Reduced mode drops spinner cycling: the tab keeps a static working marker
+    // and the working agent alone no longer schedules animation ticks.
+    state.config.animations = crate::config::UiAnimationsConfig::Reduced;
+    let frame_reduced = state.compose(106, 24).expect("composed reduced frame");
+    let tab_row_reduced: String = frame_reduced.cells[..106]
+        .iter()
+        .map(|cell| cell.symbol.as_str())
+        .collect();
+    assert!(
+        tab_row_reduced.contains('●'),
+        "reduced mode uses static working indicator on tab: {tab_row_reduced:?}"
+    );
+    assert!(!crate::ui::WORKING_SPINNER_GLYPHS
+        .iter()
+        .any(|glyph| tab_row_reduced.contains(glyph)));
+    assert_eq!(
+        state.animation_timer_delay(std::time::Instant::now() + std::time::Duration::from_secs(3)),
+        None
+    );
+
+    // Off mode restores the pre-animation tab bar and never schedules ticks.
+    state.config.animations = crate::config::UiAnimationsConfig::Off;
+    let frame_off = state.compose(106, 24).expect("composed off frame");
+    let tab_row_off: String = frame_off.cells[..106]
+        .iter()
+        .map(|cell| cell.symbol.as_str())
+        .collect();
+    assert!(
+        !tab_row_off.contains('●'),
+        "off mode adds no tab marker: {tab_row_off:?}"
+    );
+    assert!(!state.has_active_animations(std::time::Instant::now()));
+    assert!(!state.tick_animations(std::time::Instant::now()));
+    assert_eq!(state.animation_timer_delay(std::time::Instant::now()), None);
 }

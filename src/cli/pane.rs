@@ -83,7 +83,7 @@ fn caller_target(
     if current.is_some() && current > explicit {
         let caller = caller.map(super::normalize_pane_id);
         if require_current_caller && caller.is_none() {
-            return Err(ParseError::Usage("--current requires HERDR_PANE_ID".into()));
+            return Err(ParseError::Usage("--current requires ASTER_PANE_ID".into()));
         }
         return Ok(caller);
     }
@@ -321,7 +321,7 @@ mod tests {
             ),
             (
                 "input",
-                vec!["pane", "--right-click", "herdr"],
+                vec!["pane", "--right-click", "aster"],
                 "cli:pane:input:set",
                 "pane.input.set",
                 json!({"pane_id": "pane", "right_click": "herdr"}),
@@ -498,7 +498,7 @@ mod tests {
         assert_eq!(params.target_pane_id, Some("issue-1".into()));
         assert_eq!(params.direction, SplitDirection::Right);
         assert_eq!(params.ratio, Some(0.333));
-        assert_eq!(params.right_click, PaneRightClickTarget::Herdr);
+        assert_eq!(params.right_click, PaneRightClickTarget::Aster);
     }
 
     #[test]

@@ -32,6 +32,29 @@ pub struct WorktreeAddResult {
     pub result: Result<(), String>,
 }
 
+/// A stage of starting an isolated Orbit worker finished off the event loop:
+/// `git worktree add`, then the new pane's shell becoming ready.
+#[derive(Debug)]
+pub struct OrbitWorktreeResult {
+    pub id: String,
+    pub params: crate::api::schema::OrbitAgentStartParams,
+    /// The worker's launch model and permission mode after the allowlist and defaults.
+    pub launch: crate::app::OrbitWorkerLaunch,
+    pub branch: String,
+    pub path: std::path::PathBuf,
+    pub repo_root: std::path::PathBuf,
+    /// The worker pane, once it exists and its shell had time to start.
+    pub pane_id: Option<String>,
+    /// The worker pane's terminal, reserved for this start until launch.
+    pub terminal_id: Option<String>,
+    /// `git worktree add -b` created the branch, so discarding the worktree
+    /// also deletes it.
+    pub created_branch: bool,
+    /// Error code and message when the worktree could not be created.
+    pub result: Result<(), (&'static str, String)>,
+    pub respond_to: std::sync::mpsc::Sender<String>,
+}
+
 #[derive(Debug)]
 pub struct ApiWorktreeRemoveRequest {
     pub id: String,
@@ -97,6 +120,8 @@ pub enum AppEvent {
         agent: Option<Agent>,
         state: AgentState,
         visible_blocker: bool,
+        /// The detected agent's idle prompt is on screen (not "composer empty").
+        visible_idle: bool,
         visible_working: bool,
         process_exited: bool,
         observed_at: Instant,
@@ -177,7 +202,7 @@ pub enum AppEvent {
     /// The host-facing process forwards them to its outer terminal.
     TerminalBell { pane_id: PaneId, count: u16 },
     /// A pane child emitted a valid OSC 52 clipboard write. The main loop
-    /// re-emits it through herdr's own clipboard writer.
+    /// re-emits it through aster's own clipboard writer.
     ClipboardWrite { content: Vec<u8> },
     /// A pane child reported its shell current directory through terminal
     /// metadata such as OSC 7.
@@ -217,4 +242,10 @@ pub enum AppEvent {
     WorktreeRemoveFinished(Box<WorktreeRemoveResult>),
     /// Background worktree discovery completed for an API list/open request.
     WorktreeReadFinished(Box<WorktreeReadResult>),
+    /// Background stage of an isolated Orbit worker start completed.
+    OrbitWorktreeReady(Box<OrbitWorktreeResult>),
+    /// An Orbit decision finished on its decision thread.
+    OrbitDecisionReady(Box<crate::app::OrbitDecisionOutcome>),
+    /// A background write of an Orbit state file finished.
+    OrbitFileSaved(Box<crate::app::orbit_files::OrbitFileSaved>),
 }

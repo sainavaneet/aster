@@ -119,6 +119,7 @@ impl ClientShellState {
             self.pending_workspace_highlight = None;
         }
         self.retire_endpoint_notifications(endpoint_id);
+        self.animations.clear_endpoint(endpoint_id);
         if let Some(endpoint) = self
             .endpoints
             .iter_mut()
@@ -573,6 +574,7 @@ impl ClientShellState {
             .is_some_and(|previous| previous.boot_id != snapshot.boot_id);
         if boot_changed {
             self.retire_endpoint_notifications(endpoint_id);
+            self.animations.clear_endpoint(endpoint_id);
         }
         self.endpoints[index]
             .agent_presentation
@@ -587,6 +589,12 @@ impl ClientShellState {
                 .agent_presentation
                 .acknowledge_surface(&mut snapshot, surface, self.outer_focused);
         }
+        self.animations.observe_snapshot(
+            endpoint_id,
+            generation,
+            &snapshot,
+            std::time::Instant::now(),
+        );
         let previous = self.endpoints[index].snapshot.as_deref();
         let mut next_recency = self
             .endpoints

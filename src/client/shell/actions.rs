@@ -343,11 +343,13 @@ impl ClientShellState {
         } else {
             8
         };
+        let now = std::time::Instant::now();
         self.visible_endpoint_notice = Some(ClientVisibleEndpointNotice {
             key,
             title: title.into(),
             body,
-            deadline: std::time::Instant::now() + std::time::Duration::from_secs(duration_seconds),
+            shown_at: now,
+            deadline: now + std::time::Duration::from_secs(duration_seconds),
         });
         true
     }

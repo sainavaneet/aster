@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "team_schema": "2026-11",
+  "roles": [
+    {
+      "name": "reviewer",
+      "area": "Code review",
+      "prompt": "Be strict.",
+      "budget": {"daily_usd": 5},
+      "members": [
+        {
+          "name": "rc",
+          "kind": "claude",
+          "model": "opus",
+          "terminal_id": "term-rc",
+          "priority": 1,
+          "session": {
+            "source": "aster:claude",
+            "agent": "claude",
+            "kind": "thread",
+            "value": "session-rc"
+          }
+        },
+        {
+          "name": "rg",
+          "kind": "gemini-ultra",
+          "sandbox": "strict"
+        }
+      ],
+      "tab": {
+        "workspace_id": "w1",
+        "tab_number": 2,
+        "pinned": true
+      }
+    }
+  ]
+}

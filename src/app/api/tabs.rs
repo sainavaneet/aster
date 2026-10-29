@@ -44,7 +44,7 @@ impl App {
         encode_success(id, ResponseResult::TabInfo { tab })
     }
 
-    pub(super) fn handle_tab_create(&mut self, id: String, params: TabCreateParams) -> String {
+    pub(crate) fn handle_tab_create(&mut self, id: String, params: TabCreateParams) -> String {
         let TabCreateParams {
             workspace_id,
             cwd,
@@ -171,7 +171,7 @@ impl App {
         encode_success(id, ResponseResult::TabInfo { tab })
     }
 
-    pub(super) fn handle_tab_move(&mut self, id: String, params: TabMoveParams) -> String {
+    pub(crate) fn handle_tab_move(&mut self, id: String, params: TabMoveParams) -> String {
         let Some((ws_idx, tab_idx)) = self.parse_tab_id(&params.tab_id) else {
             return tab_not_found(id, &params.tab_id);
         };
@@ -213,7 +213,7 @@ impl App {
         encode_success(id, ResponseResult::TabList { tabs })
     }
 
-    pub(super) fn handle_tab_close(&mut self, id: String, target: TabTarget) -> String {
+    pub(crate) fn handle_tab_close(&mut self, id: String, target: TabTarget) -> String {
         let Some((ws_idx, tab_idx)) = self.parse_tab_id(&target.tab_id) else {
             return tab_not_found(id, &target.tab_id);
         };
