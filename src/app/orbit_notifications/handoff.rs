@@ -100,14 +100,11 @@ pub(super) fn handoff_text(
 }
 
 impl App {
-    /// The kinds a task relayed within `role` passes through, from the role's
-    /// `[[polaris.team]]` entry; empty for other roles.
+    /// The kinds a task relayed within `role` passes through: the session's
+    /// `orbit_team_define` pipeline, else the role's `[[polaris.team]]` one.
     pub(crate) fn orbit_role_pipeline(&mut self, role: &str) -> Vec<String> {
         self.ensure_orbit_team_loaded();
-        self.orbit_team
-            .pinned_config(role)
-            .map(|config| config.pipeline.clone())
-            .unwrap_or_default()
+        self.orbit_team.pipeline(role).to_vec()
     }
 
     /// Step 1 of a task given to a member of a role with other members; empty
@@ -135,11 +132,7 @@ impl App {
             .orbit_team
             .roster
             .member(member)
-            .map_or(0, |(role, _)| {
-                self.orbit_team
-                    .pinned_config(&role.name)
-                    .map_or(0, |config| config.pipeline.len())
-            });
+            .map_or(0, |(role, _)| self.orbit_team.pipeline(&role.name).len());
         if task.steps.len() < 2 && total < 2 {
             return None;
         }

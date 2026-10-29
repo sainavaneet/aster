@@ -975,3 +975,37 @@ fn gemini_working_screen_and_title_read_working_not_idle() {
     );
     assert_eq!(blocked.state, AgentState::Blocked, "{blocked:?}");
 }
+
+/// codex-cli 0.165 asks to trust every new folder, including each parallel
+/// step's fresh checkout. A long wrapped launch command pushes the dialog out
+/// of the top lines `trust_directory` reads, and the title alone used to read
+/// idle, so an assignment was typed into the dialog and lost.
+#[test]
+fn codex_folder_trust_dialog_below_a_long_command_is_blocked_not_idle() {
+    let screen = include_str!("../../../tests/fixtures/detection/codex-0.165-folder-trust.txt");
+    let explain = explain_with_input(
+        Agent::Codex,
+        DetectionInput {
+            screen,
+            osc_title: "par012",
+            osc_progress: "",
+        },
+    );
+    assert_eq!(explain.state, AgentState::Blocked, "{explain:?}");
+    assert_eq!(
+        explain.matched_rule.as_ref().map(|rule| rule.id.as_str()),
+        Some("folder_trust_dialog")
+    );
+    assert!(explain.visible_blocker);
+    assert!(!explain.visible_idle);
+    // Once trusted, the same title reads idle again.
+    let idle = explain_with_input(
+        Agent::Codex,
+        DetectionInput {
+            screen: "› Ask Codex to do anything\n",
+            osc_title: "par012",
+            osc_progress: "",
+        },
+    );
+    assert_eq!(idle.state, AgentState::Idle, "{idle:?}");
+}

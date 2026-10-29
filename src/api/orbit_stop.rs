@@ -114,6 +114,7 @@ fn remove_worktree(removal: &Value, result: &mut Value) {
         &command, &repo_root, &path, force, false,
     ) {
         Ok(()) => {
+            crate::codex_trust::untrust_checkout(&path);
             result["worktree_removed"] = json!(true);
             if let Some(branch) = removal["delete_branch"].as_str() {
                 result["branch_deleted"] = json!(delete_branch(&repo_root, branch));

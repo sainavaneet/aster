@@ -1,7 +1,7 @@
 id = "codex"
-version = "2026.10.11.1"
+version = "2026.10.29.1"
 min_engine_version = 3
-updated_at = "2026-10-11T00:00:00Z"
+updated_at = "2026-10-29T00:00:00Z"
 
 [[rules]]
 id = "osc_title_blocked"
@@ -53,6 +53,19 @@ all = [
     ] },
   ] },
 ]
+
+[[rules]]
+id = "folder_trust_dialog"
+state = "blocked"
+priority = 940
+# The same dialog as trust_directory, anchored at the bottom: a long launch
+# command line (role or step instructions) can push the dialog's heading out of
+# the top lines, and the title alone then read as idle. Require the question
+# and the numbered "Trust and continue" option, which only the live dialog shows.
+region = "bottom_non_empty_lines(15)"
+visible_blocker = true
+contains = ["trust this folder?"]
+line_regex = ['(?i)^\s*(?:[›>❯]\s*)?1\.\s*trust\s+and\s+continue\s*$']
 
 [[rules]]
 id = "startup_update"

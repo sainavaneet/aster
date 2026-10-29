@@ -222,6 +222,93 @@ async fn handoff_without_a_target_follows_the_role_pipeline() {
     assert_eq!(current["steps"][1]["kind"], "codex");
 }
 
+/// `orbit.team_define` for role `builder` with `members` and `pipeline`.
+fn define_builder(app: &mut App, members: &[(&str, &str)], pipeline: Value) -> Value {
+    let members: Vec<Value> = members
+        .iter()
+        .map(|(name, kind)| json!({"name": name, "kind": kind, "model": name}))
+        .collect();
+    call(
+        app,
+        "orbit.team_define",
+        json!({"name": "builder", "area": "builder area", "members": members, "pipeline": pipeline}),
+    )
+}
+
+#[tokio::test]
+async fn a_defined_pipeline_is_listed_and_followed_by_a_relayed_task() {
+    let members = [("pa", "claude"), ("pb", "claude"), ("pc", "codex")];
+    let Team {
+        mut app,
+        mut queues,
+        terminals,
+    } = team(&members, &[]);
+    let defined = define_builder(&mut app, &members, json!(["Codex", "claude"]));
+    assert!(defined.get("error").is_none(), "{defined}");
+    assert_eq!(
+        defined["result"]["role"]["pipeline"],
+        json!(["codex", "claude"])
+    );
+    let listed = call(&mut app, "orbit.team_list", json!({}));
+    let role = &listed["result"]["roles"][0];
+    assert_eq!(role["pipeline"], json!(["codex", "claude"]), "{listed}");
+    assert_eq!(role["pipeline_overridden"], false, "{listed}");
+
+    // No kind is given: the pipeline's first kind (codex) starts the task.
+    let (task_id, worker) = assign(&mut app, json!({"role": "builder", "prompt": "Build"}));
+    assert_eq!(worker, terminals[2]);
+    let token = app.orbit_last_issued_token().unwrap();
+    let relayed = report(&mut app, &task_id, &worker, &token, Some(note(None)));
+    assert!(relayed.get("error").is_none(), "{relayed}");
+    wait_text(&mut queues[0], "Continue task").await;
+    let current = task(&mut app, &task_id);
+    assert_eq!(current["worker_id"], json!(terminals[0]));
+    assert_eq!(current["step_line"], "step 2/2 pa");
+    assert_eq!(current["steps"][1]["kind"], "claude");
+}
+
+#[tokio::test]
+async fn a_defined_pipeline_is_checked_against_members_and_the_allowlist() {
+    let members = [("pa", "claude")];
+    let Team { mut app, .. } = team(&members, &[]);
+    let not_a_member = define_builder(&mut app, &members, json!(["claude", "codex"]));
+    assert_eq!(
+        not_a_member["error"]["code"], "invalid_params",
+        "{not_a_member}"
+    );
+    let unsupported = define_builder(&mut app, &members, json!(["gemini"]));
+    assert_eq!(
+        unsupported["error"]["code"], "orbit_worker_not_allowed",
+        "{unsupported}"
+    );
+    assert!(app
+        .orbit_team
+        .roster
+        .role("builder")
+        .unwrap()
+        .pipeline
+        .is_empty());
+}
+
+#[tokio::test]
+async fn a_defined_pipeline_overrides_a_pinned_one_for_the_session() {
+    let members = [("pa", "claude"), ("pc", "codex")];
+    let Team { mut app, .. } = team(&members, &["claude", "codex"]);
+    let defined = define_builder(&mut app, &members, json!(["codex", "claude"]));
+    assert!(defined.get("error").is_none(), "{defined}");
+    let role = &defined["result"]["role"];
+    assert_eq!(role["pinned"], true, "{defined}");
+    assert_eq!(role["pipeline_overridden"], true, "{defined}");
+    assert_eq!(role["pipeline"], json!(["codex", "claude"]));
+    // An empty list returns to the config pipeline.
+    let reverted = define_builder(&mut app, &members, json!([]));
+    assert_eq!(
+        reverted["result"]["role"]["pipeline"],
+        json!(["claude", "codex"])
+    );
+    assert_eq!(reverted["result"]["role"]["pipeline_overridden"], false);
+}
+
 #[tokio::test]
 async fn handoff_falls_back_to_another_kind_when_the_target_is_busy_or_unnamed() {
     let Team {

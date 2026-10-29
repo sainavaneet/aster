@@ -170,6 +170,7 @@ fn discard_worktree(worktree: &OrbitWorktree, created_branch: bool) {
             tracing::warn!(%error, path = %path.display(), "could not discard Orbit worktree");
             return;
         }
+        crate::codex_trust::untrust_checkout(&path);
         if let Some(command) = branch {
             if let Err(error) = crate::worktree::run_worktree_command(&command) {
                 tracing::warn!(%error, "could not delete the discarded Orbit worktree branch");
@@ -271,6 +272,8 @@ impl App {
         };
         // Counted from admission, so parallel starts cannot pass the limit together.
         self.orbit_starts.in_flight += 1;
+        let codex = crate::detect::parse_agent_label(&stage.params.kind)
+            == Some(crate::detect::Agent::Codex);
         crate::thread_spawn::spawn_named("aster-orbit-worktree-add", move || {
             let created = match stage.parallel.as_mut() {
                 Some(plan) => create_checkout(&project, &directory, plan),
@@ -278,6 +281,19 @@ impl App {
             };
             match created {
                 Ok(created) => {
+                    if codex {
+                        // Codex asks to trust every new folder; a checkout of a
+                        // project the user trusts is trusted with it.
+                        let root = match stage
+                            .parallel
+                            .as_ref()
+                            .and_then(|plan| plan.checkout.as_ref())
+                        {
+                            Some(checkout) => checkout.path.clone(),
+                            None => created.path.clone(),
+                        };
+                        crate::codex_trust::trust_checkout(&created.repo_root, &project, &root);
+                    }
                     stage.path = created.path;
                     stage.repo_root = created.repo_root;
                     stage.created_branch = created.created_branch;

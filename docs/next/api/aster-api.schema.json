@@ -3183,6 +3183,16 @@
             "name": {
               "type": "string"
             },
+            "pipeline": {
+              "description": "Agent kinds a task relayed within the role passes through, for example\n[\"claude\", \"codex\"]: each must be the kind of a member and allowed by\n`[polaris.workers]`. For a pinned role it replaces the config pipeline\nfor this session only; an empty list returns to the config pipeline.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
             "prompt": {
               "description": "Role instructions given to every member, at most 4096 bytes.",
               "type": [

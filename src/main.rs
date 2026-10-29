@@ -19,6 +19,7 @@ mod build_info;
 mod checksum;
 mod cli;
 mod client;
+mod codex_trust;
 mod config;
 mod copy_mode;
 mod detect;

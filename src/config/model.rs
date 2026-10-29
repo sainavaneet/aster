@@ -356,14 +356,16 @@ pub struct PolarisConfig {
     pub delivery: PolarisDeliveryConfig,
     /// The decision layer: rules first, then an optional provider.
     pub decisions: Box<PolarisDecisionsConfig>,
-    /// Pinned team roles, present in every session's Orbit roster.
+    /// Pinned team roles, present in the Orbit roster of each session whose
+    /// project they apply to.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub team: Vec<PolarisTeamRoleConfig>,
 }
 
 /// One `[[polaris.team]]` role: a pinned Polaris tab whose members are resumed
-/// instead of relaunched. Merged into every session's `orbit-team.json` at
-/// startup and on config reload; Polaris cannot remove it.
+/// instead of relaunched. Merged into the `orbit-team.json` of every session
+/// it applies to (see `projects`) at startup and on config reload; Polaris
+/// cannot remove it.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct PolarisTeamRoleConfig {
@@ -385,6 +387,12 @@ pub struct PolarisTeamRoleConfig {
     /// role, else the first member of this role.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub integrator: Option<String>,
+    /// Project directories the role belongs to, for example
+    /// ["~/Developer/aster"]: the role is pinned only in sessions whose Orbit
+    /// project directory is one of them or inside one. Empty pins it in every
+    /// session.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub projects: Vec<String>,
 }
 
 /// A member of a `[[polaris.team]]` role.

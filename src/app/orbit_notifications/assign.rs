@@ -176,12 +176,15 @@ impl App {
             }
         };
         tracing::info!(%task_id, %worker_id, "orbit task assigned");
+        let used_role = self
+            .loaded_orbit_team_member_of_terminal(&worker_id)
+            .map(|(role, _)| role);
         let token_hash = Some(token::hash(&secret));
         #[cfg(test)]
         {
             self.orbit_notifications.last_issued_token = Some(secret);
         }
-        Ok(self.orbit_notifications.insert(Task {
+        let task = self.orbit_notifications.insert(Task {
             task_id,
             worker_id,
             lead_id,
@@ -210,7 +213,11 @@ impl App {
                 submission_ack: Some(ack),
                 ..LiveState::default()
             },
-        }))
+        });
+        if let Some(role) = used_role {
+            self.note_orbit_role_used(&role);
+        }
+        Ok(task)
     }
 
     /// One assignment per worker at a time, so two quick assignments (for example

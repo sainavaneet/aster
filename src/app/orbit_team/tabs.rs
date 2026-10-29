@@ -105,7 +105,11 @@ impl App {
     /// native resume, and the supervisor starts keeping members alive.
     pub(crate) fn prepare_orbit_team_startup(&mut self) {
         self.ensure_orbit_team_loaded();
-        if self.orbit_team.roster.roles.is_empty() || self.resolve_orbit().is_err() {
+        if self.resolve_orbit().is_err() {
+            return;
+        }
+        self.pin_orbit_team_for_project();
+        if self.orbit_team.roster.roles.is_empty() {
             return;
         }
         for index in 0..self.orbit_team.roster.roles.len() {

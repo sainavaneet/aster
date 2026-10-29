@@ -187,6 +187,9 @@ mod tests {
             tab: None,
             pinned: false,
             overridden: false,
+            pipeline: Vec::new(),
+            pipeline_overridden: false,
+            used: false,
             extra: Default::default(),
         }
     }

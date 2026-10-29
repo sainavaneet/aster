@@ -13,7 +13,11 @@
 # $ORBIT_FAKE_STATE:
 #   <name>.pid      this process id
 #   <name>.argv     its launch arguments, each terminated by a NUL byte
-#   <name>.mode     write `busy` to show the working title, `idle` to return
+#   <name>.mode     write `busy` to show the working title, `idle` to return;
+#                   `trust` (before launch) shows codex-cli 0.165's folder-trust
+#                   dialog, which reads as blocked; writing `idle` then trusts
+#                   the folder and clears it
+#   <name>.lost     input typed into the trust dialog instead of a prompt
 #   <name>.prompts  every submitted prompt as read from the PTY, each preceded
 #                   by `=== prompt N ===`; the screen shows only its first line
 set -u
@@ -34,23 +38,41 @@ stty raw -echo opost onlcr 2>/dev/null
 printf '\033[?2004h'
 
 current_mode() {
-    if [ -f "$mode_file" ] && [ "$(cat "$mode_file")" = busy ]; then echo busy; else echo idle; fi
+    case $(cat "$mode_file" 2>/dev/null) in
+    busy) echo busy ;;
+    trust) echo trust ;;
+    *) echo idle ;;
+    esac
+}
+trust_dialog() {
+    printf '\n  Folder access\n\n  %s\n\n' "$PWD"
+    printf '  Trust this folder? Codex can read, edit, and run files here, and may run\n'
+    printf '  commands without asking based on your approval settings.\n\n'
+    printf '\342\200\272 1. Trust and continue\n  2. Quit\n\n  enter continue \302\267 esc quit\n'
 }
 draw() {
-    if [ "$1" = busy ]; then
+    if [ "$1" = trust ]; then
+        printf '\033]0;fake-codex\007'
+        trust_dialog
+    elif [ "$1" = busy ]; then
         printf '\033]0;⠋ fake-codex\007'
     else
         printf '\033]0;fake-codex\007'
     fi
 }
 
-printf 'fake codex (%s) ready\n' "$name"
+[ "$(current_mode)" = trust ] || printf 'fake codex (%s) ready\n' "$name"
 draw "$(current_mode)"
 (
     shown=$(current_mode)
     while sleep 0.2; do
         wanted=$(current_mode)
         [ "$wanted" = "$shown" ] && continue
+        if [ "$shown" = trust ]; then
+            # Trusted: the dialog gives way to the composer.
+            printf '\033[2J\033[H'
+            printf 'fake codex (%s) ready\n' "$name"
+        fi
         shown=$wanted
         draw "$wanted"
     done
@@ -73,6 +95,11 @@ while IFS= read -r -d '~' chunk; do
     prompt=${prompt//"$paste_start"/}
     while [[ $prompt == [$'\r\n']* ]]; do prompt=${prompt:1}; done
     [ -z "$prompt" ] && continue
+    if [ "$(current_mode)" = trust ]; then
+        # The dialog swallows the text, and Enter answers it.
+        printf '%s\n' "$prompt" >>"$state_dir/$name.lost"
+        continue
+    fi
     count=$((count + 1))
     printf '=== prompt %s ===\n%s\n' "$count" "$prompt" >>"$log"
     printf 'received prompt %s, %s bytes: %s\n' "$count" "${#prompt}" "${prompt%%$'\n'*}"

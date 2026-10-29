@@ -11,6 +11,23 @@ use crate::config::OrbitNotifyEvent;
 pub(super) const TEAM_KEY_PREFIX: &str = "team:";
 
 impl App {
+    /// Whether the ledger holds a task given to `role`, to one of `terminals`,
+    /// or relayed through one of `members`.
+    pub(crate) fn orbit_ledger_mentions_role(
+        &mut self,
+        role: &str,
+        members: &[String],
+        terminals: &[String],
+    ) -> bool {
+        let now = self.orbit_notifications.now_ms(Instant::now());
+        self.ensure_orbit_ledger(now);
+        self.orbit_notifications.tasks.iter().any(|task| {
+            task.role.as_deref() == Some(role)
+                || terminals.contains(&task.worker_id)
+                || task.steps.iter().any(|step| members.contains(&step.member))
+        })
+    }
+
     /// One human notification per `key`: `subject` is a role or member name.
     pub(crate) fn record_orbit_team_notice(
         &mut self,

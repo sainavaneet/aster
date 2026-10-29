@@ -39,7 +39,7 @@ impl App {
         reply(id, Ok(self.orbit_services.list()))
     }
 
-    pub(super) fn orbit_job_cwd(&mut self) -> Result<PathBuf, String> {
+    pub(crate) fn orbit_job_cwd(&mut self) -> Result<PathBuf, String> {
         let (ws, _, _) = self
             .resolve_orbit_pane(None)
             .map_err(|(_, message)| message)?;

@@ -29,6 +29,12 @@ pub struct OrbitTeamDefineParams {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub prompt: Option<String>,
     pub members: Vec<OrbitTeamMemberParams>,
+    /// Agent kinds a task relayed within the role passes through, for example
+    /// ["claude", "codex"]: each must be the kind of a member and allowed by
+    /// `[polaris.workers]`. For a pinned role it replaces the config pipeline
+    /// for this session only; an empty list returns to the config pipeline.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pipeline: Option<Vec<String>>,
 }
 
 /// Retires a role. Refused while a member has an assignment awaiting its

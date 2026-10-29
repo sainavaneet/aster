@@ -124,6 +124,18 @@ pub(crate) struct Role {
     /// A pinned role whose prompt this session replaced; reloads keep it.
     #[serde(default, skip_serializing_if = "is_false")]
     pub(crate) overridden: bool,
+    /// Agent kinds a task relayed within the role passes through, from
+    /// `orbit_team_define`. Empty for a pinned role that follows its config
+    /// `pipeline`; see `TeamState::pipeline`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub(crate) pipeline: Vec<String>,
+    /// A pinned role whose config pipeline this session replaced; reloads keep it.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub(crate) pipeline_overridden: bool,
+    /// A task was given to a member of the role in this session. An unused
+    /// role whose config no longer applies to the session's project is retired.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub(crate) used: bool,
     /// Fields from a newer build, kept so they survive this build's saves.
     #[serde(flatten)]
     pub(crate) extra: Map<String, Value>,
@@ -151,6 +163,8 @@ pub(crate) struct RoleSpec {
     pub(crate) area: String,
     pub(crate) prompt: String,
     pub(crate) members: Vec<MemberSpec>,
+    /// Kinds a relayed task passes through; empty for none.
+    pub(crate) pipeline: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -177,6 +191,8 @@ impl From<&crate::config::PolarisTeamRoleConfig> for RoleSpec {
                     permission_mode: member.permission_mode.clone(),
                 })
                 .collect(),
+            // The config pipeline is read from config, not copied to the role.
+            pipeline: Vec::new(),
         }
     }
 }
@@ -197,6 +213,7 @@ impl From<crate::api::schema::OrbitTeamDefineParams> for RoleSpec {
                     permission_mode: member.permission_mode,
                 })
                 .collect(),
+            pipeline: params.pipeline.unwrap_or_default(),
         }
     }
 }
@@ -233,6 +250,35 @@ pub(crate) fn check_pipeline(pipeline: &[String]) -> Result<(), Rejection> {
         )));
     }
     pipeline.iter().try_for_each(|kind| check_kind(kind))
+}
+
+/// `kind` in its canonical spelling, for a kind `check_kind` accepted.
+fn canonical_kind(kind: &str) -> String {
+    crate::detect::agent_label(crate::detect::parse_agent_label(kind).unwrap_or(Agent::Claude))
+        .to_owned()
+}
+
+/// A session-supplied pipeline: kinds the worker allowlist admits, each the
+/// kind of a member of the role, in canonical spelling.
+fn check_role_pipeline(
+    pipeline: &[String],
+    members: &[Member],
+    policy: &WorkerPolicy,
+) -> Result<Vec<String>, Rejection> {
+    check_pipeline(pipeline)?;
+    pipeline
+        .iter()
+        .map(|kind| {
+            policy.admit(kind, None)?;
+            let agent = crate::detect::parse_agent_label(kind);
+            if !members.iter().any(|member| member.agent() == agent) {
+                return Err(invalid(format!(
+                    "pipeline kind {kind:?} is not the kind of any member of the role"
+                )));
+            }
+            Ok(canonical_kind(kind))
+        })
+        .collect()
 }
 
 /// Whether `check_shape` rejects member kinds this build cannot run.
@@ -330,6 +376,7 @@ pub(crate) fn validate(
             extra: kept.map(|old| old.extra.clone()).unwrap_or_default(),
         });
     }
+    let pipeline = check_role_pipeline(&spec.pipeline, &members, policy)?;
     Ok(Role {
         name: spec.name,
         area: spec.area,
@@ -338,6 +385,9 @@ pub(crate) fn validate(
         tab: previous.and_then(|role| role.tab.clone()),
         pinned: false,
         overridden: false,
+        pipeline,
+        pipeline_overridden: false,
+        used: previous.is_some_and(|role| role.used),
         extra: previous.map(|role| role.extra.clone()).unwrap_or_default(),
     })
 }
@@ -463,12 +513,14 @@ impl From<&Member> for MemberSpec {
 /// The pinned role `config` merged onto `previous`: area and the config
 /// members' kinds, models, and permission modes come from config; observed
 /// state and the tab binding are kept; `extras` (members the session added) are
-/// appended; `prompt` replaces the config prompt for this session only.
+/// appended; `prompt` and a non-empty `pipeline` replace the config prompt and
+/// pipeline for this session only.
 pub(crate) fn pinned_role(
     config: &crate::config::PolarisTeamRoleConfig,
     previous: Option<&Role>,
     extras: Vec<MemberSpec>,
     prompt: Option<String>,
+    pipeline: Option<Vec<String>>,
     policy: &WorkerPolicy,
 ) -> Result<Role, Rejection> {
     check_pipeline(&config.pipeline)?;
@@ -482,7 +534,16 @@ pub(crate) fn pinned_role(
     if let Some(prompt) = prompt {
         spec.prompt = prompt;
     }
+    if let Some(pipeline) = pipeline {
+        spec.pipeline = pipeline;
+    }
     let role = validate(spec, policy, previous)?;
+    let configured_pipeline: Vec<String> = config
+        .pipeline
+        .iter()
+        .map(|kind| canonical_kind(kind))
+        .collect();
+    let pipeline_overridden = !role.pipeline.is_empty() && role.pipeline != configured_pipeline;
     let members = role
         .members
         .into_iter()
@@ -494,6 +555,12 @@ pub(crate) fn pinned_role(
     Ok(Role {
         pinned: true,
         overridden: role.prompt != config.prompt,
+        pipeline: if pipeline_overridden {
+            role.pipeline
+        } else {
+            Vec::new()
+        },
+        pipeline_overridden,
         members,
         ..role
     })
@@ -510,15 +577,16 @@ pub(crate) struct Pinned {
 }
 
 /// The pinned role for `config` on a reload or session start: the session's
-/// prompt override and added members survive; config members dropped from
-/// config, and added members beyond `MAX_MEMBERS`, are released.
+/// prompt and pipeline overrides and added members survive; config members
+/// dropped from config, and added members beyond `MAX_MEMBERS`, are released.
+/// A pipeline override that no longer fits the role's members is dropped.
 fn repin(
     config: &crate::config::PolarisTeamRoleConfig,
     previous: Option<&Role>,
     policy: &WorkerPolicy,
 ) -> Result<Role, Rejection> {
     let room = MAX_MEMBERS.saturating_sub(config.members.len());
-    let extras = previous
+    let extras: Vec<MemberSpec> = previous
         .iter()
         .flat_map(|role| &role.members)
         .filter(|member| !member.pinned)
@@ -529,7 +597,25 @@ fn repin(
     let prompt = previous
         .filter(|role| role.pinned && role.overridden)
         .map(|role| role.prompt.clone());
-    pinned_role(config, previous, extras, prompt, policy)
+    let pipeline = previous
+        .filter(|role| role.pinned && role.pipeline_overridden)
+        .map(|role| role.pipeline.clone());
+    let keeps_pipeline = pipeline.is_some();
+    pinned_role(
+        config,
+        previous,
+        extras.clone(),
+        prompt.clone(),
+        pipeline,
+        policy,
+    )
+    .or_else(|error| {
+        if !keeps_pipeline {
+            return Err(error);
+        }
+        tracing::warn!(role = %config.name, "orbit role pipeline override no longer fits; config pipeline used");
+        pinned_role(config, previous, extras, prompt, None, policy)
+    })
 }
 
 /// `current` with every `[[polaris.team]]` role present and up to date, in
@@ -549,6 +635,9 @@ pub(crate) fn pin(
         .map(|role| Role {
             pinned: false,
             overridden: false,
+            // A session pipeline override stays the role's pipeline; a role
+            // that followed its config pipeline has none of its own.
+            pipeline_overridden: false,
             members: role
                 .members
                 .iter()

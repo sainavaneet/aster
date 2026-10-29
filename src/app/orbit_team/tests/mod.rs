@@ -14,6 +14,7 @@ mod integrate;
 mod pinned;
 mod roster_tests;
 mod routing;
+mod scoped;
 mod shell_view;
 mod startup;
 mod supervision;
@@ -78,6 +79,7 @@ pub(super) fn spec(name: &str, members: &[(&str, &str)]) -> RoleSpec {
                 permission_mode: None,
             })
             .collect(),
+        pipeline: Vec::new(),
     }
 }
 

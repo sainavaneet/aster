@@ -273,4 +273,18 @@ mod tests {
         }
         assert!(permission_prompt_rules(Agent::Pi).is_empty());
     }
+
+    /// Codex's folder-trust dialog is blocked but not a permission prompt: `y`
+    /// or Esc would answer a question the lead was never asked.
+    #[test]
+    fn the_codex_folder_trust_dialog_is_never_answered() {
+        let screen = include_str!("../../../tests/fixtures/detection/codex-0.165-folder-trust.txt");
+        let explain = crate::detect::manifest::explain(Agent::Codex, screen);
+        assert_eq!(explain.state, AgentState::Blocked);
+        let rule = explain.matched_rule.expect("a blocking rule").id;
+        assert!(
+            !permission_prompt_rules(Agent::Codex).contains(&rule.as_str()),
+            "{rule}"
+        );
+    }
 }

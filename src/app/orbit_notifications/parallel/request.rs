@@ -211,7 +211,12 @@ impl App {
             token_hash: Some(token::hash(&secret)),
             live: LiveState::default(),
         };
-        Ok(self.orbit_notifications.insert(task))
+        let role = task.role.clone();
+        let task = self.orbit_notifications.insert(task);
+        if let Some(role) = role {
+            self.note_orbit_role_used(&role);
+        }
+        Ok(task)
     }
 
     /// A handoff that asks for parallel steps instead of one next member: the

@@ -769,7 +769,8 @@ mod tests {
     #[test]
     fn orbit_mcp_maps_team_tools_and_role_routing() {
         let define = json!({"name":"reviewer","area":"Reviews","prompt":"Be strict",
-            "members":[{"name":"rc","kind":"claude","model":"opus"},{"name":"rx","kind":"codex"}]});
+            "members":[{"name":"rc","kind":"claude","model":"opus"},{"name":"rx","kind":"codex"}],
+            "pipeline":["claude","codex"]});
         for (tool, arguments, method) in [
             ("orbit_team_define", define, "orbit.team_define"),
             (
@@ -815,6 +816,21 @@ mod tests {
             .as_str()
             .unwrap()
             .contains("responsible team role"));
+        let define = tools
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|tool| tool["name"] == "orbit_team_define")
+            .unwrap();
+        assert_eq!(
+            define["inputSchema"]["properties"]["pipeline"]["items"]["enum"],
+            json!(["claude", "codex"])
+        );
+        let description = define["description"].as_str().unwrap();
+        assert!(
+            description.contains("pipeline") && description.contains("pipeline_overridden"),
+            "{description}"
+        );
     }
 
     #[test]

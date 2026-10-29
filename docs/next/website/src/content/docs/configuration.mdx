@@ -703,7 +703,13 @@ members are not pre-trusted: codex-cli 0.165.0 ignores a
 `-c projects."<path>".trust_level="trusted"` override, so a Codex member started
 in a folder you have not trusted in Codex stops at Codex's folder-trust dialog,
 which Polaris relays as a blocked worker; trust the project once in Codex to
-avoid it. Member kinds
+avoid it. Orbit never types a prompt into that dialog: a worker showing it is
+blocked, not idle. When Orbit creates a worktree or a parallel step's checkout
+for a Codex worker and the Orbit project is already trusted in Codex's
+`config.toml` (`$CODEX_HOME`, default `~/.codex`), Aster appends a marked
+`[projects."<checkout>"] trust_level = "trusted"` entry for that checkout and
+removes exactly that entry when the checkout is removed. It never trusts any
+other path and never creates the file. Member kinds
 and models are checked against [`[polaris.workers]`](#worker-kinds-and-models);
 members do not count toward `max_concurrent`.
 
@@ -711,9 +717,9 @@ Polaris manages the team with three tools, also available from a shell:
 
 | Tool | CLI | Purpose |
 | --- | --- | --- |
-| `orbit_team_define {name, area, prompt?, members}` | `aster orbit team-define` | Create or replace a role. The first definition creates its tab without moving your focus. |
+| `orbit_team_define {name, area, prompt?, members, pipeline?}` | `aster orbit team-define` | Create or replace a role. The first definition creates its tab without moving your focus. `pipeline` sets the kinds a relayed task passes through (see [Relaying a task within a role](#relaying-a-task-within-a-role)). |
 | `orbit_team_remove {name, stop_members?, force?}` | `aster orbit team-remove` | Retire a role. Refused for a pinned config role (`orbit_role_pinned`), and while a member has an assignment awaiting its report unless `force` cancels it. `stop_members` also closes the tab. |
-| `orbit_team_list` | `aster orbit team-list` | Roles, areas, tabs, `pinned`, `overridden`, and members with `pane_id`, `terminal_id`, `state`, `agent_status`, and `open_tasks`. |
+| `orbit_team_list` | `aster orbit team-list` | Roles, areas, tabs, `pipeline`, `pinned`, `overridden`, `pipeline_overridden`, and members with `pane_id`, `terminal_id`, `state`, `agent_status`, and `open_tasks`. |
 
 ```sh
 aster orbit team-define '{"name":"reviewer","area":"Code review","prompt":"Review strictly; never edit files.","members":[{"name":"reviewer-claude","kind":"claude","model":"opus"},{"name":"reviewer-codex","kind":"codex"}]}'
@@ -739,10 +745,10 @@ read is dropped so the member starts fresh. A roster that is not valid JSON, has
 another version, or breaks the role rules is left untouched and reported;
 team changes are refused until it is fixed.
 
-Roles declared in config are **pinned**: the same team is present in every
-session, fresh or restored. At every session start and on
-`aster server reload-config`, each `[[polaris.team]]` role is merged into the
-session's roster: its area, prompt, and members (kind, model, permission mode)
+Roles declared in config are **pinned**: the team is present in every session
+it applies to, fresh or restored. At every session start and on
+`aster server reload-config`, each `[[polaris.team]]` role that applies to the
+session is merged into the session's roster: its area, prompt, and members (kind, model, permission mode)
 follow config, while each member keeps its recorded terminal, native session,
 and the role's tab. A member new in config is added and started; a member
 removed from config is released, so its agent keeps running in its pane without
@@ -751,6 +757,29 @@ supervisor pass after a reload), after the Polaris tab in config order, before
 roles the session defined itself and before the Orbit tab. Roles the session
 defined with `orbit_team_define` are never changed by config.
 
+A role belongs to projects through `projects`, a list of directories (`~` is
+expanded; paths are compared after resolving symlinks). It is pinned only in
+sessions whose Orbit project directory (the directory of the Polaris workspace,
+where `orbit_exec` runs) is one of them or inside one, so each project keeps its
+own roles and names. A role without `projects` is pinned in every session, as
+before; Aster then suggests adding `projects` once, as a config notice. When a
+role no longer applies to a session's project, for example after you change
+`projects` and reload, it is unpinned there like a role removed from config.
+If no task was ever given to its members in that session, it is also removed
+and its tab closed, so a project that never used the team does not keep it; a
+role that was used stays, unpinned, and can be removed with `orbit_team_remove`.
+
+```toml
+[[polaris.team]]
+name = "core"
+area = "The Rust core"
+projects = ["~/Developer/aster"]
+
+[[polaris.team.members]]
+name = "core-claude"
+kind = "claude"
+```
+
 Polaris cannot remove a pinned role: `orbit_team_remove` refuses it with
 `orbit_role_pinned`. To retire one, delete it from config and reload; it then
 stays in the session as an ordinary role (nothing disappears under you) and can
@@ -758,8 +787,11 @@ be removed. `orbit_team_define` on a pinned role may add members and replace
 the prompt for the current session only: the role is then marked
 `overridden`, later reloads keep the session's prompt, and the area and config
 members still come from config. Define the role again with its config prompt to
-drop the override. `orbit_team_list` reports `pinned` and `overridden` for each
-role and `pinned` for each config member.
+drop the override. A `pipeline` given to `orbit_team_define` likewise replaces
+a pinned role's config pipeline for the session (`pipeline_overridden`, kept
+across reloads); `pipeline: []` returns to the config pipeline.
+`orbit_team_list` reports `pinned`, `overridden`, `pipeline`, and
+`pipeline_overridden` for each role and `pinned` for each config member.
 
 ```toml
 [[polaris.team]]
@@ -807,7 +839,9 @@ different kind. If no member is free, the task is reported `blocked` with
 
 `pipeline` lists the kinds a relayed task passes through. The first kind takes
 the task when it is assigned to the role without a `kind`, and each handoff
-without `to` moves to the next kind:
+without `to` moves to the next kind. Set it in config, or for any role with
+`orbit_team_define {…, "pipeline": ["claude", "codex"]}`; each kind must be the
+kind of a member of the role and allowed by `[polaris.workers]`:
 
 ```toml
 [[polaris.team]]

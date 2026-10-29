@@ -21,8 +21,16 @@ mod safety;
 mod tests;
 
 use checked::{git, run, run_bytes};
+pub(crate) use safety::RemoveError;
 use safety::{clonable, remove_unchecked, verify_clone, write_marker};
-pub(crate) use safety::{remove, RemoveError};
+
+/// Removes a checkout Aster created under `directory` (see `safety::remove`),
+/// and the Codex trust Aster gave it.
+pub(crate) fn remove(checkout: &Checkout, directory: &Path) -> Result<(), RemoveError> {
+    safety::remove(checkout, directory)?;
+    crate::codex_trust::untrust_checkout(&checkout.path);
+    Ok(())
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

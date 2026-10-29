@@ -109,6 +109,8 @@ impl App {
             "tab_missing": place.is_none(),
             "pinned": role.pinned,
             "overridden": role.overridden,
+            "pipeline": self.orbit_team.pipeline(&role.name),
+            "pipeline_overridden": role.pipeline_overridden,
             "members": members,
         });
         if with_prompt {
@@ -131,7 +133,7 @@ impl App {
         let previous = self.orbit_team.roster.role(&params.name).cloned();
         let role = match self.orbit_team.pinned_config(&params.name).cloned() {
             // A pinned role keeps its config area and members; this session
-            // may add members and replace the prompt.
+            // may add members and replace the prompt and the pipeline.
             Some(config) => {
                 let prompt = params.prompt.clone().or_else(|| {
                     previous
@@ -139,11 +141,18 @@ impl App {
                         .filter(|role| role.overridden)
                         .map(|role| role.prompt.clone())
                 });
+                let pipeline = params.pipeline.clone().or_else(|| {
+                    previous
+                        .as_ref()
+                        .filter(|role| role.pipeline_overridden)
+                        .map(|role| role.pipeline.clone())
+                });
                 roster::pinned_role(
                     &config,
                     previous.as_ref(),
                     RoleSpec::from(params).members,
                     prompt,
+                    pipeline,
                     &self.orbit_worker_policy,
                 )?
             }
@@ -200,7 +209,7 @@ impl App {
         reply(id, result)
     }
 
-    fn orbit_team_remove(
+    pub(crate) fn orbit_team_remove(
         &mut self,
         id: &str,
         params: OrbitTeamRemoveParams,
