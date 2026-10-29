@@ -750,6 +750,21 @@ impl ClientShellState {
         if let Some(bar) = mode_bar {
             occlusion.cover(bar);
         }
+        // The flow view's layout is brought up to date before it is drawn; with
+        // the view closed none of this runs.
+        Self::refresh_flow_layout(
+            &mut self.overlay,
+            snapshot,
+            self.snapshot_serial,
+            Rect::new(0, 0, frame.width, frame.height),
+        );
+        let flow_pane = self.flow_selected_pane_available();
+        let flow_draw = modern::draw::flow::FlowDraw {
+            chrome: &self.config.chrome,
+            spinner: self.animations.spinner_index(self.config.animations, now),
+            now_unix_ms: frame_unix_ms,
+            selected_pane: flow_pane,
+        };
         if let Some(overlay) = self.overlay.as_ref() {
             let mut composed = frame.to_ratatui_buffer()?;
             let cursor = if let ClientShellOverlay::ContextMenu(menu) = overlay {
@@ -778,6 +793,7 @@ impl ClientShellState {
                     &self.active_endpoint_id,
                     &self.config.keybinds,
                     &self.config.palette,
+                    &flow_draw,
                 )?;
                 occlusion.cover(rendered.area);
                 self.hits.overlay_primary = rendered.primary;
@@ -797,6 +813,9 @@ impl ClientShellState {
                 self.hits.settings_popup = rendered.settings_popup;
                 self.hits.settings_tabs = rendered.settings_tabs;
                 self.hits.settings_choices = rendered.settings_choices;
+                self.hits.flow_popup = rendered.flow_popup;
+                self.hits.flow_steps = rendered.flow_steps;
+                self.hits.flow_tasks = rendered.flow_tasks;
                 self.hits.product_announcement_scrollbar = rendered.product_announcement_scrollbar;
                 self.hits.product_announcement_scroll_metrics =
                     rendered.product_announcement_scroll_metrics;

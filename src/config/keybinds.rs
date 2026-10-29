@@ -361,6 +361,7 @@ pub struct Keybinds {
     pub close_workspace: ActionKeybinds,
     pub workspace_picker: ActionKeybinds,
     pub goto: ActionKeybinds,
+    pub orbit_flow: ActionKeybinds,
     pub detach: ActionKeybinds,
     pub reload_config: ActionKeybinds,
     pub open_notification_target: ActionKeybinds,
@@ -544,6 +545,7 @@ impl Config {
             close_workspace: empty_action!(),
             workspace_picker: empty_action!(),
             goto: empty_action!(),
+            orbit_flow: empty_action!(),
             detach: empty_action!(),
             reload_config: empty_action!(),
             open_notification_target: empty_action!(),
@@ -673,6 +675,7 @@ impl Config {
             apply_action!(keybinds.close_workspace, close_workspace, source);
             apply_action!(keybinds.workspace_picker, workspace_picker, source);
             apply_action!(keybinds.goto, goto, source);
+            apply_action!(keybinds.orbit_flow, orbit_flow, source);
             apply_action!(keybinds.detach, detach, source);
             apply_action!(keybinds.reload_config, reload_config, source);
             apply_action!(
@@ -1685,6 +1688,29 @@ next_tab = "prefix+n"
                 KeyModifiers::empty()
             ))]
         );
+    }
+
+    #[test]
+    fn orbit_flow_defaults_to_prefix_f_and_can_be_rebound() {
+        let kb = Config::default().keybinds();
+        assert_eq!(
+            binding_triggers(&kb.orbit_flow),
+            vec![BindingTrigger::Prefix((
+                KeyCode::Char('f'),
+                KeyModifiers::empty()
+            ))]
+        );
+        let config: Config = toml::from_str("[keys]\norbit_flow = \"prefix+shift+f\"\n").unwrap();
+        assert_eq!(
+            binding_triggers(&config.keybinds().orbit_flow),
+            vec![BindingTrigger::Prefix((
+                KeyCode::Char('f'),
+                KeyModifiers::SHIFT
+            ))]
+        );
+        assert!(Config::default().ui.flow_view);
+        let off: Config = toml::from_str("[ui]\nflow_view = false\n").unwrap();
+        assert!(!off.ui.flow_view);
     }
 
     #[test]

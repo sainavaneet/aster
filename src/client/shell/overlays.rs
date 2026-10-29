@@ -22,6 +22,9 @@ pub(crate) struct OverlayRender {
     pub(crate) help_scroll_metrics: Option<crate::pane::ScrollMetrics>,
     pub(crate) help_max_scroll: usize,
     pub(crate) settings_popup: Rect,
+    pub(crate) flow_popup: Rect,
+    pub(crate) flow_steps: super::modern::model::flow::FlowHits,
+    pub(crate) flow_tasks: super::modern::model::flow::FlowHits,
     pub(crate) settings_tabs: Vec<(Rect, ClientSettingsSection)>,
     pub(crate) settings_choices: Vec<(Rect, usize)>,
     pub(crate) product_announcement_scrollbar: Rect,
@@ -41,6 +44,7 @@ pub(crate) fn render_client_overlay(
     active_endpoint_id: &ClientEndpointId,
     k: &LiveKeybindConfig,
     p: &Palette,
+    flow: &super::modern::draw::flow::FlowDraw<'_>,
 ) -> Option<OverlayRender> {
     if !matches!(
         o,
@@ -64,6 +68,7 @@ pub(crate) fn render_client_overlay(
         ClientShellOverlay::Rename(v) => render_rename_overlay(b, v, p),
         ClientShellOverlay::ConfirmClose(v) => render_confirm_close_overlay(b, v, p),
         ClientShellOverlay::Help(v) => render_help_overlay(b, v, k, p),
+        ClientShellOverlay::OrbitFlow(v) => render_flow_overlay(b, v, s, flow, p),
         ClientShellOverlay::Navigator(v) => {
             render_navigator_overlay(b, v, endpoints, active_endpoint_id, p)
         }
@@ -1112,6 +1117,51 @@ fn help_lines(
         lines.push((0, Line::raw("")));
     }
     lines
+}
+
+/// The popup the Orbit flow view uses inside `area`.
+pub(crate) fn flow_popup(area: Rect) -> Option<Rect> {
+    popup(area, 120, 30)
+}
+
+fn render_flow_overlay(
+    b: &mut Buffer,
+    v: &ClientOrbitFlowOverlay,
+    s: &ClientShellSnapshot,
+    flow: &super::modern::draw::flow::FlowDraw<'_>,
+    p: &Palette,
+) -> Option<OverlayRender> {
+    let q = flow_popup(b.area)?;
+    let i = panel(b, q, p.accent, p.panel_bg)?;
+    if i.width < 20 || i.height < 8 {
+        return None;
+    }
+    let close = Rect::new(i.right() - 13, i.y, 13, 1);
+    let mut out = OverlayRender {
+        area: q,
+        flow_popup: q,
+        cancel: close,
+        ..OverlayRender::default()
+    };
+    super::modern::draw::flow::render(
+        b,
+        i,
+        v,
+        s.orbit.as_ref(),
+        flow,
+        &mut out.flow_steps,
+        &mut out.flow_tasks,
+    );
+    button(
+        b,
+        close,
+        " esc close ",
+        Style::default()
+            .fg(contrast(p))
+            .bg(p.accent)
+            .add_modifier(Modifier::BOLD),
+    );
+    Some(out)
 }
 
 fn render_help_overlay(

@@ -129,6 +129,9 @@ impl Task {
                         .map(|integrate| integrate_phase(integrate.phase).to_owned()),
                     started_at_ms: noted.then_some(step.started_at).flatten(),
                     finished_at_ms: noted.then_some(step.finished_at).flatten(),
+                    // Filled by the view, which knows terminals and panes.
+                    worker_terminal_id: None,
+                    pane_id: None,
                 })
             })
             .collect();

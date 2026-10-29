@@ -36,7 +36,13 @@ pub(in crate::client::shell) fn render_line(
 ) -> bool {
     let tier = team.rows.tier.unwrap_or(Tier::Normal);
     match *line {
-        TeamLineRef::WorkLabel => work_label(buffer, rect, team, ctx),
+        TeamLineRef::WorkLabel => {
+            work_label(buffer, rect, team, ctx);
+            // The label opens the flow view (a no-op when `ui.flow_view` is off).
+            if ctx.config.flow_view {
+                hits.chrome_targets.push((rect, ChromeTarget::FlowOpen));
+            }
+        }
         TeamLineRef::LaneHeader {
             lane,
             collapsed,

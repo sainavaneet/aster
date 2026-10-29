@@ -1088,6 +1088,14 @@ pub struct OrbitShellStep {
     pub started_at_ms: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub finished_at_ms: Option<u64>,
+    /// The terminal of the agent that ran (or runs) this step, when known. Two
+    /// parallel steps of the same kind have different workers.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worker_terminal_id: Option<String>,
+    /// The pane that terminal sits in, when it sits in one; absent once the
+    /// worker stopped, so a client cannot focus a pane that is gone.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pane_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -1984,6 +1992,8 @@ mod tests {
                 integrate: None,
                 started_at_ms: None,
                 finished_at_ms: None,
+                worker_terminal_id: None,
+                pane_id: None,
             }],
             step_total: Some(2),
             parallel: Some(OrbitShellParallel { done: 1, total: 2 }),
@@ -2033,6 +2043,44 @@ mod tests {
             let changed: OrbitShellView = serde_json::from_value(changed).unwrap();
             assert!(!original.same_facts(&changed), "{pointer}");
         }
+    }
+
+    #[test]
+    fn step_worker_identity_is_optional_both_ways() {
+        let old = serde_json::json!({
+            "index": 0, "member": "a", "kind": "codex", "state": "active"
+        });
+        let step: OrbitShellStep = serde_json::from_value(old.clone()).unwrap();
+        assert_eq!((step.worker_terminal_id, step.pane_id), (None, None));
+        let identified = OrbitShellStep {
+            index: 0,
+            member: "a".into(),
+            kind: "codex".into(),
+            state: "active".into(),
+            note: None,
+            next: None,
+            parallel: None,
+            integrate: None,
+            started_at_ms: None,
+            finished_at_ms: None,
+            worker_terminal_id: Some("term_9".into()),
+            pane_id: Some("w1:p2".into()),
+        };
+        let encoded = serde_json::to_value(&identified).unwrap();
+        assert_eq!(encoded["pane_id"], "w1:p2");
+        let round_trip: OrbitShellStep = serde_json::from_value(encoded).unwrap();
+        assert_eq!(round_trip, identified);
+        let bare = OrbitShellStep {
+            worker_terminal_id: None,
+            pane_id: None,
+            ..identified
+        };
+        let encoded = serde_json::to_value(&bare).unwrap();
+        assert!(encoded.get("pane_id").is_none() && encoded.get("worker_terminal_id").is_none());
+        // An older client ignores the fields it does not know.
+        let mut newer = encoded;
+        newer["pane_id"] = "w1:p9".into();
+        let _: OrbitShellStep = serde_json::from_value(newer).unwrap();
     }
 
     #[test]

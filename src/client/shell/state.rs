@@ -27,6 +27,7 @@ pub(crate) struct ClientShellConfig {
     pub(super) agent_panel_sort: crate::config::AgentPanelSortConfig,
     pub(super) sidebar_team: bool,
     pub(super) sidebar_work: bool,
+    pub(super) flow_view: bool,
     pub(super) status_indicators: crate::config::StatusIndicatorStyle,
     pub(super) animations: crate::config::UiAnimationsConfig,
     pub(super) sound_enabled: bool,
@@ -148,6 +149,10 @@ pub(super) struct ShellHitMap {
     pub(super) settings_popup: Rect,
     pub(super) settings_tabs: Vec<(Rect, ClientSettingsSection)>,
     pub(super) settings_choices: Vec<(Rect, usize)>,
+    pub(super) flow_popup: Rect,
+    /// Step slots and task chips of the open flow view, with their rectangles.
+    pub(super) flow_steps: super::modern::model::flow::FlowHits,
+    pub(super) flow_tasks: super::modern::model::flow::FlowHits,
     pub(super) product_announcement_scrollbar: Rect,
     pub(super) product_announcement_scroll_metrics: Option<crate::pane::ScrollMetrics>,
     pub(super) product_announcement_max_scroll: usize,
@@ -300,6 +305,7 @@ pub(super) enum ClientShellOverlayKind {
     Rename,
     ConfirmClose,
     Help,
+    OrbitFlow,
     Navigator,
     WorktreeCreate,
     WorktreeOpen,
@@ -392,6 +398,17 @@ pub(super) struct ClientHelpOverlay {
     pub(super) scroll: usize,
 }
 
+/// The Orbit flow view: which task is shown, which of its step slots is
+/// selected, and the layout built for the current snapshot and geometry.
+#[derive(Debug)]
+pub(super) struct ClientOrbitFlowOverlay {
+    pub(super) task: usize,
+    pub(super) step: usize,
+    /// Select the active step when the first layout is built.
+    pub(super) default_step: bool,
+    pub(super) layout: Option<super::modern::model::flow::FlowLayout>,
+}
+
 #[derive(Debug)]
 pub(super) struct ClientGlobalMenuOverlay {
     pub(super) highlighted: usize,
@@ -434,6 +451,8 @@ impl ChromeTargets {
 pub(super) enum ChromeTarget {
     /// A work lane header: toggles the lane.
     Lane(crate::ui::chrome::state::Lane),
+    /// The work label: opens the Orbit flow view.
+    FlowOpen,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -671,6 +690,7 @@ pub(super) enum ClientShellOverlay {
     Rename(ClientRenameOverlay),
     ConfirmClose(ClientConfirmCloseOverlay),
     Help(ClientHelpOverlay),
+    OrbitFlow(ClientOrbitFlowOverlay),
     Navigator(ClientNavigatorOverlay),
     WorktreeCreate(ClientWorktreeCreateOverlay),
     WorktreeOpen(ClientWorktreeOpenOverlay),
@@ -689,6 +709,7 @@ impl ClientShellOverlay {
             Self::Rename(_) => ClientShellOverlayKind::Rename,
             Self::ConfirmClose(_) => ClientShellOverlayKind::ConfirmClose,
             Self::Help(_) => ClientShellOverlayKind::Help,
+            Self::OrbitFlow(_) => ClientShellOverlayKind::OrbitFlow,
             Self::Navigator(_) => ClientShellOverlayKind::Navigator,
             Self::WorktreeCreate(_) => ClientShellOverlayKind::WorktreeCreate,
             Self::WorktreeOpen(_) => ClientShellOverlayKind::WorktreeOpen,

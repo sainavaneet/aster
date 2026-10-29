@@ -358,6 +358,12 @@ fn every_dialog_and_menu_occludes_its_panel_not_the_whole_screen() {
                 &state.active_endpoint_id,
                 &state.config.keybinds,
                 &state.config.palette,
+                &super::super::modern::draw::flow::FlowDraw {
+                    chrome: &state.config.chrome,
+                    spinner: None,
+                    now_unix_ms: 0,
+                    selected_pane: false,
+                },
             ),
         }
         .unwrap();

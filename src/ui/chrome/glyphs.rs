@@ -31,6 +31,11 @@ pub(crate) struct GlyphSet {
     pub(crate) ellipsis: &'static str,
     pub(crate) chip_on: &'static str,
     pub(crate) chip_off: &'static str,
+    /// Tree pieces of the flow view: vertical, branch, last branch, fork.
+    pub(crate) tree_vertical: &'static str,
+    pub(crate) tree_mid: &'static str,
+    pub(crate) tree_end: &'static str,
+    pub(crate) tree_fork: &'static str,
     /// Working spinner frames; the first frame is the static working glyph's
     /// stand-in while animations are off.
     pub(crate) spinner: &'static [&'static str],
@@ -61,6 +66,10 @@ pub(crate) const UNICODE: GlyphSet = GlyphSet {
     ellipsis: "…",
     chip_on: "▪",
     chip_off: "▫",
+    tree_vertical: "│",
+    tree_mid: "├",
+    tree_end: "╰",
+    tree_fork: "┬",
     spinner: &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"],
 };
 
@@ -89,6 +98,10 @@ pub(crate) const ASCII: GlyphSet = GlyphSet {
     ellipsis: "~",
     chip_on: "#",
     chip_off: ".",
+    tree_vertical: "|",
+    tree_mid: "+",
+    tree_end: "\\",
+    tree_fork: "+",
     spinner: &["|", "/", "-", "\\"],
 };
 
@@ -157,6 +170,10 @@ mod tests {
             set.ellipsis,
             set.chip_on,
             set.chip_off,
+            set.tree_vertical,
+            set.tree_mid,
+            set.tree_end,
+            set.tree_fork,
         ];
         glyphs.extend(set.spinner);
         glyphs

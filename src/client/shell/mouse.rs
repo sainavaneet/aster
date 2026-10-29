@@ -1571,6 +1571,10 @@ impl ClientShellState {
             }
             return;
         }
+        if matches!(self.overlay, Some(ClientShellOverlay::OrbitFlow(_))) {
+            self.handle_flow_mouse(mouse, outcome);
+            return;
+        }
         if matches!(self.overlay, Some(ClientShellOverlay::Help(_))) {
             match mouse.kind {
                 MouseEventKind::ScrollUp => {
@@ -2166,6 +2170,10 @@ impl ClientShellState {
                     Some(ChromeTarget::Lane(lane)) => {
                         self.toggle_lane(lane);
                         outcome.repaint = true;
+                        return;
+                    }
+                    Some(ChromeTarget::FlowOpen) => {
+                        self.open_orbit_flow(outcome);
                         return;
                     }
                     None => {}

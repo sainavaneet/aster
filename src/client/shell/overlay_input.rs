@@ -786,6 +786,11 @@ impl ClientShellState {
             return;
         }
 
+        if matches!(self.overlay, Some(ClientShellOverlay::OrbitFlow(_))) {
+            self.handle_flow_key(key, outcome);
+            return;
+        }
+
         if matches!(self.overlay, Some(ClientShellOverlay::Help(_))) {
             let text_character = crate::input::keybind_help_text_char(key);
             let (code, modifiers) = crate::config::normalize_key_combo((key.code, key.modifiers));

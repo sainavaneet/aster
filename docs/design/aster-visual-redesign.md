@@ -1317,3 +1317,49 @@ removed, while correct residue clearing adds work on worker border rows. Do not
 claim the ratio budget passed. Six benchmark profiles pass in every run; the
 known native-file CoW retention profile still fails. Classic and endpoint fixture
 expectations remain unedited.
+
+## Appendix D: Phase 4 notes (design-sonnet)
+
+- Built: the Orbit flow view as an overlay (`ClientShellOverlay::OrbitFlow`, `shell/flow_view.rs`, `modern/model/flow.rs`, `modern/draw/flow.rs`). The layout (`FlowLayout`: rows, focusable step slots, summary) is built when the view opens and when its key (snapshot serial, selected task, popup width) changes, and holds indices into `snapshot.orbit`, not copies; drawing borrows the snapshot, and with the view closed nothing runs.
+- Layout: lead ━▶ role header with the task progress; relay steps joined by arrows labelled with the first line of the handoff `next` text; parallel steps under `parallel D/T done` (the task-level total), as columns from 100 cells up to 4 steps and as a list otherwise or beyond; the integrator; `… N earlier/later steps` rows for steps beyond the projected list; task chips at the bottom. Member and kind are drawn before the note and the right-hand age/phase are reserved first, so truncation cuts the note first.
+- Data: `OrbitShellStep` gained optional `worker_terminal_id` and `pane_id` (parallel steps use their own agent, the active step the current worker, others the roster member's terminal; `pane_id` only while the terminal sits in a pane). The client focuses a step only if that pane is also an agent in the snapshot; the integrator and stopped workers are inert. Optional JSON fields only; no frozen codec or enum changed, so `PROTOCOL_VERSION` is not bumped.
+- Entry points: `keys.orbit_flow` (default `prefix+f`), the modern `WORK` label, gated by `ui.flow_view` (default true). Classic keeps the binding inert and its existing output unchanged. Keybinding help and the global menu currently do not list the flow entry; the modern WORK label and configured binding open it.
+- Motion: the active step uses the shared spinner under full animations; reduced and off show the static glyph with all information.
+
+
+### Phase 4 validation (design-sol)
+
+- Added a 336-scene deterministic flow snapshot matrix: relay, parallel 1/2 and
+  1/4, integrating with long/multiline/Unicode notes, approval (including approval plus blocked), blocked alone, empty;
+  44/80/120/200 columns, dark/light, full/reduced/off, Unicode/ASCII. Cell style
+  digests accompany text. Classic and frozen endpoint fixtures remain unedited.
+- Added server projection coverage for parallel ownership, the current relay
+  worker, roster fallback, a terminal without a pane, and an unknown worker.
+  Unassigned parallel steps no longer inherit the relay's current worker.
+- Fixed classic flow gating. Flow hit rectangles use 32 inline slots rather than
+  growing vectors during draw. A snapshot serial mismatch rejects stale focus
+  hits until the new layout has been composed. Added clipped-layout and bounded
+  hit-storage regression tests.
+
+- Snapshot refresh now preserves the selected task id and original step index
+  when task ordinals or the 32-step window change. The cache omits height and
+  glyphs intentionally: rows contain indices and no wrapping, height controls
+  clipping at draw time, and glyphs are borrowed on every draw. Width alone
+  chooses the column/list layout. Two-line column selections reserve both rows.
+- Final native validation: 4,668 nextest tests passed, 16 skipped; fmt and clippy
+  passed. Architecture (14), config reference, docs contract (7), translation
+  parity (4), and maintenance/integration asset suites passed. `just check`
+  reaches Windows lint and stops because the workstation has no Windows SDK
+  libc configuration; no platform code changed. An earlier overlapping rebuild
+  invalidated a test executable; the final sequential run above is clean.
+- Quiet render-scale samples with work lanes visible, 1/15/50 panes (µs):
+  sample 1 classic 167/172/180, modern 167/183/186; sample 2 classic
+  167/170/177, modern 166/176/182. Absolute overhead stays under the 10%/15%
+  budgets. The 15:1 normalized scaling gap was +0.066 then +0.042; the repeat
+  meets +0.05, and the first is consistent with the preceding phase's
+  +0.055/+0.067 samples. Prior phase baseline was classic 156/163/171 and
+  modern 160/176/178; no new pre-implementation baseline was captured in this
+  handoff. These profiles exercise the closed overlay (normal composition),
+  not a wall-clock budget for the open flow popup. Both runs passed six profiles
+  and hit the documented pre-existing native_file_render_scale_profile retained
+  graphics failure. No new dependencies or frozen fixture changes.

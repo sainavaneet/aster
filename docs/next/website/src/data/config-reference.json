@@ -756,6 +756,12 @@
           "description": "Open the session navigator."
         },
         {
+          "key": "keys.orbit_flow",
+          "type": "keybinding",
+          "default": "\"prefix+f\"",
+          "description": "Open the Orbit flow view."
+        },
+        {
           "key": "keys.navigate_workspace_up",
           "type": "keybinding",
           "default": "\"up\"",
@@ -1269,6 +1275,12 @@
           "type": "boolean",
           "default": "true",
           "description": "Show the work board below the Orbit team tree: active assignments with blocked ones first and pulsing, then up to five recently resolved assignments for ten minutes after they finish. Needs ui.sidebar_team. Set false to hide the board."
+        },
+        {
+          "key": "ui.flow_view",
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow the Orbit flow view: one assignment drawn as lead, role and member steps with handoff arrows, parallel steps side by side and the integrator. Set false to make keys.orbit_flow and the WORK label inert."
         },
         {
           "key": "ui.status_indicators",

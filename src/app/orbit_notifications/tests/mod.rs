@@ -399,3 +399,64 @@ fn ledger_clock_is_monotonic_follows_the_wall_after_sleep_and_maps_back_exactly(
     // A wall clock stepping backwards or an earlier instant never moves time back.
     assert_eq!(clock.now_ms(base, 0), now + 1_000);
 }
+
+#[tokio::test]
+async fn flow_step_projection_resolves_parallel_current_roster_and_missing_panes() {
+    let (mut app, _worker_rx, _lead_rx) = setup();
+    app.ensure_orbit_team_loaded();
+    let lead = app.orbit_lead_terminal().unwrap().terminal_id;
+    let worker = app.state.workspaces[0]
+        .terminal_id(app.state.workspaces[0].tabs[1].root_pane)
+        .unwrap()
+        .to_string();
+    app.orbit_team.roster.roles.push(
+        serde_json::from_value(serde_json::json!({
+            "name": "design", "members": [
+                {"name":"old", "kind":"codex", "terminal_id": lead},
+                {"name":"gone", "kind":"codex", "terminal_id":"missing-terminal"}
+            ]
+        }))
+        .unwrap(),
+    );
+    app.orbit_notifications.tasks.push(
+        serde_json::from_value(serde_json::json!({
+            "task_id":"projection", "worker_id":worker, "lead_id":lead,
+            "submission":"submitted", "delivery":"awaiting_report", "error":null,
+            "created_at":1000,
+            "steps":[
+                {"index":0,"member":"parallel","kind":"codex","state":"done",
+                 "parallel":{"prompt":"p","files":[],"phase":"running","worker_id":lead}},
+                {"index":1,"member":"current","kind":"codex","state":"active"},
+                {"index":2,"member":"old","kind":"codex","state":"done"},
+                {"index":3,"member":"gone","kind":"codex","state":"done"},
+                {"index":4,"member":"unknown","kind":"codex","state":"active",
+             "parallel":{"prompt":"p","files":[],"phase":"running"}}
+            ]
+        }))
+        .unwrap(),
+    );
+    app.refresh_orbit_shell_view(Instant::now() + Duration::from_secs(1));
+    let view = app.orbit_shell_view().unwrap();
+    let steps = &view
+        .active_tasks
+        .iter()
+        .find(|task| task.task_id == "projection")
+        .unwrap()
+        .steps;
+    assert_eq!(steps[0].worker_terminal_id.as_deref(), Some(lead.as_str()));
+    assert_eq!(steps[0].pane_id, view.lead.pane_id);
+    assert_eq!(
+        steps[1].worker_terminal_id.as_deref(),
+        Some(worker.as_str())
+    );
+    assert!(steps[1].pane_id.is_some());
+    assert_ne!(steps[1].pane_id, steps[0].pane_id);
+    assert_eq!(steps[2].worker_terminal_id.as_deref(), Some(lead.as_str()));
+    assert_eq!(steps[2].pane_id, view.lead.pane_id);
+    assert_eq!(
+        steps[3].worker_terminal_id.as_deref(),
+        Some("missing-terminal")
+    );
+    assert!(steps[3].pane_id.is_none());
+    assert!(steps[4].worker_terminal_id.is_none() && steps[4].pane_id.is_none());
+}

@@ -1,6 +1,7 @@
 //! Allocation-free drawing of the modern sidebar. Everything here borrows the
 //! precomputed models and writes cells; nothing formats, clones or collects.
 
+pub(in crate::client::shell) mod flow;
 pub(in crate::client::shell) mod lanes;
 pub(in crate::client::shell) mod pane_header;
 pub(in crate::client::shell) mod tabs;

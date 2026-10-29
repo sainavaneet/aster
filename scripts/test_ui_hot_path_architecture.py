@@ -31,6 +31,7 @@ STYLE_DISPATCH_FILES = frozenset(
         "composition.rs",
         "config.rs",
         "endpoint_sidebar.rs",
+        "flow_view.rs",
         "endpoint_agent_state.rs",  # owns the snapshot-derived pane attention cache
         "global_menu.rs",
         "mobile.rs",
@@ -79,6 +80,7 @@ DRAW_FORBIDDEN = (
     (re.compile(r"\bvec!\s*[\[(]"), "vec! allocates"),
     (re.compile(r"\bString\s*::"), "String construction"),
     (re.compile(r"\bVec\s*::"), "Vec construction"),
+    (re.compile(r"&\s*mut\s+Vec\s*<"), "growable draw output; use bounded inline storage"),
     (re.compile(r"\.collect\s*[(:<]"), "collect allocates"),
     (re.compile(r"\bBox\s*::\s*new\b"), "Box allocation"),
     (re.compile(r"\b(?:HashMap|HashSet)\s*::"), "hash collection construction"),
@@ -299,6 +301,7 @@ class UiHotPathArchitectureTests(unittest.TestCase):
             "fn draw() { let v = vec![1]; }",
             "fn draw() { String::new(); }",
             "fn draw() { Vec::new(); }",
+            "fn draw(hits: &mut Vec<Hit>) { hits.push(hit); }",
             "fn draw() { it.collect::<Vec<_>>(); }",
             "fn draw() { Box::new(1); }",
             "fn draw() { HashMap::new(); }",

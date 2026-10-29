@@ -184,7 +184,7 @@ impl App {
             },
             roles,
             scratch,
-            active_tasks: self.orbit_shell_active_tasks(),
+            active_tasks: self.orbit_shell_active_tasks(&pane_ids),
             recent_tasks: self.orbit_shell_recent_tasks(),
             // Stamped per snapshot (`orbit_shell_view_at`), not per build, so an
             // unchanged view stays equal to the cached one.
@@ -315,7 +315,10 @@ impl App {
             .collect()
     }
 
-    fn orbit_shell_active_tasks(&self) -> Vec<OrbitShellActiveTask> {
+    fn orbit_shell_active_tasks(
+        &self,
+        pane_ids: &HashMap<String, String>,
+    ) -> Vec<OrbitShellActiveTask> {
         self.orbit_notifications
             .tasks
             .iter()
@@ -331,7 +334,29 @@ impl App {
                 } else {
                     terminal.map_or("unknown", |terminal| state_name(terminal.state))
                 };
-                let shell_steps = task.shell_steps(self.orbit_step_total(task));
+                let mut shell_steps = task.shell_steps(self.orbit_step_total(task));
+                // Who ran each step: a parallel step's own agent, the current
+                // worker for the active step, else the roster member's terminal.
+                // The pane exists only while that terminal sits in one.
+                for step in &mut shell_steps.steps {
+                    let terminal = task
+                        .steps
+                        .iter()
+                        .find(|source| source.index == usize::from(step.index))
+                        .and_then(|source| source.parallel.as_ref()?.worker_id.clone())
+                        .or_else(|| {
+                            (step.state == "active" && step.parallel.is_none())
+                                .then(|| task.worker_id.clone())
+                        })
+                        .or_else(|| {
+                            self.orbit_team
+                                .roster
+                                .member(&step.member)
+                                .and_then(|(_, member)| member.terminal_id.clone())
+                        });
+                    step.pane_id = terminal.as_ref().and_then(|id| pane_ids.get(id)).cloned();
+                    step.worker_terminal_id = terminal;
+                }
                 OrbitShellActiveTask {
                     task_id: task.task_id.clone(),
                     worker_terminal_id: task.worker_id.clone(),

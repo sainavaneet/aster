@@ -260,6 +260,7 @@ mod input_domain;
 mod keybindings_settings;
 mod link_hover;
 mod mobile;
+mod modern_flow;
 mod modern_headers;
 mod modern_sidebar;
 mod mouse_selection;

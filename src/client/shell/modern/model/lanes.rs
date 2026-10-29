@@ -305,6 +305,8 @@ mod tests {
             integrate: None,
             started_at_ms: None,
             finished_at_ms: None,
+            worker_terminal_id: None,
+            pane_id: None,
         }
     }
 
