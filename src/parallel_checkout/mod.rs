@@ -179,6 +179,8 @@ fn add_worktree(repo_root: &Path, path: &Path, snapshot: &str) -> Result<(), Str
 
 /// Creates the checkout `name` under `directory/<repo_name>/`, then applies the
 /// `apply` patches in order: the earlier steps' results that this one builds on.
+/// `owner` is the session recorded in the ownership marker; only that session's
+/// startup may reclaim the checkout later (see `reclaim`).
 pub(crate) fn create(
     repo_root: &Path,
     project: &Path,
@@ -186,19 +188,26 @@ pub(crate) fn create(
     repo_name: &str,
     name: &str,
     apply: &[PathBuf],
+    owner: &str,
 ) -> Result<Checkout, String> {
-    create_with(
-        repo_root,
-        project,
+    let place = Placement {
         directory,
         repo_name,
         name,
+        owner,
+    };
+    create_placed(
+        repo_root,
+        project,
+        place,
         apply,
         crate::platform::clone_directory_cow,
     )
 }
 
 /// `create` with the copy-on-write clone replaceable, so tests can fail it.
+/// The checkout has no owner, so no startup reclaims it.
+#[cfg(test)]
 pub(crate) fn create_with(
     repo_root: &Path,
     project: &Path,
@@ -208,6 +217,37 @@ pub(crate) fn create_with(
     apply: &[PathBuf],
     clone: CloneFn,
 ) -> Result<Checkout, String> {
+    let place = Placement {
+        directory,
+        repo_name,
+        name,
+        owner: "",
+    };
+    create_placed(repo_root, project, place, apply, clone)
+}
+
+/// Where a checkout goes and whose it is.
+#[derive(Clone, Copy)]
+pub(crate) struct Placement<'a> {
+    pub(crate) directory: &'a Path,
+    pub(crate) repo_name: &'a str,
+    pub(crate) name: &'a str,
+    pub(crate) owner: &'a str,
+}
+
+pub(crate) fn create_placed(
+    repo_root: &Path,
+    project: &Path,
+    place: Placement<'_>,
+    apply: &[PathBuf],
+    clone: CloneFn,
+) -> Result<Checkout, String> {
+    let Placement {
+        directory,
+        repo_name,
+        name,
+        owner,
+    } = place;
     let lock = CREATE_LOCK
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
@@ -231,7 +271,7 @@ pub(crate) fn create_with(
     // First, before anything exists at the name: the marker is what lets
     // `remove` recognise the directory as ours, and an existing marker path
     // (a file or a symlink someone else put there) refuses the whole checkout.
-    write_marker(&path, repo_root)?;
+    write_marker(&path, repo_root, owner)?;
     let cloned = clonable(repo_root, directory)
         && match clone(repo_root, &path).map_err(|error| error.to_string()) {
             // Nothing in the clone is touched until it is proven to be a

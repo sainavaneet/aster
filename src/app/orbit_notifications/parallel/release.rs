@@ -189,8 +189,14 @@ impl App {
         }
     }
 
+    /// The session recorded in the markers of the checkouts this server makes:
+    /// the directory of its ledger and sockets.
+    pub(crate) fn orbit_checkout_owner(&self) -> String {
+        crate::session::data_dir().display().to_string()
+    }
+
     /// Removes marked checkouts no ledger entry owns and that are at least
-    /// `min_age` old, off the event loop (see `parallel_checkout::reclaim_orphans`).
+    /// `min_age` old and made by this session, off the event loop (see `parallel_checkout::reclaim_orphans`).
     pub(crate) fn reclaim_orphaned_checkouts(&mut self, min_age: std::time::Duration) {
         let owned: std::collections::HashSet<std::path::PathBuf> = self
             .orbit_notifications
@@ -201,8 +207,11 @@ impl App {
             .map(|checkout| checkout.path.clone())
             .collect();
         let directory = self.state.worktree_directory.clone();
+        let owner = self.orbit_checkout_owner();
         let spawned = crate::thread_spawn::spawn_named("aster-orbit-checkout-reclaim", move || {
-            for item in crate::parallel_checkout::reclaim_orphans(&directory, &owned, min_age) {
+            let found =
+                crate::parallel_checkout::reclaim_orphans(&directory, &owner, &owned, min_age);
+            for item in found {
                 match item.result {
                     Ok(()) => {
                         tracing::info!(path = %item.path.display(), "reclaimed an orphaned parallel checkout")
@@ -239,5 +248,20 @@ impl App {
             (outcome != OrbitOutcome::Completed).then(|| "a parallel step did not complete".into());
         task.live = Default::default();
         task.set_delivery(Delivery::Queued, now, "parallel steps finished");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn removal_backoff_doubles_from_five_seconds_and_is_capped() {
+        let waits: Vec<u64> = (1..=MAX_REMOVAL_TRIES).map(removal_backoff_ms).collect();
+        assert_eq!(waits[..4], [5_000, 10_000, 20_000, 40_000]);
+        assert!(waits.windows(2).all(|pair| pair[0] <= pair[1]));
+        assert_eq!(waits[MAX_REMOVAL_TRIES as usize - 1], 1_800_000);
+        assert_eq!(removal_backoff_ms(u32::MAX), 1_800_000);
+        assert_eq!(MAX_REMOVAL_TRIES, 12);
     }
 }

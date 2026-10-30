@@ -15,6 +15,10 @@ const MARKER: &str = "\n# Trusted by Aster for an Orbit checkout; removed with t
 
 /// `$CODEX_HOME/config.toml`, else `~/.codex/config.toml`.
 pub(crate) fn config_path() -> Option<PathBuf> {
+    // Unit tests never read or edit the real Codex config.
+    if cfg!(test) {
+        return None;
+    }
     config_path_from(|key| std::env::var_os(key))
 }
 

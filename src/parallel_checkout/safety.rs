@@ -81,10 +81,16 @@ pub(super) fn marker_path(path: &Path) -> PathBuf {
 /// Records that Aster created the checkout at `path`. The marker is created
 /// exclusively (`write_new`): a marker path someone else put there, a link
 /// included, is an error, never written through.
-pub(super) fn write_marker(path: &Path, repo_root: &Path) -> Result<(), String> {
+///
+/// A third `owner=<id>` line names the session that created the checkout (none
+/// when `owner` is empty); only that session's startup may reclaim it.
+pub(super) fn write_marker(path: &Path, repo_root: &Path, owner: &str) -> Result<(), String> {
     let target = checked::real_target(path).map_err(|error| error.to_string())?;
     let marker = marker_path(path);
-    let text = format!("{}\n{}\n", target.display(), repo_root.display());
+    let mut text = format!("{}\n{}\n", target.display(), repo_root.display());
+    if !owner.is_empty() {
+        text.push_str(&format!("{OWNER_PREFIX}{owner}\n"));
+    }
     checked::write_new(&marker, text.as_bytes()).map_err(|error| {
         format!(
             "cannot create the ownership marker {}: {error}",
@@ -96,6 +102,18 @@ pub(super) fn write_marker(path: &Path, repo_root: &Path) -> Result<(), String> 
 /// Deletes the marker this process created for `path` (below `directory`).
 pub(super) fn remove_marker(directory: &Path, path: &Path) {
     let _ = checked::remove_file_inside(directory, &marker_path(path));
+}
+
+const OWNER_PREFIX: &str = "owner=";
+
+/// The session recorded in the marker, if it has one (older markers do not).
+pub(super) fn read_owner(path: &Path) -> Option<String> {
+    let text = checked::read_plain(&marker_path(path)).ok()?;
+    text.lines()
+        .nth(2)?
+        .strip_prefix(OWNER_PREFIX)
+        .filter(|owner| !owner.is_empty())
+        .map(str::to_owned)
 }
 
 /// The marker's two lines (canonical checkout path, source repository), read
@@ -160,7 +178,22 @@ fn marker_matches(path: &Path, target: &Path, repo_root: &Path) -> bool {
 /// The canonical path to delete, once it is proven to be ours: contained (see
 /// `contained`) and named by the marker written when it was created.
 fn authorize(path: &Path, repo_root: &Path, directory: &Path) -> Result<PathBuf, RemoveError> {
+    if !checked::is_plain_dir(path) {
+        return Err(refusal(
+            path,
+            "it is not a real directory (a link is never followed)",
+        ));
+    }
     let target = contained(path, repo_root, directory)?;
+    // `<directory>/<repo>/<name>`: a link anywhere on the way would put the
+    // canonical path somewhere else.
+    let root = checked::real_path(directory).map_err(|error| refusal(path, &error.to_string()))?;
+    if target.parent().and_then(Path::parent) != Some(root.as_path()) {
+        return Err(refusal(
+            path,
+            "it is not a checkout directly below a repository directory",
+        ));
+    }
     if !marker_matches(path, &target, repo_root) {
         return Err(refusal(path, "it has no matching ownership marker"));
     }

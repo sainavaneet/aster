@@ -3,13 +3,16 @@
 //! leaves a clone (often gigabytes of build output) that no step will ever
 //! remove. Only directories carrying the ownership marker Aster writes before
 //! it clones are considered, and only once the marker is old enough that no
-//! creation can still be running.
+//! creation can still be running. The worktrees directory is shared by every
+//! session and repository, so a marker is acted on only when it names this
+//! session as its owner; markers with no owner (older builds) or another
+//! owner are left alone.
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
 use super::checked;
-use super::safety::{marker_path, read_marker};
+use super::safety::{marker_path, read_marker, read_owner};
 use super::{Checkout, CheckoutMethod};
 
 /// How old a marker must be before its checkout counts as abandoned.
@@ -25,11 +28,13 @@ pub(crate) struct Reclaimed {
 }
 
 /// Removes the marked checkouts below `directory/<repo>/` that are not in
-/// `owned`, whose marker is at least `min_age` old. Everything else (unmarked
-/// directories, links, young or owned checkouts) is left alone. Removal goes
-/// through the same ownership checks as `remove`.
+/// `owned`, whose marker names `owner` and is at least `min_age` old. Everything
+/// else (unmarked directories, young, owned, foreign or ownerless checkouts) is
+/// left alone. Removal goes through the same ownership checks as `remove`, which
+/// refuse links.
 pub(crate) fn reclaim_orphans(
     directory: &Path,
+    owner: &str,
     owned: &HashSet<PathBuf>,
     min_age: Duration,
 ) -> Vec<Reclaimed> {
@@ -45,8 +50,13 @@ pub(crate) fn reclaim_orphans(
             continue;
         };
         for entry in entries.flatten() {
-            if let Some(path) = orphan(&repo, &entry.file_name().to_string_lossy(), owned, min_age)
-            {
+            if let Some(path) = orphan(
+                &repo,
+                &entry.file_name().to_string_lossy(),
+                owner,
+                owned,
+                min_age,
+            ) {
                 let result = super::remove(&checkout_at(&path), directory);
                 reclaimed.push(Reclaimed {
                     path,
@@ -60,12 +70,29 @@ pub(crate) fn reclaim_orphans(
 
 /// The checkout a marker file named `name` in `repo` stands for, when it is an
 /// old, unowned, regular marker.
-fn orphan(repo: &Path, name: &str, owned: &HashSet<PathBuf>, min_age: Duration) -> Option<PathBuf> {
+fn orphan(
+    repo: &Path,
+    name: &str,
+    owner: &str,
+    owned: &HashSet<PathBuf>,
+    min_age: Duration,
+) -> Option<PathBuf> {
     let stem = name.strip_suffix(MARKER_SUFFIX).filter(|s| !s.is_empty())?;
     let path = repo.join(stem);
     let marker = marker_path(&path);
-    if !checked::is_plain_file(&marker) || read_marker(&path).is_none() {
+    if owner.is_empty() || !checked::is_plain_file(&marker) {
         return None;
+    }
+    if read_marker(&path).is_none() {
+        tracing::info!(marker = %marker.display(), "left an unreadable checkout marker alone");
+        return None;
+    }
+    match read_owner(&path) {
+        Some(recorded) if recorded == owner => {}
+        recorded => {
+            tracing::info!(marker = %marker.display(), owner = ?recorded, "left a checkout of another or unknown owner alone");
+            return None;
+        }
     }
     let age = std::fs::symlink_metadata(&marker)
         .and_then(|meta| meta.modified())

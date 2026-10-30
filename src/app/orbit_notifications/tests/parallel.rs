@@ -619,17 +619,16 @@ async fn a_corrupt_recorded_checkout_path_is_refused_untouched_and_not_retried()
     crate::parallel_checkout::remove(&checkout, &repo.root.join("checkouts")).unwrap();
 }
 
-fn made_checkout(repo: &Repo, name: &str) -> crate::parallel_checkout::Checkout {
-    crate::parallel_checkout::create_with(
-        &repo.path(),
-        &repo.path(),
-        &repo.root.join("checkouts"),
-        "repo",
+/// A checkout made by this session, as the server makes them.
+fn made_checkout(app: &App, repo: &Repo, name: &str) -> crate::parallel_checkout::Checkout {
+    let place = crate::parallel_checkout::Placement {
+        directory: &repo.root.join("checkouts"),
+        repo_name: "repo",
         name,
-        &[],
-        no_clone,
-    )
-    .unwrap()
+        owner: &app.orbit_checkout_owner(),
+    };
+    crate::parallel_checkout::create_placed(&repo.path(), &repo.path(), place, &[], no_clone)
+        .unwrap()
 }
 
 #[tokio::test]
@@ -669,7 +668,7 @@ async fn a_task_resolved_without_its_steps_still_releases_the_active_steps_check
     let repo = Repo::new();
     app.state.worktree_directory = repo.root.join("checkouts");
     let task_id = parallel_task(&mut app, json!([step(&["a.rs"])]));
-    let checkout = made_checkout(&repo, "par-active");
+    let checkout = made_checkout(&app, &repo, "par-active");
     let worker = reviewer(&app);
     run_step(&mut app, &task_id, 0, &worker);
     task_mut(&mut app, &task_id).steps[0]
@@ -702,7 +701,21 @@ async fn startup_reclaims_marked_checkouts_no_ledger_entry_owns() {
     let (mut app, _worker, _lead) = setup();
     let repo = Repo::new();
     app.state.worktree_directory = repo.root.join("checkouts");
-    let orphan = made_checkout(&repo, "par-orphan");
+    let orphan = made_checkout(&app, &repo, "par-orphan");
+    // Another session's live checkout in the same shared directory.
+    let other = crate::parallel_checkout::create_placed(
+        &repo.path(),
+        &repo.path(),
+        crate::parallel_checkout::Placement {
+            directory: &repo.root.join("checkouts"),
+            repo_name: "repo",
+            name: "par-other-session",
+            owner: "/sessions/someone-else",
+        },
+        &[],
+        no_clone,
+    )
+    .unwrap();
     let (task_id, owned) = finished_step_with_checkout(&mut app, &repo);
     // Not ours: no marker.
     let foreign = repo.root.join("checkouts/repo/par-foreign");
@@ -724,9 +737,11 @@ async fn startup_reclaims_marked_checkouts_no_ledger_entry_owns() {
 
     assert!(!orphan.path.exists(), "the orphaned clone was kept");
     assert!(owned.path.exists(), "a clone the ledger owns was removed");
+    assert!(other.path.exists(), "another session's clone was removed");
     assert!(foreign.join("keep.txt").exists());
     assert!(task(&app, &task_id).holds_parallel_resources());
     crate::parallel_checkout::remove(&owned, &repo.root.join("checkouts")).unwrap();
+    crate::parallel_checkout::remove(&other, &repo.root.join("checkouts")).unwrap();
 }
 
 #[tokio::test]
@@ -734,7 +749,7 @@ async fn a_checkout_recorded_for_a_task_the_ledger_lost_is_removed_not_dropped()
     let (mut app, _worker, _lead) = setup();
     let repo = Repo::new();
     app.state.worktree_directory = repo.root.join("checkouts");
-    let checkout = made_checkout(&repo, "par-lost");
+    let checkout = made_checkout(&app, &repo, "par-lost");
 
     app.record_parallel_checkout(&crate::events::ParallelLaunch {
         task_id: "task-that-is-gone".into(),

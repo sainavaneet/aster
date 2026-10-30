@@ -342,5 +342,6 @@ fn concurrent_checkouts_of_one_repository_all_succeed() {
 mod chain;
 mod checked;
 mod integrate;
+mod reclaim;
 mod resume;
 mod safety;

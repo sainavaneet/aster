@@ -123,6 +123,7 @@ fn send_stage(
 fn create_checkout(
     project: &Path,
     directory: &Path,
+    owner: &str,
     plan: &mut ParallelLaunch,
 ) -> Result<CreatedWorktree, (&'static str, String)> {
     let failed = |error: String| ("worktree_create_failed", error);
@@ -135,6 +136,7 @@ fn create_checkout(
         &space.repo_name,
         &plan.label,
         &plan.apply,
+        owner,
     )
     .map_err(failed)?;
     let created = CreatedWorktree {
@@ -255,6 +257,7 @@ impl App {
             .orbit_job_cwd()
             .map_err(|message| encode_error(id.into(), "orbit_missing", message))?;
         let directory = self.state.worktree_directory.clone();
+        let owner = self.orbit_checkout_owner();
         let event_tx = self.event_tx.clone();
         let mut stage = OrbitWorktreeResult {
             id: id.into(),
@@ -276,7 +279,7 @@ impl App {
             == Some(crate::detect::Agent::Codex);
         crate::thread_spawn::spawn_named("aster-orbit-worktree-add", move || {
             let created = match stage.parallel.as_mut() {
-                Some(plan) => create_checkout(&project, &directory, plan),
+                Some(plan) => create_checkout(&project, &directory, &owner, plan),
                 None => create_worktree(&project, &directory, &stage.branch),
             };
             match created {
