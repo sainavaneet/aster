@@ -1839,20 +1839,19 @@ The parallel-checkout leak was a **separate fix**, outside the redesign:
 
 ### Review and verification
 
-Each phase received two review rounds. The phase notes preserve themes and
-fixes, but do not provide complete severity-labelled HIGH/MEDIUM totals. The
-table therefore records unavailable totals explicitly rather than inferring
-severity or counting bullets as findings.
+Each phase received two review rounds. Counts below come from the lead's review
+log; the last column records leftovers after round 2 and where they were resolved.
 
-| Phase | HIGH / MEDIUM counts | Review themes resolved |
+| Phase | Round 1 findings | After round 2 / disposition |
 |---|---|---|
-| 0 | Not recorded / not recorded | Truncated-flow identity/completion, bounded projection, cache invalidation, hit mapping and dispatch scanner limits |
-| 1 | Not recorded / not recorded | Contrast, classic coverage, settings persistence and style/glyph reload |
-| 2 | Not recorded / not recorded | Approval classification, progress consistency and glyph selection |
-| 3 | Not recorded / not recorded | Grapheme-safe headers, border stops/residue, capacity scope, static recency and distinct attention counts |
-| 4 | Not recorded / not recorded | Exact step owners, model/live state, focus targets, discoverability and allocation-free drawing |
-| 5 | Not recorded / not recorded | Mode-bar allocations, terminal delivery, ASCII hints, bottom-chrome geometry and contrast |
-| 6 | At least 1 / not recorded | Header/cache scaling, narrow urgent chips, exact contrast, approval facts, grapheme width, cancellation precedence, open-flow cost and sustained profiling; the explicitly HIGH header-copy regression went from 100 allocations to zero |
+| 0 | 0 HIGH, 4 MEDIUM | 1 MEDIUM: per-step worker identity folded into Phase 4 |
+| 1 | 0 HIGH, 3 MEDIUM, 1 LOW | 1 MEDIUM (contrast search) and 1 LOW (classic mode-bar coverage), fixed in Phase 6 |
+| 2 | 0 HIGH, 4 MEDIUM | 1 MEDIUM: width-18 collapsed chips, fixed in Phase 6 |
+| 3 | 0 HIGH, 4 MEDIUM | 1 MEDIUM: header-copy per-frame work / scaling gap, fixed in Phase 6 |
+| 4 | 0 HIGH, 6 MEDIUM, 1 LOW | 2 MEDIUM: branch approval vs blocked and `inline_symbol` width, fixed in Phase 6 |
+| 5 | 0 HIGH, 5 MEDIUM | 1 MEDIUM: cancelled-after-blocked CLI state, fixed in Phase 6 |
+| 6 | 1 HIGH (per-frame grapheme capacity growth), plus performance budget not reliably met | Both fixed and verified in narrow round 2; nothing left |
+| Checkout leak (separate) | 2 HIGH (cross-session deletion; checkout symlink), 1 LOW | Round 2 found 1 HIGH (repository-directory symlink), fixed in `1aaa28cf` |
 
 Final native count: **4,746 passed, 17 skipped**. The final repeat hit one known
 Orbit assignment timing flake; its isolated retry passed. Fmt, native clippy,
