@@ -1816,3 +1816,114 @@ observed Orbit parallel-assignment flake (`pa has no assignment`); its isolated
 retry passed. Both outcomes are retained. Windows cross-lint remains unavailable
 because the local Windows SDK libc configuration is absent. Classic goldens,
 all endpoint fixtures, dependency manifests and classic P15 code are unchanged.
+
+
+## Result
+
+Implemented on `feat/visual-redesign`; **not merged**. Modern is the default;
+classic retains its characterized output. No new crates or generation-1 fixture
+changes were required; new runtime facts use optional additive JSON fields.
+
+| Phase | Delivered | Commits |
+|---|---|---|
+| 0 | Audit, baseline, visual language, compatibility and performance plan | `0c506350`, `d870c4a8` |
+| 1 | Theme roles, glyph sets, style dispatch, settings and classic characterization | `c40e7f73`, `f7bb3d03` |
+| 2 | Role cards, work-board lanes, progress strips and typed lane targets | `37178690`, `16f851d8` |
+| 3 | Worker pane headers, role activity tabs, attention counts and static recency | `e9c7c29e`, `16cd9afc` |
+| 4 | Orbit flow overlay, step ownership/focus, live state and discoverable entry points | `61a12efa`, `33379a85` |
+| 5 | Modern notifications, status/mode bars, mobile attention and activity CLI | `99ad7f6d`, `527d534c` |
+| 6 | Width/theme/motion/glyph matrices, exact contrast, classic mode characterization, cached header/topology work, flow reuse and allocation fixes | `c911363e`, `8510cb37` |
+
+The parallel-checkout leak was a **separate fix**, outside the redesign:
+`f03bf566`, `26d41553`, `1aaa28cf` (owned-checkout reclamation and symlink safety).
+
+### Review and verification
+
+Each phase received two review rounds. The phase notes preserve themes and
+fixes, but do not provide complete severity-labelled HIGH/MEDIUM totals. The
+table therefore records unavailable totals explicitly rather than inferring
+severity or counting bullets as findings.
+
+| Phase | HIGH / MEDIUM counts | Review themes resolved |
+|---|---|---|
+| 0 | Not recorded / not recorded | Truncated-flow identity/completion, bounded projection, cache invalidation, hit mapping and dispatch scanner limits |
+| 1 | Not recorded / not recorded | Contrast, classic coverage, settings persistence and style/glyph reload |
+| 2 | Not recorded / not recorded | Approval classification, progress consistency and glyph selection |
+| 3 | Not recorded / not recorded | Grapheme-safe headers, border stops/residue, capacity scope, static recency and distinct attention counts |
+| 4 | Not recorded / not recorded | Exact step owners, model/live state, focus targets, discoverability and allocation-free drawing |
+| 5 | Not recorded / not recorded | Mode-bar allocations, terminal delivery, ASCII hints, bottom-chrome geometry and contrast |
+| 6 | At least 1 / not recorded | Header/cache scaling, narrow urgent chips, exact contrast, approval facts, grapheme width, cancellation precedence, open-flow cost and sustained profiling; the explicitly HIGH header-copy regression went from 100 allocations to zero |
+
+Final native count: **4,746 passed, 17 skipped**. The final repeat hit one known
+Orbit assignment timing flake; its isolated retry passed. Fmt, native clippy,
+UI hot-path architecture, config-reference and docs contracts passed. Classic
+goldens and endpoint contracts remain unchanged. Windows lint was not run to
+completion: no local Windows SDK. The known pre-existing
+`native_file_render_scale_profile` CoW-retention failure remains.
+
+### Performance
+
+Phase 0 client-composition baseline at 1/15 panes: background **156/171 µs**,
+active **149/163 µs**. These plain-workspace profiles differ from the populated
+Orbit/chrome profiles below; they are retained as baseline context.
+
+Final 60-second paired client-composition medians (µs, 1/15/50 panes):
+
+| Profile | Classic | Modern |
+|---|---|---|
+| Team and lanes | 141/144/147 | 139/146/149 |
+| Settled toast, feedback and mode bar | 421/430/438 | 271/285/291 |
+| Entry toast, feedback and mode bar | 424/434/441 | 273/289/295 |
+
+All completed sustained-run normalized gaps were **≤ +0.044**, against **+0.05**.
+The preceding phase notes retain every run, including long-ZWJ titles and earlier
+short-sample excursions. Final narrow-review gaps: team15 **+0.030**,
+settled50 **+0.035**, entry50 **+0.043**. Gap means modern N:1 ratio minus classic
+N:1 ratio; these narrow-review values are separate observations, not values
+recomputed from the rounded table above.
+
+Optimized open flow, four steps (closed/open µs):
+
+| Columns | Closed / open |
+|---|---|
+| 80 | 83/115 |
+| 120 | 106/154 |
+| 200 | 156/213 |
+
+### Remaining follow-ups and boundaries
+
+- Classic `status.rs` byte-width bugs (P15) remain so classic stays pixel-identical.
+- Windows lint needs a local Windows SDK; Windows compilation remains unverified.
+- Checkout leak follow-ups: exclude `target/` from parallel clones, check a
+  free-disk threshold before creating a checkout, and consider git-worktree-style
+  checkouts.
+- Pre-existing flaky tests:
+  `a_newer_collapsed_paste_on_the_lead_screen_proves_an_uncertain_delivery` and
+  `overlapping_parallel_steps_run_one_after_another` under load.
+- The native-file CoW-retention benchmark remains a pre-existing failure.
+- Server-owned pane borders and shared classic sidebar framing retain their
+  glyphs; ASCII mode does not rewrite terminal content. Underlines depend on
+  terminal support. Mobile has no pane-header row; the mobile attention chip has
+  composition coverage rather than a separate benchmark profile.
+- Only the done lane truncates by section height; other lanes scroll. Modern
+  state shapes ignore `ui.status_indicators`. Full multi-endpoint/mobile
+  structural redesign remains outside this work.
+- A stalled tint for an idle worker with an active task remains deferred pending
+  a threshold decision. No optional pane-header toggle was added.
+
+### Try it
+
+Set `ui.style = "modern"` (the default) or `ui.style = "classic"` in config;
+`ui.glyphs = "ascii"` selects the ASCII set. In modern style, open flow with
+`prefix+f` (`keys.orbit_flow`) or the sidebar's `WORK` label. The implemented
+feature gate is `ui.flow_view = true` (default); `false` disables it. This
+supersedes the early plan's `ui.orbit_flow` name. Esc closes flow; arrows or
+`h/j/k/l` navigate and Enter focuses an available worker pane. Inspect activity
+with `aster orbit activity`.
+
+For a local build inside an Aster session, follow `AGENTS.md`:
+
+```sh
+export ZIG=/Users/navaneet/.local/share/herdr/toolchains/zig-aarch64-macos-0.16.0/zig
+env -u ASTER_SOCKET_PATH -u ASTER_CLIENT_SOCKET_PATH cargo run -- orbit activity
+```
