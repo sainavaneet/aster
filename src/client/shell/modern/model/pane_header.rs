@@ -42,8 +42,9 @@ pub(in crate::client::shell) struct PaneHeader {
     pub(in crate::client::shell) step: Option<String>,
     pub(in crate::client::shell) widths: HeaderWidths,
     /// Bytes the largest grapheme cluster of this header needs in a cell. The
-    /// compositor reserves exactly this in the cells of this pane's header row
-    /// (and nowhere else), so painting never grows a string.
+    /// compositor reserves at least this in the pane's header row, widening
+    /// its normal UTF-8-scalar reservation only there, so painting never grows
+    /// a string.
     pub(in crate::client::shell) cell_bytes: usize,
 }
 
@@ -146,10 +147,24 @@ pub(super) fn build(
 /// A reservation span in surface-local coordinates, prepared on state change.
 #[derive(Debug, Clone, Copy)]
 pub(in crate::client::shell) struct HeaderCopy {
+    pub(in crate::client::shell) pane: usize,
     pub(in crate::client::shell) row: u16,
     pub(in crate::client::shell) from: u16,
     pub(in crate::client::shell) to: u16,
     pub(in crate::client::shell) bytes: usize,
+}
+
+/// Output revisions and cell contents do not change header reservation geometry.
+pub(in crate::client::shell) fn same_geometry(
+    a: &crate::protocol::PaneSurfaceFrame,
+    b: &crate::protocol::PaneSurfaceFrame,
+) -> bool {
+    a.frame.width == b.frame.width
+        && a.frame.height == b.frame.height
+        && a.panes.len() == b.panes.len()
+        && a.panes.iter().zip(&b.panes).all(|(a, b)| {
+            a.pane_id == b.pane_id && a.rect == b.rect && a.inner_rect == b.inner_rect
+        })
 }
 
 pub(in crate::client::shell) fn copy_spans(
@@ -159,7 +174,8 @@ pub(in crate::client::shell) fn copy_spans(
     let mut spans: Vec<_> = surface
         .panes
         .iter()
-        .filter_map(|pane| {
+        .enumerate()
+        .filter_map(|(index, pane)| {
             if pane.inner_rect.y <= pane.rect.y
                 || pane.rect.width < super::super::draw::pane_header::MIN_PANE_WIDTH
             {
@@ -167,6 +183,7 @@ pub(in crate::client::shell) fn copy_spans(
             }
             let header = headers.get(&pane.pane_id)?;
             Some(HeaderCopy {
+                pane: index,
                 row: pane.rect.y,
                 from: pane.rect.x.saturating_add(1),
                 to: pane

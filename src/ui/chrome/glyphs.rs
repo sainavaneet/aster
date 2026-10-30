@@ -18,6 +18,9 @@ pub(crate) struct GlyphSet {
     pub(crate) group_open: &'static str,
     pub(crate) group_closed: &'static str,
     pub(crate) role_gutter: &'static str,
+    pub(crate) close: &'static str,
+    /// Top-left, top-right, bottom-left and bottom-right popup corners.
+    pub(crate) popup_corners: [&'static str; 4],
     pub(crate) node_done: &'static str,
     pub(crate) node_active: &'static str,
     pub(crate) node_pending: &'static str,
@@ -57,6 +60,8 @@ pub(crate) const UNICODE: GlyphSet = GlyphSet {
     group_open: "▾",
     group_closed: "▸",
     role_gutter: "▌",
+    close: "×",
+    popup_corners: ["┌", "┐", "└", "┘"],
     node_done: "●",
     node_active: "◐",
     node_pending: "○",
@@ -91,6 +96,8 @@ pub(crate) const ASCII: GlyphSet = GlyphSet {
     group_open: "v",
     group_closed: ">",
     role_gutter: "|",
+    close: "x",
+    popup_corners: ["+"; 4],
     node_done: "#",
     node_active: "*",
     node_pending: ".",
@@ -165,6 +172,7 @@ mod tests {
             set.group_open,
             set.group_closed,
             set.role_gutter,
+            set.close,
             set.node_done,
             set.node_active,
             set.node_pending,
@@ -183,6 +191,7 @@ mod tests {
             set.tree_end,
             set.tree_fork,
         ];
+        glyphs.extend(set.popup_corners);
         glyphs.extend(set.spinner);
         glyphs
     }

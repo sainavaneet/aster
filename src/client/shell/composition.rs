@@ -200,6 +200,20 @@ impl ClientShellState {
         let sidebar = self.layout(cols, rows).sidebar;
         let section_height = self.team_section_height(sidebar);
         self.refresh_team_rows(sidebar.width, section_height, now);
+        self.refresh_header_copies();
+        if matches!(self.overlay, Some(ClientShellOverlay::OrbitFlow(_))) {
+            if !self.flow_view_enabled() {
+                self.overlay = None;
+            } else if let Some(q) = render::flow_popup(Rect::new(0, 0, cols, rows)) {
+                if self
+                    .flow_buffer
+                    .as_ref()
+                    .is_none_or(|buffer| buffer.area != q)
+                {
+                    self.flow_buffer = Some(Buffer::empty(q));
+                }
+            }
+        }
         let valid_navigation_target = self.mode == ClientShellMode::Navigate
             && self
                 .navigate_workspace_id
@@ -327,7 +341,7 @@ impl ClientShellState {
                 pixel_height: pane.pixel_height,
             })
             .collect();
-        let topology_signature = pane_surface_topology_signature(surface);
+        let topology_signature = self.current_pane_topology()?;
         self.hits.pane_splits = surface
             .splits
             .iter()
@@ -392,45 +406,43 @@ impl ClientShellState {
             self.hits.tab_scroll_left = Rect::default();
             self.hits.tab_scroll_right = Rect::default();
         }
-        let mut frame = FrameData::from_ratatui_buffer_with_hyperlinks(&buffer, None, &[]);
+        let flow_area = matches!(self.overlay, Some(ClientShellOverlay::OrbitFlow(_)))
+            .then(|| render::flow_popup(buffer.area))
+            .flatten();
+        let mut frame = frame_for_composition(
+            &buffer,
+            flow_area,
+            self.config.chrome.is_modern() && self.team_sidebar.is_some(),
+        );
         let mode_bar_cells = mode_bar.map(|bar| {
             let start = usize::from(bar.y) * usize::from(frame.width) + usize::from(bar.x);
             frame.cells[start..start + usize::from(bar.width)].to_vec()
         });
-        if self.config.chrome.is_modern() && self.team_sidebar.is_some() {
-            blit_pane_surface_with_headers(
+        if let (true, Some(team)) = (self.config.chrome.is_modern(), self.team_sidebar.as_ref()) {
+            blit_pane_surface_modern(
                 &mut frame,
-                &surface.frame,
+                surface,
                 layout.pane_surface,
                 &self.header_copies,
+                team,
+                &team_sidebar::TeamRenderContext {
+                    config: &self.config,
+                    endpoint_id: &self.active_endpoint_id,
+                    animation: animation::AnimationFrame::new(
+                        &self.animations,
+                        self.config.animations,
+                        now,
+                    ),
+                    focused_pane_id: snapshot.focused_pane_id.as_deref(),
+                    now_unix_ms: frame_unix_ms,
+                    recent: &self.recent,
+                    now,
+                },
             );
         } else {
             blit_pane_surface(&mut frame, &surface.frame, layout.pane_surface);
         }
         restore_mode_bar(&mut frame, mode_bar, mode_bar_cells.as_deref());
-        // Modern: worker headers go on the border row the surface just brought.
-        if self.config.chrome.is_modern() {
-            if let Some(team) = self.team_sidebar.as_ref() {
-                modern::draw::pane_header::paint(
-                    &mut frame,
-                    &self.hits.panes,
-                    team,
-                    &team_sidebar::TeamRenderContext {
-                        config: &self.config,
-                        endpoint_id: &self.active_endpoint_id,
-                        animation: animation::AnimationFrame::new(
-                            &self.animations,
-                            self.config.animations,
-                            now,
-                        ),
-                        focused_pane_id: snapshot.focused_pane_id.as_deref(),
-                        now_unix_ms: frame_unix_ms,
-                        recent: &self.recent,
-                        now,
-                    },
-                );
-            }
-        }
         let mut occlusion = crate::kitty_graphics::surface::Occlusion::default();
         let has_selection = self
             .selection
@@ -496,7 +508,7 @@ impl ClientShellState {
                     );
                 }
             }
-            frame.replace_from_ratatui_buffer_preserving_effects(&composed, cursor);
+            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
         }
         self.render_link_hover(&mut frame, &mut occlusion);
         if self.mode == ClientShellMode::Copy {
@@ -529,7 +541,7 @@ impl ClientShellState {
                                 .bg(self.config.palette.accent)
                                 .add_modifier(Modifier::BOLD),
                         );
-                        frame.replace_from_ratatui_buffer_preserving_effects(&composed, None);
+                        replace_composed_frame(&mut frame, &composed, None, flow_area);
                     } else {
                         frame.cursor = None;
                     }
@@ -626,7 +638,7 @@ impl ClientShellState {
                 };
             }
             occlusion.cover(self.hits.notification_toast);
-            frame.replace_from_ratatui_buffer_preserving_effects(&composed, cursor);
+            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
         }
         if let Some(feedback) = self.copy_feedback.as_ref() {
             let cursor = frame.cursor.clone();
@@ -656,7 +668,7 @@ impl ClientShellState {
                 feedback,
                 offset,
             ));
-            frame.replace_from_ratatui_buffer_preserving_effects(&composed, cursor);
+            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
         }
         self.hits.popup = None;
         if let Some(popup) = surface.popup.as_deref() {
@@ -678,8 +690,12 @@ impl ClientShellState {
                     &mut composed,
                 );
                 ratatui::widgets::Widget::render(block, geometry.outer, &mut composed);
-                frame.replace_from_ratatui_buffer_preserving_effects(&composed, None);
-                blit_pane_surface(&mut frame, &popup.frame, geometry.inner);
+                replace_composed_frame(&mut frame, &composed, None, flow_area);
+                if flow_area.is_some() {
+                    blit_pane_surface_reusing(&mut frame, &popup.frame, geometry.inner);
+                } else {
+                    blit_pane_surface(&mut frame, &popup.frame, geometry.inner);
+                }
                 self.hits.popup = Some(PaneHit {
                     rect: geometry.outer,
                     inner_rect: geometry.inner,
@@ -739,7 +755,7 @@ impl ClientShellState {
                     phase,
                 );
             }
-            frame.replace_from_ratatui_buffer_preserving_effects(&composed, None);
+            replace_composed_frame(&mut frame, &composed, None, flow_area);
             self.hits.panes.clear();
             self.hits.pane_splits.clear();
             self.hits.popup = None;
@@ -773,7 +789,29 @@ impl ClientShellState {
             selected_pane: flow_pane,
             offered: super::flow_view::flow_offered(&self.config, snapshot),
         };
-        if let Some(overlay) = self.overlay.as_ref() {
+        if let Some(ClientShellOverlay::OrbitFlow(flow)) = self.overlay.as_ref() {
+            if let Some(composed) = self
+                .flow_buffer
+                .as_mut()
+                .filter(|b| Some(b.area) == flow_area)
+            {
+                composed.reset();
+                let rendered = render::render_flow_popup(
+                    composed,
+                    composed.area,
+                    flow,
+                    snapshot,
+                    &flow_draw,
+                    &self.config.palette,
+                )?;
+                apply_flow_popup(&mut frame, composed);
+                occlusion.cover(rendered.area);
+                self.hits.overlay_cancel = rendered.cancel;
+                self.hits.flow_popup = rendered.flow_popup;
+                self.hits.flow_steps = rendered.flow_steps;
+                self.hits.flow_tasks = rendered.flow_tasks;
+            }
+        } else if let Some(overlay) = self.overlay.as_ref() {
             let mut composed = frame.to_ratatui_buffer()?;
             let cursor = if let ClientShellOverlay::ContextMenu(menu) = overlay {
                 let rendered =
@@ -835,7 +873,7 @@ impl ClientShellState {
                 self.hits.release_notes_max_scroll = rendered.release_notes_max_scroll;
                 rendered.cursor
             };
-            frame.replace_from_ratatui_buffer_preserving_effects(&composed, cursor);
+            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
         }
         if let Some(ClientShellOverlay::Help(help)) = self.overlay.as_mut() {
             help.scroll = help.scroll.min(self.hits.help_max_scroll);
@@ -948,4 +986,106 @@ fn client_popup_size(size: crate::protocol::ClientShellPopupSize) -> crate::popu
             crate::popup_size::PopupSize::Percent(percent)
         }
     }
+}
+
+/// Reserve the existing output-cell allocation once, rather than rebuilding the
+/// entire frame through ratatui for the opaque modern flow popup.
+pub(super) fn frame_for_composition(
+    buffer: &Buffer,
+    popup: Option<Rect>,
+    modern_surface: bool,
+) -> FrameData {
+    if popup.is_none() && !modern_surface {
+        return FrameData::from_ratatui_buffer_with_hyperlinks(buffer, None, &[]);
+    }
+    let cells = buffer
+        .content
+        .iter()
+        .enumerate()
+        .map(|(index, cell)| {
+            // The existing allocation holds a UTF-8 scalar, so an ordinary
+            // Unicode border never reallocates as pane cardinality grows.
+            let minimum = if popup.is_some_and(|popup| {
+                let x = (index % usize::from(buffer.area.width)) as u16;
+                let y = (index / usize::from(buffer.area.width)) as u16;
+                popup.contains((x, y).into())
+            }) {
+                24
+            } else {
+                4
+            };
+            let mut symbol = String::with_capacity(minimum.max(cell.symbol().len()));
+            symbol.push_str(cell.symbol());
+            crate::protocol::CellData {
+                symbol,
+                fg: crate::protocol::color_to_u32(cell.fg),
+                bg: crate::protocol::color_to_u32(cell.bg),
+                modifier: crate::protocol::modifier_to_u16(cell.modifier),
+                skip: cell.skip,
+                hyperlink: None,
+            }
+        })
+        .collect();
+    FrameData {
+        cells,
+        width: buffer.area.width,
+        height: buffer.area.height,
+        cursor: None,
+        hyperlinks: Vec::new(),
+        graphics: Vec::new(),
+    }
+}
+
+/// Scratch cells contain only bounded inline symbols. Output storage was
+/// reserved during the normal frame copy, so this pass allocates nothing.
+pub(super) fn apply_flow_popup(frame: &mut FrameData, popup: &Buffer) {
+    let dim = crate::protocol::modifier_to_u16(Modifier::DIM);
+    for cell in &mut frame.cells {
+        cell.modifier |= dim;
+    }
+    for y in popup.area.y..popup.area.bottom() {
+        let from = usize::from(y) * usize::from(frame.width) + usize::from(popup.area.x);
+        for (target, cell) in frame.cells[from..from + usize::from(popup.area.width)]
+            .iter_mut()
+            .zip(&popup.content[usize::from(y - popup.area.y) * usize::from(popup.area.width)..])
+        {
+            target.symbol.clear();
+            target.symbol.push_str(cell.symbol());
+            target.fg = crate::protocol::color_to_u32(cell.fg);
+            target.bg = crate::protocol::color_to_u32(cell.bg);
+            target.modifier = crate::protocol::modifier_to_u16(cell.modifier);
+            target.skip = cell.skip;
+            target.hyperlink = None;
+        }
+    }
+    frame.cursor = None;
+}
+
+/// Flow can coexist with toasts, search highlights and a server popup. Keep the
+/// frame's reserved strings through those layers rather than discarding them.
+/// Retain link indices only where the visible symbol is still the same; unused
+/// URI entries are harmless and avoid rebuilding a link table for an opaque popup.
+pub(super) fn replace_composed_frame(
+    frame: &mut FrameData,
+    buffer: &Buffer,
+    cursor: Option<crate::protocol::CursorState>,
+    popup: Option<Rect>,
+) {
+    if popup.is_none() || frame.width != buffer.area.width || frame.height != buffer.area.height {
+        frame.replace_from_ratatui_buffer_preserving_effects(buffer, cursor);
+        return;
+    }
+    let link_count = frame.hyperlinks.len();
+    for (target, cell) in frame.cells.iter_mut().zip(&buffer.content) {
+        target.hyperlink = target
+            .hyperlink
+            .filter(|&index| (index as usize) < link_count && target.symbol == cell.symbol());
+        target.symbol.clear();
+        target.symbol.push_str(cell.symbol());
+        target.fg = crate::protocol::color_to_u32(cell.fg);
+        target.bg = crate::protocol::color_to_u32(cell.bg);
+        target.modifier = crate::protocol::modifier_to_u16(cell.modifier);
+        target.skip = cell.skip;
+    }
+    frame.cursor = cursor;
 }

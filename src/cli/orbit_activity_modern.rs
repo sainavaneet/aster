@@ -66,10 +66,7 @@ fn task_row(task: &Value, now_ms: u64) -> (Lane, Row) {
     // terminal state leaves the WORKING lane.
     let delivery = str_field(task, "delivery");
     let (lane, state) = match (report, outcome) {
-        (Some(_), Some("blocked")) => (Lane::NeedsYou, StateKind::Blocked),
-        (Some(_), Some("failed")) => (Lane::Done, StateKind::Failed),
-        (Some(_), _) => (Lane::Done, StateKind::Done),
-        (None, _)
+        (_, _)
             if matches!(
                 delivery,
                 Some("failed" | "worker_lost" | "unreported" | "timed_out")
@@ -77,12 +74,20 @@ fn task_row(task: &Value, now_ms: u64) -> (Lane, Row) {
         {
             (Lane::Done, StateKind::Failed)
         }
-        (None, _) if delivery == Some("cancelled") => (Lane::Done, StateKind::Exited),
+        (_, _) if delivery == Some("cancelled") => (Lane::Done, StateKind::Exited),
+        (Some(_), Some("blocked")) => (Lane::NeedsYou, StateKind::Blocked),
+        (Some(_), Some("failed")) => (Lane::Done, StateKind::Failed),
+        (Some(_), _) => (Lane::Done, StateKind::Done),
         (None, _) if delivery == Some("submitted") => (Lane::Done, StateKind::Done),
         (None, _) if queued => (Lane::Queued, StateKind::Queued),
         (None, _) => (Lane::Working, StateKind::Working),
     };
+    let ended = matches!(
+        delivery,
+        Some("cancelled" | "failed" | "worker_lost" | "unreported" | "timed_out")
+    );
     let text = match report {
+        _ if ended => cell(task.get("delivery"), 24).replace('_', " "),
         Some(report) => redacted_cell(report.get("summary"), 80),
         None => cell(task.get("delivery"), 24).replace('_', " "),
     };
@@ -301,6 +306,33 @@ pub(super) fn render(result: &Value, watch: bool, now_ms: u64, glyphs: &GlyphSet
     ascii_fold(out, glyphs)
 }
 
+/// Terminal presentation only; redirected output and JSON retain their shape.
+/// Break on grapheme boundaries, never in a CJK cell or ZWJ sequence.
+pub(super) fn fit_terminal(text: &str, columns: u16) -> String {
+    use unicode_segmentation::UnicodeSegmentation;
+    use unicode_width::UnicodeWidthStr;
+    let width = usize::from(columns.max(4));
+    let mut out = String::with_capacity(text.len());
+    for line in text.split_inclusive('\n') {
+        let has_newline = line.ends_with('\n');
+        let line = line.strip_suffix('\n').unwrap_or(line);
+        let mut used = 0;
+        for cluster in line.graphemes(true) {
+            let cells = cluster.width();
+            if used + cells > width {
+                out.push_str("\n  ");
+                used = 2;
+            }
+            out.push_str(cluster);
+            used += cells;
+        }
+        if has_newline {
+            out.push('\n');
+        }
+    }
+    out
+}
+
 /// The shared classic sections print an em dash for a missing value and an
 /// ellipsis for a cut one; under `ui.glyphs = "ascii"` they become `-` and the
 /// glyph set's ellipsis, so generated punctuation is ASCII. The same punctuation in payload text
@@ -337,6 +369,49 @@ mod tests {
                            "checks":[{"name":"a","status":"passed"}]}}
             ]
         })
+    }
+
+    #[test]
+    fn terminal_width_matrix_preserves_graphemes_and_all_text() {
+        use unicode_width::UnicodeWidthStr;
+        let payload = payload();
+        let mut actual = String::new();
+        for glyphs in [&UNICODE, &ASCII] {
+            let text = render(&payload, false, 181_000, glyphs);
+            for cols in [44, 80, 120, 200] {
+                let fitted = fit_terminal(&text, cols);
+                assert!(fitted.lines().all(|line| line.width() <= usize::from(cols)));
+                assert_eq!(
+                    fitted
+                        .chars()
+                        .filter(|c| !c.is_whitespace())
+                        .collect::<String>(),
+                    text.chars()
+                        .filter(|c| !c.is_whitespace())
+                        .collect::<String>()
+                );
+                actual.push_str(&format!("=== {}/{cols}\n", glyphs.working));
+                for row in fitted.lines() {
+                    actual.push_str(row);
+                    actual.push_str("|\n");
+                }
+            }
+        }
+        let complex = "日本語☀️👩‍👩‍👧‍👦".repeat(40);
+        for cols in [4, 44, 80, 120, 200] {
+            let fitted = fit_terminal(&complex, cols);
+            assert!(fitted.lines().all(|line| line.width() <= usize::from(cols)));
+            assert_eq!(fitted.replace("\n  ", ""), complex);
+        }
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/client/shell/tests/fixtures/orbit-activity-widths-phase6.txt"
+        );
+        if std::env::var_os("ASTER_CAPTURE_PHASE6").is_some() {
+            std::fs::write(path, actual).unwrap();
+        } else {
+            assert_eq!(actual, std::fs::read_to_string(path).unwrap());
+        }
     }
 
     #[test]
@@ -439,6 +514,24 @@ mod tests {
             !text.contains("hunter2") && !text.contains('\u{1b}'),
             "{text}"
         );
+    }
+
+    #[test]
+    fn terminal_delivery_wins_over_a_stale_blocked_report() {
+        for delivery in [
+            "cancelled",
+            "timed_out",
+            "worker_lost",
+            "unreported",
+            "failed",
+        ] {
+            let p = json!({"tasks":[{"task_id":"ended-task", "worker_id":"worker", "submission":"submitted", "delivery":delivery, "report":{"outcome":"blocked", "summary":"waiting for permission"}}]});
+            let text = render(&p, false, 1000, &ASCII);
+            assert!(
+                lane_of(&text, "ended-task").ends_with("DONE"),
+                "{delivery}: {text}"
+            );
+        }
     }
 
     fn lane_of(text: &str, id: &str) -> String {

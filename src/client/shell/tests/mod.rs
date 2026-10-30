@@ -274,3 +274,12 @@ mod work_board;
 mod visual_classic;
 
 mod modern_notifications;
+
+mod polish;
+
+mod classic_modes;
+
+/// Reuse the thread-local counter from sibling client draw-module tests.
+pub(super) fn draw_allocations(f: impl FnOnce()) -> usize {
+    alloc_count::allocations(f)
+}

@@ -230,6 +230,16 @@ fn panel(
     c: ratatui::style::Color,
     bg: ratatui::style::Color,
 ) -> Option<Rect> {
+    panel_with_glyphs(b, a, c, bg, &crate::ui::chrome::glyphs::UNICODE)
+}
+
+fn panel_with_glyphs(
+    b: &mut Buffer,
+    a: Rect,
+    c: ratatui::style::Color,
+    bg: ratatui::style::Color,
+    glyphs: &crate::ui::chrome::GlyphSet,
+) -> Option<Rect> {
     if a.width < 2 || a.height < 2 {
         return None;
     }
@@ -243,27 +253,31 @@ fn panel(
     for x in a.x..a.right() {
         b[(x, a.y)]
             .set_symbol(if x == a.x {
-                "┌"
+                glyphs.popup_corners[0]
             } else if x + 1 == a.right() {
-                "┐"
+                glyphs.popup_corners[1]
             } else {
-                "─"
+                glyphs.bar_empty
             })
             .set_style(border);
         let y = a.bottom() - 1;
         b[(x, y)]
             .set_symbol(if x == a.x {
-                "└"
+                glyphs.popup_corners[2]
             } else if x + 1 == a.right() {
-                "┘"
+                glyphs.popup_corners[3]
             } else {
-                "─"
+                glyphs.bar_empty
             })
             .set_style(border);
     }
     for y in a.y + 1..a.bottom() - 1 {
-        b[(a.x, y)].set_symbol("│").set_style(border);
-        b[(a.right() - 1, y)].set_symbol("│").set_style(border);
+        b[(a.x, y)]
+            .set_symbol(glyphs.tree_vertical)
+            .set_style(border);
+        b[(a.right() - 1, y)]
+            .set_symbol(glyphs.tree_vertical)
+            .set_style(border);
     }
     Some(Rect::new(a.x + 1, a.y + 1, a.width - 2, a.height - 2))
 }
@@ -1137,7 +1151,18 @@ fn render_flow_overlay(
     p: &Palette,
 ) -> Option<OverlayRender> {
     let q = flow_popup(b.area)?;
-    let i = panel(b, q, p.accent, p.panel_bg)?;
+    render_flow_popup(b, q, v, s, flow, p)
+}
+
+pub(in crate::client::shell) fn render_flow_popup(
+    b: &mut Buffer,
+    q: Rect,
+    v: &ClientOrbitFlowOverlay,
+    s: &ClientShellSnapshot,
+    flow: &super::modern::draw::flow::FlowDraw<'_>,
+    p: &Palette,
+) -> Option<OverlayRender> {
+    let i = panel_with_glyphs(b, q, p.accent, p.panel_bg, flow.chrome.glyphs)?;
     if i.width < 20 || i.height < 8 {
         return None;
     }

@@ -1,0 +1,282 @@
+=== ◐/44
+Orbit  ·  2 workers  ·  ▲ 1 needs you   ◐ 1 |
+  working   ◌ 1 queued|
+|
+▲ NEEDS YOU|
+  ▲ w1:p3                        cy         |
+            2m  waiting for a decision on t-|
+  1|
+  Answer in the worker's pane; Polaris answe|
+  rs only with [polaris.approvals] lead_may_|
+  approve.|
+◐ WORKING|
+  ◐ t-2                          bo         |
+            1m  awaiting report|
+◌ QUEUED|
+  ◌ t-3                          rae        |
+           11s  queued|
+✓ DONE|
+  ✓ t-4                          ada        |
+             —  bump deps|
+      completed: bump deps  tests=yes  check|
+  s=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ▲ cy                     blocked    w1:p3 |
+           claude|
+  ◐ bo                     working    w1:p4 |
+           codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"jo|
+  b_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"jo|
+  b_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"t|
+  ask_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"t|
+  ask_id":"ID"}'|
+=== ◐/80
+Orbit  ·  2 workers  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued|
+|
+▲ NEEDS YOU|
+  ▲ w1:p3                        cy                   2m  waiting for a decision|
+   on t-1|
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lea|
+  d_may_approve.|
+◐ WORKING|
+  ◐ t-2                          bo                   1m  awaiting report|
+◌ QUEUED|
+  ◌ t-3                          rae                 11s  queued|
+✓ DONE|
+  ✓ t-4                          ada                   —  bump deps|
+      completed: bump deps  tests=yes  checks=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ▲ cy                     blocked    w1:p3          claude|
+  ◐ bo                     working    w1:p4          codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"job_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'|
+=== ◐/120
+Orbit  ·  2 workers  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued|
+|
+▲ NEEDS YOU|
+  ▲ w1:p3                        cy                   2m  waiting for a decision on t-1|
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.|
+◐ WORKING|
+  ◐ t-2                          bo                   1m  awaiting report|
+◌ QUEUED|
+  ◌ t-3                          rae                 11s  queued|
+✓ DONE|
+  ✓ t-4                          ada                   —  bump deps|
+      completed: bump deps  tests=yes  checks=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ▲ cy                     blocked    w1:p3          claude|
+  ◐ bo                     working    w1:p4          codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"job_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'|
+=== ◐/200
+Orbit  ·  2 workers  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued|
+|
+▲ NEEDS YOU|
+  ▲ w1:p3                        cy                   2m  waiting for a decision on t-1|
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.|
+◐ WORKING|
+  ◐ t-2                          bo                   1m  awaiting report|
+◌ QUEUED|
+  ◌ t-3                          rae                 11s  queued|
+✓ DONE|
+  ✓ t-4                          ada                   —  bump deps|
+      completed: bump deps  tests=yes  checks=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ▲ cy                     blocked    w1:p3          claude|
+  ◐ bo                     working    w1:p4          codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"job_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'|
+=== */44
+Orbit  .  2 workers  .  ! 1 needs you   * 1 |
+  working   . 1 queued|
+|
+! NEEDS YOU|
+  ! w1:p3                        cy         |
+            2m  waiting for a decision on t-|
+  1|
+  Answer in the worker's pane; Polaris answe|
+  rs only with [polaris.approvals] lead_may_|
+  approve.|
+* WORKING|
+  * t-2                          bo         |
+            1m  awaiting report|
+. QUEUED|
+  . t-3                          rae        |
+           11s  queued|
++ DONE|
+  + t-4                          ada        |
+             -  bump deps|
+      completed: bump deps  tests=yes  check|
+  s=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ! cy                     blocked    w1:p3 |
+           claude|
+  * bo                     working    w1:p4 |
+           codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"jo|
+  b_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"jo|
+  b_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"t|
+  ask_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"t|
+  ask_id":"ID"}'|
+=== */80
+Orbit  .  2 workers  .  ! 1 needs you   * 1 working   . 1 queued|
+|
+! NEEDS YOU|
+  ! w1:p3                        cy                   2m  waiting for a decision|
+   on t-1|
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lea|
+  d_may_approve.|
+* WORKING|
+  * t-2                          bo                   1m  awaiting report|
+. QUEUED|
+  . t-3                          rae                 11s  queued|
++ DONE|
+  + t-4                          ada                   -  bump deps|
+      completed: bump deps  tests=yes  checks=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ! cy                     blocked    w1:p3          claude|
+  * bo                     working    w1:p4          codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"job_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'|
+=== */120
+Orbit  .  2 workers  .  ! 1 needs you   * 1 working   . 1 queued|
+|
+! NEEDS YOU|
+  ! w1:p3                        cy                   2m  waiting for a decision on t-1|
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.|
+* WORKING|
+  * t-2                          bo                   1m  awaiting report|
+. QUEUED|
+  . t-3                          rae                 11s  queued|
++ DONE|
+  + t-4                          ada                   -  bump deps|
+      completed: bump deps  tests=yes  checks=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ! cy                     blocked    w1:p3          claude|
+  * bo                     working    w1:p4          codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"job_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'|
+=== */200
+Orbit  .  2 workers  .  ! 1 needs you   * 1 working   . 1 queued|
+|
+! NEEDS YOU|
+  ! w1:p3                        cy                   2m  waiting for a decision on t-1|
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.|
+* WORKING|
+  * t-2                          bo                   1m  awaiting report|
+. QUEUED|
+  . t-3                          rae                 11s  queued|
++ DONE|
+  + t-4                          ada                   -  bump deps|
+      completed: bump deps  tests=yes  checks=1 passed|
+|
+Jobs|
+No jobs yet.|
+|
+Workers|
+  ! cy                     blocked    w1:p3          claude|
+  * bo                     working    w1:p4          codex|
+|
+Worker kinds|
+No worker kinds allowed.|
+|
+Polaris lead|
+No lead status.|
+|
+Inspect output: aster orbit job-status '{"job_id":"ID"}'|
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'|
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'|
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'|

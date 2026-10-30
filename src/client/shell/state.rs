@@ -976,6 +976,8 @@ pub(crate) struct ClientShellState {
     pub(super) active_snapshot_generation: Option<u64>,
     pub(super) pane_surface_generation: Option<u64>,
     pub(super) pane_surface: Option<PaneSurfaceFrame>,
+    /// Resize identity digest, refreshed only when the accepted topology changes.
+    pub(super) pane_topology_signature: u64,
     /// A future projection surface waits here until its matching snapshot arrives. The visible
     /// pane surface always remains an exact snapshot pair.
     pub(super) pending_pane_surface: Option<PaneSurfaceFrame>,
@@ -1008,6 +1010,10 @@ pub(crate) struct ClientShellState {
     /// until the first snapshot, which is only a baseline.
     pub(super) pane_states: Option<HashMap<String, crate::ui::chrome::state::StateKind>>,
     /// Surface-local header reservation spans, prepared on snapshot/surface changes.
+    #[cfg(test)]
+    pub(super) header_copy_builds: usize,
+    pub(super) header_copies_dirty: bool,
+    pub(super) header_copies_modern: bool,
     pub(super) header_copies: Vec<super::modern::model::pane_header::HeaderCopy>,
     /// Static recent-change markers, independent of `ui.animations`.
     pub(super) recent: super::modern::model::recent::RecentMarks,
@@ -1038,6 +1044,8 @@ pub(crate) struct ClientShellState {
     pub(super) pending_workspace_highlight: Option<PendingWorkspaceHighlight>,
     pub(super) reveal_navigation_workspace: bool,
     pub(super) overlay: Option<ClientShellOverlay>,
+    /// Popup scratch storage, resized only when flow geometry changes.
+    pub(super) flow_buffer: Option<Buffer>,
     pub(super) previous_pane_id: Option<String>,
     pub(super) pane_mouse_gesture: Option<ClientPaneMouseGesture>,
     pub(super) link_hover: Option<super::link_hover::LinkHover>,
@@ -1171,6 +1179,7 @@ impl ClientShellState {
             active_snapshot_generation: None,
             pane_surface_generation: None,
             pane_surface: None,
+            pane_topology_signature: 0,
             pending_pane_surface: None,
             graphics: crate::kitty_graphics::surface::ClientState::new(),
             graphics_cell_size: crate::kitty_graphics::HostCellSize {
@@ -1197,6 +1206,10 @@ impl ClientShellState {
             collapsed_team_groups: HashSet::new(),
             collapsed_lanes: crate::ui::chrome::state::LaneSet::EMPTY,
             tab_activity: HashMap::new(),
+            #[cfg(test)]
+            header_copy_builds: 0,
+            header_copies_dirty: true,
+            header_copies_modern: false,
             header_copies: Vec::new(),
             pane_states: None,
             recent: Default::default(),
@@ -1224,6 +1237,7 @@ impl ClientShellState {
             pending_workspace_highlight: None,
             reveal_navigation_workspace: false,
             overlay,
+            flow_buffer: None,
             previous_pane_id: None,
             pane_mouse_gesture: None,
             link_hover: None,
@@ -1383,7 +1397,10 @@ impl ClientShellState {
     }
 
     pub(super) fn reset_endpoint_projection(&mut self) {
+        self.pane_topology_signature = 0;
         self.header_copies.clear();
+        self.header_copies_dirty = true;
+        self.header_copies_modern = false;
         self.pane_states = None;
         self.recent = Default::default();
         self.hits = ShellHitMap::default();
@@ -1745,6 +1762,7 @@ impl ClientShellState {
             _ => false,
         };
         if !same_orbit {
+            self.header_copies_dirty = true;
             self.team_sidebar = snapshot
                 .orbit
                 .as_ref()
@@ -1795,13 +1813,37 @@ impl ClientShellState {
         self.reconcile_input_source();
     }
 
-    fn refresh_header_copies(&mut self) {
+    /// The digest protects an in-flight resize against a changed split tree.
+    pub(super) fn current_pane_topology(&self) -> Option<u64> {
+        self.pane_surface
+            .as_ref()
+            .map(|_| self.pane_topology_signature)
+    }
+
+    pub(super) fn refresh_header_copies(&mut self) {
+        let modern = self.config.chrome.is_modern();
+        if modern != self.header_copies_modern {
+            self.header_copies_dirty = true;
+            self.header_copies_modern = modern;
+        }
+        if !modern {
+            self.header_copies.clear();
+            return;
+        }
+        if !self.header_copies_dirty {
+            return;
+        }
         self.header_copies = match (self.pane_surface.as_ref(), self.team_sidebar.as_ref()) {
             (Some(surface), Some(team)) => {
+                #[cfg(test)]
+                {
+                    self.header_copy_builds += 1;
+                }
                 super::modern::model::pane_header::copy_spans(surface, &team.modern.headers)
             }
             _ => Vec::new(),
         };
+        self.header_copies_dirty = false;
     }
 
     pub(crate) fn has_presented_surface(&self) -> bool {
@@ -1858,6 +1900,21 @@ impl ClientShellState {
         // exact-pair compose guard prevents it from replacing the visible frame.
         if surface.projection_revision != snapshot.revision {
             self.hits = ShellHitMap::default();
+        }
+        if self
+            .pane_surface
+            .as_ref()
+            .is_none_or(|old| !super::same_pane_surface_topology(old, &surface))
+        {
+            self.pane_topology_signature = super::pane_surface_topology_signature(&surface);
+        }
+        if self.config.chrome.is_modern()
+            && self
+                .pane_surface
+                .as_ref()
+                .is_none_or(|old| !super::modern::model::pane_header::same_geometry(old, &surface))
+        {
+            self.header_copies_dirty = true;
         }
         self.acknowledge_active_surface_agents(&surface);
         let previous_popup = self.popup_terminal_id.clone();

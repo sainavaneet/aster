@@ -401,7 +401,15 @@ pub(super) fn run(watch: bool) -> io::Result<i32> {
         if watch {
             output.write_all(b"\x1b[2J\x1b[H")?;
         }
-        output.write_all(render_styled(result, watch, now_ms(), glyphs).as_bytes())?;
+        let text = render_styled(result, watch, now_ms(), glyphs);
+        let text = if glyphs.is_some() && io::stdout().is_terminal() {
+            crossterm::terminal::size()
+                .map(|(cols, _)| super::orbit_activity_modern::fit_terminal(&text, cols))
+                .unwrap_or(text)
+        } else {
+            text
+        };
+        output.write_all(text.as_bytes())?;
         output.flush()?;
         drop(output);
         if !watch {

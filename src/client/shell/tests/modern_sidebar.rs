@@ -6,6 +6,7 @@ const NOW_MS: u64 = 10_000_000_000;
 
 fn step(index: u16, member: &str, kind: &str, state: &str) -> OrbitShellStep {
     OrbitShellStep {
+        awaiting_approval: None,
         index,
         member: member.into(),
         kind: kind.into(),
@@ -272,6 +273,8 @@ fn snapshot_matrix() -> String {
                 for (scene, width, height, sidebar) in [
                     ("desktop-80", 80, 120, 36),
                     ("desktop-120", 120, 120, 36),
+                    ("desktop-200", 200, 120, 36),
+                    ("narrow-roles", 80, 120, 18),
                     ("mobile", 44, 30, 26),
                     ("collapsed", 80, 40, 36),
                 ] {
@@ -315,7 +318,7 @@ fn snapshot_matrix() -> String {
                             assert!(text.contains(needle), "{scene} {needle}");
                         }
                         assert!(state.hits.chrome_targets.len() >= 4);
-                    } else {
+                    } else if scene == "mobile" || scene == "collapsed" {
                         assert!(state.hits.chrome_targets.is_empty());
                     }
                     out.push_str(&format!("=== {theme}/{motion}/{glyphs}/{scene}\n"));

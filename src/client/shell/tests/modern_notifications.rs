@@ -28,7 +28,7 @@ fn config(theme: &str, glyphs: &str) -> ClientShellConfig {
     ClientShellConfig::from_config(&config)
 }
 
-fn capture(out: &mut String, buffer: &Buffer) {
+pub(super) fn capture(out: &mut String, buffer: &Buffer) {
     let mut hash = 0xcbf29ce484222325u64;
     for row in buffer.content.chunks(usize::from(buffer.area.width)) {
         for cell in row {
@@ -162,69 +162,73 @@ fn notifications_snapshot_matrix() {
     for theme in ["catppuccin", "catppuccin-latte"] {
         for glyphs in ["unicode", "ascii"] {
             let config = config(theme, glyphs);
-            for motion in [
-                UiAnimationsConfig::Full,
-                UiAnimationsConfig::Reduced,
-                UiAnimationsConfig::Off,
-            ] {
-                for elapsed in [0, 300, 950] {
-                    let phase = notification_transition_phase(
-                        base,
-                        base + std::time::Duration::from_secs(1),
-                        base + std::time::Duration::from_millis(elapsed),
-                        motion,
-                    );
-                    for height in 1..=3 {
-                        let area = Rect::new(0, 0, 44, height);
-                        for position in POSITIONS {
+            for cols in [44, 80, 120, 200] {
+                for motion in [
+                    UiAnimationsConfig::Full,
+                    UiAnimationsConfig::Reduced,
+                    UiAnimationsConfig::Off,
+                ] {
+                    for elapsed in [0, 300, 950] {
+                        let phase = notification_transition_phase(
+                            base,
+                            base + std::time::Duration::from_secs(1),
+                            base + std::time::Duration::from_millis(elapsed),
+                            motion,
+                        );
+                        for height in 1..=3 {
+                            let area = Rect::new(0, 0, cols, height);
+                            for position in POSITIONS {
+                                let mut buffer = Buffer::empty(area);
+                                toast::draw_card(
+                                    &mut buffer,
+                                    area,
+                                    StateKind::Approval,
+                                    "日本語 👩‍👩‍👧‍👦 title",
+                                    "a long body that must yield before the state glyph",
+                                    position,
+                                    0,
+                                    &config,
+                                    phase,
+                                );
+                                actual.push_str(&format!("=== card/{cols}/{theme}/{glyphs}/{motion:?}/{elapsed}/{height}/{position:?}\n"));
+                                capture(&mut actual, &buffer);
+                            }
                             let mut buffer = Buffer::empty(area);
-                            toast::draw_card(
+                            toast::draw_banner(
                                 &mut buffer,
                                 area,
-                                StateKind::Approval,
-                                "日本語 👩‍👩‍👧‍👦 title",
-                                "a long body that must yield before the state glyph",
-                                position,
-                                0,
+                                StateKind::Failed,
+                                "endpoint rejected",
+                                Some("日本語 body"),
+                                false,
                                 &config,
                                 phase,
                             );
-                            actual.push_str(&format!("=== card/{theme}/{glyphs}/{motion:?}/{elapsed}/{height}/{position:?}\n"));
+                            actual.push_str(&format!(
+                            "=== banner/{cols}/{theme}/{glyphs}/{motion:?}/{elapsed}/{height}\n"
+                        ));
                             capture(&mut actual, &buffer);
                         }
-                        let mut buffer = Buffer::empty(area);
-                        toast::draw_banner(
-                            &mut buffer,
-                            area,
-                            StateKind::Failed,
-                            "endpoint rejected",
-                            Some("日本語 body"),
-                            false,
-                            &config,
-                            phase,
-                        );
-                        actual.push_str(&format!(
-                            "=== banner/{theme}/{glyphs}/{motion:?}/{elapsed}/{height}\n"
-                        ));
-                        capture(&mut actual, &buffer);
                     }
                 }
-            }
-            for position in CLIPBOARD {
-                let area = Rect::new(0, 0, 44, 3);
-                let mut buffer = Buffer::empty(area);
-                toast::draw_feedback(
-                    &mut buffer,
-                    area,
-                    &CopyFeedback {
-                        message: "日本語 copied".into(),
-                    },
-                    0,
-                    position,
-                    &config,
-                );
-                actual.push_str(&format!("=== clipboard/{theme}/{glyphs}/{position:?}\n"));
-                capture(&mut actual, &buffer);
+                for position in CLIPBOARD {
+                    let area = Rect::new(0, 0, cols, 3);
+                    let mut buffer = Buffer::empty(area);
+                    toast::draw_feedback(
+                        &mut buffer,
+                        area,
+                        &CopyFeedback {
+                            message: "日本語 copied".into(),
+                        },
+                        0,
+                        position,
+                        &config,
+                    );
+                    actual.push_str(&format!(
+                        "=== clipboard/{cols}/{theme}/{glyphs}/{position:?}\n"
+                    ));
+                    capture(&mut actual, &buffer);
+                }
             }
         }
     }
@@ -242,7 +246,7 @@ fn golden(name: &str, actual: &str) {
     }
 }
 
-fn copy_mode_fixture() -> ClientCopyModeState {
+pub(super) fn copy_mode_fixture() -> ClientCopyModeState {
     ClientCopyModeState {
         pane_id: "pane_1".into(),
         content_revision: 0,
@@ -277,7 +281,7 @@ fn modern_mode_bar_snapshot_matrix() {
                 approval: 2,
                 working: 3,
             };
-            for cols in [50, 64, 80, 120] {
+            for cols in [44, 50, 64, 80, 120, 200] {
                 for mode in [
                     ClientShellMode::Terminal,
                     ClientShellMode::Prefix,

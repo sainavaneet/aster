@@ -434,7 +434,7 @@ impl ClientShellState {
         }
         Some(
             snapshot.focused_tab_id.as_deref() == Some(tab_id)
-                && pane_surface_topology_signature(surface) == hit.topology_signature,
+                && self.current_pane_topology() == Some(hit.topology_signature),
         )
     }
 

@@ -319,6 +319,19 @@ impl App {
         &self,
         pane_ids: &HashMap<String, String>,
     ) -> Vec<OrbitShellActiveTask> {
+        // One permission check per known owner in this cached projection,
+        // including when a worker appears in several tasks or relay steps.
+        let mut permissions = HashMap::<String, bool>::new();
+        let mut permission = |id: &str| {
+            let terminal = self.state.terminals.get(id)?;
+            if let Some(&known) = permissions.get(id) {
+                return Some(known);
+            }
+            let awaiting = terminal.state == AgentState::Blocked
+                && self.orbit_permission_prompt_agent(id).is_some();
+            permissions.insert(id.to_owned(), awaiting);
+            Some(awaiting)
+        };
         self.orbit_notifications
             .tasks
             .iter()
@@ -345,11 +358,14 @@ impl App {
                         .iter()
                         .find(|source| source.index == usize::from(step.index));
                     let roster = self.orbit_team.roster.member(&step.member).map(|(_, m)| m);
-                    let (terminal, model) =
-                        step_owner(source, step.state == "active", &task.worker_id, roster);
-                    step.pane_id = terminal.as_ref().and_then(|id| pane_ids.get(id)).cloned();
-                    step.worker_terminal_id = terminal;
-                    step.model = model.filter(|model| !model.is_empty());
+                    project_step_owner(
+                        step,
+                        source,
+                        &task.worker_id,
+                        roster,
+                        pane_ids,
+                        &mut permission,
+                    );
                 }
                 OrbitShellActiveTask {
                     task_id: task.task_id.clone(),
@@ -361,10 +377,7 @@ impl App {
                     state: state.to_owned(),
                     created_at_ms: task.created_at,
                     blocked,
-                    awaiting_approval: blocked
-                        && self
-                            .orbit_permission_prompt_agent(&task.worker_id)
-                            .is_some(),
+                    awaiting_approval: blocked && permission(&task.worker_id) == Some(true),
                     steps: shell_steps.steps,
                     step_total: shell_steps.step_total,
                     parallel: shell_steps.parallel,
@@ -397,6 +410,31 @@ impl App {
             .map(recent_task)
             .collect()
     }
+}
+
+/// Project only the recorded owner's current permission fact; historical or
+/// unresolved steps never borrow the task worker's live approval state.
+fn project_step_owner(
+    step: &mut crate::protocol::OrbitShellStep,
+    source: Option<&super::steps::Step>,
+    task_worker: &str,
+    roster: Option<&crate::app::orbit_team::roster::Member>,
+    pane_ids: &HashMap<String, String>,
+    permission: &mut impl FnMut(&str) -> Option<bool>,
+) {
+    let (terminal, model) = if source.is_some() {
+        step_owner(source, step.state == "active", task_worker, roster)
+    } else {
+        (None, None)
+    };
+    step.awaiting_approval = if step.state == "active" {
+        terminal.as_deref().and_then(permission)
+    } else {
+        None
+    };
+    step.pane_id = terminal.as_ref().and_then(|id| pane_ids.get(id)).cloned();
+    step.worker_terminal_id = terminal;
+    step.model = model.filter(|model| !model.is_empty());
 }
 
 /// The terminal and model that ran a step: what the ledger recorded for that
@@ -458,6 +496,59 @@ mod tests {
 
         fn step() -> Step {
             Step::active(0, "ada", "codex", 1)
+        }
+
+        #[test]
+        fn step_permission_projection_follows_only_the_resolved_active_owner() {
+            let mut source = step();
+            source.parallel = Some(
+                serde_json::from_value::<Parallel>(serde_json::json!({
+                    "prompt":"p", "files":[], "phase":"running", "worker_id":"term_branch"
+                }))
+                .unwrap(),
+            );
+            let mut projected: crate::protocol::OrbitShellStep = serde_json::from_value(
+                serde_json::json!({"index":0,"member":"ada","kind":"codex","state":"active","since_unix_ms":1})
+            ).unwrap();
+            let panes = HashMap::from([("term_branch".into(), "pane_branch".into())]);
+            let mut observed = Vec::new();
+            let mut permission = |id: &str| {
+                observed.push(id.to_owned());
+                Some(true)
+            };
+            project_step_owner(
+                &mut projected,
+                Some(&source),
+                "term_now",
+                Some(&member()),
+                &panes,
+                &mut permission,
+            );
+            assert_eq!(projected.awaiting_approval, Some(true));
+            assert_eq!(projected.pane_id.as_deref(), Some("pane_branch"));
+            assert_eq!(projected.worker_terminal_id.as_deref(), Some("term_branch"));
+            projected.state = "handed_off".into();
+            project_step_owner(
+                &mut projected,
+                Some(&source),
+                "term_now",
+                None,
+                &panes,
+                &mut permission,
+            );
+            assert_eq!(projected.awaiting_approval, None);
+            projected.state = "active".into();
+            project_step_owner(
+                &mut projected,
+                None,
+                "term_now",
+                Some(&member()),
+                &panes,
+                &mut permission,
+            );
+            assert_eq!(projected.awaiting_approval, None);
+            assert_eq!(projected.worker_terminal_id, None);
+            assert_eq!(observed, ["term_branch"]);
         }
 
         #[test]

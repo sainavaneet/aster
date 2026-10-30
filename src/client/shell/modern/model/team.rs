@@ -85,16 +85,26 @@ impl PaneAttention {
         let mut states = HashMap::new();
         for task in &orbit.active_tasks {
             let state = task_state(task);
-            if !matches!(state, StateKind::Approval | StateKind::Blocked) {
-                continue;
+            if matches!(state, StateKind::Approval | StateKind::Blocked) {
+                if let Some(pane) = terminals.get(task.worker_terminal_id.as_str()) {
+                    let current = states.entry((*pane).to_owned()).or_insert(state);
+                    if state.priority() > current.priority() {
+                        *current = state;
+                    }
+                }
             }
-            if let Some(pane) = terminals.get(task.worker_terminal_id.as_str()) {
-                let current = states.entry((*pane).to_owned()).or_insert(state);
-                if state.priority() > current.priority() {
-                    *current = state;
+            for step in &task.steps {
+                if step.state == "active"
+                    && step.awaiting_approval == Some(true)
+                    && step.worker_terminal_id.is_some()
+                {
+                    if let Some(pane) = &step.pane_id {
+                        states.insert(pane.clone(), StateKind::Approval);
+                    }
                 }
             }
         }
+
         Self(states)
     }
 }
@@ -146,7 +156,11 @@ fn member(member: &OrbitShellMember, open: Option<&Open<'_>>) -> ModernMember {
     }
 }
 
-fn role(entries: &[OrbitShellMember], open: &HashMap<&str, Open<'_>>) -> ModernRole {
+fn role(
+    entries: &[OrbitShellMember],
+    open: &HashMap<&str, Open<'_>>,
+    attention: &PaneAttention,
+) -> ModernRole {
     let opens = entries
         .iter()
         .map(|entry| entry.terminal_id.as_deref().and_then(|id| open.get(id)))
@@ -154,7 +168,15 @@ fn role(entries: &[OrbitShellMember], open: &HashMap<&str, Open<'_>>) -> ModernR
     let members = entries
         .iter()
         .zip(&opens)
-        .map(|(entry, open)| member(entry, *open))
+        .map(|(entry, open)| {
+            let mut member = member(entry, *open);
+            if let Some(state) = entry.pane_id.as_deref().and_then(|id| attention.state(id)) {
+                if state.priority() > member.state.priority() {
+                    member.state = state;
+                }
+            }
+            member
+        })
         .collect::<Vec<_>>();
     let mut counts = StateCounts::default();
     for member in &members {
@@ -199,24 +221,33 @@ impl ModernTeam {
                 open.insert(task.worker_terminal_id.as_str(), candidate);
             }
         }
-        let lead = ModernMember {
+        let attention = PaneAttention::build(Some(orbit));
+        let mut lead = ModernMember {
             state: StateKind::from_member_state(&orbit.lead.state),
             kind: "lead".to_owned(),
             model: None,
             phase: String::new(),
             task_title: None,
         };
+        if let Some(state) = orbit
+            .lead
+            .pane_id
+            .as_deref()
+            .and_then(|id| attention.state(id))
+        {
+            lead.state = state;
+        }
         let mut roles = orbit
             .roles
             .iter()
-            .map(|entry| role(&entry.members, &open))
+            .map(|entry| role(&entry.members, &open, &attention))
             .collect::<Vec<_>>();
         if !orbit.scratch.is_empty() {
-            roles.push(role(&orbit.scratch, &open));
+            roles.push(role(&orbit.scratch, &open, &attention));
         }
         let headers = super::pane_header::build(orbit, &lead, &roles, &open);
         Self {
-            attention: PaneAttention::build(Some(orbit)),
+            attention,
             lead,
             roles,
             lanes: Lanes::build(orbit),

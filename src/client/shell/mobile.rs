@@ -47,6 +47,33 @@ impl MobileItem {
     }
 }
 
+/// Mobile surfaces use the same configured state glyphs as desktop chrome.
+fn mobile_state(
+    status: crate::api::schema::AgentStatus,
+    config: &ClientShellConfig,
+) -> (&'static str, Color) {
+    if config.chrome.is_modern() {
+        super::modern::draw::state_glyph_for(
+            config,
+            crate::ui::chrome::state::StateKind::from_status(status),
+            Default::default(),
+        )
+    } else {
+        (
+            status_icon(status, config.status_indicators),
+            status_color(status, &config.palette),
+        )
+    }
+}
+
+fn mobile_separator(config: &ClientShellConfig) -> &'static str {
+    if config.chrome.is_modern() {
+        config.chrome.glyphs.separator
+    } else {
+        "·"
+    }
+}
+
 pub(super) fn render_mobile_header(
     buffer: &mut Buffer,
     area: Rect,
@@ -101,7 +128,7 @@ fn render_header_status(
         );
         return;
     };
-    let tab_status = compact_tab_status(snapshot, workspace);
+    let tab_status = compact_tab_status(snapshot, workspace, config);
     let tab_width = display_width(&tab_status).saturating_add(1).min(area.width);
     // The modern attention chip takes the cells left of the tab counter when
     // the name keeps at least `MIN_NAME` of them.
@@ -138,12 +165,9 @@ fn render_header_status(
         area.x,
         area.y,
         name_width.min(3),
-        &format!(
-            " {} ",
-            status_icon(workspace.agent_status, config.status_indicators)
-        ),
+        &format!(" {} ", mobile_state(workspace.agent_status, config).0),
         Style::default()
-            .fg(status_color(workspace.agent_status, palette))
+            .fg(mobile_state(workspace.agent_status, config).1)
             .bg(palette.panel_bg),
     );
     put_text(
@@ -192,7 +216,11 @@ fn render_header_button(
             area.x,
             y,
             1,
-            "│",
+            if config.chrome.is_modern() && config.chrome.glyphs.separator.is_ascii() {
+                "|"
+            } else {
+                "│"
+            },
             Style::default()
                 .fg(palette.surface_dim)
                 .bg(palette.surface0),
@@ -224,10 +252,7 @@ fn render_header_button(
             area.right().saturating_sub(1),
             area.y,
             1,
-            status_icon(
-                crate::api::schema::AgentStatus::Blocked,
-                config.status_indicators,
-            ),
+            mobile_state(crate::api::schema::AgentStatus::Blocked, config).0,
             Style::default().fg(palette.red).bg(palette.surface0),
         );
     }
@@ -243,7 +268,11 @@ fn mobile_endpoint_state(status: ClientEndpointStatus) -> &'static str {
     }
 }
 
-fn compact_tab_status(snapshot: &ClientShellSnapshot, workspace: &ClientShellWorkspace) -> String {
+fn compact_tab_status(
+    snapshot: &ClientShellSnapshot,
+    workspace: &ClientShellWorkspace,
+    config: &ClientShellConfig,
+) -> String {
     let tabs = snapshot
         .tabs
         .iter()
@@ -260,7 +289,12 @@ fn compact_tab_status(snapshot: &ClientShellSnapshot, workspace: &ClientShellWor
     if tabs.len() <= 1 {
         format!("tab {label}")
     } else {
-        format!("tab {label} · {}/{}", active + 1, tabs.len())
+        format!(
+            "tab {label} {} {}/{}",
+            mobile_separator(config),
+            active + 1,
+            tabs.len()
+        )
     }
 }
 
@@ -324,17 +358,27 @@ fn render_agent_summary(
         if count == 0 {
             continue;
         }
-        let symbol = match (config.status_indicators, status) {
-            (crate::config::StatusIndicatorStyle::Dots, AgentStatus::Blocked) => Some("◉"),
-            (crate::config::StatusIndicatorStyle::Dots, AgentStatus::Done) => Some("●"),
-            (crate::config::StatusIndicatorStyle::Dots, _) => None,
-            _ => Some(status_icon(status, config.status_indicators)),
+        let symbol = if config.chrome.is_modern() {
+            Some(mobile_state(status, config).0)
+        } else {
+            match (config.status_indicators, status) {
+                (crate::config::StatusIndicatorStyle::Dots, AgentStatus::Blocked) => Some("◉"),
+                (crate::config::StatusIndicatorStyle::Dots, AgentStatus::Done) => Some("●"),
+                (crate::config::StatusIndicatorStyle::Dots, _) => None,
+                _ => Some(status_icon(status, config.status_indicators)),
+            }
         };
         let text = symbol.map_or_else(
             || format!("{count} {label}"),
             |symbol| format!("{symbol} {count} {label}"),
         );
-        let separator = if shown == 0 { "" } else { " · " };
+        let separator = if shown == 0 {
+            ""
+        } else if config.chrome.is_modern() && config.chrome.glyphs.separator.is_ascii() {
+            " | "
+        } else {
+            " · "
+        };
         let needed = display_width(separator).saturating_add(display_width(&text));
         if area.right().saturating_sub(x) < needed {
             omitted = true;
@@ -352,7 +396,9 @@ fn render_agent_summary(
                     .bg(config.palette.panel_bg),
             );
         }
-        let color = if shown == 0 {
+        let color = if config.chrome.is_modern() {
+            mobile_state(status, config).1
+        } else if shown == 0 {
             match status {
                 AgentStatus::Done => config.palette.blue,
                 _ => status_color(status, &config.palette),
@@ -383,7 +429,11 @@ fn render_agent_summary(
             x,
             area.y,
             2,
-            " …",
+            if config.chrome.is_modern() && config.chrome.glyphs.ellipsis.is_ascii() {
+                " ~"
+            } else {
+                " …"
+            },
             Style::default()
                 .fg(config.palette.overlay0)
                 .bg(config.palette.panel_bg),
@@ -417,7 +467,12 @@ pub(super) fn render_mobile_switcher(
             area.x,
             area.y,
             area.width,
-            &"─".repeat(usize::from(area.width)),
+            &if config.chrome.is_modern() {
+                config.chrome.glyphs.bar_empty
+            } else {
+                "─"
+            }
+            .repeat(usize::from(area.width)),
             Style::default()
                 .fg(palette.surface_dim)
                 .bg(palette.panel_bg),
@@ -444,14 +499,19 @@ pub(super) fn render_mobile_switcher(
             .bg(palette.panel_bg)
             .add_modifier(Modifier::BOLD),
     );
-    render_close_button(buffer, close, palette);
+    render_close_button(buffer, close, config);
     let rule_y = area.y + header_height;
     put_text(
         buffer,
         area.x,
         rule_y,
         area.width,
-        &"─".repeat(usize::from(area.width)),
+        &if config.chrome.is_modern() {
+            config.chrome.glyphs.bar_empty
+        } else {
+            "─"
+        }
+        .repeat(usize::from(area.width)),
         Style::default()
             .fg(palette.surface_dim)
             .bg(palette.panel_bg),
@@ -516,7 +576,7 @@ pub(super) fn render_mobile_switcher(
         Rect::default()
     };
     if max_scroll > 0 {
-        render_left_scrollbar(buffer, viewport, total_rows, *scroll, palette);
+        render_left_scrollbar(buffer, viewport, total_rows, *scroll, config);
     }
     if content.is_empty() {
         return;
@@ -555,7 +615,8 @@ pub(super) fn render_mobile_switcher(
     }
 }
 
-fn render_close_button(buffer: &mut Buffer, area: Rect, palette: &Palette) {
+fn render_close_button(buffer: &mut Buffer, area: Rect, config: &ClientShellConfig) {
+    let palette = &config.palette;
     if area.is_empty() {
         return;
     }
@@ -566,7 +627,11 @@ fn render_close_button(buffer: &mut Buffer, area: Rect, palette: &Palette) {
             area.x,
             y,
             1,
-            "│",
+            if config.chrome.is_modern() {
+                config.chrome.glyphs.tree_vertical
+            } else {
+                "│"
+            },
             Style::default()
                 .fg(palette.surface_dim)
                 .bg(palette.surface0),
@@ -594,7 +659,11 @@ fn render_close_button(buffer: &mut Buffer, area: Rect, palette: &Palette) {
             area.x.saturating_add(area.width / 2),
             area.y + 1,
             1,
-            "×",
+            if config.chrome.is_modern() {
+                config.chrome.glyphs.close
+            } else {
+                "×"
+            },
             Style::default()
                 .fg(palette.text)
                 .bg(palette.surface0)
@@ -617,7 +686,21 @@ fn mobile_items(
         items.push(MobileItem::section("machines", palette));
         for endpoint in endpoints {
             let background = palette.panel_bg;
-            let (symbol, state, color) = endpoint_status_presentation(endpoint.status, palette);
+            let (mut symbol, state, mut color) =
+                endpoint_status_presentation(endpoint.status, palette);
+            if config.chrome.is_modern() {
+                use crate::ui::chrome::state::StateKind;
+                let kind = match endpoint.status {
+                    ClientEndpointStatus::Connecting | ClientEndpointStatus::Reconnecting => {
+                        StateKind::Working
+                    }
+                    ClientEndpointStatus::Online => StateKind::Idle,
+                    ClientEndpointStatus::Attention => StateKind::Blocked,
+                    ClientEndpointStatus::Disabled => StateKind::Exited,
+                };
+                (symbol, color) =
+                    super::modern::draw::state_glyph_for(config, kind, Default::default());
+            }
             items.push(MobileItem {
                 lines: vec![
                     Line::from(vec![
@@ -649,7 +732,7 @@ fn mobile_items(
     let agent_view_label = snapshot.agent_view_label.as_deref();
     if !agents.is_empty() || agent_view_label.is_some() {
         let title = agent_view_label
-            .map(|label| format!("agents · {label}"))
+            .map(|label| format!("agents {} {label}", mobile_separator(config)))
             .unwrap_or_else(|| "agents".to_owned());
         items.push(MobileItem::section(title, palette));
         if agents.is_empty() {
@@ -763,7 +846,11 @@ fn mobile_items(
                         Span::styled(" ", Style::default().bg(background)),
                         Span::styled(
                             crate::ui::truncate_end(
-                                &format!("{} · {primary}", endpoint.label),
+                                &format!(
+                                    "{} {} {primary}",
+                                    endpoint.label,
+                                    mobile_separator(config)
+                                ),
                                 usize::from(content_width.saturating_sub(5)),
                             ),
                             Style::default()
@@ -774,7 +861,18 @@ fn mobile_items(
                     ]),
                     Line::from(Span::styled(
                         crate::ui::truncate_end(
-                            &format!("  {}", detail.join(" · ")),
+                            &format!(
+                                "  {}",
+                                detail.join(
+                                    if config.chrome.is_modern()
+                                        && config.chrome.glyphs.separator.is_ascii()
+                                    {
+                                        " | "
+                                    } else {
+                                        " · "
+                                    }
+                                )
+                            ),
                             usize::from(content_width),
                         ),
                         Style::default()
@@ -825,9 +923,17 @@ fn mobile_items(
             };
             let connector = if entry.indented {
                 if entry.last_child {
-                    "└─ "
+                    if config.chrome.is_modern() && config.chrome.glyphs.separator.is_ascii() {
+                        "`- "
+                    } else {
+                        "└─ "
+                    }
                 } else {
-                    "├─ "
+                    if config.chrome.is_modern() && config.chrome.glyphs.separator.is_ascii() {
+                        "|- "
+                    } else {
+                        "├─ "
+                    }
                 }
             } else {
                 ""
@@ -846,7 +952,11 @@ fn mobile_items(
                 if entry.last_child {
                     "       "
                 } else {
-                    "  │    "
+                    if config.chrome.is_modern() && config.chrome.glyphs.separator.is_ascii() {
+                        "  |    "
+                    } else {
+                        "  │    "
+                    }
                 }
             } else {
                 "  "
@@ -864,10 +974,14 @@ fn mobile_items(
             let status = if endpoint.stale() {
                 palette.overlay0
             } else {
-                status_color(workspace.agent_status, palette)
+                mobile_state(workspace.agent_status, config).1
             };
             let stale_detail = if endpoint.stale() {
-                format!(" · {}", mobile_endpoint_state(endpoint.status))
+                format!(
+                    " {} {}",
+                    mobile_separator(config),
+                    mobile_endpoint_state(endpoint.status)
+                )
             } else {
                 String::new()
             };
@@ -882,13 +996,13 @@ fn mobile_items(
                                 .add_modifier(dim),
                         ),
                         Span::styled(
-                            status_icon(workspace.agent_status, config.status_indicators),
+                            mobile_state(workspace.agent_status, config).0,
                             Style::default().fg(status).bg(background).add_modifier(dim),
                         ),
                         Span::styled(" ", Style::default().bg(background)),
                         Span::styled(
                             crate::ui::truncate_end(
-                                &format!("{} · {name}", endpoint.label),
+                                &format!("{} {} {name}", endpoint.label, mobile_separator(config)),
                                 usize::from(content_width.saturating_sub(if entry.indented {
                                     8
                                 } else {
@@ -904,8 +1018,9 @@ fn mobile_items(
                     Line::from(Span::styled(
                         crate::ui::truncate_end(
                             &format!(
-                                "{detail_prefix}{branch} · {}{stale_detail}",
-                                compact_tab_status(endpoint.snapshot, workspace)
+                                "{detail_prefix}{branch} {} {}{stale_detail}",
+                                mobile_separator(config),
+                                compact_tab_status(endpoint.snapshot, workspace, config)
                             ),
                             usize::from(content_width),
                         ),
@@ -943,7 +1058,7 @@ fn mobile_items(
                 palette.panel_bg
             };
             let label = if tab.custom_label {
-                format!("{} · {}", index + 1, tab.label)
+                format!("{} {} {}", index + 1, mobile_separator(config), tab.label)
             } else {
                 format!("tab {}", tab.label)
             };
@@ -1145,8 +1260,9 @@ fn render_left_scrollbar(
     viewport: Rect,
     total_rows: usize,
     scroll: usize,
-    palette: &Palette,
+    config: &ClientShellConfig,
 ) {
+    let palette = &config.palette;
     if viewport.is_empty() {
         return;
     }
@@ -1164,7 +1280,11 @@ fn render_left_scrollbar(
             track.x,
             y,
             1,
-            "│",
+            if config.chrome.is_modern() {
+                config.chrome.glyphs.tree_vertical
+            } else {
+                "│"
+            },
             Style::default()
                 .fg(palette.surface_dim)
                 .bg(palette.panel_bg),
@@ -1177,7 +1297,11 @@ fn render_left_scrollbar(
                 track.x,
                 y,
                 1,
-                "▌",
+                if config.chrome.is_modern() {
+                    config.chrome.glyphs.role_gutter
+                } else {
+                    "▌"
+                },
                 Style::default().fg(palette.accent).bg(palette.panel_bg),
             );
         }

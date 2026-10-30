@@ -113,6 +113,7 @@ impl Task {
                 let note = |text: &str| noted.then(|| display_first_line(text, NOTE_MAX_CHARS));
                 let handoff = step.handoff.as_ref();
                 Some(OrbitShellStep {
+                    awaiting_approval: None,
                     index,
                     member: step.member.clone(),
                     kind: step.kind.clone(),

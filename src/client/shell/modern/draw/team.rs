@@ -6,7 +6,7 @@ use ratatui::{
     style::{Modifier, Style},
 };
 
-use super::{counts_width, put_counts, row_background, state_glyph};
+use super::{put_counts, row_background, state_glyph};
 use crate::client::shell::modern::model::rows::Tier;
 use crate::client::shell::team_rows::TeamLineRef;
 use crate::client::shell::team_sidebar::{TeamRenderContext, TeamRow, TeamSidebar};
@@ -163,7 +163,12 @@ fn role_header(
             muted,
         );
     }
-    let counts_width = counts_width(&card.counts, ctx);
+    let name_min = if tier == Tier::Narrow { 2 } else { MIN_NAME };
+    let counts_width = super::counts_width_fitting(
+        &card.counts,
+        limit.saturating_sub(rect.x + GUTTER_X + 2 + name_min + 1),
+        ctx,
+    );
     let counts_start = limit.saturating_sub(counts_width);
     let counts_rect = Rect::new(rect.x, rect.y, limit.saturating_sub(rect.x), 1);
     let mut x = put_segment(
@@ -175,7 +180,7 @@ fn role_header(
         tint,
     );
     x = put_segment(buffer, x, rect.y, right, " ", Style::default());
-    let name_right = if counts_width > 0 && counts_start > x + MIN_NAME {
+    let name_right = if counts_width > 0 && counts_start > x {
         counts_start - 1
     } else {
         limit

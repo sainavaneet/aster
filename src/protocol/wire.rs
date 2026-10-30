@@ -1099,6 +1099,10 @@ pub struct OrbitShellStep {
     /// The model the step's agent runs, when known.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model: Option<String>,
+    /// Whether this active step's own worker is waiting on a permission prompt.
+    /// Missing on older servers or when the step has no known active worker.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub awaiting_approval: Option<bool>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -1985,6 +1989,7 @@ mod tests {
 
         let relayed = OrbitShellActiveTask {
             steps: vec![OrbitShellStep {
+                awaiting_approval: None,
                 index: 0,
                 member: "a".into(),
                 kind: "claude".into(),
@@ -2057,6 +2062,7 @@ mod tests {
         let step: OrbitShellStep = serde_json::from_value(old.clone()).unwrap();
         assert_eq!((step.worker_terminal_id, step.pane_id), (None, None));
         let identified = OrbitShellStep {
+            awaiting_approval: None,
             index: 0,
             member: "a".into(),
             kind: "codex".into(),

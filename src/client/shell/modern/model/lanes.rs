@@ -295,6 +295,7 @@ mod tests {
 
     fn step(index: u16, state: &str) -> OrbitShellStep {
         OrbitShellStep {
+            awaiting_approval: None,
             index,
             member: format!("m{index}"),
             kind: format!("kind{index}"),

@@ -108,16 +108,25 @@ fn digits(value: u16) -> u16 {
     }
 }
 
-/// Width of the roll-up `put_counts` draws, trailing margin included; 0 when
-/// there is nothing to show.
-pub(super) fn counts_width(counts: &StateCounts, ctx: &TeamRenderContext<'_>) -> u16 {
-    let glyphs = ctx.config.chrome.glyphs;
-    ROLLUP
-        .into_iter()
-        .map(|state| (state, counts.get(state)))
-        .filter(|(_, count)| *count > 0)
-        .map(|(state, count)| display_width(glyphs.state(state)) + digits(count) + 1)
-        .sum()
+/// Retain the most urgent chips that fit; low-priority counts yield first.
+pub(super) fn counts_width_fitting(
+    counts: &StateCounts,
+    available: u16,
+    ctx: &TeamRenderContext<'_>,
+) -> u16 {
+    let mut width = 0;
+    for state in ROLLUP {
+        let count = counts.get(state);
+        if count == 0 {
+            continue;
+        }
+        let next = display_width(ctx.config.chrome.glyphs.state(state)) + digits(count) + 1;
+        if width + next > available {
+            break;
+        }
+        width += next;
+    }
+    width
 }
 
 /// The right-aligned roll-up of `counts` (`◐1 ▲1`), ending one cell before the
@@ -130,17 +139,14 @@ pub(super) fn put_counts(
     ctx: &TeamRenderContext<'_>,
 ) -> u16 {
     let chrome = &ctx.config.chrome;
-    let mut width = 0u16;
-    for state in ROLLUP {
-        let count = counts.get(state);
-        if count > 0 {
-            width += display_width(chrome.glyphs.state(state)) + digits(count) + 1;
-        }
-    }
     let right = rect.right();
-    // The trailing separator of the last chip is the margin before the edge.
+    let width = counts_width_fitting(
+        counts,
+        right.saturating_sub(left_limit.saturating_add(1)),
+        ctx,
+    );
     let start = right.saturating_sub(width);
-    if width == 0 || start <= left_limit {
+    if width == 0 {
         return right;
     }
     let mut x = start;
@@ -148,6 +154,10 @@ pub(super) fn put_counts(
         let count = counts.get(state);
         if count == 0 {
             continue;
+        }
+        let chip = display_width(chrome.glyphs.state(state)) + digits(count) + 1;
+        if x + chip > right {
+            break;
         }
         let style = state_style(ctx, chrome.roles.state(state));
         x = put_segment(buffer, x, rect.y, right, chrome.glyphs.state(state), style);

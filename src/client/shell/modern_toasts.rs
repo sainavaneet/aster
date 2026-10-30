@@ -37,6 +37,18 @@ impl ClientShellState {
         self.mode = ClientShellMode::Navigate;
     }
 
+    /// Freeze a meaningful in-flight entry phase for the scaling profile.
+    #[cfg(test)]
+    pub(crate) fn show_bench_transition(&mut self) -> std::time::Instant {
+        self.show_bench_chrome();
+        let now = std::time::Instant::now();
+        self.visible_notification
+            .as_mut()
+            .expect("bench toast")
+            .shown_at = now - std::time::Duration::from_millis(50);
+        now
+    }
+
     /// The modern mode bar's extras, `None` under `ui.style = "classic"`.
     pub(super) fn modern_mode_bar(&self) -> Option<render::ModernModeBar<'_>> {
         self.config

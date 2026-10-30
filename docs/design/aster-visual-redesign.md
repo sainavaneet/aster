@@ -1585,3 +1585,154 @@ unedited).
   Every completed bench run passes six profiles and retains only the documented
   native_file_render_scale_profile CoW-retention failure. The mobile header has
   composition/width tests, not a standalone benchmark profile.
+
+
+### Phase 6: polish and performance (design-sol)
+
+- **Protected behavior and review.** The header-copy/cache and optional runtime
+  fact changes received a read-only contract and header roundtable before the
+  refactor. Existing classic snapshots and generation-1 fixtures are unchanged.
+  A separate 960-frame mode-bar fixture was captured from the actual
+  `d870c4a8` pre-redesign implementation, covering Prefix, Navigate, Resize,
+  Copy (plain, selected, matches and search) and errors in both themes and all
+  motion/glyph settings. It is compared with the current classic renderer.
+- **Header hot path (B1).** Classic never prepares header spans. Modern rebuilds
+  them only when pane geometry or header facts change; content/surface revisions
+  alone retain the cache. The cell copy now visits reservation spans only on
+  header rows, discovers border stops while copying, clears stale title/style/
+  hyperlink metadata there, and paints the prepared header once. Ordinary rows
+  reuse their existing output strings directly. Modern's existing output-cell
+  allocation reserves one UTF-8 scalar (four bytes); a test-first allocation
+  regression caught border-cell reallocations rising with pane count after the
+  first optimization. Ordinary border rows now allocate zero times at 1/15/50
+  panes after that initial frame allocation. The shared resize-topology digest
+  also allocated and sorted pane IDs and split paths on every compose. It is now
+  cached when an accepted surface changes IDs, split directions or paths; output,
+  scroll and split positions keep it. A zero-allocation read test compares ID,
+  direction, path, reordering and reset behavior with the original digest.
+  ASCII header fields use a bounded byte path rather than re-segmenting every
+  scalar as a grapheme. One lookahead byte protects a clipped scalar that could
+  join a combining/variation suffix; Unicode falls back to the original loop.
+  A zero-allocation characterization checks all clipping widths against that
+  original loop, including a 40,000-byte title, CJK, ZWJ, keycaps and controls.
+  A reference-pipeline test covers area offsets, split junctions, clipping,
+  links, skip flags and all motion modes.
+- **Narrow cards and contrast (B2–B3).** At 18 columns, urgent approval and blocked
+  counts take room before the role name and low-priority chips. Palette fitting
+  intersects the exact allowed luminance intervals and checks every quantized
+  shade/tint candidate, with exact RGB fallback for narrow feasible bands.
+  The reported yellow-on-#090909/#afafaf case passes 3:1; settled role tests now
+  require 3:1 without the former 0.05 tolerance. All work occurs on palette change.
+- **Worker facts and text (B5–B7).** `OrbitShellStep.awaiting_approval` is an
+  optional additive JSON fact for the recorded active step owner. Server
+  projection caches permission checks by owner; old/unknown/inactive steps do
+  not borrow a sibling's fact. Flow, headers, tabs and team state share that
+  attention projection. Missing fields retain the old fallback. Oversized inline
+  graphemes choose a bounded, width-preserving prefix where possible and advance
+  by the emitted symbol's width. Terminal delivery wins over a stale blocked
+  report in CLI lanes; the report is still available as history under DONE.
+- **Matrix and glyph consistency.** The composed matrix covers 44/80/120/200
+  columns, light/dark, full/reduced/off, both glyph sets and collapsed/expanded
+  sidebars. Existing header/flow scene matrices remain, sidebar cases now include
+  200 columns and 18-column cards, notification geometry covers all four widths
+  and heights 1–3, and mode bars add mobile and 200-column cases. Modern mobile
+  state, tree, separator, close and scrollbar glyphs, and the flow popup border,
+  follow the configured set.
+  Modern activity wraps on grapheme boundaries only on a terminal; plain pipes,
+  classic and machine-readable data keep their shape. Width and Unicode tests
+  supplement the existing empty/dense/overflow CLI goldens. English, Japanese
+  and Simplified Chinese draft configuration docs describe terminal wrapping.
+- **Flow composition (B8).** The immutable layout remains keyed by snapshot,
+  selected task and popup width. The open view now reuses a popup-sized ratatui
+  buffer allocated on open/resize, dims the background in place, and copies only
+  opaque popup cells into the existing frame storage. It avoids the full-screen
+  ratatui round trip and hyperlink reconstruction. The popup application test
+  counts zero allocations, including after toast/search and server-popup layers,
+  preserves background links and clears hidden links. A test-first follow-up
+  caught capacity being discarded by those earlier layers; flow composition now
+  retains its existing cells and valid link indices through them.
+  The optimized fixed-geometry profile covers closed/open, 80/120/200 columns,
+  and 4/32 steps; baseline numbers are recorded below with final measurements.
+- **Scope follow-up.** P15's classic `status.rs` byte-width bugs remain untouched,
+  as requested. Server-owned pane borders and shared classic sidebar framing
+  retain their existing glyphs (the R4 boundary); pane content is never rewritten
+  to enforce ASCII. Underline presentation still depends on terminal support.
+
+
+#### Phase 6 measurements
+
+Fixed 120×40 geometry, 5 warmups and 40 samples per case in an optimized build.
+One full `just bench-render-scale` run and two quiet repeats of its main profile
+use the same on-screen lanes and chrome. The entry profile pins composition time
+at 50 ms after toast entry, rather than comparing different animation phases.
+Triplets below are medians of the three run medians, in µs at 1/15/50 panes.
+Gaps in this first table are computed directly from those triplets:
+`modern(N)/modern(1) − classic(N)/classic(1)`; budget +0.05.
+
+| Profile | Classic 1/15/50 | Modern 1/15/50 | 15:1 gap | 50:1 gap |
+| --- | --- | --- | --- | --- |
+| Team + lanes | 155/163/166 | 119/128/132 | +0.0240 | +0.0383 |
+| Settled toast + feedback + mode bar | 387/394/411 | 346/372/373 | +0.0571 | +0.0160 |
+| Fixed entry toast + feedback + mode bar | 388/405/406 | 343/367/375 | +0.0262 | +0.0469 |
+
+The settled-toast 15:1 gap from independent medians is +0.0571, 0.0071 above
+budget. Each matched run's settled 15:1 gap is below +0.05; ratios of independent
+medians lose that pairing. For clarity, the paired results and their complete
+three-run ranges are also recorded, without claiming every sample meets budget:
+
+| Profile | Paired median 15:1 (range) | Paired median 50:1 (range) |
+| --- | --- | --- |
+| Team + lanes | +0.0240 (+0.0043 to +0.0314) | +0.0383 (+0.0334 to +0.0641) |
+| Settled toast + feedback + mode bar | +0.0445 (-0.0003 to +0.0467) | -0.0021 (-0.0174 to +0.0318) |
+| Fixed entry toast + feedback + mode bar | +0.0223 (-0.0067 to +0.0492) | +0.0261 (+0.0132 to +0.0701) |
+
+The fixed entry profile has no persistent median over-budget pane-scaled cost,
+but a +0.0701 50-pane sample remains. These wall-clock excursions are retained
+as a limitation, not converted into CI timing assertions. Zero-allocation draw,
+header geometry/output invalidation and topology-read tests provide deterministic
+coverage of the multiplicative work. The settled-toast aggregation discrepancy
+and the sample excursions remain visible for the lead's release decision.
+
+Phase 6's initial team profile was classic 163/168/171 versus modern 170/172/175
+µs. The final modern team medians are lower by 30.0%/25.6%/24.6%, while preserving
+all header, lane and input behavior. Against Phase 0's requested baseline:
+
+| Client composition | Phase 0 1/15 | Phase 6 1/15/50 | Change at 1 / 15 |
+| --- | --- | --- | --- |
+| Background workspaces | 156/171 | 141/157/159 | -9.6% / -8.2% |
+| Active panes | 149/163 | 140/146/148 | -6.0% / -10.4% |
+
+Open-flow profile: fixed 40 rows and two bordered worker panes, motion off;
+layout/model builds excluded by warmup. Each value is an optimized 40-sample
+median, with closed/open from the same profile run; rows are columns × steps.
+The pre-change optimized baseline is compared directly with the final quiet run,
+not with the earlier debug-build numbers.
+
+| Columns × steps | Before closed / open (µs) | After closed / open (µs) | Open change |
+| --- | --- | --- | --- |
+| 80 × 4 | 96 / 204 | 83 / 115 | -43.6% |
+| 80 × 32 | 98 / 212 | 77 / 119 | -43.9% |
+| 120 × 4 | 147 / 300 | 106 / 154 | -48.7% |
+| 120 × 32 | 143 / 308 | 100 / 157 | -49.0% |
+| 200 × 4 | 231 / 469 | 156 / 213 | -54.6% |
+| 200 × 32 | 233 / 484 | 158 / 223 | -53.9% |
+
+#### Phase 6 verification
+
+- Final fmt and clippy (`--all-targets --locked -- -D warnings`) pass. The final
+  full native run passes **4,744 tests**, with 17 skipped and no retry used.
+  Earlier runs hit the known `overlapping_parallel_steps_run_one_after_another`
+  timing failure; it passed in isolation and in the final full runs. No backend
+  scheduling code or integration test was changed to accommodate it.
+- UI hot-path architecture (14), maintenance Python contracts (151), publishing
+  workflow contracts (5), integration assets (28), config reference and docs
+  contracts (7) pass. Classic's original fixture, endpoint frozen fixtures,
+  method-shape fixture and dependency manifests are unedited; no crates added.
+- `just check` reaches Windows lint after native and repository checks, then
+  stops because this workstation lacks `windows-cross/libc.txt`. Windows cross
+  compilation remains unverified; no platform-specific code changed.
+- Full render-scale runs pass six profiles and fail only the known
+  `native_file_render_scale_profile` CoW source-retention check. The main profile
+  repeats and optimized open-flow profile pass. The performance tables retain
+  the budget caveats rather than treating supporting wall-clock measurements
+  as deterministic CI limits.

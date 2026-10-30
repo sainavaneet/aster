@@ -1,3 +1,33 @@
+=== catppuccin/unicode/44/Terminal/false
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin/unicode/44/Terminal/true
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin/unicode/44/Prefix/false
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=7b0824221886aa11
+=== catppuccin/unicode/44/Prefix/true
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=7b0824221886aa11
+=== catppuccin/unicode/44/Navigate/false
+ NAV  esc back  ↑↓ space  tab pane  ? keys  |
+style=b287c10e1bbe3cca
+=== catppuccin/unicode/44/Navigate/true
+ NAV  esc back  ↑↓ space  tab p update ready|
+style=423764a0f930de92
+=== catppuccin/unicode/44/Resize/false
+ RESIZE   h/l width  j/k height  esc done   |
+style=a0a537084e4f9b6e
+=== catppuccin/unicode/44/Resize/true
+ RESIZE   h/l width  j/k height  esc done   |
+style=a0a537084e4f9b6e
+=== catppuccin/unicode/44/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=0e2e6a0b79a168a6
+=== catppuccin/unicode/44/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=0e2e6a0b79a168a6
 === catppuccin/unicode/50/Terminal/false
                                                   |
 style=e66985af83f88d79
@@ -118,6 +148,66 @@ style=6144500fb9ddd1b9
 === catppuccin/unicode/120/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                ▲1 ⚑2 ◐3 |
 style=6144500fb9ddd1b9
+=== catppuccin/unicode/200/Terminal/false
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin/unicode/200/Terminal/true
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin/unicode/200/Prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           ▲1 ⚑2 ◐3 |
+style=ec9085778ef6ecca
+=== catppuccin/unicode/200/Prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           ▲1 ⚑2 ◐3 |
+style=ec9085778ef6ecca
+=== catppuccin/unicode/200/Navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                       ▲1 ⚑2 ◐3 |
+style=164657d9326031ba
+=== catppuccin/unicode/200/Navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                          ▲1 ⚑2 ◐3  update ready|
+style=4e71ee7f6b5c7629
+=== catppuccin/unicode/200/Resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      ▲1 ⚑2 ◐3 |
+style=f768ba2f00c0d222
+=== catppuccin/unicode/200/Resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      ▲1 ⚑2 ◐3 |
+style=f768ba2f00c0d222
+=== catppuccin/unicode/200/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                ▲1 ⚑2 ◐3 |
+style=280b2e043ca816b9
+=== catppuccin/unicode/200/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                ▲1 ⚑2 ◐3 |
+style=280b2e043ca816b9
+=== catppuccin/ascii/44/Terminal/false
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin/ascii/44/Terminal/true
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin/ascii/44/Prefix/false
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=7b0824221886aa11
+=== catppuccin/ascii/44/Prefix/true
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=7b0824221886aa11
+=== catppuccin/ascii/44/Navigate/false
+ NAV  esc back  ^v space  tab pane  ? keys  |
+style=b287c10e1bbe3cca
+=== catppuccin/ascii/44/Navigate/true
+ NAV  esc back  ^v space  tab p update ready|
+style=423764a0f930de92
+=== catppuccin/ascii/44/Resize/false
+ RESIZE   h/l width  j/k height  esc done   |
+style=a0a537084e4f9b6e
+=== catppuccin/ascii/44/Resize/true
+ RESIZE   h/l width  j/k height  esc done   |
+style=a0a537084e4f9b6e
+=== catppuccin/ascii/44/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=0e2e6a0b79a168a6
+=== catppuccin/ascii/44/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=0e2e6a0b79a168a6
 === catppuccin/ascii/50/Terminal/false
                                                   |
 style=e66985af83f88d79
@@ -238,6 +328,66 @@ style=6144500fb9ddd1b9
 === catppuccin/ascii/120/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                !1 ?2 *3 |
 style=6144500fb9ddd1b9
+=== catppuccin/ascii/200/Terminal/false
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin/ascii/200/Terminal/true
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin/ascii/200/Prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           !1 ?2 *3 |
+style=ec9085778ef6ecca
+=== catppuccin/ascii/200/Prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           !1 ?2 *3 |
+style=ec9085778ef6ecca
+=== catppuccin/ascii/200/Navigate/false
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                                                                                                       !1 ?2 *3 |
+style=164657d9326031ba
+=== catppuccin/ascii/200/Navigate/true
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                                                                                          !1 ?2 *3  update ready|
+style=4e71ee7f6b5c7629
+=== catppuccin/ascii/200/Resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      !1 ?2 *3 |
+style=f768ba2f00c0d222
+=== catppuccin/ascii/200/Resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      !1 ?2 *3 |
+style=f768ba2f00c0d222
+=== catppuccin/ascii/200/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                !1 ?2 *3 |
+style=280b2e043ca816b9
+=== catppuccin/ascii/200/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                !1 ?2 *3 |
+style=280b2e043ca816b9
+=== catppuccin-latte/unicode/44/Terminal/false
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin-latte/unicode/44/Terminal/true
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin-latte/unicode/44/Prefix/false
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=0f11b1bbdb69d52f
+=== catppuccin-latte/unicode/44/Prefix/true
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=0f11b1bbdb69d52f
+=== catppuccin-latte/unicode/44/Navigate/false
+ NAV  esc back  ↑↓ space  tab pane  ? keys  |
+style=acb30f5fc47ee9b0
+=== catppuccin-latte/unicode/44/Navigate/true
+ NAV  esc back  ↑↓ space  tab p update ready|
+style=f83fc312135ab4b8
+=== catppuccin-latte/unicode/44/Resize/false
+ RESIZE   h/l width  j/k height  esc done   |
+style=287c3f096918bff8
+=== catppuccin-latte/unicode/44/Resize/true
+ RESIZE   h/l width  j/k height  esc done   |
+style=287c3f096918bff8
+=== catppuccin-latte/unicode/44/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=436063a185de9276
+=== catppuccin-latte/unicode/44/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=436063a185de9276
 === catppuccin-latte/unicode/50/Terminal/false
                                                   |
 style=e66985af83f88d79
@@ -246,28 +396,28 @@ style=e66985af83f88d79
 style=e66985af83f88d79
 === catppuccin-latte/unicode/50/Prefix/false
  PFX  esc cancel  ctrl+b send  w space  ? keys    |
-style=1433db54946be5d5
+style=0850db223b1ec6d1
 === catppuccin-latte/unicode/50/Prefix/true
  PFX  esc cancel  ctrl+b send  w space  ? keys    |
-style=1433db54946be5d5
+style=0850db223b1ec6d1
 === catppuccin-latte/unicode/50/Navigate/false
  NAV  esc back  ↑↓ space  tab pane  ? keys        |
-style=1f4f9d00ba8aa512
+style=c6771450f911941a
 === catppuccin-latte/unicode/50/Navigate/true
  NAV  esc back  ↑↓ space  tab pane  ? update ready|
-style=32ea8e5b04efb791
+style=2bcebbcb6a8d7c45
 === catppuccin-latte/unicode/50/Resize/false
  RESIZE   h/l width  j/k height  esc done         |
-style=1c3a5af449f6639e
+style=ce929fa055621522
 === catppuccin-latte/unicode/50/Resize/true
  RESIZE   h/l width  j/k height  esc done         |
-style=1c3a5af449f6639e
+style=ce929fa055621522
 === catppuccin-latte/unicode/50/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
-style=268fc3ac7575aa56
+style=01721a0a2affae1a
 === catppuccin-latte/unicode/50/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
-style=268fc3ac7575aa56
+style=01721a0a2affae1a
 === catppuccin-latte/unicode/64/Terminal/false
                                                                 |
 style=e676faea5c2685a5
@@ -276,28 +426,28 @@ style=e676faea5c2685a5
 style=e676faea5c2685a5
 === catppuccin-latte/unicode/64/Prefix/false
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
-style=68cee7b5daa90a6e
+style=32788322242f6b8a
 === catppuccin-latte/unicode/64/Prefix/true
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
-style=68cee7b5daa90a6e
+style=32788322242f6b8a
 === catppuccin-latte/unicode/64/Navigate/false
  NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
-style=4b5da3b2f9e1313c
+style=587a7663955ef194
 === catppuccin-latte/unicode/64/Navigate/true
  NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
-style=c22c9180f6a0f427
+style=ff7428cee0d12053
 === catppuccin-latte/unicode/64/Resize/false
  RESIZE   h/l width  j/k height  esc done              ▲1 ⚑2 ◐3 |
-style=c69041f23fe5d37c
+style=33b23f0da02fea66
 === catppuccin-latte/unicode/64/Resize/true
  RESIZE   h/l width  j/k height  esc done              ▲1 ⚑2 ◐3 |
-style=c69041f23fe5d37c
+style=33b23f0da02fea66
 === catppuccin-latte/unicode/64/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
-style=fdefdd43b1806825
+style=8435a4fdf9023e2d
 === catppuccin-latte/unicode/64/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
-style=fdefdd43b1806825
+style=8435a4fdf9023e2d
 === catppuccin-latte/unicode/80/Terminal/false
                                                                                 |
 style=842044e05c9e6e85
@@ -306,28 +456,28 @@ style=842044e05c9e6e85
 style=842044e05c9e6e85
 === catppuccin-latte/unicode/80/Prefix/false
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds   ▲1 ⚑2 ◐3 |
-style=82df51ae55c9fc6e
+style=b9e547930771e3dc
 === catppuccin-latte/unicode/80/Prefix/true
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds   ▲1 ⚑2 ◐3 |
-style=82df51ae55c9fc6e
+style=b9e547930771e3dc
 === catppuccin-latte/unicode/80/Navigate/false
  NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds               ▲1 ⚑2 ◐3 |
-style=19fc7c49b08f0d5c
+style=fd6b6bd5fb6bf68e
 === catppuccin-latte/unicode/80/Navigate/true
  NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds  ▲1 ⚑2 ◐3  update ready|
-style=c27c3b530c1bb877
+style=6c32fd9b5586a665
 === catppuccin-latte/unicode/80/Resize/false
  RESIZE   h/l width  j/k height  esc done                              ▲1 ⚑2 ◐3 |
-style=1ea8e9472d10f9cc
+style=1162407a64f41976
 === catppuccin-latte/unicode/80/Resize/true
  RESIZE   h/l width  j/k height  esc done                              ▲1 ⚑2 ◐3 |
-style=1ea8e9472d10f9cc
+style=1162407a64f41976
 === catppuccin-latte/unicode/80/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
-style=87602eb4357937be
+style=2469378724fd548a
 === catppuccin-latte/unicode/80/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
-style=87602eb4357937be
+style=2469378724fd548a
 === catppuccin-latte/unicode/120/Terminal/false
                                                                                                                         |
 style=60434359fa255355
@@ -336,28 +486,88 @@ style=60434359fa255355
 style=60434359fa255355
 === catppuccin-latte/unicode/120/Prefix/false
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                           ▲1 ⚑2 ◐3 |
-style=8b88a83960308a16
+style=ace5c435d3aa7c74
 === catppuccin-latte/unicode/120/Prefix/true
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                           ▲1 ⚑2 ◐3 |
-style=8b88a83960308a16
+style=ace5c435d3aa7c74
 === catppuccin-latte/unicode/120/Navigate/false
  NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                       ▲1 ⚑2 ◐3 |
-style=3a1a4782c2d0fe64
+style=6a938fe44edc0866
 === catppuccin-latte/unicode/120/Navigate/true
  NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                          ▲1 ⚑2 ◐3  update ready|
-style=143ec3b61e30d50f
+style=d09b1e6819b31fdd
 === catppuccin-latte/unicode/120/Resize/false
  RESIZE   h/l width  j/k height  esc done                                                                      ▲1 ⚑2 ◐3 |
-style=106f958fac782214
+style=282f908d85f4506e
 === catppuccin-latte/unicode/120/Resize/true
  RESIZE   h/l width  j/k height  esc done                                                                      ▲1 ⚑2 ◐3 |
-style=106f958fac782214
+style=282f908d85f4506e
 === catppuccin-latte/unicode/120/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                ▲1 ⚑2 ◐3 |
-style=a3e605481f70d019
+style=f6db3de2970021ef
 === catppuccin-latte/unicode/120/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                ▲1 ⚑2 ◐3 |
-style=a3e605481f70d019
+style=f6db3de2970021ef
+=== catppuccin-latte/unicode/200/Terminal/false
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin-latte/unicode/200/Terminal/true
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin-latte/unicode/200/Prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           ▲1 ⚑2 ◐3 |
+style=52773be6825baa44
+=== catppuccin-latte/unicode/200/Prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           ▲1 ⚑2 ◐3 |
+style=52773be6825baa44
+=== catppuccin-latte/unicode/200/Navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                       ▲1 ⚑2 ◐3 |
+style=5bfce75b2c642736
+=== catppuccin-latte/unicode/200/Navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                          ▲1 ⚑2 ◐3  update ready|
+style=c155d66164bcabad
+=== catppuccin-latte/unicode/200/Resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      ▲1 ⚑2 ◐3 |
+style=303dfed4d9fed9fe
+=== catppuccin-latte/unicode/200/Resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      ▲1 ⚑2 ◐3 |
+style=303dfed4d9fed9fe
+=== catppuccin-latte/unicode/200/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                ▲1 ⚑2 ◐3 |
+style=9af8c72f90f9073f
+=== catppuccin-latte/unicode/200/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                ▲1 ⚑2 ◐3 |
+style=9af8c72f90f9073f
+=== catppuccin-latte/ascii/44/Terminal/false
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin-latte/ascii/44/Terminal/true
+                                            |
+style=a4de00e99e1c365d
+=== catppuccin-latte/ascii/44/Prefix/false
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=0f11b1bbdb69d52f
+=== catppuccin-latte/ascii/44/Prefix/true
+ PFX  esc cancel  ctrl+b send  w space  ? ke|
+style=0f11b1bbdb69d52f
+=== catppuccin-latte/ascii/44/Navigate/false
+ NAV  esc back  ^v space  tab pane  ? keys  |
+style=acb30f5fc47ee9b0
+=== catppuccin-latte/ascii/44/Navigate/true
+ NAV  esc back  ^v space  tab p update ready|
+style=f83fc312135ab4b8
+=== catppuccin-latte/ascii/44/Resize/false
+ RESIZE   h/l width  j/k height  esc done   |
+style=287c3f096918bff8
+=== catppuccin-latte/ascii/44/Resize/true
+ RESIZE   h/l width  j/k height  esc done   |
+style=287c3f096918bff8
+=== catppuccin-latte/ascii/44/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=436063a185de9276
+=== catppuccin-latte/ascii/44/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n|
+style=436063a185de9276
 === catppuccin-latte/ascii/50/Terminal/false
                                                   |
 style=e66985af83f88d79
@@ -366,28 +576,28 @@ style=e66985af83f88d79
 style=e66985af83f88d79
 === catppuccin-latte/ascii/50/Prefix/false
  PFX  esc cancel  ctrl+b send  w space  ? keys    |
-style=1433db54946be5d5
+style=0850db223b1ec6d1
 === catppuccin-latte/ascii/50/Prefix/true
  PFX  esc cancel  ctrl+b send  w space  ? keys    |
-style=1433db54946be5d5
+style=0850db223b1ec6d1
 === catppuccin-latte/ascii/50/Navigate/false
  NAV  esc back  ^v space  tab pane  ? keys        |
-style=1f4f9d00ba8aa512
+style=c6771450f911941a
 === catppuccin-latte/ascii/50/Navigate/true
  NAV  esc back  ^v space  tab pane  ? update ready|
-style=32ea8e5b04efb791
+style=2bcebbcb6a8d7c45
 === catppuccin-latte/ascii/50/Resize/false
  RESIZE   h/l width  j/k height  esc done         |
-style=1c3a5af449f6639e
+style=ce929fa055621522
 === catppuccin-latte/ascii/50/Resize/true
  RESIZE   h/l width  j/k height  esc done         |
-style=1c3a5af449f6639e
+style=ce929fa055621522
 === catppuccin-latte/ascii/50/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
-style=268fc3ac7575aa56
+style=01721a0a2affae1a
 === catppuccin-latte/ascii/50/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
-style=268fc3ac7575aa56
+style=01721a0a2affae1a
 === catppuccin-latte/ascii/64/Terminal/false
                                                                 |
 style=e676faea5c2685a5
@@ -396,28 +606,28 @@ style=e676faea5c2685a5
 style=e676faea5c2685a5
 === catppuccin-latte/ascii/64/Prefix/false
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
-style=68cee7b5daa90a6e
+style=32788322242f6b8a
 === catppuccin-latte/ascii/64/Prefix/true
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
-style=68cee7b5daa90a6e
+style=32788322242f6b8a
 === catppuccin-latte/ascii/64/Navigate/false
  NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds        |
-style=4b5da3b2f9e1313c
+style=587a7663955ef194
 === catppuccin-latte/ascii/64/Navigate/true
  NAVIGATE  esc back  ^/v workspace  tab pane  ? key update ready|
-style=c22c9180f6a0f427
+style=ff7428cee0d12053
 === catppuccin-latte/ascii/64/Resize/false
  RESIZE   h/l width  j/k height  esc done              !1 ?2 *3 |
-style=c69041f23fe5d37c
+style=33b23f0da02fea66
 === catppuccin-latte/ascii/64/Resize/true
  RESIZE   h/l width  j/k height  esc done              !1 ?2 *3 |
-style=c69041f23fe5d37c
+style=33b23f0da02fea66
 === catppuccin-latte/ascii/64/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
-style=fdefdd43b1806825
+style=8435a4fdf9023e2d
 === catppuccin-latte/ascii/64/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
-style=fdefdd43b1806825
+style=8435a4fdf9023e2d
 === catppuccin-latte/ascii/80/Terminal/false
                                                                                 |
 style=842044e05c9e6e85
@@ -426,28 +636,28 @@ style=842044e05c9e6e85
 style=842044e05c9e6e85
 === catppuccin-latte/ascii/80/Prefix/false
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds   !1 ?2 *3 |
-style=82df51ae55c9fc6e
+style=b9e547930771e3dc
 === catppuccin-latte/ascii/80/Prefix/true
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds   !1 ?2 *3 |
-style=82df51ae55c9fc6e
+style=b9e547930771e3dc
 === catppuccin-latte/ascii/80/Navigate/false
  NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds               !1 ?2 *3 |
-style=19fc7c49b08f0d5c
+style=fd6b6bd5fb6bf68e
 === catppuccin-latte/ascii/80/Navigate/true
  NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds  !1 ?2 *3  update ready|
-style=c27c3b530c1bb877
+style=6c32fd9b5586a665
 === catppuccin-latte/ascii/80/Resize/false
  RESIZE   h/l width  j/k height  esc done                              !1 ?2 *3 |
-style=1ea8e9472d10f9cc
+style=1162407a64f41976
 === catppuccin-latte/ascii/80/Resize/true
  RESIZE   h/l width  j/k height  esc done                              !1 ?2 *3 |
-style=1ea8e9472d10f9cc
+style=1162407a64f41976
 === catppuccin-latte/ascii/80/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
-style=87602eb4357937be
+style=2469378724fd548a
 === catppuccin-latte/ascii/80/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
-style=87602eb4357937be
+style=2469378724fd548a
 === catppuccin-latte/ascii/120/Terminal/false
                                                                                                                         |
 style=60434359fa255355
@@ -456,25 +666,55 @@ style=60434359fa255355
 style=60434359fa255355
 === catppuccin-latte/ascii/120/Prefix/false
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                           !1 ?2 *3 |
-style=8b88a83960308a16
+style=ace5c435d3aa7c74
 === catppuccin-latte/ascii/120/Prefix/true
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                           !1 ?2 *3 |
-style=8b88a83960308a16
+style=ace5c435d3aa7c74
 === catppuccin-latte/ascii/120/Navigate/false
  NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                       !1 ?2 *3 |
-style=3a1a4782c2d0fe64
+style=6a938fe44edc0866
 === catppuccin-latte/ascii/120/Navigate/true
  NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                          !1 ?2 *3  update ready|
-style=143ec3b61e30d50f
+style=d09b1e6819b31fdd
 === catppuccin-latte/ascii/120/Resize/false
  RESIZE   h/l width  j/k height  esc done                                                                      !1 ?2 *3 |
-style=106f958fac782214
+style=282f908d85f4506e
 === catppuccin-latte/ascii/120/Resize/true
  RESIZE   h/l width  j/k height  esc done                                                                      !1 ?2 *3 |
-style=106f958fac782214
+style=282f908d85f4506e
 === catppuccin-latte/ascii/120/Copy/false
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                !1 ?2 *3 |
-style=a3e605481f70d019
+style=f6db3de2970021ef
 === catppuccin-latte/ascii/120/Copy/true
  COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                !1 ?2 *3 |
-style=a3e605481f70d019
+style=f6db3de2970021ef
+=== catppuccin-latte/ascii/200/Terminal/false
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin-latte/ascii/200/Terminal/true
+                                                                                                                                                                                                        |
+style=5dbd29a6ee298135
+=== catppuccin-latte/ascii/200/Prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           !1 ?2 *3 |
+style=52773be6825baa44
+=== catppuccin-latte/ascii/200/Prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                           !1 ?2 *3 |
+style=52773be6825baa44
+=== catppuccin-latte/ascii/200/Navigate/false
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                                                                                                       !1 ?2 *3 |
+style=5bfce75b2c642736
+=== catppuccin-latte/ascii/200/Navigate/true
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                                                                                          !1 ?2 *3  update ready|
+style=c155d66164bcabad
+=== catppuccin-latte/ascii/200/Resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      !1 ?2 *3 |
+style=303dfed4d9fed9fe
+=== catppuccin-latte/ascii/200/Resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                      !1 ?2 *3 |
+style=303dfed4d9fed9fe
+=== catppuccin-latte/ascii/200/Copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                !1 ?2 *3 |
+style=9af8c72f90f9073f
+=== catppuccin-latte/ascii/200/Copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                !1 ?2 *3 |
+style=9af8c72f90f9073f

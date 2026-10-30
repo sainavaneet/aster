@@ -12,9 +12,14 @@ use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
 
 use crate::client::shell::modern::model::pane_header::{HeaderWidths, PaneHeader};
-use crate::client::shell::team_sidebar::{TeamRenderContext, TeamSidebar};
+use crate::client::shell::team_sidebar::TeamRenderContext;
+#[cfg(test)]
+use crate::client::shell::team_sidebar::TeamSidebar;
+#[cfg(test)]
 use crate::client::shell::PaneHit;
-use crate::protocol::{color_to_u32, modifier_to_u16, CellData, FrameData};
+#[cfg(test)]
+use crate::protocol::FrameData;
+use crate::protocol::{color_to_u32, modifier_to_u16, CellData};
 use crate::ui::chrome::age::{age_text, AGE_BUFFER_LEN};
 use crate::ui::chrome::draw::display_width;
 
@@ -27,6 +32,7 @@ const MIN_TITLE: u16 = 8;
 const ROLE_MAX: u16 = 14;
 /// Border corner, tee and edge glyphs a header must never overwrite.
 /// The horizontal border glyph a cleared header span shows.
+#[cfg(test)]
 const BORDER: &str = "─";
 const STOPS: [&str; 10] = ["┬", "┴", "┼", "├", "┤", "┌", "┐", "└", "┘", "│"];
 
@@ -90,7 +96,7 @@ pub(in crate::client::shell) fn plan(width: u16, hw: &HeaderWidths, age_width: u
     plan
 }
 
-fn is_stop(symbol: &str) -> bool {
+pub(in crate::client::shell) fn is_stop(symbol: &str) -> bool {
     STOPS.contains(&symbol)
 }
 
@@ -149,6 +155,31 @@ fn put(
     } else {
         available.saturating_sub(ellipsis_width)
     };
+    // Inspect only the visible prefix plus one lookahead byte. The lookahead
+    // proves that the final ASCII scalar is not joined to a combining suffix.
+    // A long model/title never incurs an unbounded is_ascii scan per frame.
+    let checked = text.len().min(budget.saturating_add(1));
+    if text.as_bytes()[..checked]
+        .iter()
+        .all(|byte| (b' '..=b'~').contains(byte))
+    {
+        let count = text.len().min(budget);
+        for offset in 0..count {
+            set_cell(
+                &mut cells[*x + offset],
+                &text[offset..offset + 1],
+                fg,
+                bg,
+                modifier,
+            );
+        }
+        *x += count;
+        if !fits && available >= ellipsis_width {
+            set_cell(&mut cells[*x], look.ellipsis, fg, bg, modifier);
+            *x += ellipsis_width;
+        }
+        return;
+    }
     let end = *x + budget;
     for grapheme in text.graphemes(true) {
         let width = if grapheme.len() == 1 && (b' '..=b'~').contains(&grapheme.as_bytes()[0]) {
@@ -186,6 +217,7 @@ fn space(cells: &mut [CellData], x: &mut usize, look: Look) {
 }
 
 /// Paints the header of every worker pane whose top border row is visible.
+#[cfg(test)]
 pub(in crate::client::shell) fn paint(
     frame: &mut FrameData,
     panes: &[PaneHit],
@@ -204,6 +236,7 @@ pub(in crate::client::shell) fn paint(
     }
 }
 
+#[cfg(test)]
 fn paint_one(
     frame: &mut FrameData,
     hit: &PaneHit,
@@ -223,30 +256,7 @@ fn paint_one(
     let end = (first..last)
         .find(|index| is_stop(&cells[*index].symbol))
         .unwrap_or(last);
-    let span = u16::try_from(end.saturating_sub(first)).unwrap_or(0);
-
-    let chrome = &ctx.config.chrome;
-    let roles = &chrome.roles;
-    let palette = &ctx.config.palette;
-    let is_focused = ctx.focused_pane_id == Some(hit.pane_id.as_str());
-    let (glyph, glyph_style, phase) = super::state_glyph(ctx, header.state, &hit.pane_id);
-    let glyph_color = glyph_style.fg.unwrap_or(roles.state_idle);
-    // A calm marker for a pane that just changed: a faint fill under the header
-    // that decays with the recency window. Static under reduced motion's
-    // one-shots and absent when animations are off.
-    let pulse = phase.status_flash.max(phase.recency_highlight * 0.65);
-    let bg = (pulse > 0.0).then(|| {
-        crate::client::shell::animation::blend_color(
-            palette.panel_bg,
-            palette.surface0,
-            pulse,
-            palette,
-        )
-    });
-    let look = Look {
-        bg,
-        ellipsis: chrome.glyphs.ellipsis,
-    };
+    let prepared = prepare(header, &hit.pane_id, ctx);
     // The server may have drawn its own title here. Everything the header does
     // not overwrite must read as plain border again, so first clear the whole
     // writable span (junctions are outside it) to the border's own style.
@@ -274,12 +284,83 @@ fn paint_one(
         cell.hyperlink = None;
         cell.skip = false;
     }
-    if let Some(bg) = bg {
+    if let Some(bg) = prepared.look.bg {
         for cell in &mut cells[first..end] {
             cell.bg = color_to_u32(bg);
         }
     }
 
+    paint_prepared(cells, first, end, header, ctx, prepared);
+}
+
+/// Frame-local styles and glyphs, shared by fused copy/clear and painting.
+#[derive(Clone, Copy)]
+pub(in crate::client::shell) struct PreparedHeader {
+    look: Look,
+    glyph: &'static str,
+    glyph_color: Color,
+    is_focused: bool,
+    recent: bool,
+}
+impl PreparedHeader {
+    pub(in crate::client::shell) fn background(self) -> Option<u32> {
+        self.look.bg.map(color_to_u32)
+    }
+}
+pub(in crate::client::shell) fn prepare(
+    header: &PaneHeader,
+    pane_id: &str,
+    ctx: &TeamRenderContext<'_>,
+) -> PreparedHeader {
+    let chrome = &ctx.config.chrome;
+    let roles = &chrome.roles;
+    let palette = &ctx.config.palette;
+    let is_focused = ctx.focused_pane_id == Some(pane_id);
+    let (glyph, glyph_style, phase) = super::state_glyph(ctx, header.state, pane_id);
+    let glyph_color = glyph_style.fg.unwrap_or(roles.state_idle);
+    // A calm marker for a pane that just changed: a faint fill under the header
+    // that decays with the recency window. Static under reduced motion's
+    // one-shots and absent when animations are off.
+    let pulse = phase.status_flash.max(phase.recency_highlight * 0.65);
+    let bg = (pulse > 0.0).then(|| {
+        crate::client::shell::animation::blend_color(
+            palette.panel_bg,
+            palette.surface0,
+            pulse,
+            palette,
+        )
+    });
+    PreparedHeader {
+        look: Look {
+            bg,
+            ellipsis: chrome.glyphs.ellipsis,
+        },
+        glyph,
+        glyph_color,
+        is_focused,
+        recent: ctx.recent.is_recent(pane_id, ctx.now),
+    }
+}
+
+/// The row is already reserved, cleared and filled by its existing copy pass.
+pub(in crate::client::shell) fn paint_prepared(
+    cells: &mut [CellData],
+    first: usize,
+    end: usize,
+    header: &PaneHeader,
+    ctx: &TeamRenderContext<'_>,
+    prepared: PreparedHeader,
+) {
+    let span = u16::try_from(end.saturating_sub(first)).unwrap_or(0);
+    let chrome = &ctx.config.chrome;
+    let roles = &chrome.roles;
+    let PreparedHeader {
+        look,
+        glyph,
+        glyph_color,
+        is_focused,
+        recent,
+    } = prepared;
     let mut age_buffer = [0u8; AGE_BUFFER_LEN];
     let age = header
         .created_at_ms
@@ -297,7 +378,6 @@ fn paint_one(
     // A static mark for a pane that just changed (finished, or now needs you):
     // an underline, present whatever `ui.animations` says, until the coarse tick
     // ends it.
-    let recent = ctx.recent.is_recent(&hit.pane_id, ctx.now);
     let name_modifier = if recent {
         bold | Modifier::UNDERLINED
     } else {
@@ -413,6 +493,127 @@ fn paint_one(
             space(cells, &mut r, look);
             put(cells, &mut r, end, age, age_width, muted, look);
             space(cells, &mut r, look);
+        }
+    }
+}
+
+#[cfg(test)]
+mod phase6_ascii_tests {
+    use super::*;
+
+    // Characterization of the pre-optimization grapheme loop, kept independent
+    // of the production fast path so clipping cannot bless a boundary change.
+    fn original_put(
+        cells: &mut [CellData],
+        x: &mut usize,
+        limit: usize,
+        text: &str,
+        text_width: u16,
+        (fg, modifier): (Color, Modifier),
+        look: Look,
+    ) {
+        let available = limit.saturating_sub(*x);
+        let fits = usize::from(text_width) <= available;
+        let budget = if fits {
+            available
+        } else {
+            available.saturating_sub(1)
+        };
+        let end = *x + budget;
+        let fg = color_to_u32(fg);
+        let bg = look.bg.map(color_to_u32);
+        let modifier = modifier_to_u16(modifier);
+        for grapheme in text.graphemes(true) {
+            let width = if grapheme.len() == 1 && (b' '..=b'~').contains(&grapheme.as_bytes()[0]) {
+                1
+            } else {
+                UnicodeWidthStr::width(grapheme)
+            };
+            if width == 0 {
+                continue;
+            }
+            if *x + width > end {
+                break;
+            }
+            set_cell(&mut cells[*x], grapheme, fg, bg, modifier);
+            for filler in 1..width {
+                set_cell(&mut cells[*x + filler], " ", fg, bg, modifier);
+            }
+            *x += width;
+        }
+        if !fits && available >= 1 {
+            set_cell(&mut cells[*x], look.ellipsis, fg, bg, modifier);
+            *x += 1;
+        }
+    }
+
+    #[test]
+    fn ascii_header_clipping_matches_original_grapheme_boundaries_without_allocating() {
+        let texts = [
+            "".to_owned(),
+            "ASCII field".into(),
+            "a".repeat(40_000),
+            "cafe\u{301} next".into(),
+            "#\u{fe0f}\u{20e3} digits".into(),
+            "👩‍👩‍👧‍👦 family".into(),
+            "☀\u{fe0f} sunshine".into(),
+            "界 and ASCII".into(),
+            "a\r\nb".into(),
+            "\u{301}word".into(),
+        ];
+        let cells = || {
+            (0..80)
+                .map(|_| {
+                    let mut symbol = String::with_capacity(64);
+                    symbol.push('─');
+                    CellData {
+                        symbol,
+                        fg: 0,
+                        bg: 0,
+                        modifier: 0,
+                        skip: false,
+                        hyperlink: None,
+                    }
+                })
+                .collect::<Vec<_>>()
+        };
+        for text in texts {
+            let width = display_width(&text);
+            for available in 0..65 {
+                for ellipsis in ["…", "~"] {
+                    let mut expected = cells();
+                    let mut actual = cells();
+                    let mut old_x = 3;
+                    let mut new_x = 3;
+                    let look = Look {
+                        bg: Some(Color::Black),
+                        ellipsis,
+                    };
+                    original_put(
+                        &mut expected,
+                        &mut old_x,
+                        3 + available,
+                        &text,
+                        width,
+                        (Color::White, Modifier::BOLD),
+                        look,
+                    );
+                    let allocations = crate::client::shell::tests::draw_allocations(|| {
+                        put(
+                            &mut actual,
+                            &mut new_x,
+                            3 + available,
+                            &text,
+                            width,
+                            (Color::White, Modifier::BOLD),
+                            look,
+                        )
+                    });
+                    assert_eq!(allocations, 0);
+                    assert_eq!(old_x, new_x, "{text:?}/{available}");
+                    assert_eq!(expected, actual, "{text:?}/{available}");
+                }
+            }
         }
     }
 }

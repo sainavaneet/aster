@@ -1,0 +1,2880 @@
+=== catppuccin/full/unicode/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/full/unicode/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/full/unicode/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=587e534b631a6c3e
+=== catppuccin/full/unicode/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=52751fbebbaeccb6
+=== catppuccin/full/unicode/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/full/unicode/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/full/unicode/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/unicode/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/unicode/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/unicode/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/unicode/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/unicode/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/unicode/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/full/unicode/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/full/unicode/50/error/false
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/full/unicode/50/error/true
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/full/unicode/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/full/unicode/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/full/unicode/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=bede40b9099661b6
+=== catppuccin/full/unicode/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=76c5c87c9ec289dd
+=== catppuccin/full/unicode/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/full/unicode/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/full/unicode/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/unicode/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/unicode/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/full/unicode/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/full/unicode/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/unicode/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/unicode/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/full/unicode/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/full/unicode/64/error/false
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/full/unicode/64/error/true
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/full/unicode/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/full/unicode/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/full/unicode/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=81d03f1af44d6876
+=== catppuccin/full/unicode/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=6a0017327fdcb19d
+=== catppuccin/full/unicode/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/full/unicode/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/full/unicode/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/full/unicode/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/full/unicode/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/full/unicode/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/full/unicode/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/full/unicode/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/full/unicode/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/full/unicode/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/full/unicode/80/error/false
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/full/unicode/80/error/true
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/full/unicode/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/full/unicode/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/full/unicode/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=675c7a93c8341696
+=== catppuccin/full/unicode/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=7d4bdcb84bcf013d
+=== catppuccin/full/unicode/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/full/unicode/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/full/unicode/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/full/unicode/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/full/unicode/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/full/unicode/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/full/unicode/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/full/unicode/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/full/unicode/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/full/unicode/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/full/unicode/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/full/unicode/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/full/unicode/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/full/unicode/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/full/unicode/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=f4ddf7a79b840256
+=== catppuccin/full/unicode/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=cdadf92d144975fd
+=== catppuccin/full/unicode/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/full/unicode/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/full/unicode/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/full/unicode/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/full/unicode/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/full/unicode/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/full/unicode/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/full/unicode/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/full/unicode/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/full/unicode/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/full/unicode/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/full/unicode/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/full/ascii/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/full/ascii/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/full/ascii/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=587e534b631a6c3e
+=== catppuccin/full/ascii/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=52751fbebbaeccb6
+=== catppuccin/full/ascii/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/full/ascii/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/full/ascii/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/ascii/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/ascii/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/ascii/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/ascii/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/ascii/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/full/ascii/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/full/ascii/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/full/ascii/50/error/false
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/full/ascii/50/error/true
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/full/ascii/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/full/ascii/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/full/ascii/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=bede40b9099661b6
+=== catppuccin/full/ascii/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=76c5c87c9ec289dd
+=== catppuccin/full/ascii/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/full/ascii/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/full/ascii/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/ascii/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/ascii/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/full/ascii/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/full/ascii/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/ascii/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/full/ascii/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/full/ascii/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/full/ascii/64/error/false
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/full/ascii/64/error/true
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/full/ascii/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/full/ascii/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/full/ascii/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=81d03f1af44d6876
+=== catppuccin/full/ascii/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=6a0017327fdcb19d
+=== catppuccin/full/ascii/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/full/ascii/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/full/ascii/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/full/ascii/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/full/ascii/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/full/ascii/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/full/ascii/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/full/ascii/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/full/ascii/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/full/ascii/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/full/ascii/80/error/false
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/full/ascii/80/error/true
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/full/ascii/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/full/ascii/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/full/ascii/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=675c7a93c8341696
+=== catppuccin/full/ascii/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=7d4bdcb84bcf013d
+=== catppuccin/full/ascii/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/full/ascii/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/full/ascii/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/full/ascii/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/full/ascii/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/full/ascii/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/full/ascii/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/full/ascii/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/full/ascii/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/full/ascii/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/full/ascii/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/full/ascii/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/full/ascii/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/full/ascii/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/full/ascii/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=f4ddf7a79b840256
+=== catppuccin/full/ascii/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=cdadf92d144975fd
+=== catppuccin/full/ascii/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/full/ascii/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/full/ascii/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/full/ascii/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/full/ascii/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/full/ascii/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/full/ascii/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/full/ascii/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/full/ascii/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/full/ascii/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/full/ascii/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/full/ascii/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/reduced/unicode/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/reduced/unicode/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/reduced/unicode/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=587e534b631a6c3e
+=== catppuccin/reduced/unicode/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=52751fbebbaeccb6
+=== catppuccin/reduced/unicode/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/reduced/unicode/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/reduced/unicode/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/unicode/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/unicode/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/unicode/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/unicode/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/unicode/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/unicode/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/reduced/unicode/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/reduced/unicode/50/error/false
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/reduced/unicode/50/error/true
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/reduced/unicode/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/reduced/unicode/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/reduced/unicode/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=bede40b9099661b6
+=== catppuccin/reduced/unicode/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=76c5c87c9ec289dd
+=== catppuccin/reduced/unicode/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/reduced/unicode/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/reduced/unicode/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/unicode/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/unicode/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/reduced/unicode/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/reduced/unicode/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/unicode/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/unicode/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/reduced/unicode/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/reduced/unicode/64/error/false
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/reduced/unicode/64/error/true
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/reduced/unicode/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/reduced/unicode/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/reduced/unicode/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=81d03f1af44d6876
+=== catppuccin/reduced/unicode/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=6a0017327fdcb19d
+=== catppuccin/reduced/unicode/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/reduced/unicode/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/reduced/unicode/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/reduced/unicode/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/reduced/unicode/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/reduced/unicode/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/reduced/unicode/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/reduced/unicode/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/reduced/unicode/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/reduced/unicode/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/reduced/unicode/80/error/false
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/reduced/unicode/80/error/true
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/reduced/unicode/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/reduced/unicode/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/reduced/unicode/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=675c7a93c8341696
+=== catppuccin/reduced/unicode/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=7d4bdcb84bcf013d
+=== catppuccin/reduced/unicode/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/reduced/unicode/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/reduced/unicode/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/reduced/unicode/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/reduced/unicode/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/reduced/unicode/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/reduced/unicode/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/reduced/unicode/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/reduced/unicode/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/reduced/unicode/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/reduced/unicode/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/reduced/unicode/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/reduced/unicode/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/reduced/unicode/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/reduced/unicode/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=f4ddf7a79b840256
+=== catppuccin/reduced/unicode/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=cdadf92d144975fd
+=== catppuccin/reduced/unicode/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/reduced/unicode/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/reduced/unicode/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/reduced/unicode/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/reduced/unicode/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/reduced/unicode/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/reduced/unicode/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/reduced/unicode/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/reduced/unicode/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/reduced/unicode/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/reduced/unicode/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/reduced/unicode/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/reduced/ascii/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/reduced/ascii/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/reduced/ascii/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=587e534b631a6c3e
+=== catppuccin/reduced/ascii/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=52751fbebbaeccb6
+=== catppuccin/reduced/ascii/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/reduced/ascii/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/reduced/ascii/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/ascii/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/ascii/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/ascii/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/ascii/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/ascii/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/reduced/ascii/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/reduced/ascii/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/reduced/ascii/50/error/false
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/reduced/ascii/50/error/true
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/reduced/ascii/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/reduced/ascii/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/reduced/ascii/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=bede40b9099661b6
+=== catppuccin/reduced/ascii/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=76c5c87c9ec289dd
+=== catppuccin/reduced/ascii/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/reduced/ascii/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/reduced/ascii/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/ascii/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/ascii/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/reduced/ascii/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/reduced/ascii/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/ascii/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/reduced/ascii/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/reduced/ascii/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/reduced/ascii/64/error/false
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/reduced/ascii/64/error/true
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/reduced/ascii/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/reduced/ascii/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/reduced/ascii/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=81d03f1af44d6876
+=== catppuccin/reduced/ascii/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=6a0017327fdcb19d
+=== catppuccin/reduced/ascii/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/reduced/ascii/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/reduced/ascii/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/reduced/ascii/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/reduced/ascii/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/reduced/ascii/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/reduced/ascii/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/reduced/ascii/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/reduced/ascii/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/reduced/ascii/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/reduced/ascii/80/error/false
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/reduced/ascii/80/error/true
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/reduced/ascii/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/reduced/ascii/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/reduced/ascii/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=675c7a93c8341696
+=== catppuccin/reduced/ascii/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=7d4bdcb84bcf013d
+=== catppuccin/reduced/ascii/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/reduced/ascii/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/reduced/ascii/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/reduced/ascii/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/reduced/ascii/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/reduced/ascii/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/reduced/ascii/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/reduced/ascii/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/reduced/ascii/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/reduced/ascii/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/reduced/ascii/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/reduced/ascii/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/reduced/ascii/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/reduced/ascii/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/reduced/ascii/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=f4ddf7a79b840256
+=== catppuccin/reduced/ascii/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=cdadf92d144975fd
+=== catppuccin/reduced/ascii/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/reduced/ascii/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/reduced/ascii/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/reduced/ascii/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/reduced/ascii/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/reduced/ascii/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/reduced/ascii/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/reduced/ascii/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/reduced/ascii/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/reduced/ascii/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/reduced/ascii/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/reduced/ascii/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/off/unicode/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/off/unicode/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/off/unicode/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=587e534b631a6c3e
+=== catppuccin/off/unicode/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=52751fbebbaeccb6
+=== catppuccin/off/unicode/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/off/unicode/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/off/unicode/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/unicode/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/unicode/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/unicode/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/unicode/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/unicode/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/unicode/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/off/unicode/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/off/unicode/50/error/false
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/off/unicode/50/error/true
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/off/unicode/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/off/unicode/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/off/unicode/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=bede40b9099661b6
+=== catppuccin/off/unicode/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=76c5c87c9ec289dd
+=== catppuccin/off/unicode/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/off/unicode/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/off/unicode/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/unicode/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/unicode/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/off/unicode/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/off/unicode/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/unicode/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/unicode/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/off/unicode/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/off/unicode/64/error/false
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/off/unicode/64/error/true
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/off/unicode/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/off/unicode/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/off/unicode/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=81d03f1af44d6876
+=== catppuccin/off/unicode/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=6a0017327fdcb19d
+=== catppuccin/off/unicode/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/off/unicode/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/off/unicode/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/off/unicode/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/off/unicode/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/off/unicode/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/off/unicode/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/off/unicode/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/off/unicode/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/off/unicode/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/off/unicode/80/error/false
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/off/unicode/80/error/true
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/off/unicode/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/off/unicode/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/off/unicode/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=675c7a93c8341696
+=== catppuccin/off/unicode/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=7d4bdcb84bcf013d
+=== catppuccin/off/unicode/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/off/unicode/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/off/unicode/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/off/unicode/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/off/unicode/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/off/unicode/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/off/unicode/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/off/unicode/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/off/unicode/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/off/unicode/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/off/unicode/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/off/unicode/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/off/unicode/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/off/unicode/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/off/unicode/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=f4ddf7a79b840256
+=== catppuccin/off/unicode/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=cdadf92d144975fd
+=== catppuccin/off/unicode/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/off/unicode/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/off/unicode/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/off/unicode/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/off/unicode/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/off/unicode/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/off/unicode/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/off/unicode/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/off/unicode/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/off/unicode/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/off/unicode/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/off/unicode/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/off/ascii/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/off/ascii/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=1131c6e61715e4c5
+=== catppuccin/off/ascii/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=587e534b631a6c3e
+=== catppuccin/off/ascii/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=52751fbebbaeccb6
+=== catppuccin/off/ascii/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/off/ascii/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=752d4744f88aa386
+=== catppuccin/off/ascii/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/ascii/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/ascii/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/ascii/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/ascii/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/ascii/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=eedcc99d7d3425e6
+=== catppuccin/off/ascii/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/off/ascii/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=3a96ae8426ce6076
+=== catppuccin/off/ascii/50/error/false
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/off/ascii/50/error/true
+ ERROR  offline endpoint                          |
+style=5eedc8c1d6fa10f2
+=== catppuccin/off/ascii/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/off/ascii/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=03e7d598efa47a46
+=== catppuccin/off/ascii/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=bede40b9099661b6
+=== catppuccin/off/ascii/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=76c5c87c9ec289dd
+=== catppuccin/off/ascii/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/off/ascii/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=fb229ccca5607d5e
+=== catppuccin/off/ascii/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/ascii/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/ascii/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/off/ascii/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=f2ad12586d17d0ee
+=== catppuccin/off/ascii/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/ascii/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=c282a41a506c863d
+=== catppuccin/off/ascii/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/off/ascii/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=5131ee95f2379c8a
+=== catppuccin/off/ascii/64/error/false
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/off/ascii/64/error/true
+ ERROR  offline endpoint                                        |
+style=dc4aafff97643c2a
+=== catppuccin/off/ascii/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/off/ascii/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=4a0dab577a35cd06
+=== catppuccin/off/ascii/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=81d03f1af44d6876
+=== catppuccin/off/ascii/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=6a0017327fdcb19d
+=== catppuccin/off/ascii/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/off/ascii/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=f367f447d38d3b1e
+=== catppuccin/off/ascii/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/off/ascii/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=94a0bad185918626
+=== catppuccin/off/ascii/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/off/ascii/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=a7b2346137ec95cd
+=== catppuccin/off/ascii/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/off/ascii/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=596b0a1accb345e5
+=== catppuccin/off/ascii/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/off/ascii/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=dae50c8e423b3b6a
+=== catppuccin/off/ascii/80/error/false
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/off/ascii/80/error/true
+ ERROR  offline endpoint                                                        |
+style=cbaf8bf4b4f493ea
+=== catppuccin/off/ascii/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/off/ascii/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=68b014ef24c9f426
+=== catppuccin/off/ascii/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=675c7a93c8341696
+=== catppuccin/off/ascii/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=7d4bdcb84bcf013d
+=== catppuccin/off/ascii/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/off/ascii/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=4bd5c4b7e03e0a3e
+=== catppuccin/off/ascii/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/off/ascii/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=49e9f0ba158479e5
+=== catppuccin/off/ascii/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/off/ascii/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=a0464b337365063d
+=== catppuccin/off/ascii/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/off/ascii/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=2e79771c4caeab3d
+=== catppuccin/off/ascii/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/off/ascii/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=92cc44355820f6ba
+=== catppuccin/off/ascii/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/off/ascii/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=883594ad362a828a
+=== catppuccin/off/ascii/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/off/ascii/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=8b88da9df5911ae6
+=== catppuccin/off/ascii/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=f4ddf7a79b840256
+=== catppuccin/off/ascii/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=cdadf92d144975fd
+=== catppuccin/off/ascii/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/off/ascii/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=32bc8853fc7820fe
+=== catppuccin/off/ascii/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/off/ascii/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=10b0ceae984ebee5
+=== catppuccin/off/ascii/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/off/ascii/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=4bf8a2b8b464873d
+=== catppuccin/off/ascii/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/off/ascii/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=406df5ff03bdac3d
+=== catppuccin/off/ascii/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/off/ascii/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=e32633d432a3cc1a
+=== catppuccin/off/ascii/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin/off/ascii/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=04cf07efb2cdda4a
+=== catppuccin-latte/full/unicode/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/full/unicode/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/full/unicode/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=af91beca0024480a
+=== catppuccin-latte/full/unicode/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=9afe82bb49ad5050
+=== catppuccin-latte/full/unicode/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/full/unicode/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/full/unicode/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/unicode/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/unicode/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/unicode/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/unicode/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/unicode/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/unicode/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/full/unicode/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/full/unicode/50/error/false
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/full/unicode/50/error/true
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/full/unicode/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/full/unicode/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/full/unicode/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=ca3d2a12d2eefbf0
+=== catppuccin-latte/full/unicode/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=8ebd746b7f84e477
+=== catppuccin-latte/full/unicode/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/full/unicode/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/full/unicode/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/unicode/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/unicode/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/full/unicode/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/full/unicode/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/unicode/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/unicode/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/full/unicode/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/full/unicode/64/error/false
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/full/unicode/64/error/true
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/full/unicode/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/full/unicode/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/full/unicode/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=88b007792d395ac0
+=== catppuccin-latte/full/unicode/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=5411be0df6b36e07
+=== catppuccin-latte/full/unicode/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/full/unicode/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/full/unicode/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/full/unicode/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/full/unicode/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/full/unicode/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/full/unicode/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/full/unicode/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/full/unicode/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/full/unicode/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/full/unicode/80/error/false
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/full/unicode/80/error/true
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/full/unicode/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/full/unicode/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/full/unicode/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=cb604a7e8d2f9918
+=== catppuccin-latte/full/unicode/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=dc2c7615790c62bf
+=== catppuccin-latte/full/unicode/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/full/unicode/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/full/unicode/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/full/unicode/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/full/unicode/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/full/unicode/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/full/unicode/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/full/unicode/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/full/unicode/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/full/unicode/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/full/unicode/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/full/unicode/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/full/unicode/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/full/unicode/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/full/unicode/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=0498e5eed7265fa8
+=== catppuccin-latte/full/unicode/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=21526ee403e1cd0f
+=== catppuccin-latte/full/unicode/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/full/unicode/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/full/unicode/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/full/unicode/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/full/unicode/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/full/unicode/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/full/unicode/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/full/unicode/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/full/unicode/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/full/unicode/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/full/unicode/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/full/unicode/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/full/ascii/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/full/ascii/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/full/ascii/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=af91beca0024480a
+=== catppuccin-latte/full/ascii/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=9afe82bb49ad5050
+=== catppuccin-latte/full/ascii/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/full/ascii/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/full/ascii/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/ascii/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/ascii/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/ascii/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/ascii/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/ascii/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/full/ascii/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/full/ascii/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/full/ascii/50/error/false
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/full/ascii/50/error/true
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/full/ascii/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/full/ascii/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/full/ascii/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=ca3d2a12d2eefbf0
+=== catppuccin-latte/full/ascii/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=8ebd746b7f84e477
+=== catppuccin-latte/full/ascii/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/full/ascii/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/full/ascii/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/ascii/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/ascii/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/full/ascii/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/full/ascii/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/ascii/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/full/ascii/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/full/ascii/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/full/ascii/64/error/false
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/full/ascii/64/error/true
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/full/ascii/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/full/ascii/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/full/ascii/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=88b007792d395ac0
+=== catppuccin-latte/full/ascii/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=5411be0df6b36e07
+=== catppuccin-latte/full/ascii/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/full/ascii/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/full/ascii/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/full/ascii/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/full/ascii/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/full/ascii/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/full/ascii/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/full/ascii/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/full/ascii/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/full/ascii/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/full/ascii/80/error/false
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/full/ascii/80/error/true
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/full/ascii/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/full/ascii/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/full/ascii/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=cb604a7e8d2f9918
+=== catppuccin-latte/full/ascii/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=dc2c7615790c62bf
+=== catppuccin-latte/full/ascii/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/full/ascii/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/full/ascii/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/full/ascii/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/full/ascii/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/full/ascii/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/full/ascii/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/full/ascii/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/full/ascii/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/full/ascii/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/full/ascii/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/full/ascii/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/full/ascii/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/full/ascii/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/full/ascii/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=0498e5eed7265fa8
+=== catppuccin-latte/full/ascii/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=21526ee403e1cd0f
+=== catppuccin-latte/full/ascii/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/full/ascii/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/full/ascii/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/full/ascii/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/full/ascii/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/full/ascii/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/full/ascii/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/full/ascii/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/full/ascii/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/full/ascii/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/full/ascii/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/full/ascii/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/reduced/unicode/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/reduced/unicode/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/reduced/unicode/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=af91beca0024480a
+=== catppuccin-latte/reduced/unicode/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=9afe82bb49ad5050
+=== catppuccin-latte/reduced/unicode/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/reduced/unicode/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/reduced/unicode/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/unicode/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/unicode/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/unicode/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/unicode/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/unicode/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/unicode/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/reduced/unicode/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/reduced/unicode/50/error/false
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/reduced/unicode/50/error/true
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/reduced/unicode/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/reduced/unicode/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/reduced/unicode/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=ca3d2a12d2eefbf0
+=== catppuccin-latte/reduced/unicode/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=8ebd746b7f84e477
+=== catppuccin-latte/reduced/unicode/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/reduced/unicode/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/reduced/unicode/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/unicode/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/unicode/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/reduced/unicode/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/reduced/unicode/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/unicode/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/unicode/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/reduced/unicode/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/reduced/unicode/64/error/false
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/reduced/unicode/64/error/true
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/reduced/unicode/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/reduced/unicode/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/reduced/unicode/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=88b007792d395ac0
+=== catppuccin-latte/reduced/unicode/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=5411be0df6b36e07
+=== catppuccin-latte/reduced/unicode/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/reduced/unicode/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/reduced/unicode/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/reduced/unicode/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/reduced/unicode/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/reduced/unicode/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/reduced/unicode/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/reduced/unicode/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/reduced/unicode/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/reduced/unicode/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/reduced/unicode/80/error/false
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/reduced/unicode/80/error/true
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/reduced/unicode/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/reduced/unicode/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/reduced/unicode/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=cb604a7e8d2f9918
+=== catppuccin-latte/reduced/unicode/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=dc2c7615790c62bf
+=== catppuccin-latte/reduced/unicode/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/reduced/unicode/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/reduced/unicode/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/reduced/unicode/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/reduced/unicode/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/reduced/unicode/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/reduced/unicode/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/reduced/unicode/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/reduced/unicode/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/reduced/unicode/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/reduced/unicode/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/reduced/unicode/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/reduced/unicode/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/reduced/unicode/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/reduced/unicode/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=0498e5eed7265fa8
+=== catppuccin-latte/reduced/unicode/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=21526ee403e1cd0f
+=== catppuccin-latte/reduced/unicode/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/reduced/unicode/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/reduced/unicode/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/reduced/unicode/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/reduced/unicode/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/reduced/unicode/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/reduced/unicode/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/reduced/unicode/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/reduced/unicode/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/reduced/unicode/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/reduced/unicode/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/reduced/unicode/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/reduced/ascii/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/reduced/ascii/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/reduced/ascii/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=af91beca0024480a
+=== catppuccin-latte/reduced/ascii/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=9afe82bb49ad5050
+=== catppuccin-latte/reduced/ascii/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/reduced/ascii/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/reduced/ascii/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/ascii/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/ascii/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/ascii/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/ascii/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/ascii/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/reduced/ascii/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/reduced/ascii/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/reduced/ascii/50/error/false
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/reduced/ascii/50/error/true
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/reduced/ascii/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/reduced/ascii/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/reduced/ascii/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=ca3d2a12d2eefbf0
+=== catppuccin-latte/reduced/ascii/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=8ebd746b7f84e477
+=== catppuccin-latte/reduced/ascii/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/reduced/ascii/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/reduced/ascii/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/ascii/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/ascii/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/reduced/ascii/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/reduced/ascii/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/ascii/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/reduced/ascii/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/reduced/ascii/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/reduced/ascii/64/error/false
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/reduced/ascii/64/error/true
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/reduced/ascii/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/reduced/ascii/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/reduced/ascii/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=88b007792d395ac0
+=== catppuccin-latte/reduced/ascii/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=5411be0df6b36e07
+=== catppuccin-latte/reduced/ascii/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/reduced/ascii/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/reduced/ascii/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/reduced/ascii/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/reduced/ascii/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/reduced/ascii/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/reduced/ascii/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/reduced/ascii/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/reduced/ascii/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/reduced/ascii/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/reduced/ascii/80/error/false
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/reduced/ascii/80/error/true
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/reduced/ascii/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/reduced/ascii/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/reduced/ascii/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=cb604a7e8d2f9918
+=== catppuccin-latte/reduced/ascii/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=dc2c7615790c62bf
+=== catppuccin-latte/reduced/ascii/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/reduced/ascii/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/reduced/ascii/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/reduced/ascii/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/reduced/ascii/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/reduced/ascii/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/reduced/ascii/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/reduced/ascii/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/reduced/ascii/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/reduced/ascii/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/reduced/ascii/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/reduced/ascii/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/reduced/ascii/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/reduced/ascii/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/reduced/ascii/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=0498e5eed7265fa8
+=== catppuccin-latte/reduced/ascii/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=21526ee403e1cd0f
+=== catppuccin-latte/reduced/ascii/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/reduced/ascii/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/reduced/ascii/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/reduced/ascii/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/reduced/ascii/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/reduced/ascii/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/reduced/ascii/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/reduced/ascii/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/reduced/ascii/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/reduced/ascii/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/reduced/ascii/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/reduced/ascii/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/off/unicode/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/off/unicode/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/off/unicode/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=af91beca0024480a
+=== catppuccin-latte/off/unicode/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=9afe82bb49ad5050
+=== catppuccin-latte/off/unicode/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/off/unicode/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/off/unicode/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/unicode/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/unicode/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/unicode/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/unicode/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/unicode/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/unicode/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/off/unicode/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/off/unicode/50/error/false
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/off/unicode/50/error/true
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/off/unicode/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/off/unicode/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/off/unicode/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=ca3d2a12d2eefbf0
+=== catppuccin-latte/off/unicode/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=8ebd746b7f84e477
+=== catppuccin-latte/off/unicode/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/off/unicode/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/off/unicode/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/unicode/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/unicode/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/off/unicode/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/off/unicode/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/unicode/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/unicode/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/off/unicode/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/off/unicode/64/error/false
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/off/unicode/64/error/true
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/off/unicode/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/off/unicode/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/off/unicode/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=88b007792d395ac0
+=== catppuccin-latte/off/unicode/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=5411be0df6b36e07
+=== catppuccin-latte/off/unicode/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/off/unicode/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/off/unicode/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/off/unicode/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/off/unicode/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/off/unicode/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/off/unicode/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/off/unicode/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/off/unicode/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/off/unicode/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/off/unicode/80/error/false
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/off/unicode/80/error/true
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/off/unicode/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/off/unicode/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/off/unicode/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=cb604a7e8d2f9918
+=== catppuccin-latte/off/unicode/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=dc2c7615790c62bf
+=== catppuccin-latte/off/unicode/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/off/unicode/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/off/unicode/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/off/unicode/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/off/unicode/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/off/unicode/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/off/unicode/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/off/unicode/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/off/unicode/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/off/unicode/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/off/unicode/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/off/unicode/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/off/unicode/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/off/unicode/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/off/unicode/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=0498e5eed7265fa8
+=== catppuccin-latte/off/unicode/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=21526ee403e1cd0f
+=== catppuccin-latte/off/unicode/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/off/unicode/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/off/unicode/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/off/unicode/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/off/unicode/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/off/unicode/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/off/unicode/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/off/unicode/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/off/unicode/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/off/unicode/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/off/unicode/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/off/unicode/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/off/ascii/50/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/off/ascii/50/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspa|
+style=8022065f9c168175
+=== catppuccin-latte/off/ascii/50/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? ke|
+style=af91beca0024480a
+=== catppuccin-latte/off/ascii/50/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  t update ready|
+style=9afe82bb49ad5050
+=== catppuccin-latte/off/ascii/50/resize/false
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/off/ascii/50/resize/true
+ RESIZE   h/l width  j/k height  esc done         |
+style=dc566fa476becf5a
+=== catppuccin-latte/off/ascii/50/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/ascii/50/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/ascii/50/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/ascii/50/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/ascii/50/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/ascii/50/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N rep|
+style=4db8b17c50667112
+=== catppuccin-latte/off/ascii/50/copy-search/false
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/off/ascii/50/copy-search/true
+ COPY  /needle            enter search  esc cancel|
+style=56a8548dfcddc57a
+=== catppuccin-latte/off/ascii/50/error/false
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/off/ascii/50/error/true
+ ERROR  offline endpoint                          |
+style=ba38dc8211e02802
+=== catppuccin-latte/off/ascii/64/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/off/ascii/64/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
+style=a4040e3c8b4eada2
+=== catppuccin-latte/off/ascii/64/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+style=ca3d2a12d2eefbf0
+=== catppuccin-latte/off/ascii/64/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+style=8ebd746b7f84e477
+=== catppuccin-latte/off/ascii/64/resize/false
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/off/ascii/64/resize/true
+ RESIZE   h/l width  j/k height  esc done                       |
+style=ff9d3aa76bf244c0
+=== catppuccin-latte/off/ascii/64/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/ascii/64/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/ascii/64/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/off/ascii/64/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/sp|
+style=666b49e8e2f0fc8c
+=== catppuccin-latte/off/ascii/64/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/ascii/64/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space s|
+style=ca312b00962c8675
+=== catppuccin-latte/off/ascii/64/copy-search/false
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/off/ascii/64/copy-search/true
+ COPY  /needle                          enter search  esc cancel|
+style=f77d7cf33a665220
+=== catppuccin-latte/off/ascii/64/error/false
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/off/ascii/64/error/true
+ ERROR  offline endpoint                                        |
+style=0fb72519dcb7fa08
+=== catppuccin-latte/off/ascii/80/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/off/ascii/80/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds            |
+style=3a38cc38d48c4a32
+=== catppuccin-latte/off/ascii/80/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                        |
+style=88b007792d395ac0
+=== catppuccin-latte/off/ascii/80/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds            update ready|
+style=5411be0df6b36e07
+=== catppuccin-latte/off/ascii/80/resize/false
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/off/ascii/80/resize/true
+ RESIZE   h/l width  j/k height  esc done                                       |
+style=ba1ba3f62976b790
+=== catppuccin-latte/off/ascii/80/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/off/ascii/80/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter c|
+style=7e9e466afbdbf76a
+=== catppuccin-latte/off/ascii/80/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/off/ascii/80/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/en|
+style=d0861807e096bb99
+=== catppuccin-latte/off/ascii/80/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/off/ascii/80/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/ente|
+style=c3de9e9ee74d7597
+=== catppuccin-latte/off/ascii/80/copy-search/false
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/off/ascii/80/copy-search/true
+ COPY  /needle                                          enter search  esc cancel|
+style=3c673961e7ee6450
+=== catppuccin-latte/off/ascii/80/error/false
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/off/ascii/80/error/true
+ ERROR  offline endpoint                                                        |
+style=de89109728952758
+=== catppuccin-latte/off/ascii/120/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/off/ascii/120/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                    |
+style=6051338c61fe7c4a
+=== catppuccin-latte/off/ascii/120/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                |
+style=cb604a7e8d2f9918
+=== catppuccin-latte/off/ascii/120/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                    update ready|
+style=dc2c7615790c62bf
+=== catppuccin-latte/off/ascii/120/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/off/ascii/120/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                               |
+style=146bb6010c4613e8
+=== catppuccin-latte/off/ascii/120/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/off/ascii/120/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                         |
+style=df4093bd16625821
+=== catppuccin-latte/off/ascii/120/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/off/ascii/120/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit             |
+style=d6dcc7ce3cb16877
+=== catppuccin-latte/off/ascii/120/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/off/ascii/120/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit               |
+style=8fb3e2651fc9ebcf
+=== catppuccin-latte/off/ascii/120/copy-search/false
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/off/ascii/120/copy-search/true
+ COPY  /needle                                                                                  enter search  esc cancel|
+style=595b523eb221a588
+=== catppuccin-latte/off/ascii/120/error/false
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/off/ascii/120/error/true
+ ERROR  offline endpoint                                                                                                |
+style=681b880c49571790
+=== catppuccin-latte/off/ascii/200/prefix/false
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/off/ascii/200/prefix/true
+ PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                                                                                                                    |
+style=56cbfe1db36edc5a
+=== catppuccin-latte/off/ascii/200/navigate/false
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                                |
+style=0498e5eed7265fa8
+=== catppuccin-latte/off/ascii/200/navigate/true
+ NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                                                                                                    update ready|
+style=21526ee403e1cd0f
+=== catppuccin-latte/off/ascii/200/resize/false
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/off/ascii/200/resize/true
+ RESIZE   h/l width  j/k height  esc done                                                                                                                                                               |
+style=dc3f9e30f7633178
+=== catppuccin-latte/off/ascii/200/copy/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/off/ascii/200/copy/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space select  y/enter copy  q/esc exit                                                                                                         |
+style=c70defaa2850deb1
+=== catppuccin-latte/off/ascii/200/copy-matches/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/off/ascii/200/copy-matches/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat 3/14  v/space select  y/enter copy  esc clear  q exit                                                                                             |
+style=7cd7b98dd4c21a47
+=== catppuccin-latte/off/ascii/200/copy-selected/false
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/off/ascii/200/copy-selected/true
+ COPY  h/j/k/l w/b/e { } move  / ? search  n/N repeat  v/space selecting  y/enter copy  esc clear  q exit                                                                                               |
+style=5dfdb45fdfc2c1df
+=== catppuccin-latte/off/ascii/200/copy-search/false
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/off/ascii/200/copy-search/true
+ COPY  /needle                                                                                                                                                                  enter search  esc cancel|
+style=b211487526a66c78
+=== catppuccin-latte/off/ascii/200/error/false
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220
+=== catppuccin-latte/off/ascii/200/error/true
+ ERROR  offline endpoint                                                                                                                                                                                |
+style=75dce19f5d8c0220

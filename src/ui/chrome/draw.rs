@@ -16,6 +16,17 @@ fn inline_symbol(grapheme: &str) -> &str {
     if grapheme.len() <= INLINE_SYMBOL_BYTES {
         return grapheme;
     }
+    let wanted = display_width(grapheme);
+    for (start, scalar) in grapheme.char_indices() {
+        let end = start + scalar.len_utf8();
+        if end > INLINE_SYMBOL_BYTES {
+            break;
+        }
+        let prefix = &grapheme[..end];
+        if display_width(prefix) == wanted {
+            return prefix;
+        }
+    }
     grapheme
         .chars()
         .next()
@@ -49,9 +60,16 @@ pub(crate) fn put_segment(
 }
 
 /// Writes at most `width` cells of `text` at `(x, y)`; clipped to the buffer.
-fn put_text_inline(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &str, style: Style) {
+fn put_text_inline(
+    buffer: &mut Buffer,
+    x: u16,
+    y: u16,
+    width: u16,
+    text: &str,
+    style: Style,
+) -> u16 {
     if width == 0 || y >= buffer.area.bottom() || x >= buffer.area.right() {
-        return;
+        return x;
     }
     let right = (u32::from(x) + u32::from(width)).min(u32::from(buffer.area.right())) as u16;
     let mut x = x;
@@ -59,21 +77,21 @@ fn put_text_inline(buffer: &mut Buffer, x: u16, y: u16, width: u16, text: &str, 
         if grapheme.contains(char::is_control) {
             continue;
         }
-        let cells = display_width(grapheme);
+        let symbol = inline_symbol(grapheme);
+        let cells = display_width(symbol);
         if cells == 0 {
             continue;
         }
         if cells > right.saturating_sub(x) {
             break;
         }
-        buffer[(x, y)]
-            .set_symbol(inline_symbol(grapheme))
-            .set_style(style);
+        buffer[(x, y)].set_symbol(symbol).set_style(style);
         for covered in x + 1..x + cells {
             buffer[(covered, y)].reset();
         }
         x += cells;
     }
+    x
 }
 
 /// Writes `text` clipped at column `right`; returns the next free column.
@@ -85,9 +103,7 @@ pub(crate) fn put_segment_inline(
     text: &str,
     style: Style,
 ) -> u16 {
-    let width = display_width(text).min(right.saturating_sub(x));
-    put_text_inline(buffer, x, y, width, text, style);
-    x.saturating_add(width)
+    put_text_inline(buffer, x, y, right.saturating_sub(x), text, style)
 }
 
 /// Writes `text` clipped at column `right`; when it does not fit, the last
@@ -214,5 +230,19 @@ mod tests {
             .map(|x| buffer[(x, 0)].symbol().to_owned())
             .collect::<String>();
         assert_eq!(row, "━━─");
+    }
+}
+
+#[cfg(test)]
+mod phase6_tests {
+    use super::*;
+    #[test]
+    fn oversized_variation_graphemes_emit_the_width_the_writer_advances() {
+        let cluster = format!("☀\u{fe0f}{}", "\u{301}".repeat(12));
+        assert!(cluster.len() > INLINE_SYMBOL_BYTES);
+        let mut b = Buffer::empty(Rect::new(0, 0, 8, 1));
+        let end = put_segment_inline(&mut b, 0, 0, 8, &cluster, Style::default());
+        assert_eq!(display_width(b[(0, 0)].symbol()), end);
+        assert_eq!(end, 2);
     }
 }

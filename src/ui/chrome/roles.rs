@@ -126,56 +126,153 @@ pub(crate) fn contrast_ratio(a: (u8, u8, u8), b: (u8, u8, u8)) -> f32 {
     (high + 0.05) / (low + 0.05)
 }
 
-fn mix(from: (u8, u8, u8), to: (u8, u8, u8), amount: f32) -> (u8, u8, u8) {
-    let lerp = |a: u8, b: u8| {
-        (f32::from(a) + (f32::from(b) - f32::from(a)) * amount)
-            .round()
-            .clamp(0.0, 255.0) as u8
+fn luminance64((r, g, b): (u8, u8, u8)) -> f64 {
+    let linear = |v: u8| {
+        let s = f64::from(v) / 255.0;
+        if s <= 0.04045 {
+            s / 12.92
+        } else {
+            ((s + 0.055) / 1.055).powf(2.4)
+        }
     };
-    (lerp(from.0, to.0), lerp(from.1, to.1), lerp(from.2, to.2))
+    0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
 }
 
-/// `color` unchanged when it already reaches `minimum` against every
-/// measurable background (or cannot be measured). Otherwise it is mixed toward
-/// both black and white in 5% steps until a candidate passes every background.
-/// If no candidate passes, retain the best minimum contrast found. Candidates
-/// are compared by actual contrast, never by guessing from luminance: on `#b0b0b0` black reads at 9.7:1 and white at 2.2:1.
+/// Intersect the exact allowed luminance intervals for every background.
+fn feasible_luminances(backgrounds: &[(u8, u8, u8)], minimum: f64) -> Vec<(f64, f64)> {
+    let mut ranges: Vec<(f64, f64)> = vec![(0.0, 1.0)];
+    for &background in backgrounds {
+        let b = luminance64(background);
+        let dark = (b + 0.05) / minimum - 0.05;
+        let light = minimum * (b + 0.05) - 0.05;
+        ranges = ranges
+            .into_iter()
+            .flat_map(|(lo, hi)| {
+                [(lo, hi.min(dark)), (lo.max(light), hi)]
+                    .into_iter()
+                    .filter(|&(a, b)| a <= b && a >= 0.0 && b <= 1.0)
+            })
+            .collect();
+    }
+    ranges
+}
+
+/// Preserve a passing color, otherwise fit its luminance to the intersection
+/// allowed by all backgrounds. Enumerate every rounded color on the two
+/// hue-preserving tint/shade paths, rather than sampling those paths at 5%.
+/// A rare exact 8-bit RGB search handles feasible bands neither path can hit.
+/// This runs only on palette changes, never in rendering.
 pub(crate) fn ensure_contrast(
     color: Color,
     backgrounds: &[Option<(u8, u8, u8)>],
     minimum: f32,
 ) -> Color {
-    let Some(base) = rgb(color) else {
-        return color;
-    };
-    let measurable = || backgrounds.iter().flatten().copied();
-    let worst = |candidate: (u8, u8, u8)| {
-        measurable()
-            .map(|background| contrast_ratio(candidate, background))
-            .fold(f32::INFINITY, f32::min)
-    };
-    if measurable().next().is_none() || worst(base) >= minimum {
+    let Some(base) = rgb(color) else { return color };
+    let backgrounds: Vec<_> = backgrounds.iter().flatten().copied().collect();
+    if backgrounds.is_empty() || !minimum.is_finite() || minimum <= 1.0 {
         return color;
     }
-    // Test both directions: an intermediate color can work on mixed light/dark
-    // backgrounds even when neither black nor white does. If no candidate can
-    // satisfy all backgrounds, retain the best worst-case contrast found.
-    let mut fitted = base;
-    let mut best = worst(base);
-    for step in 1..=20u8 {
-        for target in [(0, 0, 0), (255, 255, 255)] {
-            let candidate = mix(base, target, f32::from(step) * 0.05);
-            let score = worst(candidate);
-            if score >= minimum {
-                return Color::Rgb(candidate.0, candidate.1, candidate.2);
+    let score = |candidate| {
+        backgrounds
+            .iter()
+            .map(|&bg| contrast_ratio(candidate, bg))
+            .fold(f32::INFINITY, f32::min)
+    };
+    if score(base) >= minimum {
+        return color;
+    }
+    let ranges = feasible_luminances(&backgrounds, f64::from(minimum));
+    let distance = |c: (u8, u8, u8)| {
+        [(c.0, base.0), (c.1, base.1), (c.2, base.2)]
+            .into_iter()
+            .map(|(a, b)| (i32::from(a) - i32::from(b)).pow(2) as u32)
+            .sum::<u32>()
+    };
+    let mut best = (score(base), base);
+    let mut closest: Option<(u32, (u8, u8, u8))> = None;
+    let consider =
+        |candidate, closest: &mut Option<(u32, (u8, u8, u8))>, best: &mut (f32, (u8, u8, u8))| {
+            let value = score(candidate);
+            if value > best.0 {
+                *best = (value, candidate);
             }
-            if score > best {
-                fitted = candidate;
-                best = score;
+            let l = luminance64(candidate);
+            if value >= minimum && ranges.iter().any(|&(a, b)| a <= l && l <= b) {
+                let d = distance(candidate);
+                if closest.is_none_or(|(old, _)| d < old) {
+                    *closest = Some((d, candidate));
+                }
+            }
+        };
+    for target in [0u8, 255] {
+        let mut breaks = vec![0.0, 1.0];
+        for channel in [base.0, base.1, base.2] {
+            let delta = f64::from(target) - f64::from(channel);
+            if delta == 0.0 {
+                continue;
+            }
+            for level in 0..255 {
+                let t = (f64::from(level) + 0.5 - f64::from(channel)) / delta;
+                if t > 0.0 && t < 1.0 {
+                    breaks.push(t);
+                }
+            }
+        }
+        breaks.sort_unstable_by(f64::total_cmp);
+        breaks.dedup();
+        let tint = |t: f64| {
+            let mix = |v: u8| {
+                (f64::from(v) + (f64::from(target) - f64::from(v)) * t)
+                    .round()
+                    .clamp(0.0, 255.0) as u8
+            };
+            (mix(base.0), mix(base.1), mix(base.2))
+        };
+        for pair in breaks.windows(2) {
+            consider(tint(pair[0]), &mut closest, &mut best);
+            consider(tint((pair[0] + pair[1]) * 0.5), &mut closest, &mut best);
+        }
+        consider((target, target, target), &mut closest, &mut best);
+    }
+    if let Some((_, (r, g, b))) = closest {
+        return Color::Rgb(r, g, b);
+    }
+    for level in 0..=255 {
+        consider((level, level, level), &mut closest, &mut best);
+    }
+    if let Some((_, (r, g, b))) = closest {
+        return Color::Rgb(r, g, b);
+    }
+    if !ranges.is_empty() {
+        // Luminance is additive and monotone in each channel. For every R/G
+        // pair, binary search exactly the allowed B interval, then choose the
+        // B nearest to the base. This covers all representable RGB candidates.
+        let linear: [f64; 256] = std::array::from_fn(|v| luminance64((v as u8, v as u8, v as u8)));
+        for r in 0..=255u8 {
+            for g in 0..=255u8 {
+                let rg = 0.2126 * linear[usize::from(r)] + 0.7152 * linear[usize::from(g)];
+                for &(lo, hi) in &ranges {
+                    let low = linear.partition_point(|&v| rg + 0.0722 * v < lo);
+                    let high = linear.partition_point(|&v| rg + 0.0722 * v <= hi);
+                    if low >= high {
+                        continue;
+                    }
+                    let b = usize::from(base.2).clamp(low, high - 1);
+                    for b in [b, low, high - 1] {
+                        let candidate = (r, g, b as u8);
+                        if score(candidate) >= minimum {
+                            let d = distance(candidate);
+                            if closest.is_none_or(|(old, _)| d < old) {
+                                closest = Some((d, candidate));
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-    Color::Rgb(fitted.0, fitted.1, fitted.2)
+    let (_, (r, g, b)) = closest.unwrap_or((0, best.1));
+    Color::Rgb(r, g, b)
 }
 
 #[cfg(test)]
@@ -215,7 +312,7 @@ mod tests {
             for (role, color) in measured_roles(&roles) {
                 let Some(color) = rgb(color) else { continue };
                 assert!(
-                    contrast_ratio(color, background) >= MIN_STATE_CONTRAST - 0.05,
+                    contrast_ratio(color, background) >= MIN_STATE_CONTRAST,
                     "{name}: {role} {color:?} on {background:?} = {}",
                     contrast_ratio(color, background)
                 );
@@ -250,14 +347,14 @@ mod tests {
     fn latte_idle_and_b0b0b0_working_reach_the_floor() {
         let latte = palette("catppuccin-latte");
         let idle = rgb(ChromeRoles::derive(&latte).state_idle).unwrap();
-        assert!(contrast_ratio(idle, rgb(latte.panel_bg).unwrap()) >= MIN_STATE_CONTRAST - 0.05);
+        assert!(contrast_ratio(idle, rgb(latte.panel_bg).unwrap()) >= MIN_STATE_CONTRAST);
 
         let mut grey = palette("catppuccin");
         grey.panel_bg = Color::Rgb(0xb0, 0xb0, 0xb0);
         grey.sidebar_bg = Color::Rgb(0xb0, 0xb0, 0xb0);
         grey.active_row_bg = Color::Rgb(0xb0, 0xb0, 0xb0);
         let working = rgb(ChromeRoles::derive(&grey).state_working).unwrap();
-        assert!(contrast_ratio(working, (0xb0, 0xb0, 0xb0)) >= MIN_STATE_CONTRAST - 0.05);
+        assert!(contrast_ratio(working, (0xb0, 0xb0, 0xb0)) >= MIN_STATE_CONTRAST);
     }
 
     #[test]
@@ -314,5 +411,67 @@ mod tests {
         let roles = ChromeRoles::derive(&palette("catppuccin"));
         assert_eq!(roles.tint(0), roles.tint(ROLE_TINTS));
         assert_ne!(roles.tint(0), roles.tint(1));
+    }
+}
+
+#[cfg(test)]
+mod phase6_tests {
+    use super::*;
+    #[test]
+    fn interval_fitting_preserves_valid_inputs_and_handles_impossible_bands() {
+        assert_eq!(
+            ensure_contrast(Color::Reset, &[Some((0, 0, 0))], 3.0),
+            Color::Reset
+        );
+        let base = Color::Rgb(220, 200, 180);
+        assert_eq!(ensure_contrast(base, &[None], 3.0), base);
+        assert_eq!(ensure_contrast(base, &[Some((0, 0, 0))], 3.0), base);
+        assert!(feasible_luminances(&[(0, 0, 0), (255, 255, 255)], 5.0).is_empty());
+        let fitted = rgb(ensure_contrast(
+            base,
+            &[Some((0, 0, 0)), Some((255, 255, 255))],
+            5.0,
+        ))
+        .unwrap();
+        let worst = |c| contrast_ratio(c, (0, 0, 0)).min(contrast_ratio(c, (255, 255, 255)));
+        assert!(worst(fitted) >= worst(rgb(base).unwrap()));
+    }
+
+    #[test]
+    fn every_quantized_grey_feasible_band_has_a_passing_fit() {
+        for dark in [0, 9, 40, 80] {
+            for light in [150, 175, 210, 255] {
+                let bgs = [Some((dark, dark, dark)), Some((light, light, light))];
+                let passes = |c| bgs.iter().flatten().all(|&b| contrast_ratio(c, b) >= 3.0);
+                if !(0..=255u8).any(|v| passes((v, v, v))) {
+                    continue;
+                }
+                for base in [(249, 226, 175), (30, 190, 240), (180, 80, 130)] {
+                    let fitted = rgb(ensure_contrast(
+                        Color::Rgb(base.0, base.1, base.2),
+                        &bgs,
+                        3.0,
+                    ))
+                    .unwrap();
+                    assert!(passes(fitted), "{dark}/{light}/{base:?}: {fitted:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn narrow_feasible_luminance_interval_is_not_skipped() {
+        let bgs = [Some((9, 9, 9)), Some((175, 175, 175))];
+        assert!(bgs
+            .iter()
+            .flatten()
+            .all(|bg| contrast_ratio((93, 93, 93), *bg) >= 3.0));
+        let fitted = rgb(ensure_contrast(Color::Rgb(249, 226, 175), &bgs, 3.0)).unwrap();
+        assert!(
+            bgs.iter()
+                .flatten()
+                .all(|bg| contrast_ratio(fitted, *bg) >= 3.0),
+            "{fitted:?}"
+        );
     }
 }

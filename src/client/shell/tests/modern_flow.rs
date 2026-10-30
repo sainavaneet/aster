@@ -16,6 +16,7 @@ pub(super) fn flow_snapshot() -> ClientShellSnapshot {
     let orbit = projected.orbit.as_mut().unwrap();
     let step = |index: u16, member: &str, state: &str, pane: Option<&str>| {
         crate::protocol::OrbitShellStep {
+            awaiting_approval: None,
             index,
             member: member.into(),
             kind: "codex".into(),
@@ -279,10 +280,7 @@ fn ascii_and_motion_modes_keep_the_whole_flow() {
             .skip(usize::from(popup.x))
             .take(usize::from(popup.width))
         {
-            assert!(
-                ch.is_ascii() || "┌┐└┘─│".contains(ch),
-                "non-ASCII {ch:?} in ASCII mode: {row}"
-            );
+            assert!(ch.is_ascii(), "non-ASCII {ch:?} in ASCII mode: {row}");
         }
     }
     assert!(text.contains("Polaris =>"), "{text}");

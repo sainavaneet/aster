@@ -95,8 +95,8 @@ style=a2c8bc88b6ed5e30
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=a66e5c65840d515c
 === catppuccin/full/unicode/active-approval-relay-parallel/mobile
- ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell    ▲1 ⚑1 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -125,7 +125,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=09c8f7f697c19a67
+style=4f7ad87c40d5d58b
 === catppuccin/full/unicode/active-approval-relay-parallel/collapsed
 1 ▲│⠹  1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                     ▲1 ⚑1 ◐1|
    │┌▌reviewer ⚑ rev-codex · approve… 4m ┐┌▌reviewer ⠹ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -255,8 +255,8 @@ style=ec7cc7dbfa5dab35
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=15d8f242690bb899
 === catppuccin/full/unicode/blocked-recent/mobile
- ● client-shell       ▲2 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell       ▲2 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -285,7 +285,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=bec06343b768fb8b
+style=a93315cf58cc1adf
 === catppuccin/full/unicode/blocked-recent/collapsed
 1 ▲│⠹  1     ▪▫ ▲2 ◐1  +                                                                                           ▲2 ◐1|
    │┌▌reviewer ▲ rev-codex · approve… 4m ┐┌▌reviewer ⠹ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -415,8 +415,8 @@ style=a2c8bc88b6ed5e30
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=a66e5c65840d515c
 === catppuccin/full/ascii/active-approval-relay-parallel/mobile
- ● client-shell    !1 ?1 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell    !1 ?1 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -445,7 +445,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=09c8f7f697c19a67
+style=4f7ad87c40d5d58b
 === catppuccin/full/ascii/active-approval-relay-parallel/collapsed
 1 !│-  1     #. !1 ?1 *1  +                                                                                     !1 ?1 *1|
    │┌|reviewer ? rev-codex . approve~ 4m ┐┌|reviewer - rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -575,8 +575,8 @@ style=ec7cc7dbfa5dab35
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=15d8f242690bb899
 === catppuccin/full/ascii/blocked-recent/mobile
- ● client-shell       !2 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell       !2 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -605,7 +605,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=bec06343b768fb8b
+style=a93315cf58cc1adf
 === catppuccin/full/ascii/blocked-recent/collapsed
 1 !│-  1     #. !2 *1  +                                                                                           !2 *1|
    │┌|reviewer ! rev-codex . approve~ 4m ┐┌|reviewer - rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -735,8 +735,8 @@ style=f524834c9db66f34
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=d5e9e9e5ddecfea8
 === catppuccin/reduced/unicode/active-approval-relay-parallel/mobile
- ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell    ▲1 ⚑1 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -765,7 +765,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=09c8f7f697c19a67
+style=4f7ad87c40d5d58b
 === catppuccin/reduced/unicode/active-approval-relay-parallel/collapsed
 1 ▲│◐  1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                     ▲1 ⚑1 ◐1|
    │┌▌reviewer ⚑ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -895,8 +895,8 @@ style=6201f41fbe9abb75
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=f0a1ecd19ed7f631
 === catppuccin/reduced/unicode/blocked-recent/mobile
- ● client-shell       ▲2 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell       ▲2 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -925,7 +925,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=bec06343b768fb8b
+style=a93315cf58cc1adf
 === catppuccin/reduced/unicode/blocked-recent/collapsed
 1 ▲│◐  1     ▪▫ ▲2 ◐1  +                                                                                           ▲2 ◐1|
    │┌▌reviewer ▲ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -1055,8 +1055,8 @@ style=f524834c9db66f34
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=d5e9e9e5ddecfea8
 === catppuccin/reduced/ascii/active-approval-relay-parallel/mobile
- ● client-shell    !1 ?1 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell    !1 ?1 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -1085,7 +1085,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=09c8f7f697c19a67
+style=4f7ad87c40d5d58b
 === catppuccin/reduced/ascii/active-approval-relay-parallel/collapsed
 1 !│*  1     #. !1 ?1 *1  +                                                                                     !1 ?1 *1|
    │┌|reviewer ? rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -1215,8 +1215,8 @@ style=6201f41fbe9abb75
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=f0a1ecd19ed7f631
 === catppuccin/reduced/ascii/blocked-recent/mobile
- ● client-shell       !2 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell       !2 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -1245,7 +1245,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=bec06343b768fb8b
+style=a93315cf58cc1adf
 === catppuccin/reduced/ascii/blocked-recent/collapsed
 1 !│*  1     #. !2 *1  +                                                                                           !2 *1|
    │┌|reviewer ! rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -1375,8 +1375,8 @@ style=f524834c9db66f34
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=d5e9e9e5ddecfea8
 === catppuccin/off/unicode/active-approval-relay-parallel/mobile
- ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell    ▲1 ⚑1 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -1405,7 +1405,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=09c8f7f697c19a67
+style=4f7ad87c40d5d58b
 === catppuccin/off/unicode/active-approval-relay-parallel/collapsed
 1 ▲│   1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                     ▲1 ⚑1 ◐1|
    │┌▌reviewer ⚑ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -1535,8 +1535,8 @@ style=6201f41fbe9abb75
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=f0a1ecd19ed7f631
 === catppuccin/off/unicode/blocked-recent/mobile
- ● client-shell       ▲2 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell       ▲2 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -1565,7 +1565,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=bec06343b768fb8b
+style=a93315cf58cc1adf
 === catppuccin/off/unicode/blocked-recent/collapsed
 1 ▲│   1     ▪▫ ▲2 ◐1  +                                                                                           ▲2 ◐1|
    │┌▌reviewer ▲ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -1695,8 +1695,8 @@ style=f524834c9db66f34
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=d5e9e9e5ddecfea8
 === catppuccin/off/ascii/active-approval-relay-parallel/mobile
- ● client-shell    !1 ?1 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell    !1 ?1 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -1725,7 +1725,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=09c8f7f697c19a67
+style=4f7ad87c40d5d58b
 === catppuccin/off/ascii/active-approval-relay-parallel/collapsed
 1 !│   1     #. !1 ?1 *1  +                                                                                     !1 ?1 *1|
    │┌|reviewer ? rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -1855,8 +1855,8 @@ style=6201f41fbe9abb75
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
 style=f0a1ecd19ed7f631
 === catppuccin/off/ascii/blocked-recent/mobile
- ● client-shell       !2 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell       !2 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -1885,7 +1885,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=bec06343b768fb8b
+style=a93315cf58cc1adf
 === catppuccin/off/ascii/blocked-recent/collapsed
 1 !│   1     #. !2 *1  +                                                                                           !2 *1|
    │┌|reviewer ! rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -1949,7 +1949,7 @@ style=98b289683833b257
  ○ client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=07f029dceffc1c1c
+style=cc331ca6927ad080
 === catppuccin-latte/full/unicode/active-approval-relay-parallel/120
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐1  +                                                               ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev-codex──── 4m ┐┌▌reviewer ⠹ rev-claude── 12m ┐┌▌scratch ○ probe · fanout tas…┐|
@@ -1981,7 +1981,7 @@ style=07f029dceffc1c1c
  ○ client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=85d577ea137274b1
+style=6d5063106c1bbd55
 === catppuccin-latte/full/unicode/active-approval-relay-parallel/200
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                                                                               ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev-codex codex·gpt-5 · approve task ti… 4m ┐┌▌reviewer ⠹ rev-claude claude·opus · relay task ti… 12m ┐┌▌scratch ○ probe claude · fanout task … parallel 1/2 3m ┐|
@@ -2013,10 +2013,10 @@ style=85d577ea137274b1
  ○ client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=1cbddf5f8fa19a47
+style=5280168470894b2b
 === catppuccin-latte/full/unicode/active-approval-relay-parallel/mobile
- ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell    ▲1 ⚑1 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -2045,7 +2045,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=84eead41d1e41479
+style=881326fb9e73cc3d
 === catppuccin-latte/full/unicode/active-approval-relay-parallel/collapsed
 1 ▲│⠹  1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                     ▲1 ⚑1 ◐1|
    │┌▌reviewer ⚑ rev-codex · approve… 4m ┐┌▌reviewer ⠹ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -2077,7 +2077,7 @@ style=84eead41d1e41479
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=da4d1ca4e1c19a56
+style=cd6ee2a8b269c5c3
 === catppuccin-latte/full/unicode/blocked-recent/80
  spaces                  │⠹  1     ▪▫ ▲2 ◐1  +                             ▲2 ◐1|
                          │┌▌reviewer ▲ rev…┐┌▌reviewer ⠹ rev…┐┌▌scratch ○ probe┐|
@@ -2109,7 +2109,7 @@ style=da4d1ca4e1c19a56
  ○ client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=6a446974b39cbe12
+style=d23a4904f4572b82
 === catppuccin-latte/full/unicode/blocked-recent/120
  spaces                  │⠹  1     ▪▫ ▲2 ◐1  +                                                                     ▲2 ◐1|
                          │┌▌reviewer ▲ rev-codex──── 4m ┐┌▌reviewer ⠹ rev-claude── 12m ┐┌▌scratch ○ probe · fanout tas…┐|
@@ -2141,7 +2141,7 @@ style=6a446974b39cbe12
  ○ client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=ddb17e8d4d0ccc5f
+style=89258cf165bf8463
 === catppuccin-latte/full/unicode/blocked-recent/200
  spaces                  │⠹  1     ▪▫ ▲2 ◐1  +                                                                                                                                                     ▲2 ◐1|
                          │┌▌reviewer ▲ rev-codex codex·gpt-5 · approve task ti… 4m ┐┌▌reviewer ⠹ rev-claude claude·opus · relay task ti… 12m ┐┌▌scratch ○ probe claude · fanout task … parallel 1/2 3m ┐|
@@ -2173,10 +2173,10 @@ style=ddb17e8d4d0ccc5f
  ○ client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=5269c77f374d1289
+style=a93924c74d3b0c99
 === catppuccin-latte/full/unicode/blocked-recent/mobile
- ● client-shell       ▲2 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell       ▲2 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -2205,7 +2205,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=b6cff1337fd00665
+style=9b34ca129f07c385
 === catppuccin-latte/full/unicode/blocked-recent/collapsed
 1 ▲│⠹  1     ▪▫ ▲2 ◐1  +                                                                                           ▲2 ◐1|
    │┌▌reviewer ▲ rev-codex · approve… 4m ┐┌▌reviewer ⠹ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -2237,7 +2237,7 @@ style=b6cff1337fd00665
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=e4fc8fdb717a1b94
+style=982495c2419205e9
 === catppuccin-latte/full/ascii/active-approval-relay-parallel/80
  spaces                  │-  1     #. !1 ?1 *1  +                       !1 ?1 *1|
                          │┌|reviewer ? rev~┐┌|reviewer - rev~┐┌|scratch o probe┐|
@@ -2269,7 +2269,7 @@ style=e4fc8fdb717a1b94
  o client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=07f029dceffc1c1c
+style=cc331ca6927ad080
 === catppuccin-latte/full/ascii/active-approval-relay-parallel/120
  spaces                  │-  1     #. !1 ?1 *1  +                                                               !1 ?1 *1|
                          │┌|reviewer ? rev-codex──── 4m ┐┌|reviewer - rev-claude── 12m ┐┌|scratch o probe . fanout tas~┐|
@@ -2301,7 +2301,7 @@ style=07f029dceffc1c1c
  o client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=85d577ea137274b1
+style=6d5063106c1bbd55
 === catppuccin-latte/full/ascii/active-approval-relay-parallel/200
  spaces                  │-  1     #. !1 ?1 *1  +                                                                                                                                               !1 ?1 *1|
                          │┌|reviewer ? rev-codex codex.gpt-5 . approve task ti~ 4m ┐┌|reviewer - rev-claude claude.opus . relay task ti~ 12m ┐┌|scratch o probe claude . fanout task ~ parallel 1/2 3m ┐|
@@ -2333,10 +2333,10 @@ style=85d577ea137274b1
  o client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=1cbddf5f8fa19a47
+style=5280168470894b2b
 === catppuccin-latte/full/ascii/active-approval-relay-parallel/mobile
- ● client-shell    !1 ?1 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell    !1 ?1 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -2365,7 +2365,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=84eead41d1e41479
+style=881326fb9e73cc3d
 === catppuccin-latte/full/ascii/active-approval-relay-parallel/collapsed
 1 !│-  1     #. !1 ?1 *1  +                                                                                     !1 ?1 *1|
    │┌|reviewer ? rev-codex . approve~ 4m ┐┌|reviewer - rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -2397,7 +2397,7 @@ style=84eead41d1e41479
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=da4d1ca4e1c19a56
+style=cd6ee2a8b269c5c3
 === catppuccin-latte/full/ascii/blocked-recent/80
  spaces                  │-  1     #. !2 *1  +                             !2 *1|
                          │┌|reviewer ! rev~┐┌|reviewer - rev~┐┌|scratch o probe┐|
@@ -2429,7 +2429,7 @@ style=da4d1ca4e1c19a56
  o client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=6a446974b39cbe12
+style=d23a4904f4572b82
 === catppuccin-latte/full/ascii/blocked-recent/120
  spaces                  │-  1     #. !2 *1  +                                                                     !2 *1|
                          │┌|reviewer ! rev-codex──── 4m ┐┌|reviewer - rev-claude── 12m ┐┌|scratch o probe . fanout tas~┐|
@@ -2461,7 +2461,7 @@ style=6a446974b39cbe12
  o client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=ddb17e8d4d0ccc5f
+style=89258cf165bf8463
 === catppuccin-latte/full/ascii/blocked-recent/200
  spaces                  │-  1     #. !2 *1  +                                                                                                                                                     !2 *1|
                          │┌|reviewer ! rev-codex codex.gpt-5 . approve task ti~ 4m ┐┌|reviewer - rev-claude claude.opus . relay task ti~ 12m ┐┌|scratch o probe claude . fanout task ~ parallel 1/2 3m ┐|
@@ -2493,10 +2493,10 @@ style=ddb17e8d4d0ccc5f
  o client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=5269c77f374d1289
+style=a93924c74d3b0c99
 === catppuccin-latte/full/ascii/blocked-recent/mobile
- ● client-shell       !2 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell       !2 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -2525,7 +2525,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=b6cff1337fd00665
+style=9b34ca129f07c385
 === catppuccin-latte/full/ascii/blocked-recent/collapsed
 1 !│-  1     #. !2 *1  +                                                                                           !2 *1|
    │┌|reviewer ! rev-codex . approve~ 4m ┐┌|reviewer - rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -2557,7 +2557,7 @@ style=b6cff1337fd00665
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=e4fc8fdb717a1b94
+style=982495c2419205e9
 === catppuccin-latte/reduced/unicode/active-approval-relay-parallel/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐1  +                       ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev…┐┌▌reviewer ◐ rev…┐┌▌scratch ○ probe┐|
@@ -2589,7 +2589,7 @@ style=e4fc8fdb717a1b94
  ○ client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=9f4b988a086500a4
+style=631c8685d214979c
 === catppuccin-latte/reduced/unicode/active-approval-relay-parallel/120
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐1  +                                                               ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev-codex──── 4m ┐┌▌reviewer ◐ rev-claude── 12m ┐┌▌scratch ○ probe · fanout tas…┐|
@@ -2621,7 +2621,7 @@ style=9f4b988a086500a4
  ○ client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=3db7d5150e53f599
+style=31446199c1a857a5
 === catppuccin-latte/reduced/unicode/active-approval-relay-parallel/200
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                                                                               ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev-codex codex·gpt-5 · approve task ti… 4m ┐┌▌reviewer ◐ rev-claude claude·opus · relay task ti… 12m ┐┌▌scratch ○ probe claude · fanout task … parallel 1/2 3m ┐|
@@ -2653,10 +2653,10 @@ style=3db7d5150e53f599
  ○ client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=7ce63b86e602e24b
+style=a54262977880a4c7
 === catppuccin-latte/reduced/unicode/active-approval-relay-parallel/mobile
- ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell    ▲1 ⚑1 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -2685,7 +2685,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=84eead41d1e41479
+style=881326fb9e73cc3d
 === catppuccin-latte/reduced/unicode/active-approval-relay-parallel/collapsed
 1 ▲│◐  1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                     ▲1 ⚑1 ◐1|
    │┌▌reviewer ⚑ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -2717,7 +2717,7 @@ style=84eead41d1e41479
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=3bccddd64fb3630d
+style=d6a71517ac0e580c
 === catppuccin-latte/reduced/unicode/blocked-recent/80
  spaces                  │◐  1     ▪▫ ▲2 ◐1  +                             ▲2 ◐1|
                          │┌▌reviewer ▲ rev…┐┌▌reviewer ◐ rev…┐┌▌scratch ○ probe┐|
@@ -2749,7 +2749,7 @@ style=3bccddd64fb3630d
  ○ client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=ea48cd6b31d09b32
+style=dd27603eb426c4a6
 === catppuccin-latte/reduced/unicode/blocked-recent/120
  spaces                  │◐  1     ▪▫ ▲2 ◐1  +                                                                     ▲2 ◐1|
                          │┌▌reviewer ▲ rev-codex──── 4m ┐┌▌reviewer ◐ rev-claude── 12m ┐┌▌scratch ○ probe · fanout tas…┐|
@@ -2781,7 +2781,7 @@ style=ea48cd6b31d09b32
  ○ client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=418cbcba48adc1eb
+style=92fc97f7e652e8cf
 === catppuccin-latte/reduced/unicode/blocked-recent/200
  spaces                  │◐  1     ▪▫ ▲2 ◐1  +                                                                                                                                                     ▲2 ◐1|
                          │┌▌reviewer ▲ rev-codex codex·gpt-5 · approve task ti… 4m ┐┌▌reviewer ◐ rev-claude claude·opus · relay task ti… 12m ┐┌▌scratch ○ probe claude · fanout task … parallel 1/2 3m ┐|
@@ -2813,10 +2813,10 @@ style=418cbcba48adc1eb
  ○ client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=2462599391282765
+style=d067ed94dd82617d
 === catppuccin-latte/reduced/unicode/blocked-recent/mobile
- ● client-shell       ▲2 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell       ▲2 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -2845,7 +2845,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=b6cff1337fd00665
+style=9b34ca129f07c385
 === catppuccin-latte/reduced/unicode/blocked-recent/collapsed
 1 ▲│◐  1     ▪▫ ▲2 ◐1  +                                                                                           ▲2 ◐1|
    │┌▌reviewer ▲ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -2877,7 +2877,7 @@ style=b6cff1337fd00665
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=b48820e48d8aac7b
+style=83a4043a131e895a
 === catppuccin-latte/reduced/ascii/active-approval-relay-parallel/80
  spaces                  │*  1     #. !1 ?1 *1  +                       !1 ?1 *1|
                          │┌|reviewer ? rev~┐┌|reviewer * rev~┐┌|scratch o probe┐|
@@ -2909,7 +2909,7 @@ style=b48820e48d8aac7b
  o client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=9f4b988a086500a4
+style=631c8685d214979c
 === catppuccin-latte/reduced/ascii/active-approval-relay-parallel/120
  spaces                  │*  1     #. !1 ?1 *1  +                                                               !1 ?1 *1|
                          │┌|reviewer ? rev-codex──── 4m ┐┌|reviewer * rev-claude── 12m ┐┌|scratch o probe . fanout tas~┐|
@@ -2941,7 +2941,7 @@ style=9f4b988a086500a4
  o client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=3db7d5150e53f599
+style=31446199c1a857a5
 === catppuccin-latte/reduced/ascii/active-approval-relay-parallel/200
  spaces                  │*  1     #. !1 ?1 *1  +                                                                                                                                               !1 ?1 *1|
                          │┌|reviewer ? rev-codex codex.gpt-5 . approve task ti~ 4m ┐┌|reviewer * rev-claude claude.opus . relay task ti~ 12m ┐┌|scratch o probe claude . fanout task ~ parallel 1/2 3m ┐|
@@ -2973,10 +2973,10 @@ style=3db7d5150e53f599
  o client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=7ce63b86e602e24b
+style=a54262977880a4c7
 === catppuccin-latte/reduced/ascii/active-approval-relay-parallel/mobile
- ● client-shell    !1 ?1 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell    !1 ?1 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -3005,7 +3005,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=84eead41d1e41479
+style=881326fb9e73cc3d
 === catppuccin-latte/reduced/ascii/active-approval-relay-parallel/collapsed
 1 !│*  1     #. !1 ?1 *1  +                                                                                     !1 ?1 *1|
    │┌|reviewer ? rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -3037,7 +3037,7 @@ style=84eead41d1e41479
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=3bccddd64fb3630d
+style=d6a71517ac0e580c
 === catppuccin-latte/reduced/ascii/blocked-recent/80
  spaces                  │*  1     #. !2 *1  +                             !2 *1|
                          │┌|reviewer ! rev~┐┌|reviewer * rev~┐┌|scratch o probe┐|
@@ -3069,7 +3069,7 @@ style=3bccddd64fb3630d
  o client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=ea48cd6b31d09b32
+style=dd27603eb426c4a6
 === catppuccin-latte/reduced/ascii/blocked-recent/120
  spaces                  │*  1     #. !2 *1  +                                                                     !2 *1|
                          │┌|reviewer ! rev-codex──── 4m ┐┌|reviewer * rev-claude── 12m ┐┌|scratch o probe . fanout tas~┐|
@@ -3101,7 +3101,7 @@ style=ea48cd6b31d09b32
  o client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=418cbcba48adc1eb
+style=92fc97f7e652e8cf
 === catppuccin-latte/reduced/ascii/blocked-recent/200
  spaces                  │*  1     #. !2 *1  +                                                                                                                                                     !2 *1|
                          │┌|reviewer ! rev-codex codex.gpt-5 . approve task ti~ 4m ┐┌|reviewer * rev-claude claude.opus . relay task ti~ 12m ┐┌|scratch o probe claude . fanout task ~ parallel 1/2 3m ┐|
@@ -3133,10 +3133,10 @@ style=418cbcba48adc1eb
  o client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=2462599391282765
+style=d067ed94dd82617d
 === catppuccin-latte/reduced/ascii/blocked-recent/mobile
- ● client-shell       !2 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell       !2 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -3165,7 +3165,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=b6cff1337fd00665
+style=9b34ca129f07c385
 === catppuccin-latte/reduced/ascii/blocked-recent/collapsed
 1 !│*  1     #. !2 *1  +                                                                                           !2 *1|
    │┌|reviewer ! rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -3197,7 +3197,7 @@ style=b6cff1337fd00665
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=b48820e48d8aac7b
+style=83a4043a131e895a
 === catppuccin-latte/off/unicode/active-approval-relay-parallel/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐1  +                       ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev…┐┌▌reviewer ◐ rev…┐┌▌scratch ○ probe┐|
@@ -3229,7 +3229,7 @@ style=b48820e48d8aac7b
  ○ client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=9f4b988a086500a4
+style=631c8685d214979c
 === catppuccin-latte/off/unicode/active-approval-relay-parallel/120
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐1  +                                                               ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev-codex──── 4m ┐┌▌reviewer ◐ rev-claude── 12m ┐┌▌scratch ○ probe · fanout tas…┐|
@@ -3261,7 +3261,7 @@ style=9f4b988a086500a4
  ○ client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=3db7d5150e53f599
+style=31446199c1a857a5
 === catppuccin-latte/off/unicode/active-approval-relay-parallel/200
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                                                                               ▲1 ⚑1 ◐1|
                          │┌▌reviewer ⚑ rev-codex codex·gpt-5 · approve task ti… 4m ┐┌▌reviewer ◐ rev-claude claude·opus · relay task ti… 12m ┐┌▌scratch ○ probe claude · fanout task … parallel 1/2 3m ┐|
@@ -3293,10 +3293,10 @@ style=3db7d5150e53f599
  ○ client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=7ce63b86e602e24b
+style=a54262977880a4c7
 === catppuccin-latte/off/unicode/active-approval-relay-parallel/mobile
- ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell    ▲1 ⚑1 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -3325,7 +3325,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=84eead41d1e41479
+style=881326fb9e73cc3d
 === catppuccin-latte/off/unicode/active-approval-relay-parallel/collapsed
 1 ▲│   1     ▪▫ ▲1 ⚑1 ◐1  +                                                                                     ▲1 ⚑1 ◐1|
    │┌▌reviewer ⚑ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -3357,7 +3357,7 @@ style=84eead41d1e41479
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=3bccddd64fb3630d
+style=d6a71517ac0e580c
 === catppuccin-latte/off/unicode/blocked-recent/80
  spaces                  │   1     ▪▫ ▲2 ◐1  +                             ▲2 ◐1|
                          │┌▌reviewer ▲ rev…┐┌▌reviewer ◐ rev…┐┌▌scratch ○ probe┐|
@@ -3389,7 +3389,7 @@ style=3bccddd64fb3630d
  ○ client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=ea48cd6b31d09b32
+style=dd27603eb426c4a6
 === catppuccin-latte/off/unicode/blocked-recent/120
  spaces                  │   1     ▪▫ ▲2 ◐1  +                                                                     ▲2 ◐1|
                          │┌▌reviewer ▲ rev-codex──── 4m ┐┌▌reviewer ◐ rev-claude── 12m ┐┌▌scratch ○ probe · fanout tas…┐|
@@ -3421,7 +3421,7 @@ style=ea48cd6b31d09b32
  ○ client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=418cbcba48adc1eb
+style=92fc97f7e652e8cf
 === catppuccin-latte/off/unicode/blocked-recent/200
  spaces                  │   1     ▪▫ ▲2 ◐1  +                                                                                                                                                     ▲2 ◐1|
                          │┌▌reviewer ▲ rev-codex codex·gpt-5 · approve task ti… 4m ┐┌▌reviewer ◐ rev-claude claude·opus · relay task ti… 12m ┐┌▌scratch ○ probe claude · fanout task … parallel 1/2 3m ┐|
@@ -3453,10 +3453,10 @@ style=418cbcba48adc1eb
  ○ client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=2462599391282765
+style=d067ed94dd82617d
 === catppuccin-latte/off/unicode/blocked-recent/mobile
- ● client-shell       ▲2 ◐1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ▲ client-shell       ▲2 ◐1 tab 1 │        ▲|
+ ▲ 2 blocked · ◐ 1 working …      │ switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -3485,7 +3485,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=b6cff1337fd00665
+style=9b34ca129f07c385
 === catppuccin-latte/off/unicode/blocked-recent/collapsed
 1 ▲│   1     ▪▫ ▲2 ◐1  +                                                                                           ▲2 ◐1|
    │┌▌reviewer ▲ rev-codex · approve… 4m ┐┌▌reviewer ◐ rev-claude · relay task…┐┌▌scratch ○ probe claude · fanout … 3m ┐|
@@ -3517,7 +3517,7 @@ style=b6cff1337fd00665
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=b48820e48d8aac7b
+style=83a4043a131e895a
 === catppuccin-latte/off/ascii/active-approval-relay-parallel/80
  spaces                  │   1     #. !1 ?1 *1  +                       !1 ?1 *1|
                          │┌|reviewer ? rev~┐┌|reviewer * rev~┐┌|scratch o probe┐|
@@ -3549,7 +3549,7 @@ style=b48820e48d8aac7b
  o client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=9f4b988a086500a4
+style=631c8685d214979c
 === catppuccin-latte/off/ascii/active-approval-relay-parallel/120
  spaces                  │   1     #. !1 ?1 *1  +                                                               !1 ?1 *1|
                          │┌|reviewer ? rev-codex──── 4m ┐┌|reviewer * rev-claude── 12m ┐┌|scratch o probe . fanout tas~┐|
@@ -3581,7 +3581,7 @@ style=9f4b988a086500a4
  o client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=3db7d5150e53f599
+style=31446199c1a857a5
 === catppuccin-latte/off/ascii/active-approval-relay-parallel/200
  spaces                  │   1     #. !1 ?1 *1  +                                                                                                                                               !1 ?1 *1|
                          │┌|reviewer ? rev-codex codex.gpt-5 . approve task ti~ 4m ┐┌|reviewer * rev-claude claude.opus . relay task ti~ 12m ┐┌|scratch o probe claude . fanout task ~ parallel 1/2 3m ┐|
@@ -3613,10 +3613,10 @@ style=3db7d5150e53f599
  o client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=7ce63b86e602e24b
+style=a54262977880a4c7
 === catppuccin-latte/off/ascii/active-approval-relay-parallel/mobile
- ● client-shell    !1 ?1 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell    !1 ?1 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -3645,7 +3645,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=84eead41d1e41479
+style=881326fb9e73cc3d
 === catppuccin-latte/off/ascii/active-approval-relay-parallel/collapsed
 1 !│   1     #. !1 ?1 *1  +                                                                                     !1 ?1 *1|
    │┌|reviewer ? rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -3677,7 +3677,7 @@ style=84eead41d1e41479
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=3bccddd64fb3630d
+style=d6a71517ac0e580c
 === catppuccin-latte/off/ascii/blocked-recent/80
  spaces                  │   1     #. !2 *1  +                             !2 *1|
                          │┌|reviewer ! rev~┐┌|reviewer * rev~┐┌|scratch o probe┐|
@@ -3709,7 +3709,7 @@ style=3bccddd64fb3630d
  o client-shell         ▕││                ││                ││                │|
    stray-idle           ▕││                ││                ││                │|
                         «│└────────────────┘└────────────────┘└────────────────┘|
-style=ea48cd6b31d09b32
+style=dd27603eb426c4a6
 === catppuccin-latte/off/ascii/blocked-recent/120
  spaces                  │   1     #. !2 *1  +                                                                     !2 *1|
                          │┌|reviewer ! rev-codex──── 4m ┐┌|reviewer * rev-claude── 12m ┐┌|scratch o probe . fanout tas~┐|
@@ -3741,7 +3741,7 @@ style=ea48cd6b31d09b32
  o client-shell         ▕││                             ││                             ││                              │|
    stray-idle           ▕││                             ││                             ││                              │|
                         «│└─────────────────────────────┘└─────────────────────────────┘└──────────────────────────────┘|
-style=418cbcba48adc1eb
+style=92fc97f7e652e8cf
 === catppuccin-latte/off/ascii/blocked-recent/200
  spaces                  │   1     #. !2 *1  +                                                                                                                                                     !2 *1|
                          │┌|reviewer ! rev-codex codex.gpt-5 . approve task ti~ 4m ┐┌|reviewer * rev-claude claude.opus . relay task ti~ 12m ┐┌|scratch o probe claude . fanout task ~ parallel 1/2 3m ┐|
@@ -3773,10 +3773,10 @@ style=418cbcba48adc1eb
  o client-shell         ▕││                                                        ││                                                        ││                                                        │|
    stray-idle           ▕││                                                        ││                                                        ││                                                        │|
                         «│└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────────────────────────────┘|
-style=2462599391282765
+style=d067ed94dd82617d
 === catppuccin-latte/off/ascii/blocked-recent/mobile
- ● client-shell       !2 *1 tab 1 │        ●|
- ◉ 2 blocked · 1 working · 3 idle │ switch  |
+ ! client-shell       !2 *1 tab 1 |        !|
+ ! 2 blocked | * 1 working ~      | switch  |
 LIVE                                        |
 PANE                                        |
                                             |
@@ -3805,7 +3805,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=b6cff1337fd00665
+style=9b34ca129f07c385
 === catppuccin-latte/off/ascii/blocked-recent/collapsed
 1 !│   1     #. !2 *1  +                                                                                           !2 *1|
    │┌|reviewer ! rev-codex . approve~ 4m ┐┌|reviewer * rev-claude . relay task~┐┌|scratch o probe claude . fanout ~ 3m ┐|
@@ -3837,4 +3837,4 @@ style=b6cff1337fd00665
    ││                                    ││                                    ││                                      │|
    ││                                    ││                                    ││                                      │|
  » │└────────────────────────────────────┘└────────────────────────────────────┘└──────────────────────────────────────┘|
-style=b48820e48d8aac7b
+style=83a4043a131e895a

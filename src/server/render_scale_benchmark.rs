@@ -34,6 +34,7 @@ struct RenderPipeline {
     app: App,
     client: ClientShellState,
     graphics_delivery: crate::kitty_graphics::surface::DeliveryCache,
+    compose_time: Option<Instant>,
 }
 
 impl RenderPipeline {
@@ -81,6 +82,7 @@ impl RenderPipeline {
         Self {
             app,
             client,
+            compose_time: None,
             graphics_delivery: crate::kitty_graphics::surface::DeliveryCache::default(),
         }
     }
@@ -126,7 +128,7 @@ impl RenderPipeline {
         });
         black_box(
             self.client
-                .compose(COLS, ROWS)
+                .compose_at(COLS, ROWS, self.compose_time.unwrap_or_else(Instant::now))
                 .expect("benchmark pipeline should compose a complete frame"),
         );
         let client_elapsed = started.elapsed();
@@ -313,6 +315,7 @@ fn bench_orbit() -> crate::protocol::OrbitShellView {
         })
         .collect();
     let step = |index: u16, state: &str| OrbitShellStep {
+        awaiting_approval: None,
         index,
         member: format!("m0-{index}"),
         kind: "claude".into(),
@@ -479,6 +482,15 @@ fn print_orbit_profiles() {
             (count, profile_pipeline(pipeline))
         });
         println!("orbit team with a visible toast, copy feedback and the mode bar, {label} style");
+        print_stage("client shell composition", &rows, |stats| stats.client);
+        let rows = CARDINALITIES.map(|count| {
+            let mut pipeline = RenderPipeline::with_orbit(active_panes(count), &config);
+            pipeline.compose_time = Some(pipeline.client.show_bench_transition());
+            (count, profile_pipeline(pipeline))
+        });
+        println!(
+            "orbit team with fixed entry-phase toast, copy feedback and mode bar, {label} style"
+        );
         print_stage("client shell composition", &rows, |stats| stats.client);
     }
 }

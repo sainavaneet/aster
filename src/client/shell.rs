@@ -137,6 +137,21 @@ fn contains(rect: Rect, point: (u16, u16)) -> bool {
         && point.1 < rect.bottom()
 }
 
+/// Only the identities, split paths and directions feed the resize digest.
+/// Output, scroll and split positions do not change that identity contract.
+fn same_pane_surface_topology(a: &PaneSurfaceFrame, b: &PaneSurfaceFrame) -> bool {
+    a.panes.len() == b.panes.len()
+        && a.splits.len() == b.splits.len()
+        && a.panes
+            .iter()
+            .zip(&b.panes)
+            .all(|(a, b)| a.pane_id == b.pane_id)
+        && a.splits
+            .iter()
+            .zip(&b.splits)
+            .all(|(a, b)| a.direction == b.direction && a.path == b.path)
+}
+
 fn pane_surface_topology_signature(surface: &PaneSurfaceFrame) -> u64 {
     const OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
     const PRIME: u64 = 0x0000_0100_0000_01b3;
@@ -257,6 +272,7 @@ fn blit_pane_surface(target: &mut FrameData, source: &FrameData, area: Rect) {
 /// Uses the existing cell-copy allocation only for cached visible header spans.
 /// The ordered span cursor advances once per span; no frame scratch allocation
 /// or row-by-pane scan is needed.
+#[cfg(test)]
 fn blit_pane_surface_with_headers(
     target: &mut FrameData,
     source: &FrameData,
@@ -291,6 +307,188 @@ fn blit_pane_surface_with_headers(
             hyperlink: cell.hyperlink,
         }
     });
+}
+
+/// Copy ordinary rows directly. Header rows reuse that copy to reserve symbols,
+/// discover junction stops and clear residue before the allocation-free painter.
+fn blit_pane_surface_modern(
+    target: &mut FrameData,
+    surface: &crate::protocol::PaneSurfaceFrame,
+    area: Rect,
+    spans: &[modern::model::pane_header::HeaderCopy],
+    team: &team_sidebar::TeamSidebar,
+    ctx: &team_sidebar::TeamRenderContext<'_>,
+) {
+    use modern::draw::pane_header::{is_stop, paint_prepared, prepare};
+    let source = &surface.frame;
+    let copy_width = source.width.min(area.width);
+    let copy_height = source.height.min(area.height);
+    let hyperlink_base = target.hyperlinks.len() as u32;
+    target.hyperlinks.extend(source.hyperlinks.iter().cloned());
+    let mut cursor = 0;
+    for row in 0..copy_height {
+        let start = usize::from(row) * usize::from(source.width);
+        let Some(source_row) = source.cells.get(start..start + usize::from(copy_width)) else {
+            continue;
+        };
+        let global_y = area.y + row;
+        let start = usize::from(global_y) * usize::from(target.width);
+        let Some(target_row) = target
+            .cells
+            .get_mut(start..start + usize::from(target.width))
+        else {
+            continue;
+        };
+        let max = copy_width.min(target.width.saturating_sub(area.x));
+        if max == 0 {
+            continue;
+        }
+        while spans.get(cursor).is_some_and(|span| span.row < row) {
+            cursor += 1;
+        }
+        let mut col = 0;
+        while let Some(span) = spans.get(cursor).filter(|span| span.row == row) {
+            cursor += 1;
+            let from = span.from.min(max);
+            let to = span.to.min(max);
+            if from < col || to <= from {
+                continue;
+            }
+            copy_plain_cells(
+                &mut target_row[usize::from(area.x + col)..usize::from(area.x + from)],
+                &source_row[usize::from(col)..usize::from(from)],
+                hyperlink_base,
+                source.hyperlinks.len(),
+            );
+            let header = surface.panes.get(span.pane).and_then(|pane| {
+                team.modern
+                    .headers
+                    .get(&pane.pane_id)
+                    .map(|header| (pane, header))
+            });
+            let Some((pane, header)) = header else {
+                copy_plain_cells(
+                    &mut target_row[usize::from(area.x + from)..usize::from(area.x + to)],
+                    &source_row[usize::from(from)..usize::from(to)],
+                    hyperlink_base,
+                    source.hyperlinks.len(),
+                );
+                col = to;
+                continue;
+            };
+            let prepared = prepare(header, &pane.pane_id, ctx);
+            let border = &source_row[usize::from(from.saturating_sub(1))];
+            let mut end = to;
+            let mut clear = true;
+            for x in from..to {
+                let source_cell = &source_row[usize::from(x)];
+                let target_cell = &mut target_row[usize::from(area.x + x)];
+                if clear && is_stop(&source_cell.symbol) {
+                    clear = false;
+                    end = x;
+                }
+                if clear {
+                    target_cell
+                        .symbol
+                        .reserve(span.bytes.saturating_sub(target_cell.symbol.len()));
+                    target_cell.symbol.clear();
+                    target_cell.symbol.push('─');
+                    target_cell.fg = border.fg;
+                    target_cell.bg = prepared.background().unwrap_or(border.bg);
+                    target_cell.modifier = border.modifier;
+                    target_cell.hyperlink = None;
+                    target_cell.skip = false;
+                } else {
+                    copy_plain_cells(
+                        std::slice::from_mut(target_cell),
+                        std::slice::from_ref(source_cell),
+                        hyperlink_base,
+                        source.hyperlinks.len(),
+                    );
+                }
+            }
+            paint_prepared(
+                target_row,
+                usize::from(area.x + from),
+                usize::from(area.x + end),
+                header,
+                ctx,
+                prepared,
+            );
+            col = to;
+        }
+        copy_plain_cells(
+            &mut target_row[usize::from(area.x + col)..usize::from(area.x + max)],
+            &source_row[usize::from(col)..usize::from(max)],
+            hyperlink_base,
+            source.hyperlinks.len(),
+        );
+    }
+    finish_surface_blit(target, source, area, copy_width, copy_height);
+}
+
+/// Copy a popup below the flow view without shrinking reserved output cells.
+fn blit_pane_surface_reusing(target: &mut FrameData, source: &FrameData, area: Rect) {
+    let width = source
+        .width
+        .min(area.width)
+        .min(target.width.saturating_sub(area.x));
+    let height = source
+        .height
+        .min(area.height)
+        .min(target.height.saturating_sub(area.y));
+    let base = target.hyperlinks.len() as u32;
+    let links = source.hyperlinks.len();
+    target.hyperlinks.extend(source.hyperlinks.iter().cloned());
+    for row in 0..height {
+        let start = usize::from(row) * usize::from(source.width);
+        let output = usize::from(area.y + row) * usize::from(target.width) + usize::from(area.x);
+        let len = usize::from(width);
+        if let (Some(source), Some(target)) = (
+            source.cells.get(start..start + len),
+            target.cells.get_mut(output..output + len),
+        ) {
+            copy_plain_cells(target, source, base, links);
+        }
+    }
+    finish_surface_blit(target, source, area, width, height);
+}
+
+fn copy_plain_cells(
+    target: &mut [crate::protocol::CellData],
+    source: &[crate::protocol::CellData],
+    hyperlink_base: u32,
+    hyperlink_count: usize,
+) {
+    for (target, source) in target.iter_mut().zip(source) {
+        target.symbol.clone_from(&source.symbol);
+        target.fg = source.fg;
+        target.bg = source.bg;
+        target.modifier = source.modifier;
+        target.skip = source.skip;
+        target.hyperlink = source
+            .hyperlink
+            .filter(|&index| (index as usize) < hyperlink_count)
+            .map(|index| hyperlink_base + index);
+    }
+}
+
+fn finish_surface_blit(
+    target: &mut FrameData,
+    source: &FrameData,
+    area: Rect,
+    copy_width: u16,
+    copy_height: u16,
+) {
+    target.cursor = source.cursor.as_ref().and_then(|cursor| {
+        (cursor.x < copy_width && cursor.y < copy_height).then(|| crate::protocol::CursorState {
+            x: area.x + cursor.x,
+            y: area.y + cursor.y,
+            visible: cursor.visible,
+            shape: cursor.shape,
+        })
+    });
+    target.graphics.clear();
 }
 
 fn blit_pane_surface_cells(

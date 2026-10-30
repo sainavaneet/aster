@@ -192,6 +192,11 @@ impl FlowLayout {
         attention: Option<&PaneAttention>,
     ) {
         let live = |pane_id: &str, state: StateKind| {
+            if let Some(waiting @ (StateKind::Approval | StateKind::Blocked)) =
+                attention.and_then(|a| a.state(pane_id))
+            {
+                return Some(waiting);
+            }
             let agent = snapshot
                 .agents
                 .iter()
@@ -289,6 +294,9 @@ impl FlowLayout {
 fn step_state(task: &OrbitShellActiveTask, step: &crate::protocol::OrbitShellStep) -> StateKind {
     match step.state.as_str() {
         "active" => {
+            if step.awaiting_approval == Some(true) {
+                return StateKind::Approval;
+            }
             let current = match step.worker_terminal_id.as_deref() {
                 Some(worker) => worker == task.worker_terminal_id,
                 None => step.parallel.is_none() && step.integrate.is_none(),
@@ -350,6 +358,7 @@ mod tests {
 
     fn step(index: u16, state: &str) -> OrbitShellStep {
         OrbitShellStep {
+            awaiting_approval: None,
             index,
             member: format!("m{index}"),
             kind: "codex".into(),
