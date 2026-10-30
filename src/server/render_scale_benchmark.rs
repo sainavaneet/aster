@@ -24,6 +24,7 @@ struct StageStats {
     max_us: u128,
 }
 
+#[derive(Clone, Copy)]
 struct PipelineStats {
     server: StageStats,
     client: StageStats,
@@ -49,6 +50,11 @@ impl RenderPipeline {
         let mut snapshot =
             super::client_shell::snapshot(&pipeline.app, "bench-boot", 1, None, None);
         let mut orbit = bench_orbit();
+        if std::env::var_os("ASTER_BENCH_LONG_GRAPHEMES").is_some() {
+            for task in &mut orbit.active_tasks {
+                task.title.push_str(" 👩‍👩‍👧‍👦 👩‍👩‍👧‍👦‍👩‍👩‍👧‍👦");
+            }
+        }
         attach_panes(&pipeline.app, &mut orbit, &mut snapshot);
         snapshot.orbit = Some(orbit);
         pipeline.client.set_snapshot(Box::new(snapshot));
@@ -182,10 +188,11 @@ fn active_panes(pane_count: usize) -> Vec<Workspace> {
 
 fn summarize(mut samples: Vec<Duration>) -> StageStats {
     samples.sort_unstable();
+    let count = samples.len();
     StageStats {
-        median_us: samples[SAMPLE_COUNT / 2].as_micros(),
-        p95_us: samples[(SAMPLE_COUNT - 1) * 95 / 100].as_micros(),
-        max_us: samples[SAMPLE_COUNT - 1].as_micros(),
+        median_us: samples[count / 2].as_micros(),
+        p95_us: samples[(count - 1) * 95 / 100].as_micros(),
+        max_us: samples[count - 1].as_micros(),
     }
 }
 
@@ -462,36 +469,77 @@ async fn transient_chrome_profile_draws_the_toast_and_the_mode_bar() {
 /// Client composition with the Orbit team on screen, classic against modern,
 /// at the same pane counts as the other profiles.
 fn print_orbit_profiles() {
-    for (label, style) in [
-        ("classic", crate::config::UiStyleConfig::Classic),
-        ("modern", crate::config::UiStyleConfig::Modern),
-    ] {
-        let mut config = Config::default();
-        config.ui.style = style;
-        let rows = CARDINALITIES.map(|count| {
-            (
-                count,
-                profile_pipeline(RenderPipeline::with_orbit(active_panes(count), &config)),
-            )
-        });
-        println!("orbit team (4 roles x 4 members, 32 tasks), {label} style");
-        print_stage("client shell composition", &rows, |stats| stats.client);
-        let rows = CARDINALITIES.map(|count| {
-            let mut pipeline = RenderPipeline::with_orbit(active_panes(count), &config);
-            pipeline.client.show_bench_chrome();
-            (count, profile_pipeline(pipeline))
-        });
-        println!("orbit team with a visible toast, copy feedback and the mode bar, {label} style");
-        print_stage("client shell composition", &rows, |stats| stats.client);
-        let rows = CARDINALITIES.map(|count| {
-            let mut pipeline = RenderPipeline::with_orbit(active_panes(count), &config);
-            pipeline.compose_time = Some(pipeline.client.show_bench_transition());
-            (count, profile_pipeline(pipeline))
-        });
-        println!(
-            "orbit team with fixed entry-phase toast, copy feedback and mode bar, {label} style"
-        );
-        print_stage("client shell composition", &rows, |stats| stats.client);
+    let seconds = std::env::var("ASTER_PERF_SAMPLE_SECONDS")
+        .ok()
+        .and_then(|s| s.parse::<u64>().ok())
+        .unwrap_or(0);
+    let titles = std::env::var_os("ASTER_BENCH_LONG_GRAPHEMES").is_some();
+    for profile in 0..3 {
+        // All counts and styles share the same observation window. Rotate their
+        // order each round so frequency/temperature drift cannot favor a case.
+        let mut cases = Vec::new();
+        for (label, style) in [
+            ("classic", crate::config::UiStyleConfig::Classic),
+            ("modern", crate::config::UiStyleConfig::Modern),
+        ] {
+            for count in CARDINALITIES {
+                let mut config = Config::default();
+                config.ui.style = style;
+                let mut pipeline = RenderPipeline::with_orbit(active_panes(count), &config);
+                if profile > 0 {
+                    pipeline.client.show_bench_chrome();
+                }
+                if profile == 2 {
+                    pipeline.compose_time = Some(pipeline.client.show_bench_transition());
+                }
+                for _ in 0..WARMUP_COUNT {
+                    black_box(pipeline.render_once());
+                }
+                cases.push((label, count, pipeline, Vec::new(), Vec::new(), Vec::new()));
+            }
+        }
+        let started = Instant::now();
+        let mut rounds = 0;
+        while rounds < SAMPLE_COUNT || started.elapsed() < Duration::from_secs(seconds) {
+            for offset in 0..cases.len() {
+                let index = (rounds + offset) % cases.len();
+                let (_, _, pipeline, server, client, total) = &mut cases[index];
+                let (a, b) = pipeline.render_once();
+                server.push(a);
+                client.push(b);
+                total.push(a + b);
+            }
+            rounds += 1;
+        }
+        println!("paired orbit window profile={profile} seconds={seconds} rounds={rounds} long_graphemes={titles}");
+        let rows = cases
+            .into_iter()
+            .map(|(label, count, _, server, client, total)| {
+                (
+                    label,
+                    count,
+                    PipelineStats {
+                        server: summarize(server),
+                        client: summarize(client),
+                        total: summarize(total),
+                    },
+                )
+            })
+            .collect::<Vec<_>>();
+        for label in ["classic", "modern"] {
+            let values = rows
+                .iter()
+                .filter(|(style, _, _)| *style == label)
+                .map(|(_, count, stats)| (*count, *stats))
+                .collect::<Vec<_>>();
+            let description = match profile {
+                0 => "orbit team (4 roles x 4 members, 32 tasks)",
+                1 => "orbit team with a visible toast, copy feedback and the mode bar",
+                _ => "orbit team with fixed entry-phase toast, copy feedback and mode bar",
+            };
+            println!("{description}, {label} style");
+            print_stage("client shell composition", &values, |stats| stats.client);
+        }
     }
 }
 

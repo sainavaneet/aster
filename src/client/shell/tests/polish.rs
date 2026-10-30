@@ -258,7 +258,17 @@ fn fused_header_copy_matches_the_characterized_copy_then_paint_pipeline() {
         expected
             .hyperlinks
             .push("https://example.invalid/chrome".into());
-        let mut actual = expected.clone();
+        let mut actual = super::super::composition::frame_for_composition(
+            &buffer,
+            &super::super::composition::FrameCapacity::for_surface(
+                &surface,
+                area,
+                &state.header_copies,
+                None,
+                true,
+            ),
+        );
+        actual.hyperlinks = expected.hyperlinks.clone();
         let mut hits = state.hits.panes.clone();
         for hit in &mut hits {
             let pane = surface
@@ -317,7 +327,10 @@ fn flow_popup_application_is_allocation_free_and_clears_hidden_links() {
     let area = Rect::new(0, 0, 120, 40);
     let popup = super::super::render::flow_popup(area).unwrap();
     let buffer = Buffer::empty(area);
-    let mut frame = frame_for_composition(&buffer, Some(popup), true);
+    let mut frame = frame_for_composition(
+        &buffer,
+        &super::super::composition::FrameCapacity::empty(true, Some(popup)),
+    );
     frame.hyperlinks.push("https://example.com".into());
     for cell in &mut frame.cells {
         cell.hyperlink = Some(0);
@@ -334,7 +347,12 @@ fn flow_popup_application_is_allocation_free_and_clears_hidden_links() {
     // A toast/search layer before the flow must not discard popup capacity.
     let underlay = FrameData::from_ratatui_buffer(&Buffer::empty(Rect::new(0, 0, 8, 2)), None);
     let count = super::alloc_count::allocations(|| {
-        super::super::composition::replace_composed_frame(&mut frame, &buffer, None, Some(popup));
+        super::super::composition::replace_composed_frame(
+            &mut frame,
+            &buffer,
+            None,
+            &super::super::composition::FrameCapacity::empty(true, Some(popup)),
+        );
         super::super::blit_pane_surface_reusing(
             &mut frame,
             &underlay,
@@ -503,8 +521,13 @@ fn ordinary_unicode_border_rows_reuse_the_initial_frame_allocation() {
         let source = bordered_surface((104, 29), &panes, &ids[0]);
         let mut output = super::super::composition::frame_for_composition(
             &Buffer::empty(Rect::new(0, 0, 104, 29)),
-            None,
-            true,
+            &super::super::composition::FrameCapacity::for_surface(
+                &source,
+                Rect::new(0, 0, 104, 29),
+                &[],
+                None,
+                true,
+            ),
         );
         let allocations = super::alloc_count::allocations(|| {
             super::super::blit_pane_surface_modern(
@@ -570,4 +593,157 @@ fn topology_digest_is_read_without_allocations_and_tracks_identity_not_output() 
     }
     state.reset_endpoint_projection();
     assert_eq!(state.current_pane_topology(), None);
+}
+#[test]
+fn review_long_grapheme_headers_do_not_allocate_during_fused_blit() {
+    let mut snapshot = lane_snapshot();
+    for task in &mut snapshot.orbit.as_mut().unwrap().active_tasks {
+        task.title.push_str("👩‍👩‍👧‍👦");
+    }
+    let mut state = modern_state(26, snapshot);
+    let surface = bordered_surface(
+        (104, 29),
+        &[("pane_3", 0, 52), ("pane_2", 52, 52)],
+        "pane_3",
+    );
+    state.set_pane_surface(surface.clone());
+    let buffer = Buffer::empty(Rect::new(0, 0, 130, 30));
+    let mut target = super::super::composition::frame_for_composition(
+        &buffer,
+        &super::super::composition::FrameCapacity::for_surface(
+            &surface,
+            Rect::new(26, 1, 104, 29),
+            &state.header_copies,
+            None,
+            true,
+        ),
+    );
+    let now = std::time::Instant::now();
+    let ctx = super::super::team_sidebar::TeamRenderContext {
+        config: &state.config,
+        endpoint_id: &state.active_endpoint_id,
+        animation: super::super::animation::AnimationFrame::new(
+            &state.animations,
+            state.config.animations,
+            now,
+        ),
+        focused_pane_id: Some("pane_3"),
+        now_unix_ms: 10_000_000_000,
+        recent: &state.recent,
+        now,
+    };
+    let team = state.team_sidebar.as_ref().unwrap();
+    let count = super::alloc_count::allocations(|| {
+        super::super::blit_pane_surface_modern(
+            &mut target,
+            &surface,
+            Rect::new(26, 1, 104, 29),
+            &state.header_copies,
+            team,
+            &ctx,
+        )
+    });
+    assert_eq!(
+        count, 0,
+        "header copy allocates after initial output-cell construction"
+    );
+}
+
+#[test]
+fn all_surface_copies_preserve_long_symbols_without_growing_cells() {
+    let family = "👩‍👩‍👧‍👦‍👩‍👩‍👧‍👦";
+    let long = format!("☀\u{fe0f}{}", "\u{301}".repeat(128));
+    let mut state = modern_state(26, lane_snapshot());
+    let mut source = bordered_surface(
+        (104, 29),
+        &[("pane_3", 0, 52), ("pane_2", 52, 52)],
+        "pane_3",
+    );
+    source.frame.cells[211].symbol = family.into();
+    let mut popup_frame =
+        FrameData::from_ratatui_buffer(&Buffer::empty(Rect::new(0, 0, 6, 1)), None);
+    popup_frame.cells[0].symbol = long.clone();
+    source.popup = Some(Box::new(crate::protocol::ClientShellPopupSurface {
+        terminal_id: "popup".into(),
+        title: "popup".into(),
+        width: Some(crate::protocol::ClientShellPopupSize::Cells(8)),
+        height: Some(crate::protocol::ClientShellPopupSize::Cells(3)),
+        frame: popup_frame,
+        mouse_reporting: false,
+        sgr_pixel_mouse: false,
+        pixel_width: 0,
+        pixel_height: 0,
+    }));
+    state.set_pane_surface(source.clone());
+    let area = Rect::new(7, 3, 104, 29);
+    let popup = crate::popup_size::resolve_popup_geometry(
+        Some(crate::popup_size::PopupSize::Cells(8)),
+        Some(crate::popup_size::PopupSize::Cells(3)),
+        area,
+    )
+    .unwrap();
+    let mut buffer = Buffer::empty(Rect::new(0, 0, 120, 40));
+    buffer[(0, 0)].set_symbol(family);
+    let plan = super::super::composition::FrameCapacity::for_surface(
+        &source,
+        area,
+        &state.header_copies,
+        None,
+        false,
+    );
+    let mut output = super::super::composition::frame_for_composition(&buffer, &plan);
+    let bar = output.cells[..1].to_vec();
+    let plan = plan.with_backup(Some((Rect::new(0, 0, 1, 1), &bar)));
+    super::super::composition::replace_composed_frame(
+        &mut output,
+        &Buffer::empty(buffer.area),
+        None,
+        &plan,
+    );
+    let now = std::time::Instant::now();
+    let ctx = super::super::team_sidebar::TeamRenderContext {
+        config: &state.config,
+        endpoint_id: &state.active_endpoint_id,
+        animation: super::super::animation::AnimationFrame::new(
+            &state.animations,
+            state.config.animations,
+            now,
+        ),
+        focused_pane_id: None,
+        now_unix_ms: 10_000_000_000,
+        recent: &state.recent,
+        now,
+    };
+    assert_eq!(
+        output.cells[119].symbol.capacity(),
+        4,
+        "large symbols do not amplify every output cell"
+    );
+    let count = super::alloc_count::allocations(|| {
+        super::super::blit_pane_surface_modern(
+            &mut output,
+            &source,
+            area,
+            &state.header_copies,
+            state.team_sidebar.as_ref().unwrap(),
+            &ctx,
+        );
+        super::super::blit_pane_surface_reusing(
+            &mut output,
+            &source.popup.as_ref().unwrap().frame,
+            popup.inner,
+        );
+        super::super::composition::restore_mode_bar(
+            &mut output,
+            Some(Rect::new(0, 0, 1, 1)),
+            Some(&bar),
+        );
+    });
+    assert_eq!(count, 0);
+    assert_eq!(output.cells[5 * 120 + 10].symbol, family);
+    assert_eq!(
+        output.cells[usize::from(popup.inner.y) * 120 + usize::from(popup.inner.x)].symbol,
+        long
+    );
+    assert_eq!(output.cells[0].symbol, family);
 }

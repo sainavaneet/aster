@@ -1736,3 +1736,83 @@ not with the earlier debug-build numbers.
   repeats and optimized open-flow profile pass. The performance tables retain
   the budget caveats rather than treating supporting wall-clock measurements
   as deterministic CI limits.
+
+### Phase 6 review round 1: output-cell capacity and sustained profiling
+
+- Ported the reviewer's production-path regression from
+  `/tmp/aster-p6-cache-review.rs` into `tests/polish.rs`. It failed with exactly
+  **100 allocations** after output construction, then passed with **zero**.
+  The earlier four-byte scalar reservation did not cover a cached 25-byte family
+  emoji. The per-cell `reserve` in the fused blit was incorrect and is removed.
+- Output construction now takes a capacity plan for visible cached header spans,
+  raw pane cells, server-popup cells, flow cells and mode-bar backups. It allocates
+  each symbol once with enough room for all later copies at that position.
+  Header-capacity spans are skipped entirely when four bytes already suffice;
+  ordinary rows do not visit header spans. Hidden workers and large isolated
+  surface symbols do not enlarge unrelated content cells.
+- The common symbol copier never grows storage. Main panes, popup panes, overlay
+  copies and mode-bar restoration use that copier. Replacing an output buffer
+  constructs its cells with the same plan; legacy URI normalization is preserved.
+  The now-unused internal `FrameData` replacement implementation moved into the
+  client allocator rather than changing any codec, wire field or endpoint method.
+- The audit also reproduced lost backup capacity after a classic overlay erased
+  a long mode-bar glyph. Including the backup in replacement-buffer construction
+  fixes that restore case. Cold tests preserve complete long source/header
+  graphemes while counting zero allocations in the subsequent copies. They cover
+  a family emoji, a longer connected ZWJ family, raw pane content, popup content
+  and erased/restored chrome.
+- Cached modern tab activity, team/lanes, flow, toasts, banners, feedback and mode
+  bars already write through the bounded inline writer (24-byte cell storage).
+  Extended their cold allocation corpus to include connected long ZWJ families,
+  not only ASCII or CJK; full pane-header graphemes remain unabridged. Existing
+  classic and modern snapshot fixtures are unchanged.
+- The previous render-scale sampler ignored `ASTER_PERF_SAMPLE_SECONDS` and used
+  only 40 samples. The main Orbit profiles now honor a 60-second observation
+  window. Both styles and all three counts run throughout that same window;
+  rotating their order reduces frequency/temperature drift between cases. Each
+  profile prints its actual window and round count. Five warmups precede each
+  case; unset/zero duration retains the short 40-round run. An optional benchmark
+  switch adds family and connected-ZWJ titles, without changing product config.
+- One early profiling attempt was interrupted during this audit before its first
+  paired Orbit window finished, to include the overlay-backup fix. It supplies no
+  completed paired result. Final sustained measurements below supersede the
+  original Phase 6 short-run budget interpretation; no samples are discarded from
+  a completed run and no timing assertion is introduced into CI.
+
+
+Sustained optimized client-composition medians (microseconds, counts 1/15/50).
+Gap = modern N:1 ratio minus classic N:1 ratio; budget is +0.05. Each
+profile below ran all six cases for a shared 60-second window. Runs 1–3 use
+normal titles; `emoji` uses long family/connected-ZWJ titles.
+
+| Run | Profile | Classic 1/15/50 | Modern 1/15/50 | 15:1 gap | 50:1 gap |
+|---|---|---|---|---|---|
+| 1 | team | 141/144/147 | 139/146/149 | +0.0291 | +0.0294 |
+| 1 | settled | 421/430/438 | 271/285/291 | +0.0303 | +0.0334 |
+| 1 | entry | 424/434/441 | 273/289/295 | +0.0350 | +0.0405 |
+| 2 | team | 142/145/148 | 140/147/150 | +0.0289 | +0.0292 |
+| 2 | settled | 428/437/444 | 273/288/294 | +0.0339 | +0.0395 |
+| 2 | entry | 419/429/436 | 269/285/290 | +0.0356 | +0.0375 |
+| 3 | team | 141/145/148 | 140/147/150 | +0.0216 | +0.0218 |
+| 3 | settled | 418/428/436 | 265/279/286 | +0.0289 | +0.0362 |
+| 3 | entry | 421/431/438 | 267/283/289 | +0.0362 | +0.0420 |
+| emoji | team | 142/145/148 | 141/147/152 | +0.0214 | +0.0358 |
+| emoji | settled | 419/428/435 | 273/286/293 | +0.0261 | +0.0351 |
+| emoji | entry | 419/429/436 | 272/288/295 | +0.0350 | +0.0440 |
+
+All twelve completed windows meet the +0.05 budget. The earlier short-run
+excursions are not reproduced by these repeated paired sustained measurements;
+this is supporting timing evidence alongside the deterministic allocation tests.
+The complete recipe in run 1 passed six benchmark tests and retained the known
+pre-existing `native_file_render_scale_profile` source-retention failure; repeat
+runs selected the main optimized render-scale profile and passed. No completed
+paired run was excluded.
+
+Verification: fmt and all-target clippy passed; architecture tests 14/14,
+maintenance tests 151 Python plus 5 workflow tests, integration assets 28/28,
+config-reference check and docs-contract 7/7 passed. A complete native run passed
+4746 tests (17 skipped). The final repeat passed 4745 and hit the previously
+observed Orbit parallel-assignment flake (`pa has no assignment`); its isolated
+retry passed. Both outcomes are retained. Windows cross-lint remains unavailable
+because the local Windows SDK libc configuration is absent. Classic goldens,
+all endpoint fixtures, dependency manifests and classic P15 code are unchanged.

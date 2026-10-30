@@ -98,7 +98,7 @@ fn toast_banner_feedback_and_diagnostic_draw_without_allocating() {
     let config = config("catppuccin-latte", "unicode");
     let area = Rect::new(0, 0, 80, 5);
     let mut buffer = Buffer::empty(area);
-    let text = "日本語 👩‍👩‍👧‍👦";
+    let text = "日本語 👩‍👩‍👧‍👦 👩‍👩‍👧‍👦‍👩‍👩‍👧‍👦";
     let feedback = CopyFeedback {
         message: text.into(),
     };
@@ -386,7 +386,7 @@ fn the_modern_mode_bar_draws_without_allocating_in_every_mode() {
     let mut searching = copy_mode_fixture();
     searching.search_prompt = Some(ClientCopySearchPrompt {
         direction: crate::api::schema::PaneCopySearchDirection::Backward,
-        query: TextEditor::from("needle 👩‍👩‍👧‍👦"),
+        query: TextEditor::from("needle 👩‍👩‍👧‍👦 👩‍👩‍👧‍👦‍👩‍👩‍👧‍👦"),
     });
     let mut matching = copy_mode_fixture();
     matching.search_query = "needle".into();

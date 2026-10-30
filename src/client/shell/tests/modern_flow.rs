@@ -552,7 +552,7 @@ fn an_open_flow_closes_when_the_flow_view_or_the_modern_style_goes_away() {
 
 #[test]
 fn modern_draw_paths_never_allocate_even_with_wide_graphemes() {
-    const FAMILY: &str = "👩‍👩‍👧‍👦👩‍👩‍👧‍👦";
+    const FAMILY: &str = "👩‍👩‍👧‍👦👩‍👩‍👧‍👦‍👩‍👩‍👧‍👦";
     let mut projected = flow_snapshot();
     {
         let orbit = projected.orbit.as_mut().unwrap();
@@ -575,7 +575,7 @@ fn modern_draw_paths_never_allocate_even_with_wide_graphemes() {
         &[("pane_3", 0, 50), ("pane_2", 50, 50)],
         "pane_3",
     ));
-    let frame = state.compose(130, ROWS).unwrap().frame;
+    state.compose(130, ROWS).unwrap();
     let mut buffer = Buffer::empty(Rect::new(0, 0, 130, ROWS));
     let team = state.team_sidebar.as_ref().unwrap();
     let popup = super::super::render::flow_popup(buffer.area).unwrap();
@@ -610,7 +610,26 @@ fn modern_draw_paths_never_allocate_even_with_wide_graphemes() {
         recent: &state.recent,
         now: std::time::Instant::now(),
     };
-    let mut painted = frame.clone();
+    let surface = state.pane_surface.as_ref().unwrap();
+    let origin = state.layout(130, ROWS).pane_surface;
+    let mut painted = super::super::composition::frame_for_composition(
+        &buffer,
+        &super::super::composition::FrameCapacity::for_surface(
+            surface,
+            origin,
+            &state.header_copies,
+            None,
+            true,
+        ),
+    );
+    super::super::blit_pane_surface_modern(
+        &mut painted,
+        surface,
+        origin,
+        &state.header_copies,
+        team,
+        &ctx,
+    );
     let activity = state
         .tab_activity
         .values()
@@ -647,6 +666,17 @@ fn modern_draw_paths_never_allocate_even_with_wide_graphemes() {
                 hits,
             );
         }
+        for (index, line) in team.rows.lines.iter().enumerate() {
+            super::super::modern::draw::lanes::render_line(
+                buffer,
+                Rect::new(0, index as u16 % 30, 36, 3),
+                index,
+                line,
+                team,
+                &ctx,
+                hits,
+            );
+        }
         super::super::modern::draw::tabs::render_suffix(
             buffer,
             Rect::new(60, 0, 20, 1),
@@ -663,7 +693,14 @@ fn modern_draw_paths_never_allocate_even_with_wide_graphemes() {
         super::super::modern::draw::pane_header::paint(painted, &state.hits.panes, team, &ctx);
     };
     // The first pass sizes the reusable hit lists; the second must not allocate.
-    draw_all(&mut buffer, &mut steps, &mut tasks, &mut hits, &mut painted);
+    let cold = super::alloc_count::allocations(|| {
+        draw_all(&mut buffer, &mut steps, &mut tasks, &mut hits, &mut painted)
+    });
+    assert_eq!(cold, 0, "cold long-grapheme cached-span draws allocate");
+    assert!(
+        painted.cells.iter().any(|cell| cell.symbol == "👩‍👩‍👧‍👦‍👩‍👩‍👧‍👦"),
+        "header must retain the full cached grapheme"
+    );
     let count = super::alloc_count::allocations(|| {
         draw_all(&mut buffer, &mut steps, &mut tasks, &mut hits, &mut painted);
     });

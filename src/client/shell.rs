@@ -266,7 +266,7 @@ fn panel_contrast_fg(palette: &Palette) -> ratatui::style::Color {
 }
 
 fn blit_pane_surface(target: &mut FrameData, source: &FrameData, area: Rect) {
-    blit_pane_surface_cells(target, source, area, |cell, _, _| cell.clone());
+    blit_pane_surface_reusing(target, source, area);
 }
 
 /// Uses the existing cell-copy allocation only for cached visible header spans.
@@ -309,8 +309,8 @@ fn blit_pane_surface_with_headers(
     });
 }
 
-/// Copy ordinary rows directly. Header rows reuse that copy to reserve symbols,
-/// discover junction stops and clear residue before the allocation-free painter.
+/// Copy ordinary rows directly. Header rows reuse that copy to discover junction
+/// stops and clear residue before the allocation-free painter.
 fn blit_pane_surface_modern(
     target: &mut FrameData,
     surface: &crate::protocol::PaneSurfaceFrame,
@@ -388,9 +388,6 @@ fn blit_pane_surface_modern(
                     end = x;
                 }
                 if clear {
-                    target_cell
-                        .symbol
-                        .reserve(span.bytes.saturating_sub(target_cell.symbol.len()));
                     target_cell.symbol.clear();
                     target_cell.symbol.push('─');
                     target_cell.fg = border.fg;
@@ -454,6 +451,20 @@ fn blit_pane_surface_reusing(target: &mut FrameData, source: &FrameData, area: R
     finish_surface_blit(target, source, area, width, height);
 }
 
+/// A copy never reserves storage. Its output constructor owns capacity planning.
+fn copy_symbol_in_place(target: &mut String, source: &str) {
+    debug_assert!(
+        target.capacity() >= source.len(),
+        "output cell capacity was not prepared"
+    );
+    target.clear();
+    if target.capacity() >= source.len() {
+        target.push_str(source);
+    } else if target.capacity() > 0 {
+        target.push(' ');
+    }
+}
+
 fn copy_plain_cells(
     target: &mut [crate::protocol::CellData],
     source: &[crate::protocol::CellData],
@@ -461,7 +472,7 @@ fn copy_plain_cells(
     hyperlink_count: usize,
 ) {
     for (target, source) in target.iter_mut().zip(source) {
-        target.symbol.clone_from(&source.symbol);
+        copy_symbol_in_place(&mut target.symbol, &source.symbol);
         target.fg = source.fg;
         target.bg = source.bg;
         target.modifier = source.modifier;
@@ -491,6 +502,7 @@ fn finish_surface_blit(
     target.graphics.clear();
 }
 
+#[cfg(test)]
 fn blit_pane_surface_cells(
     target: &mut FrameData,
     source: &FrameData,

@@ -836,33 +836,6 @@ impl FrameData {
         }
     }
 
-    pub(crate) fn replace_from_ratatui_buffer_preserving_effects(
-        &mut self,
-        buffer: &ratatui::buffer::Buffer,
-        cursor: Option<CursorState>,
-    ) {
-        let width = self.width;
-        let hyperlinks = if width == 0 {
-            Vec::new()
-        } else {
-            self.cells
-                .iter()
-                .enumerate()
-                .filter_map(|(index, cell)| {
-                    let uri = self.hyperlinks.get(cell.hyperlink? as usize)?;
-                    let x = u16::try_from(index % usize::from(width)).ok()?;
-                    let y = u16::try_from(index / usize::from(width)).ok()?;
-                    Some(((x, y), cell.symbol.clone(), uri.clone()))
-                })
-                .collect::<Vec<_>>()
-        };
-        let graphics = std::mem::take(&mut self.graphics);
-        let mut replacement =
-            Self::from_ratatui_buffer_with_hyperlinks(buffer, cursor, &hyperlinks);
-        replacement.graphics = graphics;
-        *self = replacement;
-    }
-
     /// Reconstructs a ratatui `Buffer` from this frame data.
     ///
     /// Returns `None` if the cells vector length doesn't match `width * height`.

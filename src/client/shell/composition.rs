@@ -1,6 +1,6 @@
 use super::*;
 
-fn restore_mode_bar(
+pub(super) fn restore_mode_bar(
     frame: &mut FrameData,
     bar: Option<Rect>,
     cells: Option<&[crate::protocol::CellData]>,
@@ -9,7 +9,13 @@ fn restore_mode_bar(
         return;
     };
     let start = usize::from(bar.y) * usize::from(frame.width) + usize::from(bar.x);
-    frame.cells[start..start + usize::from(bar.width)].clone_from_slice(cells);
+    let count = frame.hyperlinks.len();
+    super::copy_plain_cells(
+        &mut frame.cells[start..start + usize::from(bar.width)],
+        cells,
+        0,
+        count,
+    );
     if frame
         .cursor
         .as_ref()
@@ -409,15 +415,23 @@ impl ClientShellState {
         let flow_area = matches!(self.overlay, Some(ClientShellOverlay::OrbitFlow(_)))
             .then(|| render::flow_popup(buffer.area))
             .flatten();
-        let mut frame = frame_for_composition(
-            &buffer,
+        let capacity = FrameCapacity::for_surface(
+            surface,
+            layout.pane_surface,
+            if self.config.chrome.is_modern() {
+                &self.header_copies
+            } else {
+                &[]
+            },
             flow_area,
-            self.config.chrome.is_modern() && self.team_sidebar.is_some(),
+            self.config.chrome.is_modern(),
         );
+        let mut frame = frame_for_composition(&buffer, &capacity);
         let mode_bar_cells = mode_bar.map(|bar| {
             let start = usize::from(bar.y) * usize::from(frame.width) + usize::from(bar.x);
             frame.cells[start..start + usize::from(bar.width)].to_vec()
         });
+        let capacity = capacity.with_backup(mode_bar.zip(mode_bar_cells.as_deref()));
         if let (true, Some(team)) = (self.config.chrome.is_modern(), self.team_sidebar.as_ref()) {
             blit_pane_surface_modern(
                 &mut frame,
@@ -508,7 +522,7 @@ impl ClientShellState {
                     );
                 }
             }
-            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
+            replace_composed_frame(&mut frame, &composed, cursor, &capacity);
         }
         self.render_link_hover(&mut frame, &mut occlusion);
         if self.mode == ClientShellMode::Copy {
@@ -541,7 +555,7 @@ impl ClientShellState {
                                 .bg(self.config.palette.accent)
                                 .add_modifier(Modifier::BOLD),
                         );
-                        replace_composed_frame(&mut frame, &composed, None, flow_area);
+                        replace_composed_frame(&mut frame, &composed, None, &capacity);
                     } else {
                         frame.cursor = None;
                     }
@@ -638,7 +652,7 @@ impl ClientShellState {
                 };
             }
             occlusion.cover(self.hits.notification_toast);
-            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
+            replace_composed_frame(&mut frame, &composed, cursor, &capacity);
         }
         if let Some(feedback) = self.copy_feedback.as_ref() {
             let cursor = frame.cursor.clone();
@@ -668,7 +682,7 @@ impl ClientShellState {
                 feedback,
                 offset,
             ));
-            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
+            replace_composed_frame(&mut frame, &composed, cursor, &capacity);
         }
         self.hits.popup = None;
         if let Some(popup) = surface.popup.as_deref() {
@@ -690,7 +704,7 @@ impl ClientShellState {
                     &mut composed,
                 );
                 ratatui::widgets::Widget::render(block, geometry.outer, &mut composed);
-                replace_composed_frame(&mut frame, &composed, None, flow_area);
+                replace_composed_frame(&mut frame, &composed, None, &capacity);
                 if flow_area.is_some() {
                     blit_pane_surface_reusing(&mut frame, &popup.frame, geometry.inner);
                 } else {
@@ -755,7 +769,7 @@ impl ClientShellState {
                     phase,
                 );
             }
-            replace_composed_frame(&mut frame, &composed, None, flow_area);
+            replace_composed_frame(&mut frame, &composed, None, &capacity);
             self.hits.panes.clear();
             self.hits.pane_splits.clear();
             self.hits.popup = None;
@@ -873,7 +887,7 @@ impl ClientShellState {
                 self.hits.release_notes_max_scroll = rendered.release_notes_max_scroll;
                 rendered.cursor
             };
-            replace_composed_frame(&mut frame, &composed, cursor, flow_area);
+            replace_composed_frame(&mut frame, &composed, cursor, &capacity);
         }
         if let Some(ClientShellOverlay::Help(help)) = self.overlay.as_mut() {
             help.scroll = help.scroll.min(self.hits.help_max_scroll);
@@ -988,50 +1002,195 @@ fn client_popup_size(size: crate::protocol::ClientShellPopupSize) -> crate::popu
     }
 }
 
-/// Reserve the existing output-cell allocation once, rather than rebuilding the
-/// entire frame through ratatui for the opaque modern flow popup.
-pub(super) fn frame_for_composition(
-    buffer: &Buffer,
-    popup: Option<Rect>,
-    modern_surface: bool,
-) -> FrameData {
-    if popup.is_none() && !modern_surface {
-        return FrameData::from_ratatui_buffer_with_hyperlinks(buffer, None, &[]);
+/// Capacity inputs borrowed while allocating an output buffer. Header spans are
+/// cached on fact/geometry changes; raw source symbols can change with output.
+/// No copy or painter is allowed to grow an existing cell string.
+pub(super) struct FrameCapacity<'a> {
+    surface: Option<(&'a FrameData, Rect)>,
+    popup: Option<(&'a FrameData, Rect)>,
+    backup: Option<(Rect, &'a [crate::protocol::CellData])>,
+    headers: &'a [modern::model::pane_header::HeaderCopy],
+    flow: Option<Rect>,
+    modern: bool,
+}
+
+impl<'a> FrameCapacity<'a> {
+    #[cfg(test)]
+    pub(super) fn empty(modern: bool, flow: Option<Rect>) -> Self {
+        Self {
+            surface: None,
+            popup: None,
+            backup: None,
+            headers: &[],
+            flow,
+            modern,
+        }
     }
-    let cells = buffer
-        .content
+
+    pub(super) fn for_surface(
+        surface: &'a PaneSurfaceFrame,
+        area: Rect,
+        headers: &'a [modern::model::pane_header::HeaderCopy],
+        flow: Option<Rect>,
+        modern: bool,
+    ) -> Self {
+        let popup = surface.popup.as_deref().and_then(|popup| {
+            let geometry = crate::popup_size::resolve_popup_geometry(
+                popup.width.map(client_popup_size),
+                popup.height.map(client_popup_size),
+                area,
+            )?;
+            Some((&popup.frame, geometry.inner))
+        });
+        // The ordinary UTF-8 scalar allocation already covers short clusters.
+        // Do not visit pane spans per output cell when no header needs more.
+        let headers = if headers.iter().any(|span| span.bytes > 4) {
+            headers
+        } else {
+            &[]
+        };
+        Self {
+            surface: Some((&surface.frame, area)),
+            popup,
+            backup: None,
+            headers,
+            flow,
+            modern,
+        }
+    }
+
+    pub(super) fn with_backup(
+        mut self,
+        backup: Option<(Rect, &'a [crate::protocol::CellData])>,
+    ) -> Self {
+        self.backup = backup;
+        self
+    }
+
+    fn backup_bytes(&self, x: u16, y: u16) -> usize {
+        let Some((area, cells)) = self.backup else {
+            return 0;
+        };
+        if !area.contains((x, y).into()) {
+            return 0;
+        }
+        cells
+            .get(usize::from(y - area.y) * usize::from(area.width) + usize::from(x - area.x))
+            .map_or(0, |cell| cell.symbol.len())
+    }
+
+    fn source_bytes(source: Option<(&FrameData, Rect)>, x: u16, y: u16) -> usize {
+        let Some((frame, area)) = source else {
+            return 0;
+        };
+        let (Some(x), Some(y)) = (x.checked_sub(area.x), y.checked_sub(area.y)) else {
+            return 0;
+        };
+        if x >= area.width || y >= area.height || x >= frame.width || y >= frame.height {
+            return 0;
+        }
+        frame
+            .cells
+            .get(usize::from(y) * usize::from(frame.width) + usize::from(x))
+            .map_or(0, |cell| cell.symbol.len())
+    }
+}
+
+pub(super) fn frame_for_composition(buffer: &Buffer, capacity: &FrameCapacity<'_>) -> FrameData {
+    frame_with_links(buffer, capacity, &[])
+}
+
+/// Allocate each symbol once with enough room for every layer which may copy
+/// into it. Walk cached header spans only on their own rows, never panes x cells.
+fn frame_with_links(
+    buffer: &Buffer,
+    capacity: &FrameCapacity<'_>,
+    links: &[((u16, u16), String, String)],
+) -> FrameData {
+    let positions: HashMap<_, _> = links
         .iter()
-        .enumerate()
-        .map(|(index, cell)| {
-            // The existing allocation holds a UTF-8 scalar, so an ordinary
-            // Unicode border never reallocates as pane cardinality grows.
-            let minimum = if popup.is_some_and(|popup| {
-                let x = (index % usize::from(buffer.area.width)) as u16;
-                let y = (index / usize::from(buffer.area.width)) as u16;
-                popup.contains((x, y).into())
-            }) {
+        .map(|(position, symbol, uri)| (*position, (symbol.as_str(), uri.as_str())))
+        .collect();
+    let mut uris = Vec::<String>::new();
+    let mut indices = HashMap::<&str, u32>::new();
+    let mut cells = Vec::with_capacity(buffer.content.len());
+    let origin = capacity.surface.map_or(Rect::default(), |(_, area)| area);
+    let mut span_cursor = 0;
+    for y in buffer.area.y..buffer.area.bottom() {
+        while capacity
+            .headers
+            .get(span_cursor)
+            .is_some_and(|span| origin.y.saturating_add(span.row) < y)
+        {
+            span_cursor += 1;
+        }
+        let mut active = span_cursor;
+        let header_row = capacity
+            .headers
+            .get(active)
+            .is_some_and(|span| origin.y.saturating_add(span.row) == y);
+        for x in buffer.area.x..buffer.area.right() {
+            let header = if header_row {
+                while capacity.headers.get(active).is_some_and(|span| {
+                    origin.y.saturating_add(span.row) == y && origin.x.saturating_add(span.to) <= x
+                }) {
+                    active += 1;
+                }
+                capacity
+                    .headers
+                    .get(active)
+                    .filter(|span| {
+                        origin.y.saturating_add(span.row) == y
+                            && origin.x.saturating_add(span.from) <= x
+                            && x < origin.x.saturating_add(span.to)
+                    })
+                    .map_or(0, |span| span.bytes)
+            } else {
+                0
+            };
+            let cell = &buffer[(x, y)];
+            let inline = if capacity
+                .flow
+                .is_some_and(|area| area.contains((x, y).into()))
+            {
                 24
             } else {
                 4
             };
-            let mut symbol = String::with_capacity(minimum.max(cell.symbol().len()));
+            let bytes = inline
+                .max(header)
+                .max(FrameCapacity::source_bytes(capacity.surface, x, y))
+                .max(FrameCapacity::source_bytes(capacity.popup, x, y))
+                .max(capacity.backup_bytes(x, y))
+                .max(cell.symbol().len());
+            let mut symbol = String::with_capacity(bytes);
             symbol.push_str(cell.symbol());
-            crate::protocol::CellData {
+            let hyperlink = positions
+                .get(&(x, y))
+                .filter(|(symbol, _)| *symbol == cell.symbol())
+                .map(|(_, uri)| {
+                    *indices.entry(uri).or_insert_with(|| {
+                        let index = uris.len() as u32;
+                        uris.push((*uri).to_owned());
+                        index
+                    })
+                });
+            cells.push(crate::protocol::CellData {
                 symbol,
                 fg: crate::protocol::color_to_u32(cell.fg),
                 bg: crate::protocol::color_to_u32(cell.bg),
                 modifier: crate::protocol::modifier_to_u16(cell.modifier),
                 skip: cell.skip,
-                hyperlink: None,
-            }
-        })
-        .collect();
+                hyperlink,
+            });
+        }
+    }
     FrameData {
         cells,
         width: buffer.area.width,
         height: buffer.area.height,
         cursor: None,
-        hyperlinks: Vec::new(),
+        hyperlinks: uris,
         graphics: Vec::new(),
     }
 }
@@ -1049,8 +1208,7 @@ pub(super) fn apply_flow_popup(frame: &mut FrameData, popup: &Buffer) {
             .iter_mut()
             .zip(&popup.content[usize::from(y - popup.area.y) * usize::from(popup.area.width)..])
         {
-            target.symbol.clear();
-            target.symbol.push_str(cell.symbol());
+            super::copy_symbol_in_place(&mut target.symbol, cell.symbol());
             target.fg = crate::protocol::color_to_u32(cell.fg);
             target.bg = crate::protocol::color_to_u32(cell.bg);
             target.modifier = crate::protocol::modifier_to_u16(cell.modifier);
@@ -1069,10 +1227,40 @@ pub(super) fn replace_composed_frame(
     frame: &mut FrameData,
     buffer: &Buffer,
     cursor: Option<crate::protocol::CursorState>,
-    popup: Option<Rect>,
+    capacity: &FrameCapacity<'_>,
 ) {
-    if popup.is_none() || frame.width != buffer.area.width || frame.height != buffer.area.height {
-        frame.replace_from_ratatui_buffer_preserving_effects(buffer, cursor);
+    if !capacity.modern
+        || (capacity.flow.is_none() && !frame.hyperlinks.is_empty())
+        || frame.width != buffer.area.width
+        || frame.height != buffer.area.height
+        || frame
+            .cells
+            .iter()
+            .zip(&buffer.content)
+            .any(|(target, cell)| target.symbol.capacity() < cell.symbol().len())
+    {
+        let width = usize::from(frame.width);
+        let links = frame
+            .cells
+            .iter()
+            .enumerate()
+            .filter_map(|(index, cell)| {
+                if width == 0 {
+                    return None;
+                }
+                let uri = frame.hyperlinks.get(cell.hyperlink? as usize)?;
+                Some((
+                    ((index % width) as u16, (index / width) as u16),
+                    cell.symbol.clone(),
+                    uri.clone(),
+                ))
+            })
+            .collect::<Vec<_>>();
+        let graphics = std::mem::take(&mut frame.graphics);
+        let mut replacement = frame_with_links(buffer, capacity, &links);
+        replacement.cursor = cursor;
+        replacement.graphics = graphics;
+        *frame = replacement;
         return;
     }
     let link_count = frame.hyperlinks.len();
@@ -1080,8 +1268,7 @@ pub(super) fn replace_composed_frame(
         target.hyperlink = target
             .hyperlink
             .filter(|&index| (index as usize) < link_count && target.symbol == cell.symbol());
-        target.symbol.clear();
-        target.symbol.push_str(cell.symbol());
+        super::copy_symbol_in_place(&mut target.symbol, cell.symbol());
         target.fg = crate::protocol::color_to_u32(cell.fg);
         target.bg = crate::protocol::color_to_u32(cell.bg);
         target.modifier = crate::protocol::modifier_to_u16(cell.modifier);
