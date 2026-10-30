@@ -185,13 +185,23 @@ fn authorize(path: &Path, repo_root: &Path, directory: &Path) -> Result<PathBuf,
         ));
     }
     let target = contained(path, repo_root, directory)?;
-    // `<directory>/<repo>/<name>`: a link anywhere on the way would put the
-    // canonical path somewhere else.
+    // The canonical path must be exactly `<root>/<repo>/<name>` for the repo
+    // and name the path itself spells, and neither of those two components may
+    // be a link: a link above or at the root is fine, one below it would
+    // redirect the deletion to another checkout.
     let root = checked::real_path(directory).map_err(|error| refusal(path, &error.to_string()))?;
-    if target.parent().and_then(Path::parent) != Some(root.as_path()) {
+    let (Some(name), Some(repo)) = (path.file_name(), path.parent().and_then(Path::file_name))
+    else {
         return Err(refusal(
             path,
-            "it is not a checkout directly below a repository directory",
+            "it is not a checkout below a repository directory",
+        ));
+    };
+    let expected = root.join(repo).join(name);
+    if target != expected || !checked::is_plain_dir(&root.join(repo)) {
+        return Err(refusal(
+            path,
+            "it is not a real checkout directly below a real repository directory of the root",
         ));
     }
     if !marker_matches(path, &target, repo_root) {

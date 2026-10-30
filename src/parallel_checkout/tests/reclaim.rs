@@ -192,3 +192,51 @@ fn remove_refuses_a_symlinked_checkout_for_every_caller() {
     assert!(super::super::remove(&checkout, &temp.worktrees()).is_err());
     assert!(victim.join("keep.txt").exists());
 }
+
+fn plain_checkout(path: PathBuf, source: PathBuf) -> Checkout {
+    Checkout {
+        path,
+        repo_root: source,
+        subdir: PathBuf::new(),
+        snapshot: String::new(),
+        baseline: String::new(),
+        method: CheckoutMethod::CopyOnWrite,
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn a_repository_directory_symlink_never_redirects_removal() {
+    let temp = Temp::new("repo-alias");
+    let victim = marked_clone(&temp, "repo-b", "par-live", ME);
+    let alias = temp.worktrees().join("repo-a");
+    std::os::unix::fs::symlink(temp.worktrees().join("repo-b"), &alias).unwrap();
+    let checkout = plain_checkout(alias.join("par-live"), temp.source());
+
+    let result = super::super::remove(&checkout, &temp.worktrees());
+
+    assert!(victim.join("work.txt").exists(), "{result:?}");
+    assert!(result.is_err());
+}
+
+#[cfg(unix)]
+#[test]
+fn a_symlinked_home_or_root_above_the_checkouts_still_works() {
+    let temp = Temp::new("root-alias");
+    let real_home = temp.0.join("real-home");
+    std::fs::create_dir_all(&real_home).unwrap();
+    let home = temp.0.join("home-link");
+    std::os::unix::fs::symlink(&real_home, &home).unwrap();
+    let actual = real_home.join("actual-root");
+    std::fs::create_dir_all(&actual).unwrap();
+    let root = home.join("worktree-link");
+    std::os::unix::fs::symlink(&actual, &root).unwrap();
+    let path = root.join("repo/par");
+    std::fs::create_dir_all(path.join(".git")).unwrap();
+    write_marker(&path, &temp.source(), ME).unwrap();
+
+    let result = super::super::remove(&plain_checkout(path.clone(), temp.source()), &root);
+
+    assert!(result.is_ok(), "{result:?}");
+    assert!(!path.exists());
+}
