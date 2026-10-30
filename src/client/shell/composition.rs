@@ -539,6 +539,9 @@ impl ClientShellState {
         restore_mode_bar(&mut frame, mode_bar, mode_bar_cells.as_deref());
         self.hits.notification_toast = Rect::default();
         let has_config_diagnostic = self.config_diagnostic.is_some();
+        // Modern toasts and banners stay above the mode bar and a bottom tab bar.
+        let toast_floor = self.toast_floor(rows, &layout, mode_bar);
+        let toast_screen = Rect::new(0, 0, cols, toast_floor);
         let active_lifecycle = self
             .endpoints
             .iter()
@@ -583,7 +586,7 @@ impl ClientShellState {
                 self.hits.notification_toast = if layout.mobile_header.is_empty() {
                     self.draw_endpoint_notice(
                         &mut composed,
-                        Rect::new(0, 0, cols, rows),
+                        toast_screen,
                         notice,
                         u16::from(has_config_diagnostic) + lifecycle_offset,
                         phase,
@@ -591,7 +594,7 @@ impl ClientShellState {
                 } else {
                     self.draw_mobile_endpoint_notice(
                         &mut composed,
-                        Rect::new(0, 0, cols, rows),
+                        toast_screen,
                         notice,
                         has_config_diagnostic || lifecycle_offset > 0,
                         phase,
@@ -607,7 +610,7 @@ impl ClientShellState {
                 self.hits.notification_toast = if layout.mobile_header.is_empty() {
                     self.draw_notification(
                         &mut composed,
-                        Rect::new(0, 0, cols, rows),
+                        toast_screen,
                         notification,
                         u16::from(has_config_diagnostic) + lifecycle_offset,
                         phase,
@@ -615,7 +618,7 @@ impl ClientShellState {
                 } else {
                     self.draw_mobile_notification(
                         &mut composed,
-                        Rect::new(0, 0, cols, rows),
+                        toast_screen,
                         notification,
                         has_config_diagnostic || lifecycle_offset > 0,
                         phase,
@@ -633,6 +636,13 @@ impl ClientShellState {
                 layout.pane_surface
             } else {
                 Rect::new(0, 0, cols, rows)
+            };
+            let feedback_area = Rect {
+                height: toast_floor
+                    .max(feedback_area.y)
+                    .saturating_sub(feedback_area.y)
+                    .min(feedback_area.height),
+                ..feedback_area
             };
             let offset = self.feedback_offset(
                 feedback_area,

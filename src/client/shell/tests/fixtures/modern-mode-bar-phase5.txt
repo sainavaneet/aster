@@ -131,10 +131,10 @@ style=cb3032c5e8bc63d1
  PFX  esc cancel  ctrl+b send  w space  ? keys    |
 style=cb3032c5e8bc63d1
 === catppuccin/ascii/50/Navigate/false
- NAV  esc back  ↑↓ space  tab pane  ? keys        |
+ NAV  esc back  ^v space  tab pane  ? keys        |
 style=faf5ae1f4565db62
 === catppuccin/ascii/50/Navigate/true
- NAV  esc back  ↑↓ space  tab pane  ? update ready|
+ NAV  esc back  ^v space  tab pane  ? update ready|
 style=e8b60b35e3890589
 === catppuccin/ascii/50/Resize/false
  RESIZE   h/l width  j/k height  esc done         |
@@ -161,10 +161,10 @@ style=03e7d598efa47a46
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
 style=03e7d598efa47a46
 === catppuccin/ascii/64/Navigate/false
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds        |
 style=bede40b9099661b6
 === catppuccin/ascii/64/Navigate/true
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? key update ready|
 style=76c5c87c9ec289dd
 === catppuccin/ascii/64/Resize/false
  RESIZE   h/l width  j/k height  esc done              !1 ?2 *3 |
@@ -191,10 +191,10 @@ style=0446ff8a7364da6a
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds   !1 ?2 *3 |
 style=0446ff8a7364da6a
 === catppuccin/ascii/80/Navigate/false
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds               !1 ?2 *3 |
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds               !1 ?2 *3 |
 style=0c7ba89c4f1c5bda
 === catppuccin/ascii/80/Navigate/true
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds  !1 ?2 *3  update ready|
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds  !1 ?2 *3  update ready|
 style=4ea58e13abc98949
 === catppuccin/ascii/80/Resize/false
  RESIZE   h/l width  j/k height  esc done                              !1 ?2 *3 |
@@ -221,10 +221,10 @@ style=605aee4c649f940a
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                           !1 ?2 *3 |
 style=605aee4c649f940a
 === catppuccin/ascii/120/Navigate/false
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                       !1 ?2 *3 |
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                       !1 ?2 *3 |
 style=2cda4907667178fa
 === catppuccin/ascii/120/Navigate/true
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                          !1 ?2 *3  update ready|
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                          !1 ?2 *3  update ready|
 style=7268bea15b483169
 === catppuccin/ascii/120/Resize/false
  RESIZE   h/l width  j/k height  esc done                                                                      !1 ?2 *3 |
@@ -371,10 +371,10 @@ style=1433db54946be5d5
  PFX  esc cancel  ctrl+b send  w space  ? keys    |
 style=1433db54946be5d5
 === catppuccin-latte/ascii/50/Navigate/false
- NAV  esc back  ↑↓ space  tab pane  ? keys        |
+ NAV  esc back  ^v space  tab pane  ? keys        |
 style=1f4f9d00ba8aa512
 === catppuccin-latte/ascii/50/Navigate/true
- NAV  esc back  ↑↓ space  tab pane  ? update ready|
+ NAV  esc back  ^v space  tab pane  ? update ready|
 style=32ea8e5b04efb791
 === catppuccin-latte/ascii/50/Resize/false
  RESIZE   h/l width  j/k height  esc done         |
@@ -401,10 +401,10 @@ style=68cee7b5daa90a6e
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keyb|
 style=68cee7b5daa90a6e
 === catppuccin-latte/ascii/64/Navigate/false
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds        |
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds        |
 style=4b5da3b2f9e1313c
 === catppuccin-latte/ascii/64/Navigate/true
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? key update ready|
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? key update ready|
 style=c22c9180f6a0f427
 === catppuccin-latte/ascii/64/Resize/false
  RESIZE   h/l width  j/k height  esc done              !1 ?2 *3 |
@@ -431,10 +431,10 @@ style=82df51ae55c9fc6e
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds   !1 ?2 *3 |
 style=82df51ae55c9fc6e
 === catppuccin-latte/ascii/80/Navigate/false
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds               !1 ?2 *3 |
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds               !1 ?2 *3 |
 style=19fc7c49b08f0d5c
 === catppuccin-latte/ascii/80/Navigate/true
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds  !1 ?2 *3  update ready|
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds  !1 ?2 *3  update ready|
 style=c27c3b530c1bb877
 === catppuccin-latte/ascii/80/Resize/false
  RESIZE   h/l width  j/k height  esc done                              !1 ?2 *3 |
@@ -461,10 +461,10 @@ style=8b88a83960308a16
  PREFIX  esc cancel  ctrl+b send prefix  w workspace nav  ? keybinds                                           !1 ?2 *3 |
 style=8b88a83960308a16
 === catppuccin-latte/ascii/120/Navigate/false
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                                       !1 ?2 *3 |
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                                       !1 ?2 *3 |
 style=3a1a4782c2d0fe64
 === catppuccin-latte/ascii/120/Navigate/true
- NAVIGATE  esc back  ↑/↓ workspace  tab pane  ? keybinds                                          !1 ?2 *3  update ready|
+ NAVIGATE  esc back  ^/v workspace  tab pane  ? keybinds                                          !1 ?2 *3  update ready|
 style=143ec3b61e30d50f
 === catppuccin-latte/ascii/120/Resize/false
  RESIZE   h/l width  j/k height  esc done                                                                      !1 ?2 *3 |

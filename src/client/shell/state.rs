@@ -46,6 +46,8 @@ pub(crate) struct ClientShellConfig {
     pub(super) ui_style: crate::config::UiStyleConfig,
     pub(super) ui_glyphs: crate::config::UiGlyphsConfig,
     pub(super) keybinds: LiveKeybindConfig,
+    /// Key labels of the modern mode bar; rebuilt with `keybinds`.
+    pub(super) mode_labels: modern::model::mode_bar::ModeLabels,
     pub(super) local_keys: crate::config::KeysConfig,
     pub(super) keybinding_source: ClientShellKeybindingSource,
     pub(super) prompt_new_tab_name: bool,

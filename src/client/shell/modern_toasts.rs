@@ -7,6 +7,36 @@ use super::*;
 use crate::ui::chrome::state::StateKind;
 
 impl ClientShellState {
+    /// Puts a toast, the clipboard feedback and the navigate-mode bar on screen,
+    /// so the render-scale profile covers the transient chrome too.
+    #[cfg(test)]
+    pub(crate) fn show_bench_chrome(&mut self) {
+        let now = std::time::Instant::now();
+        self.visible_notification = Some(ClientVisibleNotification {
+            endpoint_id: ClientEndpointId::Local,
+            event: SemanticNotification {
+                kind: SemanticNotificationKind::NeedsAttention,
+                title: "cy needs approval".into(),
+                body: Some("Bash(rm -rf sessions/old)".into()),
+                sound: None,
+                agent: None,
+                workspace_id: None,
+                tab_id: None,
+                pane_id: None,
+                position: Some(crate::config::ToastAsterPosition::BottomRight),
+            },
+            // Fixed geometry: benchmark settled chrome, not the entry animation.
+            shown_at: now
+                .checked_sub(std::time::Duration::from_secs(1))
+                .unwrap_or(now),
+            deadline: now + std::time::Duration::from_secs(3600),
+        });
+        self.copy_feedback = Some(crate::app::state::CopyFeedback {
+            message: "copied to clipboard".into(),
+        });
+        self.mode = ClientShellMode::Navigate;
+    }
+
     /// The modern mode bar's extras, `None` under `ui.style = "classic"`.
     pub(super) fn modern_mode_bar(&self) -> Option<render::ModernModeBar<'_>> {
         self.config
@@ -16,6 +46,29 @@ impl ClientShellState {
                 config: &self.config,
                 summary: self.attention_summary,
             })
+    }
+
+    /// The row the frame's toasts and banners must stay above. Modern keeps
+    /// them off the mode bar and a bottom tab bar; classic draws over the whole
+    /// screen as it always did.
+    pub(super) fn toast_floor(
+        &self,
+        rows: u16,
+        layout: &ClientShellLayout,
+        mode_bar: Option<Rect>,
+    ) -> u16 {
+        if !self.config.chrome.is_modern() {
+            return rows;
+        }
+        let mut floor = rows;
+        if let Some(bar) = mode_bar {
+            floor = floor.min(bar.y);
+        }
+        let tabs = layout.tab_bar;
+        if !tabs.is_empty() && tabs.y >= rows / 2 {
+            floor = floor.min(tabs.y);
+        }
+        floor
     }
 
     fn visible_attention(&self) -> Option<&modern::model::team::PaneAttention> {

@@ -1514,3 +1514,74 @@ unedited).
   remains. Cold allocation tests separately cover the new toast draw paths.
   All completed standard bench runs pass six profiles and hit only the documented
   native_file_render_scale_profile CoW-retention failure.
+
+### Phase 5 review round 1 (design-sonnet)
+
+- **Mode bar allocation.** The modern bar is its own allocation-free painter
+  (`modern/draw/status.rs`); `render_mode_bar` delegates to it and its classic
+  body is again the original, untouched. Prefix/workspace/help key labels are
+  resolved into `ClientShellConfig.mode_labels` whenever the keybindings change
+  (`set_keybinds`), never per frame. A test counts zero allocations for every
+  mode, compact and full, with update notice, endpoint error and the three copy
+  states (plain, matches, search prompt).
+- **Terminal delivery states.** Without a report the activity view maps
+  `submitted` to DONE, `failed`/`worker_lost`/`unreported`/`timed_out` to DONE
+  with the failed glyph, `cancelled` to DONE with the neutral glyph, and
+  `uncertain` plus a pending submission to QUEUED; one test row per state.
+- **ASCII mode.** Vertical arrow hints come from the glyph set
+  (`keys_vertical[_short]`: `^/v`, `^v`); the CLI folds the classic sections'
+  em dash and ellipsis to the glyph set's `-` and `~`. Tests scan the toast,
+  banner, clipboard feedback, diagnostic, every mode bar and the CLI for
+  non-ASCII output.
+- **Bottom chrome.** Modern toasts, banners, endpoint notices and the clipboard
+  feedback are placed above the mode bar and a bottom tab bar
+  (`toast_floor`); classic still uses the whole screen. Tested at 80x24,
+  120x36, 200x50 and mobile widths.
+- **Contrast.** Toasts, banners, feedback and the diagnostic sit on `panel_bg`,
+  the background every chrome role is fitted against; the diagnostic is a
+  blocked-state row instead of text on a yellow fill. A test checks every drawn
+  cell in every bundled theme against the project's 3:1 target.
+- **Benchmark.** `show_bench_chrome` (test-only) puts a toast, the clipboard
+  feedback and the navigate bar on screen; `just bench-render-scale` prints that
+  profile next to the standard one. The mobile header chip draws through the
+  same allocation-free `render_attention` path and is covered by the
+  mobile-width composition tests, not a separate bench profile.
+
+### Phase 5 review validation (design-sol)
+
+- The mode-bar allocation test now searches for a long joined emoji. It failed
+  with one cold allocation in Copy mode at 20 columns: the modern row called the
+  classic editor painter. Modern search now reuses the editor's pure viewport
+  calculation and writes bounded inline symbols, preserving the classic editor.
+- Extended the all-theme contrast test to Prefix/Navigate/Resize/Copy bars,
+  including the update notice; it passes without changing the chip colors.
+- Full native verification passes 4,724 tests with 16 skipped; the expanded
+  contrast test and final fmt/clippy checks also pass. Architecture (14),
+  translation parity (4), config reference, docs contract (7), maintenance and
+  integration asset checks pass. `just check` reaches Windows lint and stops at
+  the missing workstation SDK libc configuration; no platform changes.
+- ASCII presentation folding also normalizes em-dash/ellipsis punctuation in
+  payload text; other Unicode payload text and the underlying API data remain
+  unchanged. Classic and frozen endpoint fixtures remain unchanged. No crates
+  or wire fields were added.
+- The new benchmark initially started the toast inside its entry animation.
+  `show_bench_chrome` now starts it one second earlier, with the same long
+  deadline, so the visible-toast profile measures fixed settled geometry. The
+  profile's on-screen-content test passes after that fixture-only adjustment.
+- Earlier transitioning-toast samples, 1/15/50 panes in µs:
+  standard classic 167/169/175 vs modern 164/176/185 (15:1/50:1 gaps
+  +0.0612/+0.0801), repeat classic 168/176/180 vs modern 165/178/177
+  (+0.0312/+0.0013). Visible chrome classic 411/413/428 vs modern
+  412/431/434 (+0.0413/+0.0120), repeat classic 423/411/417 vs modern
+  392/423/421 (+0.1075/+0.0882). These samples are retained to show variability;
+  final settled-chrome samples follow below.
+- Settled fixed-geometry samples, 1/15/50 panes in µs:
+  standard run 1 classic 166/174/177 vs modern 169/175/182 (15:1/50:1
+  gaps -0.0127/+0.0107); run 2 classic 163/167/171 vs modern 167/176/181
+  (+0.0294/+0.0348). Visible toast/feedback/mode bar run 1 classic
+  412/426/426 vs modern 412/419/431 (-0.0170/+0.0121); run 2 classic
+  400/415/426 vs modern 401/426/433 (+0.0248/+0.0148). All settled
+  normalized gaps are below +0.05; absolute overhead also fits 10%/15% budgets.
+  Every completed bench run passes six profiles and retains only the documented
+  native_file_render_scale_profile CoW-retention failure. The mobile header has
+  composition/width tests, not a standalone benchmark profile.

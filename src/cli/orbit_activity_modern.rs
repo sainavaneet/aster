@@ -62,16 +62,29 @@ fn task_row(task: &Value, now_ms: u64) -> (Lane, Row) {
     let report = task.get("report").filter(|report| !report.is_null());
     let outcome = report.and_then(|report| str_field(report, "outcome"));
     let queued = matches!(str_field(task, "submission"), Some("pending" | "uncertain"));
+    // Without a report the delivery state says how the task ended: every
+    // terminal state leaves the WORKING lane.
+    let delivery = str_field(task, "delivery");
     let (lane, state) = match (report, outcome) {
         (Some(_), Some("blocked")) => (Lane::NeedsYou, StateKind::Blocked),
         (Some(_), Some("failed")) => (Lane::Done, StateKind::Failed),
         (Some(_), _) => (Lane::Done, StateKind::Done),
+        (None, _)
+            if matches!(
+                delivery,
+                Some("failed" | "worker_lost" | "unreported" | "timed_out")
+            ) =>
+        {
+            (Lane::Done, StateKind::Failed)
+        }
+        (None, _) if delivery == Some("cancelled") => (Lane::Done, StateKind::Exited),
+        (None, _) if delivery == Some("submitted") => (Lane::Done, StateKind::Done),
         (None, _) if queued => (Lane::Queued, StateKind::Queued),
         (None, _) => (Lane::Working, StateKind::Working),
     };
     let text = match report {
         Some(report) => redacted_cell(report.get("summary"), 80),
-        None => cell(task.get("delivery"), 24),
+        None => cell(task.get("delivery"), 24).replace('_', " "),
     };
     let row = Row {
         state,
@@ -285,7 +298,20 @@ pub(super) fn render(result: &Value, watch: bool, now_ms: u64, glyphs: &GlyphSet
     render_kinds(&mut out, result);
     render_lead(&mut out, result);
     render_footer(&mut out, watch);
-    out
+    ascii_fold(out, glyphs)
+}
+
+/// The shared classic sections print an em dash for a missing value and an
+/// ellipsis for a cut one; under `ui.glyphs = "ascii"` they become `-` and the
+/// glyph set's ellipsis, so generated punctuation is ASCII. The same punctuation in payload text
+/// is normalized too; other Unicode payload characters are retained.
+fn ascii_fold(out: String, glyphs: &GlyphSet) -> String {
+    if glyphs.ellipsis.is_ascii() {
+        out.replace('—', glyphs.unknown)
+            .replace('…', glyphs.ellipsis)
+    } else {
+        out
+    }
 }
 
 #[cfg(test)]
@@ -413,5 +439,78 @@ mod tests {
             !text.contains("hunter2") && !text.contains('\u{1b}'),
             "{text}"
         );
+    }
+
+    fn lane_of(text: &str, id: &str) -> String {
+        let mut lane = String::new();
+        for line in text.lines() {
+            if !line.starts_with(' ') && !line.is_empty() {
+                lane = line.to_owned();
+            }
+            if line.contains(id) {
+                return lane;
+            }
+        }
+        panic!("{id} not listed:\n{text}");
+    }
+
+    #[test]
+    fn every_delivery_state_without_a_report_lands_in_the_right_lane() {
+        let cases = [
+            ("awaiting_report", "submitted", "WORKING"),
+            ("awaiting_report", "pending", "QUEUED"),
+            ("queued", "submitted", "WORKING"),
+            ("submitting", "submitted", "WORKING"),
+            ("uncertain", "uncertain", "QUEUED"),
+            ("submitted", "submitted", "DONE"),
+            ("failed", "submitted", "DONE"),
+            ("cancelled", "submitted", "DONE"),
+            ("worker_lost", "submitted", "DONE"),
+            ("unreported", "submitted", "DONE"),
+            ("timed_out", "submitted", "DONE"),
+        ];
+        for (delivery, submission, lane) in cases {
+            let text = render(
+                &json!({"tasks":[{"task_id":"t-x","worker_id":"w","submission":submission,
+                    "delivery":delivery,"created_at":1}]}),
+                false,
+                1_000,
+                &UNICODE,
+            );
+            assert!(
+                lane_of(&text, "t-x").ends_with(lane),
+                "{delivery}/{submission} expected {lane}:\n{text}"
+            );
+        }
+        // Failed endings show the failed glyph; a cancel is neutral, not an error.
+        let text = |delivery: &str| {
+            render(
+                &json!({"tasks":[{"task_id":"t-x","worker_id":"w","submission":"submitted",
+                    "delivery":delivery,"created_at":1}]}),
+                false,
+                1_000,
+                &UNICODE,
+            )
+        };
+        for delivery in ["failed", "worker_lost", "unreported", "timed_out"] {
+            assert!(text(delivery).contains("  ✗ t-x"), "{delivery}");
+        }
+        assert!(text("cancelled").contains("  · t-x"));
+        assert!(text("timed_out").contains("timed out"));
+    }
+
+    #[test]
+    fn ascii_glyph_output_is_ascii_even_for_missing_and_cut_values() {
+        let mut payload = payload();
+        payload["tasks"].as_array_mut().unwrap().extend([
+            json!({"task_id":"no-time","worker_id":"w","submission":"submitted","delivery":"awaiting_report"}),
+            json!({"task_id":"x".repeat(60),"worker_id":"w","submission":"submitted","delivery":"cancelled","created_at":5}),
+        ]);
+        payload["lead"] = json!({"terminal_id":"t","present":true});
+        payload["jobs"] = json!([{"job_id":"j","status":"running","command":"c".repeat(80)}]);
+        let text = render(&payload, true, 181_000, &ASCII);
+        assert!(text.is_ascii(), "{text}");
+        let text = render(&json!({"tasks":[],"lead":null}), false, 0, &ASCII);
+        assert!(text.is_ascii(), "{text}");
     }
 }

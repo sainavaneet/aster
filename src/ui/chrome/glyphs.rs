@@ -36,6 +36,10 @@ pub(crate) struct GlyphSet {
     pub(crate) tree_mid: &'static str,
     pub(crate) tree_end: &'static str,
     pub(crate) tree_fork: &'static str,
+    /// Vertical arrow hints for key legends: `↑/↓` and its short form `↑↓`.
+    /// Two or three cells, so outside the one-cell glyph invariant.
+    pub(crate) keys_vertical: &'static str,
+    pub(crate) keys_vertical_short: &'static str,
     /// Working spinner frames; the first frame is the static working glyph's
     /// stand-in while animations are off.
     pub(crate) spinner: &'static [&'static str],
@@ -70,6 +74,8 @@ pub(crate) const UNICODE: GlyphSet = GlyphSet {
     tree_mid: "├",
     tree_end: "╰",
     tree_fork: "┬",
+    keys_vertical: "↑/↓",
+    keys_vertical_short: "↑↓",
     spinner: &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"],
 };
 
@@ -102,6 +108,8 @@ pub(crate) const ASCII: GlyphSet = GlyphSet {
     tree_mid: "+",
     tree_end: "\\",
     tree_fork: "+",
+    keys_vertical: "^/v",
+    keys_vertical_short: "^v",
     spinner: &["|", "/", "-", "\\"],
 };
 

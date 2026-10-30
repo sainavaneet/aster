@@ -182,9 +182,9 @@ Orbit  ·  1 worker  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued
   ▲ p-0                          blocked-0            2d  waiting for a decision on blocked-0
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 ◐ WORKING
-  ◐ working-0                    worker               2d  awaiting_report
+  ◐ working-0                    worker               2d  awaiting report
 ◌ QUEUED
-  ◌ queued-0                     worker               2d  awaiting_report
+  ◌ queued-0                     worker               2d  awaiting report
 ✓ DONE
   ✓ done-0                       worker               2d  checked the result
       completed: checked the result  tests=yes  checks=1 passed
@@ -213,9 +213,9 @@ Orbit  .  1 worker  .  ! 1 needs you   * 1 working   . 1 queued
   ! p-0                          blocked-0            2d  waiting for a decision on blocked-0
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 * WORKING
-  * working-0                    worker               2d  awaiting_report
+  * working-0                    worker               2d  awaiting report
 . QUEUED
-  . queued-0                     worker               2d  awaiting_report
+  . queued-0                     worker               2d  awaiting report
 + DONE
   + done-0                       worker               2d  checked the result
       completed: checked the result  tests=yes  checks=1 passed
@@ -277,9 +277,9 @@ Orbit  ·  1 worker  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued
   ▲ p-0                          blocked-0            2d  waiting for a decision on blocked-0
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 ◐ WORKING
-  ◐ working-0                    worker               2d  awaiting_report
+  ◐ working-0                    worker               2d  awaiting report
 ◌ QUEUED
-  ◌ queued-0                     worker               2d  awaiting_report
+  ◌ queued-0                     worker               2d  awaiting report
 ✓ DONE
   ✓ done-0                       worker               2d  checked the result
       completed: checked the result  tests=yes  checks=1 passed
@@ -310,9 +310,9 @@ Orbit  .  1 worker  .  ! 1 needs you   * 1 working   . 1 queued
   ! p-0                          blocked-0            2d  waiting for a decision on blocked-0
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 * WORKING
-  * working-0                    worker               2d  awaiting_report
+  * working-0                    worker               2d  awaiting report
 . QUEUED
-  . queued-0                     worker               2d  awaiting_report
+  . queued-0                     worker               2d  awaiting report
 + DONE
   + done-0                       worker               2d  checked the result
       completed: checked the result  tests=yes  checks=1 passed
@@ -450,48 +450,48 @@ Orbit  ·  1 worker  ·  ▲ 25 needs you   ◐ 25 working   ◌ 25 queued
   … 5 more
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 ◐ WORKING
-  ◐ working-24                   worker               2d  awaiting_report
-  ◐ working-23                   worker               2d  awaiting_report
-  ◐ working-22                   worker               2d  awaiting_report
-  ◐ working-21                   worker               2d  awaiting_report
-  ◐ working-20                   worker               2d  awaiting_report
-  ◐ working-19                   worker               2d  awaiting_report
-  ◐ working-18                   worker               2d  awaiting_report
-  ◐ working-17                   worker               2d  awaiting_report
-  ◐ working-16                   worker               2d  awaiting_report
-  ◐ working-15                   worker               2d  awaiting_report
-  ◐ working-14                   worker               2d  awaiting_report
-  ◐ working-13                   worker               2d  awaiting_report
-  ◐ working-12                   worker               2d  awaiting_report
-  ◐ working-11                   worker               2d  awaiting_report
-  ◐ working-10                   worker               2d  awaiting_report
-  ◐ working-9                    worker               2d  awaiting_report
-  ◐ working-8                    worker               2d  awaiting_report
-  ◐ working-7                    worker               2d  awaiting_report
-  ◐ working-6                    worker               2d  awaiting_report
-  ◐ working-5                    worker               2d  awaiting_report
+  ◐ working-24                   worker               2d  awaiting report
+  ◐ working-23                   worker               2d  awaiting report
+  ◐ working-22                   worker               2d  awaiting report
+  ◐ working-21                   worker               2d  awaiting report
+  ◐ working-20                   worker               2d  awaiting report
+  ◐ working-19                   worker               2d  awaiting report
+  ◐ working-18                   worker               2d  awaiting report
+  ◐ working-17                   worker               2d  awaiting report
+  ◐ working-16                   worker               2d  awaiting report
+  ◐ working-15                   worker               2d  awaiting report
+  ◐ working-14                   worker               2d  awaiting report
+  ◐ working-13                   worker               2d  awaiting report
+  ◐ working-12                   worker               2d  awaiting report
+  ◐ working-11                   worker               2d  awaiting report
+  ◐ working-10                   worker               2d  awaiting report
+  ◐ working-9                    worker               2d  awaiting report
+  ◐ working-8                    worker               2d  awaiting report
+  ◐ working-7                    worker               2d  awaiting report
+  ◐ working-6                    worker               2d  awaiting report
+  ◐ working-5                    worker               2d  awaiting report
   … 5 more
 ◌ QUEUED
-  ◌ queued-24                    worker               2d  awaiting_report
-  ◌ queued-23                    worker               2d  awaiting_report
-  ◌ queued-22                    worker               2d  awaiting_report
-  ◌ queued-21                    worker               2d  awaiting_report
-  ◌ queued-20                    worker               2d  awaiting_report
-  ◌ queued-19                    worker               2d  awaiting_report
-  ◌ queued-18                    worker               2d  awaiting_report
-  ◌ queued-17                    worker               2d  awaiting_report
-  ◌ queued-16                    worker               2d  awaiting_report
-  ◌ queued-15                    worker               2d  awaiting_report
-  ◌ queued-14                    worker               2d  awaiting_report
-  ◌ queued-13                    worker               2d  awaiting_report
-  ◌ queued-12                    worker               2d  awaiting_report
-  ◌ queued-11                    worker               2d  awaiting_report
-  ◌ queued-10                    worker               2d  awaiting_report
-  ◌ queued-9                     worker               2d  awaiting_report
-  ◌ queued-8                     worker               2d  awaiting_report
-  ◌ queued-7                     worker               2d  awaiting_report
-  ◌ queued-6                     worker               2d  awaiting_report
-  ◌ queued-5                     worker               2d  awaiting_report
+  ◌ queued-24                    worker               2d  awaiting report
+  ◌ queued-23                    worker               2d  awaiting report
+  ◌ queued-22                    worker               2d  awaiting report
+  ◌ queued-21                    worker               2d  awaiting report
+  ◌ queued-20                    worker               2d  awaiting report
+  ◌ queued-19                    worker               2d  awaiting report
+  ◌ queued-18                    worker               2d  awaiting report
+  ◌ queued-17                    worker               2d  awaiting report
+  ◌ queued-16                    worker               2d  awaiting report
+  ◌ queued-15                    worker               2d  awaiting report
+  ◌ queued-14                    worker               2d  awaiting report
+  ◌ queued-13                    worker               2d  awaiting report
+  ◌ queued-12                    worker               2d  awaiting report
+  ◌ queued-11                    worker               2d  awaiting report
+  ◌ queued-10                    worker               2d  awaiting report
+  ◌ queued-9                     worker               2d  awaiting report
+  ◌ queued-8                     worker               2d  awaiting report
+  ◌ queued-7                     worker               2d  awaiting report
+  ◌ queued-6                     worker               2d  awaiting report
+  ◌ queued-5                     worker               2d  awaiting report
   … 5 more
 ✓ DONE
   ✓ done-24                      worker               2d  checked the result
@@ -580,48 +580,48 @@ Orbit  .  1 worker  .  ! 25 needs you   * 25 working   . 25 queued
   ~ 5 more
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 * WORKING
-  * working-24                   worker               2d  awaiting_report
-  * working-23                   worker               2d  awaiting_report
-  * working-22                   worker               2d  awaiting_report
-  * working-21                   worker               2d  awaiting_report
-  * working-20                   worker               2d  awaiting_report
-  * working-19                   worker               2d  awaiting_report
-  * working-18                   worker               2d  awaiting_report
-  * working-17                   worker               2d  awaiting_report
-  * working-16                   worker               2d  awaiting_report
-  * working-15                   worker               2d  awaiting_report
-  * working-14                   worker               2d  awaiting_report
-  * working-13                   worker               2d  awaiting_report
-  * working-12                   worker               2d  awaiting_report
-  * working-11                   worker               2d  awaiting_report
-  * working-10                   worker               2d  awaiting_report
-  * working-9                    worker               2d  awaiting_report
-  * working-8                    worker               2d  awaiting_report
-  * working-7                    worker               2d  awaiting_report
-  * working-6                    worker               2d  awaiting_report
-  * working-5                    worker               2d  awaiting_report
+  * working-24                   worker               2d  awaiting report
+  * working-23                   worker               2d  awaiting report
+  * working-22                   worker               2d  awaiting report
+  * working-21                   worker               2d  awaiting report
+  * working-20                   worker               2d  awaiting report
+  * working-19                   worker               2d  awaiting report
+  * working-18                   worker               2d  awaiting report
+  * working-17                   worker               2d  awaiting report
+  * working-16                   worker               2d  awaiting report
+  * working-15                   worker               2d  awaiting report
+  * working-14                   worker               2d  awaiting report
+  * working-13                   worker               2d  awaiting report
+  * working-12                   worker               2d  awaiting report
+  * working-11                   worker               2d  awaiting report
+  * working-10                   worker               2d  awaiting report
+  * working-9                    worker               2d  awaiting report
+  * working-8                    worker               2d  awaiting report
+  * working-7                    worker               2d  awaiting report
+  * working-6                    worker               2d  awaiting report
+  * working-5                    worker               2d  awaiting report
   ~ 5 more
 . QUEUED
-  . queued-24                    worker               2d  awaiting_report
-  . queued-23                    worker               2d  awaiting_report
-  . queued-22                    worker               2d  awaiting_report
-  . queued-21                    worker               2d  awaiting_report
-  . queued-20                    worker               2d  awaiting_report
-  . queued-19                    worker               2d  awaiting_report
-  . queued-18                    worker               2d  awaiting_report
-  . queued-17                    worker               2d  awaiting_report
-  . queued-16                    worker               2d  awaiting_report
-  . queued-15                    worker               2d  awaiting_report
-  . queued-14                    worker               2d  awaiting_report
-  . queued-13                    worker               2d  awaiting_report
-  . queued-12                    worker               2d  awaiting_report
-  . queued-11                    worker               2d  awaiting_report
-  . queued-10                    worker               2d  awaiting_report
-  . queued-9                     worker               2d  awaiting_report
-  . queued-8                     worker               2d  awaiting_report
-  . queued-7                     worker               2d  awaiting_report
-  . queued-6                     worker               2d  awaiting_report
-  . queued-5                     worker               2d  awaiting_report
+  . queued-24                    worker               2d  awaiting report
+  . queued-23                    worker               2d  awaiting report
+  . queued-22                    worker               2d  awaiting report
+  . queued-21                    worker               2d  awaiting report
+  . queued-20                    worker               2d  awaiting report
+  . queued-19                    worker               2d  awaiting report
+  . queued-18                    worker               2d  awaiting report
+  . queued-17                    worker               2d  awaiting report
+  . queued-16                    worker               2d  awaiting report
+  . queued-15                    worker               2d  awaiting report
+  . queued-14                    worker               2d  awaiting report
+  . queued-13                    worker               2d  awaiting report
+  . queued-12                    worker               2d  awaiting report
+  . queued-11                    worker               2d  awaiting report
+  . queued-10                    worker               2d  awaiting report
+  . queued-9                     worker               2d  awaiting report
+  . queued-8                     worker               2d  awaiting report
+  . queued-7                     worker               2d  awaiting report
+  . queued-6                     worker               2d  awaiting report
+  . queued-5                     worker               2d  awaiting report
   ~ 5 more
 + DONE
   + done-24                      worker               2d  checked the result
@@ -799,48 +799,48 @@ Orbit  ·  1 worker  ·  ▲ 25 needs you   ◐ 25 working   ◌ 25 queued
   … 5 more
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 ◐ WORKING
-  ◐ working-24                   worker               2d  awaiting_report
-  ◐ working-23                   worker               2d  awaiting_report
-  ◐ working-22                   worker               2d  awaiting_report
-  ◐ working-21                   worker               2d  awaiting_report
-  ◐ working-20                   worker               2d  awaiting_report
-  ◐ working-19                   worker               2d  awaiting_report
-  ◐ working-18                   worker               2d  awaiting_report
-  ◐ working-17                   worker               2d  awaiting_report
-  ◐ working-16                   worker               2d  awaiting_report
-  ◐ working-15                   worker               2d  awaiting_report
-  ◐ working-14                   worker               2d  awaiting_report
-  ◐ working-13                   worker               2d  awaiting_report
-  ◐ working-12                   worker               2d  awaiting_report
-  ◐ working-11                   worker               2d  awaiting_report
-  ◐ working-10                   worker               2d  awaiting_report
-  ◐ working-9                    worker               2d  awaiting_report
-  ◐ working-8                    worker               2d  awaiting_report
-  ◐ working-7                    worker               2d  awaiting_report
-  ◐ working-6                    worker               2d  awaiting_report
-  ◐ working-5                    worker               2d  awaiting_report
+  ◐ working-24                   worker               2d  awaiting report
+  ◐ working-23                   worker               2d  awaiting report
+  ◐ working-22                   worker               2d  awaiting report
+  ◐ working-21                   worker               2d  awaiting report
+  ◐ working-20                   worker               2d  awaiting report
+  ◐ working-19                   worker               2d  awaiting report
+  ◐ working-18                   worker               2d  awaiting report
+  ◐ working-17                   worker               2d  awaiting report
+  ◐ working-16                   worker               2d  awaiting report
+  ◐ working-15                   worker               2d  awaiting report
+  ◐ working-14                   worker               2d  awaiting report
+  ◐ working-13                   worker               2d  awaiting report
+  ◐ working-12                   worker               2d  awaiting report
+  ◐ working-11                   worker               2d  awaiting report
+  ◐ working-10                   worker               2d  awaiting report
+  ◐ working-9                    worker               2d  awaiting report
+  ◐ working-8                    worker               2d  awaiting report
+  ◐ working-7                    worker               2d  awaiting report
+  ◐ working-6                    worker               2d  awaiting report
+  ◐ working-5                    worker               2d  awaiting report
   … 5 more
 ◌ QUEUED
-  ◌ queued-24                    worker               2d  awaiting_report
-  ◌ queued-23                    worker               2d  awaiting_report
-  ◌ queued-22                    worker               2d  awaiting_report
-  ◌ queued-21                    worker               2d  awaiting_report
-  ◌ queued-20                    worker               2d  awaiting_report
-  ◌ queued-19                    worker               2d  awaiting_report
-  ◌ queued-18                    worker               2d  awaiting_report
-  ◌ queued-17                    worker               2d  awaiting_report
-  ◌ queued-16                    worker               2d  awaiting_report
-  ◌ queued-15                    worker               2d  awaiting_report
-  ◌ queued-14                    worker               2d  awaiting_report
-  ◌ queued-13                    worker               2d  awaiting_report
-  ◌ queued-12                    worker               2d  awaiting_report
-  ◌ queued-11                    worker               2d  awaiting_report
-  ◌ queued-10                    worker               2d  awaiting_report
-  ◌ queued-9                     worker               2d  awaiting_report
-  ◌ queued-8                     worker               2d  awaiting_report
-  ◌ queued-7                     worker               2d  awaiting_report
-  ◌ queued-6                     worker               2d  awaiting_report
-  ◌ queued-5                     worker               2d  awaiting_report
+  ◌ queued-24                    worker               2d  awaiting report
+  ◌ queued-23                    worker               2d  awaiting report
+  ◌ queued-22                    worker               2d  awaiting report
+  ◌ queued-21                    worker               2d  awaiting report
+  ◌ queued-20                    worker               2d  awaiting report
+  ◌ queued-19                    worker               2d  awaiting report
+  ◌ queued-18                    worker               2d  awaiting report
+  ◌ queued-17                    worker               2d  awaiting report
+  ◌ queued-16                    worker               2d  awaiting report
+  ◌ queued-15                    worker               2d  awaiting report
+  ◌ queued-14                    worker               2d  awaiting report
+  ◌ queued-13                    worker               2d  awaiting report
+  ◌ queued-12                    worker               2d  awaiting report
+  ◌ queued-11                    worker               2d  awaiting report
+  ◌ queued-10                    worker               2d  awaiting report
+  ◌ queued-9                     worker               2d  awaiting report
+  ◌ queued-8                     worker               2d  awaiting report
+  ◌ queued-7                     worker               2d  awaiting report
+  ◌ queued-6                     worker               2d  awaiting report
+  ◌ queued-5                     worker               2d  awaiting report
   … 5 more
 ✓ DONE
   ✓ done-24                      worker               2d  checked the result
@@ -931,48 +931,48 @@ Orbit  .  1 worker  .  ! 25 needs you   * 25 working   . 25 queued
   ~ 5 more
   Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
 * WORKING
-  * working-24                   worker               2d  awaiting_report
-  * working-23                   worker               2d  awaiting_report
-  * working-22                   worker               2d  awaiting_report
-  * working-21                   worker               2d  awaiting_report
-  * working-20                   worker               2d  awaiting_report
-  * working-19                   worker               2d  awaiting_report
-  * working-18                   worker               2d  awaiting_report
-  * working-17                   worker               2d  awaiting_report
-  * working-16                   worker               2d  awaiting_report
-  * working-15                   worker               2d  awaiting_report
-  * working-14                   worker               2d  awaiting_report
-  * working-13                   worker               2d  awaiting_report
-  * working-12                   worker               2d  awaiting_report
-  * working-11                   worker               2d  awaiting_report
-  * working-10                   worker               2d  awaiting_report
-  * working-9                    worker               2d  awaiting_report
-  * working-8                    worker               2d  awaiting_report
-  * working-7                    worker               2d  awaiting_report
-  * working-6                    worker               2d  awaiting_report
-  * working-5                    worker               2d  awaiting_report
+  * working-24                   worker               2d  awaiting report
+  * working-23                   worker               2d  awaiting report
+  * working-22                   worker               2d  awaiting report
+  * working-21                   worker               2d  awaiting report
+  * working-20                   worker               2d  awaiting report
+  * working-19                   worker               2d  awaiting report
+  * working-18                   worker               2d  awaiting report
+  * working-17                   worker               2d  awaiting report
+  * working-16                   worker               2d  awaiting report
+  * working-15                   worker               2d  awaiting report
+  * working-14                   worker               2d  awaiting report
+  * working-13                   worker               2d  awaiting report
+  * working-12                   worker               2d  awaiting report
+  * working-11                   worker               2d  awaiting report
+  * working-10                   worker               2d  awaiting report
+  * working-9                    worker               2d  awaiting report
+  * working-8                    worker               2d  awaiting report
+  * working-7                    worker               2d  awaiting report
+  * working-6                    worker               2d  awaiting report
+  * working-5                    worker               2d  awaiting report
   ~ 5 more
 . QUEUED
-  . queued-24                    worker               2d  awaiting_report
-  . queued-23                    worker               2d  awaiting_report
-  . queued-22                    worker               2d  awaiting_report
-  . queued-21                    worker               2d  awaiting_report
-  . queued-20                    worker               2d  awaiting_report
-  . queued-19                    worker               2d  awaiting_report
-  . queued-18                    worker               2d  awaiting_report
-  . queued-17                    worker               2d  awaiting_report
-  . queued-16                    worker               2d  awaiting_report
-  . queued-15                    worker               2d  awaiting_report
-  . queued-14                    worker               2d  awaiting_report
-  . queued-13                    worker               2d  awaiting_report
-  . queued-12                    worker               2d  awaiting_report
-  . queued-11                    worker               2d  awaiting_report
-  . queued-10                    worker               2d  awaiting_report
-  . queued-9                     worker               2d  awaiting_report
-  . queued-8                     worker               2d  awaiting_report
-  . queued-7                     worker               2d  awaiting_report
-  . queued-6                     worker               2d  awaiting_report
-  . queued-5                     worker               2d  awaiting_report
+  . queued-24                    worker               2d  awaiting report
+  . queued-23                    worker               2d  awaiting report
+  . queued-22                    worker               2d  awaiting report
+  . queued-21                    worker               2d  awaiting report
+  . queued-20                    worker               2d  awaiting report
+  . queued-19                    worker               2d  awaiting report
+  . queued-18                    worker               2d  awaiting report
+  . queued-17                    worker               2d  awaiting report
+  . queued-16                    worker               2d  awaiting report
+  . queued-15                    worker               2d  awaiting report
+  . queued-14                    worker               2d  awaiting report
+  . queued-13                    worker               2d  awaiting report
+  . queued-12                    worker               2d  awaiting report
+  . queued-11                    worker               2d  awaiting report
+  . queued-10                    worker               2d  awaiting report
+  . queued-9                     worker               2d  awaiting report
+  . queued-8                     worker               2d  awaiting report
+  . queued-7                     worker               2d  awaiting report
+  . queued-6                     worker               2d  awaiting report
+  . queued-5                     worker               2d  awaiting report
   ~ 5 more
 + DONE
   + done-24                      worker               2d  checked the result

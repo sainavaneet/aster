@@ -72,7 +72,9 @@ fn look(config: &ClientShellConfig, state: StateKind, phase: NotificationTransit
     let roles = &chrome.roles;
     let palette = &config.palette;
     let opacity = phase.opacity.clamp(0.15, 1.0);
-    let background = blend_color(palette.panel_bg, palette.surface0, opacity, palette);
+    // The roles are fitted for contrast against `panel_bg`, so the toast sits
+    // on it: every role below is legible in every theme.
+    let background = palette.panel_bg;
     let fade = |color| blend_color(background, color, opacity, palette);
     let state_color = fade(roles.state(state));
     let glyph = Style::default().fg(state_color).bg(background);
@@ -312,9 +314,9 @@ pub(in crate::client::shell) fn draw_feedback(
     rect
 }
 
-/// The config diagnostic rows, right-aligned like the classic ones but sized
-/// in display cells (a non-ASCII line no longer widens the row). Returns the
-/// rows drawn.
+/// The config diagnostic rows, right-aligned like the classic ones: a blocked
+/// bar and glyph with the line in the strong text role, sized in display cells
+/// (a non-ASCII line no longer widens the row). Returns the rows drawn.
 pub(in crate::client::shell) fn draw_config_diagnostic(
     buffer: &mut Buffer,
     area: Rect,
@@ -322,11 +324,11 @@ pub(in crate::client::shell) fn draw_config_diagnostic(
     config: &ClientShellConfig,
     mut covered: impl FnMut(Rect),
 ) -> u16 {
-    let palette = &config.palette;
-    let style = Style::default()
-        .fg(crate::client::shell::panel_contrast_fg(palette))
-        .bg(palette.yellow)
-        .add_modifier(Modifier::BOLD);
+    let look = look(
+        config,
+        StateKind::Blocked,
+        NotificationTransitionPhase::SETTLED,
+    );
     let mut rows = 0u16;
     for (row, line) in message
         .lines()
@@ -334,8 +336,10 @@ pub(in crate::client::shell) fn draw_config_diagnostic(
         .take(usize::from(area.height))
         .enumerate()
     {
-        let cells = display_width(line).saturating_add(2);
-        let width = cells.min(area.width);
+        let width = LEAD
+            .saturating_add(display_width(line))
+            .saturating_add(TRAIL)
+            .min(area.width);
         let rect = Rect::new(
             area.x + area.width.saturating_sub(width),
             area.y + row as u16,
@@ -344,19 +348,20 @@ pub(in crate::client::shell) fn draw_config_diagnostic(
         );
         covered(rect);
         Clear.render(rect, buffer);
-        buffer.set_style(rect, style);
-        put_text_gapped(buffer, rect, line, style);
+        buffer.set_style(rect, Style::default().bg(look.background));
+        let x = put_lead(buffer, rect, rect.y, &look, true);
+        put_elided(
+            buffer,
+            x,
+            rect.y,
+            rect.right().saturating_sub(TRAIL).max(rect.x),
+            line,
+            look.ellipsis,
+            look.title,
+        );
         rows = rows.saturating_add(1);
     }
     rows
-}
-
-/// `line` one cell in from the left edge of `rect`, clipped one cell short of
-/// the right edge.
-fn put_text_gapped(buffer: &mut Buffer, rect: Rect, line: &str, style: Style) {
-    let inner = rect.width.saturating_sub(2);
-    let x = rect.x.saturating_add(1);
-    put_segment_inline(buffer, x, rect.y, x.saturating_add(inner), line, style);
 }
 
 #[cfg(test)]

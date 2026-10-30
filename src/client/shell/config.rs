@@ -117,6 +117,12 @@ impl ClientShellConfig {
         self.refresh_chrome();
     }
 
+    /// Replaces the keybindings and the mode bar labels resolved from them.
+    pub(super) fn set_keybinds(&mut self, keybinds: LiveKeybindConfig) {
+        self.mode_labels = modern::model::mode_bar::ModeLabels::build(&keybinds);
+        self.keybinds = keybinds;
+    }
+
     /// Re-derives `chrome` from the current style, glyph and palette settings.
     pub(crate) fn refresh_chrome(&mut self) {
         self.chrome =
@@ -126,6 +132,13 @@ impl ClientShellConfig {
     pub(crate) fn from_config(config: &Config) -> Self {
         let theme_runtime = crate::app::client_theme_runtime_from_config(config);
         let palette = crate::app::client_palette_from_config(config);
+        let keybinds = config
+            .live_keybinds_with_diagnostics()
+            .map(|(keybinds, _diagnostics)| keybinds)
+            .unwrap_or_else(|_diagnostics| LiveKeybindConfig {
+                prefix: config.prefix_keys(),
+                keybinds: config.keybinds(),
+            });
         Self {
             polaris: config.polaris.clone(),
             sidebar_width: config.ui.sidebar_width,
@@ -157,13 +170,8 @@ impl ClientShellConfig {
             ui_style: config.ui.style,
             ui_glyphs: config.ui.glyphs,
             palette,
-            keybinds: config
-                .live_keybinds_with_diagnostics()
-                .map(|(keybinds, _diagnostics)| keybinds)
-                .unwrap_or_else(|_diagnostics| LiveKeybindConfig {
-                    prefix: config.prefix_keys(),
-                    keybinds: config.keybinds(),
-                }),
+            keybinds: keybinds.clone(),
+            mode_labels: modern::model::mode_bar::ModeLabels::build(&keybinds),
             local_keys: config.keys.clone(),
             keybinding_source: ClientShellKeybindingSource::Local,
             prompt_new_tab_name: config.ui.prompt_new_tab_name,
@@ -323,7 +331,7 @@ impl ClientShellConfig {
                     });
             }
         }
-        self.keybinds = keybinds;
+        self.set_keybinds(keybinds);
         Ok(())
     }
 
@@ -350,7 +358,7 @@ impl ClientShellConfig {
                     if self.keybinding_source == ClientShellKeybindingSource::RemoteLocal {
                         keybinds.keybinds.custom_commands.clear();
                     }
-                    self.keybinds = keybinds;
+                    self.set_keybinds(keybinds);
                     diagnostics.extend(keybind_diagnostics);
                 }
                 Err(keybind_diagnostics) => diagnostics.extend(

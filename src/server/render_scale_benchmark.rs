@@ -439,6 +439,23 @@ async fn orbit_profile_draws_the_work_lanes_in_both_styles() {
     }
 }
 
+#[tokio::test(flavor = "current_thread")]
+async fn transient_chrome_profile_draws_the_toast_and_the_mode_bar() {
+    let config = Config::default();
+    let mut pipeline = RenderPipeline::with_orbit(active_panes(15), &config);
+    pipeline.client.show_bench_chrome();
+    let (_, _) = pipeline.render_once();
+    let frame = pipeline.client.compose(COLS, ROWS).expect("frame");
+    let text: String = frame
+        .cells
+        .iter()
+        .map(|cell| cell.symbol.as_str())
+        .collect();
+    for needle in ["cy needs approval", "NAVIGATE", "copied to clipboard"] {
+        assert!(text.contains(needle), "{needle:?} is not on screen");
+    }
+}
+
 /// Client composition with the Orbit team on screen, classic against modern,
 /// at the same pane counts as the other profiles.
 fn print_orbit_profiles() {
@@ -455,6 +472,13 @@ fn print_orbit_profiles() {
             )
         });
         println!("orbit team (4 roles x 4 members, 32 tasks), {label} style");
+        print_stage("client shell composition", &rows, |stats| stats.client);
+        let rows = CARDINALITIES.map(|count| {
+            let mut pipeline = RenderPipeline::with_orbit(active_panes(count), &config);
+            pipeline.client.show_bench_chrome();
+            (count, profile_pipeline(pipeline))
+        });
+        println!("orbit team with a visible toast, copy feedback and the mode bar, {label} style");
         print_stage("client shell composition", &rows, |stats| stats.client);
     }
 }
