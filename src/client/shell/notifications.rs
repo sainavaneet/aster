@@ -136,28 +136,17 @@ pub(super) fn render_mobile_notification_banner_with_phase(
     )
 }
 
-#[allow(clippy::too_many_arguments)]
-pub(super) fn render_notification_card_with_phase(
-    buffer: &mut Buffer,
+/// Where a `width` x `height` card sits in `area` for `position`, slid in by
+/// `phase` and pushed in from the edge by `top_offset` rows. Shared by the
+/// classic and modern toast.
+pub(in crate::client::shell) fn card_rect(
     area: Rect,
-    title: &str,
-    body: &str,
+    width: u16,
+    height: u16,
     position: crate::config::ToastAsterPosition,
     top_offset: u16,
-    dot_color: Color,
-    palette: &Palette,
     phase: super::animation::NotificationTransitionPhase,
 ) -> Rect {
-    if area.is_empty() {
-        return Rect::default();
-    }
-    let content_width = unicode_width::UnicodeWidthStr::width(title)
-        .max(unicode_width::UnicodeWidthStr::width(body))
-        .saturating_add(6);
-    let width = u16::try_from(content_width)
-        .unwrap_or(u16::MAX)
-        .min(area.width);
-    let height: u16 = if body.is_empty() { 3 } else { 4 }.min(area.height);
     let max_x = area.right().saturating_sub(width).max(area.x);
     let slide = phase
         .slide_offset_cols
@@ -181,7 +170,32 @@ pub(super) fn render_notification_card_with_phase(
             .saturating_sub(height.saturating_add(top_offset)),
     }
     .clamp(area.y, max_y);
-    let rect = Rect::new(x, y, width, height);
+    Rect::new(x, y, width, height)
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn render_notification_card_with_phase(
+    buffer: &mut Buffer,
+    area: Rect,
+    title: &str,
+    body: &str,
+    position: crate::config::ToastAsterPosition,
+    top_offset: u16,
+    dot_color: Color,
+    palette: &Palette,
+    phase: super::animation::NotificationTransitionPhase,
+) -> Rect {
+    if area.is_empty() {
+        return Rect::default();
+    }
+    let content_width = unicode_width::UnicodeWidthStr::width(title)
+        .max(unicode_width::UnicodeWidthStr::width(body))
+        .saturating_add(6);
+    let width = u16::try_from(content_width)
+        .unwrap_or(u16::MAX)
+        .min(area.width);
+    let height: u16 = if body.is_empty() { 3 } else { 4 }.min(area.height);
+    let rect = card_rect(area, width, height, position, top_offset, phase);
     let opacity = phase.opacity.clamp(0.15, 1.0);
     let border_fg =
         super::animation::blend_color(palette.surface_dim, palette.overlay0, opacity, palette);

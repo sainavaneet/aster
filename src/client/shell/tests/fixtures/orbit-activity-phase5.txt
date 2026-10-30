@@ -1,0 +1,1037 @@
+=== empty/false/classic
+Orbit activity
+
+Jobs
+No jobs yet.
+
+Workers
+No workers yet.
+
+Blocked workers
+No blocked workers.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Assignments / Polaris delivery
+No assignments yet.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== empty/false/modern
+Orbit  ·  0 workers
+
+No assignments yet.
+
+Jobs
+No jobs yet.
+
+Workers
+No workers yet.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== empty/false/ascii
+Orbit  .  0 workers
+
+No assignments yet.
+
+Jobs
+No jobs yet.
+
+Workers
+No workers yet.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== empty/true/classic
+Orbit activity
+
+Jobs
+No jobs yet.
+
+Workers
+No workers yet.
+
+Blocked workers
+No blocked workers.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Assignments / Polaris delivery
+No assignments yet.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== empty/true/modern
+Orbit  ·  0 workers
+
+No assignments yet.
+
+Jobs
+No jobs yet.
+
+Workers
+No workers yet.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== empty/true/ascii
+Orbit  .  0 workers
+
+No assignments yet.
+
+Jobs
+No jobs yet.
+
+Workers
+No workers yet.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== lanes/false/classic
+Orbit activity
+
+Jobs
+No jobs yet.
+
+Workers
+Name                   Status         Pane           Provider
+worker                 working        p-worker       codex
+
+Blocked workers
+blocked-0  pane=p-0  task=blocked-0  blocked_for=48h
+Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Assignments / Polaris delivery
+done-0  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+queued-0  worker=worker  submission=pending  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+working-0  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== lanes/false/modern
+Orbit  ·  1 worker  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued
+
+▲ NEEDS YOU
+  ▲ p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+◐ WORKING
+  ◐ working-0                    worker               2d  awaiting_report
+◌ QUEUED
+  ◌ queued-0                     worker               2d  awaiting_report
+✓ DONE
+  ✓ done-0                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+
+Jobs
+No jobs yet.
+
+Workers
+  ◐ worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== lanes/false/ascii
+Orbit  .  1 worker  .  ! 1 needs you   * 1 working   . 1 queued
+
+! NEEDS YOU
+  ! p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+* WORKING
+  * working-0                    worker               2d  awaiting_report
+. QUEUED
+  . queued-0                     worker               2d  awaiting_report
++ DONE
+  + done-0                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+
+Jobs
+No jobs yet.
+
+Workers
+  * worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== lanes/true/classic
+Orbit activity
+
+Jobs
+No jobs yet.
+
+Workers
+Name                   Status         Pane           Provider
+worker                 working        p-worker       codex
+
+Blocked workers
+blocked-0  pane=p-0  task=blocked-0  blocked_for=48h
+Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Assignments / Polaris delivery
+done-0  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+queued-0  worker=worker  submission=pending  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+working-0  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== lanes/true/modern
+Orbit  ·  1 worker  ·  ▲ 1 needs you   ◐ 1 working   ◌ 1 queued
+
+▲ NEEDS YOU
+  ▲ p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+◐ WORKING
+  ◐ working-0                    worker               2d  awaiting_report
+◌ QUEUED
+  ◌ queued-0                     worker               2d  awaiting_report
+✓ DONE
+  ✓ done-0                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+
+Jobs
+No jobs yet.
+
+Workers
+  ◐ worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== lanes/true/ascii
+Orbit  .  1 worker  .  ! 1 needs you   * 1 working   . 1 queued
+
+! NEEDS YOU
+  ! p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+* WORKING
+  * working-0                    worker               2d  awaiting_report
+. QUEUED
+  . queued-0                     worker               2d  awaiting_report
++ DONE
+  + done-0                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+
+Jobs
+No jobs yet.
+
+Workers
+  * worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== overflow/false/classic
+Orbit activity
+
+Jobs
+No jobs yet.
+
+Workers
+Name                   Status         Pane           Provider
+worker                 working        p-worker       codex
+
+Blocked workers
+blocked-0  pane=p-0  task=blocked-0  blocked_for=48h
+blocked-1  pane=p-1  task=blocked-1  blocked_for=48h
+blocked-2  pane=p-2  task=blocked-2  blocked_for=48h
+blocked-3  pane=p-3  task=blocked-3  blocked_for=48h
+blocked-4  pane=p-4  task=blocked-4  blocked_for=48h
+blocked-5  pane=p-5  task=blocked-5  blocked_for=48h
+blocked-6  pane=p-6  task=blocked-6  blocked_for=48h
+blocked-7  pane=p-7  task=blocked-7  blocked_for=48h
+blocked-8  pane=p-8  task=blocked-8  blocked_for=48h
+blocked-9  pane=p-9  task=blocked-9  blocked_for=48h
+blocked-10  pane=p-10  task=blocked-10  blocked_for=48h
+blocked-11  pane=p-11  task=blocked-11  blocked_for=48h
+blocked-12  pane=p-12  task=blocked-12  blocked_for=48h
+blocked-13  pane=p-13  task=blocked-13  blocked_for=48h
+blocked-14  pane=p-14  task=blocked-14  blocked_for=48h
+blocked-15  pane=p-15  task=blocked-15  blocked_for=48h
+blocked-16  pane=p-16  task=blocked-16  blocked_for=48h
+blocked-17  pane=p-17  task=blocked-17  blocked_for=48h
+blocked-18  pane=p-18  task=blocked-18  blocked_for=48h
+blocked-19  pane=p-19  task=blocked-19  blocked_for=48h
+Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Assignments / Polaris delivery
+done-24  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-23  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-22  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-21  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-20  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-19  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-18  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-17  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-16  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-15  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-14  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-13  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-12  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-11  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-10  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-9  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-8  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-7  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-6  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-5  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+Showing the latest 20 of 75 assignments.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== overflow/false/modern
+Orbit  ·  1 worker  ·  ▲ 25 needs you   ◐ 25 working   ◌ 25 queued
+
+▲ NEEDS YOU
+  ▲ p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  ▲ p-1                          blocked-1            2d  waiting for a decision on blocked-1
+  ▲ p-2                          blocked-2            2d  waiting for a decision on blocked-2
+  ▲ p-3                          blocked-3            2d  waiting for a decision on blocked-3
+  ▲ p-4                          blocked-4            2d  waiting for a decision on blocked-4
+  ▲ p-5                          blocked-5            2d  waiting for a decision on blocked-5
+  ▲ p-6                          blocked-6            2d  waiting for a decision on blocked-6
+  ▲ p-7                          blocked-7            2d  waiting for a decision on blocked-7
+  ▲ p-8                          blocked-8            2d  waiting for a decision on blocked-8
+  ▲ p-9                          blocked-9            2d  waiting for a decision on blocked-9
+  ▲ p-10                         blocked-10           2d  waiting for a decision on blocked-10
+  ▲ p-11                         blocked-11           2d  waiting for a decision on blocked-11
+  ▲ p-12                         blocked-12           2d  waiting for a decision on blocked-12
+  ▲ p-13                         blocked-13           2d  waiting for a decision on blocked-13
+  ▲ p-14                         blocked-14           2d  waiting for a decision on blocked-14
+  ▲ p-15                         blocked-15           2d  waiting for a decision on blocked-15
+  ▲ p-16                         blocked-16           2d  waiting for a decision on blocked-16
+  ▲ p-17                         blocked-17           2d  waiting for a decision on blocked-17
+  ▲ p-18                         blocked-18           2d  waiting for a decision on blocked-18
+  ▲ p-19                         blocked-19           2d  waiting for a decision on blocked-19
+  … 5 more
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+◐ WORKING
+  ◐ working-24                   worker               2d  awaiting_report
+  ◐ working-23                   worker               2d  awaiting_report
+  ◐ working-22                   worker               2d  awaiting_report
+  ◐ working-21                   worker               2d  awaiting_report
+  ◐ working-20                   worker               2d  awaiting_report
+  ◐ working-19                   worker               2d  awaiting_report
+  ◐ working-18                   worker               2d  awaiting_report
+  ◐ working-17                   worker               2d  awaiting_report
+  ◐ working-16                   worker               2d  awaiting_report
+  ◐ working-15                   worker               2d  awaiting_report
+  ◐ working-14                   worker               2d  awaiting_report
+  ◐ working-13                   worker               2d  awaiting_report
+  ◐ working-12                   worker               2d  awaiting_report
+  ◐ working-11                   worker               2d  awaiting_report
+  ◐ working-10                   worker               2d  awaiting_report
+  ◐ working-9                    worker               2d  awaiting_report
+  ◐ working-8                    worker               2d  awaiting_report
+  ◐ working-7                    worker               2d  awaiting_report
+  ◐ working-6                    worker               2d  awaiting_report
+  ◐ working-5                    worker               2d  awaiting_report
+  … 5 more
+◌ QUEUED
+  ◌ queued-24                    worker               2d  awaiting_report
+  ◌ queued-23                    worker               2d  awaiting_report
+  ◌ queued-22                    worker               2d  awaiting_report
+  ◌ queued-21                    worker               2d  awaiting_report
+  ◌ queued-20                    worker               2d  awaiting_report
+  ◌ queued-19                    worker               2d  awaiting_report
+  ◌ queued-18                    worker               2d  awaiting_report
+  ◌ queued-17                    worker               2d  awaiting_report
+  ◌ queued-16                    worker               2d  awaiting_report
+  ◌ queued-15                    worker               2d  awaiting_report
+  ◌ queued-14                    worker               2d  awaiting_report
+  ◌ queued-13                    worker               2d  awaiting_report
+  ◌ queued-12                    worker               2d  awaiting_report
+  ◌ queued-11                    worker               2d  awaiting_report
+  ◌ queued-10                    worker               2d  awaiting_report
+  ◌ queued-9                     worker               2d  awaiting_report
+  ◌ queued-8                     worker               2d  awaiting_report
+  ◌ queued-7                     worker               2d  awaiting_report
+  ◌ queued-6                     worker               2d  awaiting_report
+  ◌ queued-5                     worker               2d  awaiting_report
+  … 5 more
+✓ DONE
+  ✓ done-24                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-23                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-22                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-21                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-20                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-19                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-18                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-17                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-16                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-15                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-14                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-13                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-12                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-11                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-10                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-9                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-8                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-7                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-6                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-5                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  … 5 more
+
+Jobs
+No jobs yet.
+
+Workers
+  ◐ worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== overflow/false/ascii
+Orbit  .  1 worker  .  ! 25 needs you   * 25 working   . 25 queued
+
+! NEEDS YOU
+  ! p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  ! p-1                          blocked-1            2d  waiting for a decision on blocked-1
+  ! p-2                          blocked-2            2d  waiting for a decision on blocked-2
+  ! p-3                          blocked-3            2d  waiting for a decision on blocked-3
+  ! p-4                          blocked-4            2d  waiting for a decision on blocked-4
+  ! p-5                          blocked-5            2d  waiting for a decision on blocked-5
+  ! p-6                          blocked-6            2d  waiting for a decision on blocked-6
+  ! p-7                          blocked-7            2d  waiting for a decision on blocked-7
+  ! p-8                          blocked-8            2d  waiting for a decision on blocked-8
+  ! p-9                          blocked-9            2d  waiting for a decision on blocked-9
+  ! p-10                         blocked-10           2d  waiting for a decision on blocked-10
+  ! p-11                         blocked-11           2d  waiting for a decision on blocked-11
+  ! p-12                         blocked-12           2d  waiting for a decision on blocked-12
+  ! p-13                         blocked-13           2d  waiting for a decision on blocked-13
+  ! p-14                         blocked-14           2d  waiting for a decision on blocked-14
+  ! p-15                         blocked-15           2d  waiting for a decision on blocked-15
+  ! p-16                         blocked-16           2d  waiting for a decision on blocked-16
+  ! p-17                         blocked-17           2d  waiting for a decision on blocked-17
+  ! p-18                         blocked-18           2d  waiting for a decision on blocked-18
+  ! p-19                         blocked-19           2d  waiting for a decision on blocked-19
+  ~ 5 more
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+* WORKING
+  * working-24                   worker               2d  awaiting_report
+  * working-23                   worker               2d  awaiting_report
+  * working-22                   worker               2d  awaiting_report
+  * working-21                   worker               2d  awaiting_report
+  * working-20                   worker               2d  awaiting_report
+  * working-19                   worker               2d  awaiting_report
+  * working-18                   worker               2d  awaiting_report
+  * working-17                   worker               2d  awaiting_report
+  * working-16                   worker               2d  awaiting_report
+  * working-15                   worker               2d  awaiting_report
+  * working-14                   worker               2d  awaiting_report
+  * working-13                   worker               2d  awaiting_report
+  * working-12                   worker               2d  awaiting_report
+  * working-11                   worker               2d  awaiting_report
+  * working-10                   worker               2d  awaiting_report
+  * working-9                    worker               2d  awaiting_report
+  * working-8                    worker               2d  awaiting_report
+  * working-7                    worker               2d  awaiting_report
+  * working-6                    worker               2d  awaiting_report
+  * working-5                    worker               2d  awaiting_report
+  ~ 5 more
+. QUEUED
+  . queued-24                    worker               2d  awaiting_report
+  . queued-23                    worker               2d  awaiting_report
+  . queued-22                    worker               2d  awaiting_report
+  . queued-21                    worker               2d  awaiting_report
+  . queued-20                    worker               2d  awaiting_report
+  . queued-19                    worker               2d  awaiting_report
+  . queued-18                    worker               2d  awaiting_report
+  . queued-17                    worker               2d  awaiting_report
+  . queued-16                    worker               2d  awaiting_report
+  . queued-15                    worker               2d  awaiting_report
+  . queued-14                    worker               2d  awaiting_report
+  . queued-13                    worker               2d  awaiting_report
+  . queued-12                    worker               2d  awaiting_report
+  . queued-11                    worker               2d  awaiting_report
+  . queued-10                    worker               2d  awaiting_report
+  . queued-9                     worker               2d  awaiting_report
+  . queued-8                     worker               2d  awaiting_report
+  . queued-7                     worker               2d  awaiting_report
+  . queued-6                     worker               2d  awaiting_report
+  . queued-5                     worker               2d  awaiting_report
+  ~ 5 more
++ DONE
+  + done-24                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-23                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-22                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-21                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-20                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-19                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-18                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-17                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-16                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-15                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-14                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-13                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-12                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-11                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-10                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-9                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-8                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-7                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-6                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-5                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ~ 5 more
+
+Jobs
+No jobs yet.
+
+Workers
+  * worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+=== overflow/true/classic
+Orbit activity
+
+Jobs
+No jobs yet.
+
+Workers
+Name                   Status         Pane           Provider
+worker                 working        p-worker       codex
+
+Blocked workers
+blocked-0  pane=p-0  task=blocked-0  blocked_for=48h
+blocked-1  pane=p-1  task=blocked-1  blocked_for=48h
+blocked-2  pane=p-2  task=blocked-2  blocked_for=48h
+blocked-3  pane=p-3  task=blocked-3  blocked_for=48h
+blocked-4  pane=p-4  task=blocked-4  blocked_for=48h
+blocked-5  pane=p-5  task=blocked-5  blocked_for=48h
+blocked-6  pane=p-6  task=blocked-6  blocked_for=48h
+blocked-7  pane=p-7  task=blocked-7  blocked_for=48h
+blocked-8  pane=p-8  task=blocked-8  blocked_for=48h
+blocked-9  pane=p-9  task=blocked-9  blocked_for=48h
+blocked-10  pane=p-10  task=blocked-10  blocked_for=48h
+blocked-11  pane=p-11  task=blocked-11  blocked_for=48h
+blocked-12  pane=p-12  task=blocked-12  blocked_for=48h
+blocked-13  pane=p-13  task=blocked-13  blocked_for=48h
+blocked-14  pane=p-14  task=blocked-14  blocked_for=48h
+blocked-15  pane=p-15  task=blocked-15  blocked_for=48h
+blocked-16  pane=p-16  task=blocked-16  blocked_for=48h
+blocked-17  pane=p-17  task=blocked-17  blocked_for=48h
+blocked-18  pane=p-18  task=blocked-18  blocked_for=48h
+blocked-19  pane=p-19  task=blocked-19  blocked_for=48h
+Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Assignments / Polaris delivery
+done-24  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-23  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-22  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-21  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-20  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-19  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-18  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-17  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-16  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-15  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-14  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-13  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-12  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-11  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-10  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-9  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-8  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-7  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-6  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+done-5  worker=worker  submission=submitted  Polaris=awaiting_report  attempts=—  age=48h  origin=—
+  completed: checked the result  tests=yes  checks=1 passed
+Showing the latest 20 of 75 assignments.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== overflow/true/modern
+Orbit  ·  1 worker  ·  ▲ 25 needs you   ◐ 25 working   ◌ 25 queued
+
+▲ NEEDS YOU
+  ▲ p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  ▲ p-1                          blocked-1            2d  waiting for a decision on blocked-1
+  ▲ p-2                          blocked-2            2d  waiting for a decision on blocked-2
+  ▲ p-3                          blocked-3            2d  waiting for a decision on blocked-3
+  ▲ p-4                          blocked-4            2d  waiting for a decision on blocked-4
+  ▲ p-5                          blocked-5            2d  waiting for a decision on blocked-5
+  ▲ p-6                          blocked-6            2d  waiting for a decision on blocked-6
+  ▲ p-7                          blocked-7            2d  waiting for a decision on blocked-7
+  ▲ p-8                          blocked-8            2d  waiting for a decision on blocked-8
+  ▲ p-9                          blocked-9            2d  waiting for a decision on blocked-9
+  ▲ p-10                         blocked-10           2d  waiting for a decision on blocked-10
+  ▲ p-11                         blocked-11           2d  waiting for a decision on blocked-11
+  ▲ p-12                         blocked-12           2d  waiting for a decision on blocked-12
+  ▲ p-13                         blocked-13           2d  waiting for a decision on blocked-13
+  ▲ p-14                         blocked-14           2d  waiting for a decision on blocked-14
+  ▲ p-15                         blocked-15           2d  waiting for a decision on blocked-15
+  ▲ p-16                         blocked-16           2d  waiting for a decision on blocked-16
+  ▲ p-17                         blocked-17           2d  waiting for a decision on blocked-17
+  ▲ p-18                         blocked-18           2d  waiting for a decision on blocked-18
+  ▲ p-19                         blocked-19           2d  waiting for a decision on blocked-19
+  … 5 more
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+◐ WORKING
+  ◐ working-24                   worker               2d  awaiting_report
+  ◐ working-23                   worker               2d  awaiting_report
+  ◐ working-22                   worker               2d  awaiting_report
+  ◐ working-21                   worker               2d  awaiting_report
+  ◐ working-20                   worker               2d  awaiting_report
+  ◐ working-19                   worker               2d  awaiting_report
+  ◐ working-18                   worker               2d  awaiting_report
+  ◐ working-17                   worker               2d  awaiting_report
+  ◐ working-16                   worker               2d  awaiting_report
+  ◐ working-15                   worker               2d  awaiting_report
+  ◐ working-14                   worker               2d  awaiting_report
+  ◐ working-13                   worker               2d  awaiting_report
+  ◐ working-12                   worker               2d  awaiting_report
+  ◐ working-11                   worker               2d  awaiting_report
+  ◐ working-10                   worker               2d  awaiting_report
+  ◐ working-9                    worker               2d  awaiting_report
+  ◐ working-8                    worker               2d  awaiting_report
+  ◐ working-7                    worker               2d  awaiting_report
+  ◐ working-6                    worker               2d  awaiting_report
+  ◐ working-5                    worker               2d  awaiting_report
+  … 5 more
+◌ QUEUED
+  ◌ queued-24                    worker               2d  awaiting_report
+  ◌ queued-23                    worker               2d  awaiting_report
+  ◌ queued-22                    worker               2d  awaiting_report
+  ◌ queued-21                    worker               2d  awaiting_report
+  ◌ queued-20                    worker               2d  awaiting_report
+  ◌ queued-19                    worker               2d  awaiting_report
+  ◌ queued-18                    worker               2d  awaiting_report
+  ◌ queued-17                    worker               2d  awaiting_report
+  ◌ queued-16                    worker               2d  awaiting_report
+  ◌ queued-15                    worker               2d  awaiting_report
+  ◌ queued-14                    worker               2d  awaiting_report
+  ◌ queued-13                    worker               2d  awaiting_report
+  ◌ queued-12                    worker               2d  awaiting_report
+  ◌ queued-11                    worker               2d  awaiting_report
+  ◌ queued-10                    worker               2d  awaiting_report
+  ◌ queued-9                     worker               2d  awaiting_report
+  ◌ queued-8                     worker               2d  awaiting_report
+  ◌ queued-7                     worker               2d  awaiting_report
+  ◌ queued-6                     worker               2d  awaiting_report
+  ◌ queued-5                     worker               2d  awaiting_report
+  … 5 more
+✓ DONE
+  ✓ done-24                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-23                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-22                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-21                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-20                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-19                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-18                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-17                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-16                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-15                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-14                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-13                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-12                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-11                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-10                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-9                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-8                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-7                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-6                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ✓ done-5                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  … 5 more
+
+Jobs
+No jobs yet.
+
+Workers
+  ◐ worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.
+
+=== overflow/true/ascii
+Orbit  .  1 worker  .  ! 25 needs you   * 25 working   . 25 queued
+
+! NEEDS YOU
+  ! p-0                          blocked-0            2d  waiting for a decision on blocked-0
+  ! p-1                          blocked-1            2d  waiting for a decision on blocked-1
+  ! p-2                          blocked-2            2d  waiting for a decision on blocked-2
+  ! p-3                          blocked-3            2d  waiting for a decision on blocked-3
+  ! p-4                          blocked-4            2d  waiting for a decision on blocked-4
+  ! p-5                          blocked-5            2d  waiting for a decision on blocked-5
+  ! p-6                          blocked-6            2d  waiting for a decision on blocked-6
+  ! p-7                          blocked-7            2d  waiting for a decision on blocked-7
+  ! p-8                          blocked-8            2d  waiting for a decision on blocked-8
+  ! p-9                          blocked-9            2d  waiting for a decision on blocked-9
+  ! p-10                         blocked-10           2d  waiting for a decision on blocked-10
+  ! p-11                         blocked-11           2d  waiting for a decision on blocked-11
+  ! p-12                         blocked-12           2d  waiting for a decision on blocked-12
+  ! p-13                         blocked-13           2d  waiting for a decision on blocked-13
+  ! p-14                         blocked-14           2d  waiting for a decision on blocked-14
+  ! p-15                         blocked-15           2d  waiting for a decision on blocked-15
+  ! p-16                         blocked-16           2d  waiting for a decision on blocked-16
+  ! p-17                         blocked-17           2d  waiting for a decision on blocked-17
+  ! p-18                         blocked-18           2d  waiting for a decision on blocked-18
+  ! p-19                         blocked-19           2d  waiting for a decision on blocked-19
+  ~ 5 more
+  Answer in the worker's pane; Polaris answers only with [polaris.approvals] lead_may_approve.
+* WORKING
+  * working-24                   worker               2d  awaiting_report
+  * working-23                   worker               2d  awaiting_report
+  * working-22                   worker               2d  awaiting_report
+  * working-21                   worker               2d  awaiting_report
+  * working-20                   worker               2d  awaiting_report
+  * working-19                   worker               2d  awaiting_report
+  * working-18                   worker               2d  awaiting_report
+  * working-17                   worker               2d  awaiting_report
+  * working-16                   worker               2d  awaiting_report
+  * working-15                   worker               2d  awaiting_report
+  * working-14                   worker               2d  awaiting_report
+  * working-13                   worker               2d  awaiting_report
+  * working-12                   worker               2d  awaiting_report
+  * working-11                   worker               2d  awaiting_report
+  * working-10                   worker               2d  awaiting_report
+  * working-9                    worker               2d  awaiting_report
+  * working-8                    worker               2d  awaiting_report
+  * working-7                    worker               2d  awaiting_report
+  * working-6                    worker               2d  awaiting_report
+  * working-5                    worker               2d  awaiting_report
+  ~ 5 more
+. QUEUED
+  . queued-24                    worker               2d  awaiting_report
+  . queued-23                    worker               2d  awaiting_report
+  . queued-22                    worker               2d  awaiting_report
+  . queued-21                    worker               2d  awaiting_report
+  . queued-20                    worker               2d  awaiting_report
+  . queued-19                    worker               2d  awaiting_report
+  . queued-18                    worker               2d  awaiting_report
+  . queued-17                    worker               2d  awaiting_report
+  . queued-16                    worker               2d  awaiting_report
+  . queued-15                    worker               2d  awaiting_report
+  . queued-14                    worker               2d  awaiting_report
+  . queued-13                    worker               2d  awaiting_report
+  . queued-12                    worker               2d  awaiting_report
+  . queued-11                    worker               2d  awaiting_report
+  . queued-10                    worker               2d  awaiting_report
+  . queued-9                     worker               2d  awaiting_report
+  . queued-8                     worker               2d  awaiting_report
+  . queued-7                     worker               2d  awaiting_report
+  . queued-6                     worker               2d  awaiting_report
+  . queued-5                     worker               2d  awaiting_report
+  ~ 5 more
++ DONE
+  + done-24                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-23                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-22                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-21                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-20                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-19                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-18                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-17                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-16                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-15                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-14                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-13                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-12                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-11                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-10                      worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-9                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-8                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-7                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-6                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  + done-5                       worker               2d  checked the result
+      completed: checked the result  tests=yes  checks=1 passed
+  ~ 5 more
+
+Jobs
+No jobs yet.
+
+Workers
+  * worker                 working    p-worker       codex
+
+Worker kinds
+No worker kinds allowed.
+
+Polaris lead
+No lead status.
+
+Inspect output: aster orbit job-status '{"job_id":"ID"}'
+Cancel a job:   aster orbit job-cancel '{"job_id":"ID"}'
+Inspect a task: aster orbit task-status '{"task_id":"ID"}'
+Cancel a task:  aster orbit task-cancel '{"task_id":"ID"}'
+
+Refreshing every second. Ctrl+C closes this view; jobs keep running.

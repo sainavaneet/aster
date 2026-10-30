@@ -272,3 +272,5 @@ mod team_sidebar;
 mod work_board;
 
 mod visual_classic;
+
+mod modern_notifications;

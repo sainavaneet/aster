@@ -6,6 +6,7 @@ pub(in crate::client::shell) mod lanes;
 pub(in crate::client::shell) mod pane_header;
 pub(in crate::client::shell) mod tabs;
 pub(in crate::client::shell) mod team;
+pub(in crate::client::shell) mod toast;
 
 use ratatui::{
     buffer::Buffer,

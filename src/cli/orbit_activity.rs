@@ -8,12 +8,12 @@ use serde_json::Value;
 use crate::api::client::ApiClient;
 use crate::api::schema::{EmptyParams, Method, Request};
 
-const MAX_ROWS: usize = 20;
+pub(super) const MAX_ROWS: usize = 20;
 
 /// Keep arbitrary command/output metadata from injecting terminal controls.
 /// Like `cell`, for worker-provided free text: labelled secrets are hidden on
 /// screen. The stored report and the copy delivered to the lead stay verbatim.
-fn redacted_cell(value: Option<&Value>, width: usize) -> String {
+pub(super) fn redacted_cell(value: Option<&Value>, width: usize) -> String {
     match value.and_then(Value::as_str) {
         Some(text) => cell(
             Some(&Value::String(crate::app::orbit_redact_secrets(text))),
@@ -23,7 +23,7 @@ fn redacted_cell(value: Option<&Value>, width: usize) -> String {
     }
 }
 
-fn cell(value: Option<&Value>, width: usize) -> String {
+pub(super) fn cell(value: Option<&Value>, width: usize) -> String {
     let text = value
         .and_then(Value::as_str)
         .map(str::to_owned)
@@ -51,7 +51,7 @@ fn age(created_at: Option<&Value>, now_ms: u64) -> String {
     }
 }
 
-fn yes_no(value: Option<&Value>) -> &'static str {
+pub(super) fn yes_no(value: Option<&Value>) -> &'static str {
     match value.and_then(Value::as_bool) {
         Some(true) => "yes",
         Some(false) => "no",
@@ -60,7 +60,7 @@ fn yes_no(value: Option<&Value>) -> &'static str {
 }
 
 /// `  checks=3 passed, 1 failed` when the report lists checks.
-fn checks_cell(report: &Value) -> String {
+pub(super) fn checks_cell(report: &Value) -> String {
     let Some(checks) = report.get("checks").and_then(Value::as_array) else {
         return String::new();
     };
@@ -76,7 +76,7 @@ fn checks_cell(report: &Value) -> String {
     format!("  checks={summary}")
 }
 
-fn render_lead(out: &mut String, result: &Value) {
+pub(super) fn render_lead(out: &mut String, result: &Value) {
     out.push_str("\nPolaris lead\n");
     if let Some(lead) = result.get("lead").filter(|lead| lead.is_object()) {
         let _ = writeln!(
@@ -97,7 +97,7 @@ fn render_lead(out: &mut String, result: &Value) {
     }
 }
 
-fn render_kinds(out: &mut String, result: &Value) {
+pub(super) fn render_kinds(out: &mut String, result: &Value) {
     out.push_str("\nWorker kinds\n");
     let Some(kinds) = result
         .get("kinds")
@@ -135,7 +135,7 @@ fn render_kinds(out: &mut String, result: &Value) {
 }
 
 /// Team roles with their members, grouped by role.
-fn render_team(out: &mut String, result: &Value) {
+pub(super) fn render_team(out: &mut String, result: &Value) {
     let Some(roles) = result
         .get("team")
         .and_then(Value::as_array)
@@ -249,7 +249,7 @@ fn render_tasks(out: &mut String, result: &Value, now_ms: u64) {
 }
 
 /// Panes whose worker agent exited; Polaris closes them with orbit_pane_close.
-fn render_stale(out: &mut String, result: &Value) {
+pub(super) fn render_stale(out: &mut String, result: &Value) {
     let Some(stale) = result
         .get("stale_panes")
         .and_then(Value::as_array)
@@ -276,8 +276,8 @@ fn now_ms() -> u64 {
         .as_millis() as u64
 }
 
-fn render(result: &Value, watch: bool, now_ms: u64) -> String {
-    let mut out = String::from("Orbit activity\n\nJobs\n");
+pub(super) fn render_jobs(out: &mut String, result: &Value) {
+    out.push_str("\nJobs\n");
     let jobs = result.get("jobs").and_then(Value::as_array);
     if let Some(jobs) = jobs.filter(|jobs| !jobs.is_empty()) {
         let _ = writeln!(out, "{:<48} {:<12} {:<6} Command", "ID", "Status", "Exit");
@@ -297,6 +297,9 @@ fn render(result: &Value, watch: bool, now_ms: u64) -> String {
     } else {
         out.push_str("No jobs yet.\n");
     }
+}
+
+fn render_workers(out: &mut String, result: &Value) {
     out.push_str("\nWorkers\n");
     let agents = result.get("agents").and_then(Value::as_array);
     if let Some(agents) = agents.filter(|agents| !agents.is_empty()) {
@@ -321,12 +324,10 @@ fn render(result: &Value, watch: bool, now_ms: u64) -> String {
     } else {
         out.push_str("No workers yet.\n");
     }
-    render_team(&mut out, result);
-    render_blocked(&mut out, result, now_ms);
-    render_stale(&mut out, result);
-    render_kinds(&mut out, result);
-    render_lead(&mut out, result);
-    render_tasks(&mut out, result, now_ms);
+}
+
+/// The command hints every view ends with.
+pub(super) fn render_footer(out: &mut String, watch: bool) {
     out.push_str("\nInspect output: aster orbit job-status '{\"job_id\":\"ID\"}'\n");
     out.push_str("Cancel a job:   aster orbit job-cancel '{\"job_id\":\"ID\"}'\n");
     out.push_str("Inspect a task: aster orbit task-status '{\"task_id\":\"ID\"}'\n");
@@ -334,7 +335,41 @@ fn render(result: &Value, watch: bool, now_ms: u64) -> String {
     if watch {
         out.push_str("\nRefreshing every second. Ctrl+C closes this view; jobs keep running.\n");
     }
+}
+
+fn render(result: &Value, watch: bool, now_ms: u64) -> String {
+    let mut out = String::from("Orbit activity\n");
+    render_jobs(&mut out, result);
+    render_workers(&mut out, result);
+    render_team(&mut out, result);
+    render_blocked(&mut out, result, now_ms);
+    render_stale(&mut out, result);
+    render_kinds(&mut out, result);
+    render_lead(&mut out, result);
+    render_tasks(&mut out, result, now_ms);
+    render_footer(&mut out, watch);
     out
+}
+
+/// The glyphs of the modern view, or `None` for the classic one. Follows
+/// `ui.style` and `ui.glyphs`; an unreadable config yields the defaults.
+fn style_glyphs() -> Option<&'static crate::ui::chrome::GlyphSet> {
+    let ui = crate::config::Config::load().config.ui;
+    ui.style
+        .is_modern()
+        .then(|| crate::ui::chrome::GlyphSet::for_config(ui.glyphs))
+}
+
+fn render_styled(
+    result: &Value,
+    watch: bool,
+    now_ms: u64,
+    glyphs: Option<&crate::ui::chrome::GlyphSet>,
+) -> String {
+    match glyphs {
+        Some(glyphs) => super::orbit_activity_modern::render(result, watch, now_ms, glyphs),
+        None => render(result, watch, now_ms),
+    }
 }
 
 pub(super) fn run(watch: bool) -> io::Result<i32> {
@@ -344,6 +379,7 @@ pub(super) fn run(watch: bool) -> io::Result<i32> {
         ));
     }
     let client = ApiClient::local();
+    let glyphs = style_glyphs();
     let mut sequence = 0_u64;
     loop {
         sequence += 1;
@@ -365,7 +401,7 @@ pub(super) fn run(watch: bool) -> io::Result<i32> {
         if watch {
             output.write_all(b"\x1b[2J\x1b[H")?;
         }
-        output.write_all(render(result, watch, now_ms()).as_bytes())?;
+        output.write_all(render_styled(result, watch, now_ms(), glyphs).as_bytes())?;
         output.flush()?;
         drop(output);
         if !watch {
@@ -612,5 +648,72 @@ mod tests {
         );
         assert!(!text.contains("hunter2"), "{text}");
         assert!(text.contains("password: <redacted>"), "{text}");
+    }
+}
+
+#[cfg(test)]
+mod phase5_goldens {
+    use super::*;
+    use crate::ui::chrome::glyphs::{ASCII, UNICODE};
+    use serde_json::json;
+
+    fn payload(dense: bool) -> Value {
+        let mut tasks = Vec::new();
+        let mut blocked = Vec::new();
+        for lane in ["working", "queued", "done", "blocked"] {
+            for index in 0..if dense { 25 } else { 1 } {
+                let id = format!("{lane}-{index}");
+                if lane == "blocked" {
+                    blocked.push(
+                        json!({"name":id,"pane_id":format!("p-{index}"),"task_id":id,"since_ms":1}),
+                    );
+                    continue;
+                }
+                let mut task = json!({"task_id":id,"worker_id":"worker","created_at":1,"submission":"submitted","delivery":"awaiting_report"});
+                if lane == "queued" {
+                    task["submission"] = json!("pending");
+                }
+                if lane == "done" {
+                    task["report"] = json!({"outcome":"completed","summary":"checked the result","tests_run":true,"checks":[{"name":"unit","status":"passed"}]});
+                }
+                tasks.push(task);
+            }
+        }
+        json!({"jobs":[],"agents":[{"name":"worker","agent":"codex","agent_status":"working","pane_id":"p-worker"}],"tasks":tasks,"blocked_workers":blocked})
+    }
+
+    #[test]
+    fn classic_modern_and_ascii_activity_goldens() {
+        let mut actual = String::new();
+        for (scene, payload) in [
+            ("empty", json!({})),
+            ("lanes", payload(false)),
+            ("overflow", payload(true)),
+        ] {
+            for watch in [false, true] {
+                for (style, glyphs) in [
+                    ("classic", None),
+                    ("modern", Some(&UNICODE)),
+                    ("ascii", Some(&ASCII)),
+                ] {
+                    let text = render_styled(&payload, watch, 172_800_001, glyphs);
+                    assert!(!text.contains('\u{1b}'));
+                    if scene == "overflow" && style != "classic" {
+                        assert_eq!(text.matches("5 more").count(), 4);
+                    }
+                    actual.push_str(&format!("=== {scene}/{watch}/{style}\n{text}\n"));
+                }
+            }
+        }
+        let _ = actual.pop(); // Keep one final newline in the golden envelope.
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/client/shell/tests/fixtures/orbit-activity-phase5.txt"
+        );
+        if std::env::var_os("ASTER_CAPTURE_PHASE5").is_some() {
+            std::fs::write(path, actual).unwrap();
+        } else {
+            assert_eq!(actual, std::fs::read_to_string(path).unwrap());
+        }
     }
 }

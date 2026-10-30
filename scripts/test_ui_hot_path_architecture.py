@@ -35,6 +35,7 @@ STYLE_DISPATCH_FILES = frozenset(
         "endpoint_agent_state.rs",  # owns the snapshot-derived pane attention cache
         "global_menu.rs",
         "mobile.rs",
+        "modern_toasts.rs",  # toast, feedback, diagnostic and mode bar dispatch
         "notifications.rs",
         "overlays.rs",
         "render.rs",
@@ -45,7 +46,11 @@ STYLE_DISPATCH_FILES = frozenset(
         "team_rows.rs",
         "team_sidebar.rs",
     )
-) | {"src/client/shell.rs", "src/cli/orbit_activity.rs"}
+) | {
+    "src/client/shell.rs",
+    "src/cli/orbit_activity.rs",
+    "src/cli/orbit_activity_modern.rs",
+}
 APP_SERVER_SOURCES = (
     *sorted((PROJECT_ROOT / "src" / "app").rglob("*.rs")),
     *sorted((PROJECT_ROOT / "src" / "server").rglob("*.rs")),

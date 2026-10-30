@@ -359,6 +359,8 @@ status_indicators = "symbols"
 
 `ui.style` は `"modern"`（デフォルト）または `"classic"` を選択します。modern のサイドバーはロールごとの状態、メンバーのモデルと作業を表示し、作業一覧を needs you・working・queued・done のレーンに分けます。classic は元の行表示を維持します。modern は Orbit ワーカーのペイン上枠にロール、メンバー、作業と状態を表示し、タブバーにロール別の活動と件数を追加します。上枠がないペインにはヘッダーを表示しません。`ui.glyphs` はmodern 表示用に `"unicode"`（デフォルト）または `"ascii"` を選択します。作業完了や新たな対応待ちなどの変更には、アニメーションが off でも 60 秒間下線が付きます。設定を変更してもペインのサイズは変わりません。modern では、設定の **style** タブで外観をプレビューし、Enter で保存、Esc で元に戻せます。classic ではこのタブは表示されません。modern に戻すには `ui.style` を編集してください。
 
+modern では、通知とクリップボードのフィードバックを状態色のガターとグリフでコンパクトに表示し、幅に余裕があればモードバーとモバイルヘッダーに対応待ち件数を表示します。`aster orbit activity` も `ui.style` と `ui.glyphs` に従い、modern では割り当てを NEEDS YOU、WORKING、QUEUED、DONE に分類し、TUI と同じ経過時間の単位を使います。classic は従来のセクションを維持します。CLI 出力はプレーンテキストです。
+
 ```toml
 [ui]
 style = "modern"

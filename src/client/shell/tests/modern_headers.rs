@@ -580,16 +580,19 @@ fn the_tab_bar_ends_with_an_attention_chip_that_yields_to_the_tabs() {
     assert!(super::frame_rows(&frame)[0]
         .trim_end()
         .ends_with("!1 ?1 *1"));
-    // Classic never draws it, and a narrow tab bar keeps its tabs instead.
+    // Classic never draws it.
     state.config.ui_style = crate::config::UiStyleConfig::Classic;
     state.config.refresh_chrome();
     let frame = state.compose(COLS, ROWS).unwrap();
     assert!(!super::frame_rows(&frame)[0].contains("!1"));
+    // A mobile-width screen has no tab bar; the chip moves to the header row,
+    // where it fits beside the workspace name.
     let mut narrow = two_panes(10, "pane_2");
     let frame = narrow.compose(40, ROWS).unwrap();
     assert!(
-        !super::frame_rows(&frame)[0].contains("▲1"),
-        "no room for the chip"
+        super::frame_rows(&frame)[0].contains("▲1 ⚑1 ◐1"),
+        "{}",
+        super::frame_rows(&frame)[0]
     );
     // Resolving the approvals changes the snapshot, and the chip with it.
     let mut quiet = two_panes(60, "pane_2");

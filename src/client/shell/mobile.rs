@@ -52,6 +52,7 @@ pub(super) fn render_mobile_header(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    summary: super::modern::model::tabs::AttentionSummary,
     hits: &mut ShellHitMap,
 ) {
     if area.is_empty() {
@@ -69,7 +70,7 @@ pub(super) fn render_mobile_header(
     hits.mobile_switch = button;
     let status_width = button.x.saturating_sub(area.x).saturating_sub(1);
     let status = Rect::new(area.x, area.y, status_width, area.height);
-    render_header_status(buffer, status, snapshot, config);
+    render_header_status(buffer, status, snapshot, config, summary);
     render_header_button(buffer, button, snapshot, config);
 }
 
@@ -78,6 +79,7 @@ fn render_header_status(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    summary: super::modern::model::tabs::AttentionSummary,
 ) {
     if area.is_empty() {
         return;
@@ -101,7 +103,36 @@ fn render_header_status(
     };
     let tab_status = compact_tab_status(snapshot, workspace);
     let tab_width = display_width(&tab_status).saturating_add(1).min(area.width);
-    let name_width = area.width.saturating_sub(tab_width);
+    // The modern attention chip takes the cells left of the tab counter when
+    // the name keeps at least `MIN_NAME` of them.
+    const MIN_NAME: u16 = 12;
+    let chip = if config.chrome.is_modern() {
+        summary.width()
+    } else {
+        0
+    };
+    let chip_reserve = if chip > 0 && area.width >= tab_width + chip + 1 + MIN_NAME {
+        chip + 1
+    } else {
+        0
+    };
+    let name_width = area
+        .width
+        .saturating_sub(tab_width)
+        .saturating_sub(chip_reserve);
+    if chip_reserve > 0 {
+        super::modern::draw::tabs::render_attention(
+            buffer,
+            Rect::new(
+                area.right().saturating_sub(tab_width + chip),
+                area.y,
+                chip,
+                1,
+            ),
+            &summary,
+            config,
+        );
+    }
     put_text(
         buffer,
         area.x,

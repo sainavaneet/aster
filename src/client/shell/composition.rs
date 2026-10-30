@@ -154,6 +154,7 @@ impl ClientShellState {
             false,
             &self.config.keybinds,
             &self.config.palette,
+            self.modern_mode_bar(),
         );
         if let Some(notice) = &self.visible_endpoint_notice {
             let phase = super::animation::notification_transition_phase(
@@ -162,12 +163,11 @@ impl ClientShellState {
                 now,
                 self.config.animations,
             );
-            self.hits.notification_toast = endpoint_notices::render_notice_with_phase(
+            self.hits.notification_toast = self.draw_endpoint_notice(
                 &mut buffer,
                 Rect::new(0, 0, cols, rows),
                 notice,
                 1,
-                &self.config.palette,
                 phase,
             );
         }
@@ -383,6 +383,7 @@ impl ClientShellState {
                 snapshot.update_available.is_some(),
                 &self.config.keybinds,
                 &self.config.palette,
+                self.modern_mode_bar(),
             )
         };
         if mode_bar == Some(layout.tab_bar) {
@@ -557,13 +558,9 @@ impl ClientShellState {
                 } else {
                     layout.pane_surface
                 };
-                crate::ui::render_config_diagnostic_buffer(
-                    &mut composed,
-                    diagnostic_area,
-                    diagnostic,
-                    &self.config.palette,
-                    |rect| occlusion.cover(rect),
-                );
+                self.draw_config_diagnostic(&mut composed, diagnostic_area, diagnostic, |rect| {
+                    occlusion.cover(rect)
+                });
             }
             let lifecycle_offset = active_lifecycle.as_ref().map_or(0, |(label, status)| {
                 occlusion.cover(endpoint_notices::render_lifecycle_banner(
@@ -584,21 +581,19 @@ impl ClientShellState {
                     self.config.animations,
                 );
                 self.hits.notification_toast = if layout.mobile_header.is_empty() {
-                    endpoint_notices::render_notice_with_phase(
+                    self.draw_endpoint_notice(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notice,
                         u16::from(has_config_diagnostic) + lifecycle_offset,
-                        &self.config.palette,
                         phase,
                     )
                 } else {
-                    endpoint_notices::render_mobile_banner_with_phase(
+                    self.draw_mobile_endpoint_notice(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notice,
                         has_config_diagnostic || lifecycle_offset > 0,
-                        &self.config.palette,
                         phase,
                     )
                 };
@@ -610,22 +605,19 @@ impl ClientShellState {
                     self.config.animations,
                 );
                 self.hits.notification_toast = if layout.mobile_header.is_empty() {
-                    notifications::render_visible_notification_with_phase(
+                    self.draw_notification(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notification,
-                        self.config.toast_position,
                         u16::from(has_config_diagnostic) + lifecycle_offset,
-                        &self.config.palette,
                         phase,
                     )
                 } else {
-                    notifications::render_mobile_notification_banner_with_phase(
+                    self.draw_mobile_notification(
                         &mut composed,
                         Rect::new(0, 0, cols, rows),
                         notification,
                         has_config_diagnostic || lifecycle_offset > 0,
-                        &self.config.palette,
                         phase,
                     )
                 };
@@ -642,20 +634,17 @@ impl ClientShellState {
             } else {
                 Rect::new(0, 0, cols, rows)
             };
-            let offset = crate::ui::copy_feedback_offset_for_toast(
+            let offset = self.feedback_offset(
                 feedback_area,
                 feedback,
                 base_offset,
-                self.config.clipboard_toast_position,
                 self.hits.notification_toast,
             );
-            occlusion.cover(crate::ui::render_copy_feedback_buffer(
+            occlusion.cover(self.draw_copy_feedback(
                 &mut composed,
                 feedback_area,
                 feedback,
                 offset,
-                self.config.clipboard_toast_position,
-                &self.config.palette,
             ));
             frame.replace_from_ratatui_buffer_preserving_effects(&composed, cursor);
         }
@@ -732,12 +721,11 @@ impl ClientShellState {
                     now,
                     self.config.animations,
                 );
-                self.hits.notification_toast = endpoint_notices::render_mobile_banner_with_phase(
+                self.hits.notification_toast = self.draw_mobile_endpoint_notice(
                     &mut composed,
                     Rect::new(0, 0, cols, rows),
                     notice,
                     active_lifecycle.is_some(),
-                    &self.config.palette,
                     phase,
                 );
             }

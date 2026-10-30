@@ -243,7 +243,7 @@ style=acd52d444d3ccc46
                                   «│                                                                                    |
 style=2960b04735ce1b86
 === catppuccin/full/unicode/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -273,7 +273,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=c5fd619359e8b55f
+style=09c8f7f697c19a67
 === catppuccin/full/unicode/collapsed
 1 ▲│⠼  1     ▪▫ ▲1 ⚑1 ◐1  +                                             ▲1 ⚑1 ◐1|
    │LIVE                                                                        |
@@ -561,7 +561,7 @@ style=acd52d444d3ccc46
                                   «│                                                                                    |
 style=2960b04735ce1b86
 === catppuccin/full/ascii/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -591,7 +591,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=c5fd619359e8b55f
+style=09c8f7f697c19a67
 === catppuccin/full/ascii/collapsed
 1 !│|  1     #. !1 ?1 *1  +                                             !1 ?1 *1|
    │LIVE                                                                        |
@@ -879,7 +879,7 @@ style=70cade6cf21d93ca
                                   «│                                                                                    |
 style=3844e6f640680d4a
 === catppuccin/reduced/unicode/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -909,7 +909,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=c5fd619359e8b55f
+style=09c8f7f697c19a67
 === catppuccin/reduced/unicode/collapsed
 1 ▲│◐  1     ▪▫ ▲1 ⚑1 ◐1  +                                             ▲1 ⚑1 ◐1|
    │LIVE                                                                        |
@@ -1197,7 +1197,7 @@ style=70cade6cf21d93ca
                                   «│                                                                                    |
 style=3844e6f640680d4a
 === catppuccin/reduced/ascii/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -1227,7 +1227,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=c5fd619359e8b55f
+style=09c8f7f697c19a67
 === catppuccin/reduced/ascii/collapsed
 1 !│*  1     #. !1 ?1 *1  +                                             !1 ?1 *1|
    │LIVE                                                                        |
@@ -1515,7 +1515,7 @@ style=70cade6cf21d93ca
                                   «│                                                                                    |
 style=3844e6f640680d4a
 === catppuccin/off/unicode/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -1545,7 +1545,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=c5fd619359e8b55f
+style=09c8f7f697c19a67
 === catppuccin/off/unicode/collapsed
 1 ▲│   1     ▪▫ ▲1 ⚑1 ◐1  +                                             ▲1 ⚑1 ◐1|
    │LIVE                                                                        |
@@ -1833,7 +1833,7 @@ style=70cade6cf21d93ca
                                   «│                                                                                    |
 style=3844e6f640680d4a
 === catppuccin/off/ascii/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -1863,7 +1863,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=c5fd619359e8b55f
+style=09c8f7f697c19a67
 === catppuccin/off/ascii/collapsed
 1 !│   1     #. !1 ?1 *1  +                                             !1 ?1 *1|
    │LIVE                                                                        |
@@ -2151,7 +2151,7 @@ style=1b1b10944ceece01
                                   «│                                                                                    |
 style=662fa3a41adc7cb1
 === catppuccin-latte/full/unicode/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -2181,7 +2181,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=e88261e212f19451
+style=84eead41d1e41479
 === catppuccin-latte/full/unicode/collapsed
 1 ▲│⠼  1     ▪▫ ▲1 ⚑1 ◐1  +                                             ▲1 ⚑1 ◐1|
    │LIVE                                                                        |
@@ -2469,7 +2469,7 @@ style=1b1b10944ceece01
                                   «│                                                                                    |
 style=662fa3a41adc7cb1
 === catppuccin-latte/full/ascii/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -2499,7 +2499,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=e88261e212f19451
+style=84eead41d1e41479
 === catppuccin-latte/full/ascii/collapsed
 1 !│|  1     #. !1 ?1 *1  +                                             !1 ?1 *1|
    │LIVE                                                                        |
@@ -2787,7 +2787,7 @@ style=53a58c8415b149c7
                                   «│                                                                                    |
 style=91032aba5cb85ff7
 === catppuccin-latte/reduced/unicode/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -2817,7 +2817,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=e88261e212f19451
+style=84eead41d1e41479
 === catppuccin-latte/reduced/unicode/collapsed
 1 ▲│◐  1     ▪▫ ▲1 ⚑1 ◐1  +                                             ▲1 ⚑1 ◐1|
    │LIVE                                                                        |
@@ -3105,7 +3105,7 @@ style=53a58c8415b149c7
                                   «│                                                                                    |
 style=91032aba5cb85ff7
 === catppuccin-latte/reduced/ascii/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -3135,7 +3135,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=e88261e212f19451
+style=84eead41d1e41479
 === catppuccin-latte/reduced/ascii/collapsed
 1 !│*  1     #. !1 ?1 *1  +                                             !1 ?1 *1|
    │LIVE                                                                        |
@@ -3423,7 +3423,7 @@ style=53a58c8415b149c7
                                   «│                                                                                    |
 style=91032aba5cb85ff7
 === catppuccin-latte/off/unicode/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -3453,7 +3453,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=e88261e212f19451
+style=84eead41d1e41479
 === catppuccin-latte/off/unicode/collapsed
 1 ▲│   1     ▪▫ ▲1 ⚑1 ◐1  +                                             ▲1 ⚑1 ◐1|
    │LIVE                                                                        |
@@ -3741,7 +3741,7 @@ style=53a58c8415b149c7
                                   «│                                                                                    |
 style=91032aba5cb85ff7
 === catppuccin-latte/off/ascii/mobile
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *1 tab 1 │        ●|
  ◉ 2 blocked · 1 working · 3 idle │ switch  |
 LIVE                                        |
 PANE                                        |
@@ -3771,7 +3771,7 @@ PANE                                        |
                                             |
                                             |
                                             |
-style=e88261e212f19451
+style=84eead41d1e41479
 === catppuccin-latte/off/ascii/collapsed
 1 !│   1     #. !1 ?1 *1  +                                             !1 ?1 *1|
    │LIVE                                                                        |

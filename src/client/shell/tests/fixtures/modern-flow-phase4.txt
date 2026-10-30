@@ -1,5 +1,5 @@
 === catppuccin/full/unicode/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -35,7 +35,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b293983fff8e8e34
+style=4a3954ba40b93464
 === catppuccin/full/unicode/relay/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -151,7 +151,7 @@ style=e493276f55c5f2f4
    pane_5               «│                                                                                                                                                                              |
 style=fb03773ac679c12b
 === catppuccin/full/unicode/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -187,7 +187,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=289751431e3ab957
+style=8bc74f951116ce47
 === catppuccin/full/unicode/parallel-two/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -303,7 +303,7 @@ style=f6b339401a3e3aa6
    pane_5               «│                                                                                                                                                                              |
 style=9a08d1c58d8abff7
 === catppuccin/full/unicode/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -339,7 +339,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=f019b414286a84ee
+style=a9a61f069bfd04de
 === catppuccin/full/unicode/parallel-four/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -455,7 +455,7 @@ style=d671a3d2eaeaeaa9
    pane_5               «│                                                                                                                                                                              |
 style=dffb801336516c7a
 === catppuccin/full/unicode/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -491,7 +491,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=4010a517b3d5235b
+style=dee24e8e48d37fcb
 === catppuccin/full/unicode/integrating-notes/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -607,7 +607,7 @@ style=79ae8f472ac4d43d
    pane_5               «│                                                                                                                                                                              |
 style=4981f2fda3b74796
 === catppuccin/full/unicode/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -643,7 +643,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=da74c8e0eea289c5
+style=15b79cb0b44f92b5
 === catppuccin/full/unicode/approval-blocked/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -759,7 +759,7 @@ style=f978924130981b54
    pane_5               «│                                                                                                                                                                              |
 style=4e4c707db4ab534d
 === catppuccin/full/unicode/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -795,7 +795,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5e01b9cf635059e9
+style=27f6458cae5cd0d9
 === catppuccin/full/unicode/blocked/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -911,7 +911,7 @@ style=01baf092cc397ee4
    pane_5               «│                                                                                                                                                                              |
 style=b6596cd4b23132c9
 === catppuccin/full/unicode/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       ▲2 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -947,7 +947,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=6a6d589401643fd2
+style=02d3a2048350e8ea
 === catppuccin/full/unicode/empty/80
  spaces                  │⠹  1     ▪▫ ▲2 ◐3  +                             ▲2 ◐3|
                          │LIVE                                                  |
@@ -1063,7 +1063,7 @@ style=cea9249af4e48e9f
    pane_5               «│                                                                                                                                                                              |
 style=ef3bbd85f81f6325
 === catppuccin/full/ascii/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -1099,7 +1099,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b293983fff8e8e34
+style=4a3954ba40b93464
 === catppuccin/full/ascii/relay/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -1215,7 +1215,7 @@ style=e493276f55c5f2f4
    pane_5               «│                                                                                                                                                                              |
 style=fb03773ac679c12b
 === catppuccin/full/ascii/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -1251,7 +1251,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=289751431e3ab957
+style=8bc74f951116ce47
 === catppuccin/full/ascii/parallel-two/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -1367,7 +1367,7 @@ style=f6b339401a3e3aa6
    pane_5               «│                                                                                                                                                                              |
 style=9a08d1c58d8abff7
 === catppuccin/full/ascii/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -1403,7 +1403,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=f019b414286a84ee
+style=a9a61f069bfd04de
 === catppuccin/full/ascii/parallel-four/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -1519,7 +1519,7 @@ style=d671a3d2eaeaeaa9
    pane_5               «│                                                                                                                                                                              |
 style=dffb801336516c7a
 === catppuccin/full/ascii/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -1555,7 +1555,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=4010a517b3d5235b
+style=dee24e8e48d37fcb
 === catppuccin/full/ascii/integrating-notes/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -1671,7 +1671,7 @@ style=79ae8f472ac4d43d
    pane_5               «│                                                                                                                                                                              |
 style=4981f2fda3b74796
 === catppuccin/full/ascii/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -1707,7 +1707,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=da74c8e0eea289c5
+style=15b79cb0b44f92b5
 === catppuccin/full/ascii/approval-blocked/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -1823,7 +1823,7 @@ style=f978924130981b54
    pane_5               «│                                                                                                                                                                              |
 style=4e4c707db4ab534d
 === catppuccin/full/ascii/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -1859,7 +1859,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5e01b9cf635059e9
+style=27f6458cae5cd0d9
 === catppuccin/full/ascii/blocked/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -1975,7 +1975,7 @@ style=01baf092cc397ee4
    pane_5               «│                                                                                                                                                                              |
 style=b6596cd4b23132c9
 === catppuccin/full/ascii/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       !2 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2011,7 +2011,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=6a6d589401643fd2
+style=02d3a2048350e8ea
 === catppuccin/full/ascii/empty/80
  spaces                  │-  1     #. !2 *3  +                             !2 *3|
                          │LIVE                                                  |
@@ -2127,7 +2127,7 @@ style=cea9249af4e48e9f
    pane_5               «│                                                                                                                                                                              |
 style=ef3bbd85f81f6325
 === catppuccin/reduced/unicode/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2163,7 +2163,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b293983fff8e8e34
+style=4a3954ba40b93464
 === catppuccin/reduced/unicode/relay/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -2279,7 +2279,7 @@ style=29b42c4d3762e9ad
    pane_5               «│                                                                                                                                                                              |
 style=c7a1e6d312c9929c
 === catppuccin/reduced/unicode/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2315,7 +2315,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=289751431e3ab957
+style=8bc74f951116ce47
 === catppuccin/reduced/unicode/parallel-two/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -2431,7 +2431,7 @@ style=512bf56e6d09787b
    pane_5               «│                                                                                                                                                                              |
 style=c245bbade705c750
 === catppuccin/reduced/unicode/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2467,7 +2467,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=f019b414286a84ee
+style=a9a61f069bfd04de
 === catppuccin/reduced/unicode/parallel-four/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -2583,7 +2583,7 @@ style=d69180ba9739d970
    pane_5               «│                                                                                                                                                                              |
 style=3cdc20e7bc4d75d5
 === catppuccin/reduced/unicode/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2619,7 +2619,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=4010a517b3d5235b
+style=dee24e8e48d37fcb
 === catppuccin/reduced/unicode/integrating-notes/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -2735,7 +2735,7 @@ style=7c2cf604085c899c
    pane_5               «│                                                                                                                                                                              |
 style=d436f113d4c941a9
 === catppuccin/reduced/unicode/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2771,7 +2771,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=da74c8e0eea289c5
+style=15b79cb0b44f92b5
 === catppuccin/reduced/unicode/approval-blocked/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -2887,7 +2887,7 @@ style=d5fd6915e42264c5
    pane_5               «│                                                                                                                                                                              |
 style=54b3c101c856505a
 === catppuccin/reduced/unicode/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -2923,7 +2923,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5e01b9cf635059e9
+style=27f6458cae5cd0d9
 === catppuccin/reduced/unicode/blocked/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -3039,7 +3039,7 @@ style=b928373ef38f1305
    pane_5               «│                                                                                                                                                                              |
 style=8fd9d7197d351a3a
 === catppuccin/reduced/unicode/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       ▲2 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3075,7 +3075,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=6a6d589401643fd2
+style=02d3a2048350e8ea
 === catppuccin/reduced/unicode/empty/80
  spaces                  │◐  1     ▪▫ ▲2 ◐3  +                             ▲2 ◐3|
                          │LIVE                                                  |
@@ -3191,7 +3191,7 @@ style=8b2d36229625860b
    pane_5               «│                                                                                                                                                                              |
 style=750aa0fa746da049
 === catppuccin/reduced/ascii/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3227,7 +3227,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b293983fff8e8e34
+style=4a3954ba40b93464
 === catppuccin/reduced/ascii/relay/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -3343,7 +3343,7 @@ style=29b42c4d3762e9ad
    pane_5               «│                                                                                                                                                                              |
 style=c7a1e6d312c9929c
 === catppuccin/reduced/ascii/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3379,7 +3379,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=289751431e3ab957
+style=8bc74f951116ce47
 === catppuccin/reduced/ascii/parallel-two/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -3495,7 +3495,7 @@ style=512bf56e6d09787b
    pane_5               «│                                                                                                                                                                              |
 style=c245bbade705c750
 === catppuccin/reduced/ascii/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3531,7 +3531,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=f019b414286a84ee
+style=a9a61f069bfd04de
 === catppuccin/reduced/ascii/parallel-four/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -3647,7 +3647,7 @@ style=d69180ba9739d970
    pane_5               «│                                                                                                                                                                              |
 style=3cdc20e7bc4d75d5
 === catppuccin/reduced/ascii/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3683,7 +3683,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=4010a517b3d5235b
+style=dee24e8e48d37fcb
 === catppuccin/reduced/ascii/integrating-notes/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -3799,7 +3799,7 @@ style=7c2cf604085c899c
    pane_5               «│                                                                                                                                                                              |
 style=d436f113d4c941a9
 === catppuccin/reduced/ascii/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3835,7 +3835,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=da74c8e0eea289c5
+style=15b79cb0b44f92b5
 === catppuccin/reduced/ascii/approval-blocked/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -3951,7 +3951,7 @@ style=d5fd6915e42264c5
    pane_5               «│                                                                                                                                                                              |
 style=54b3c101c856505a
 === catppuccin/reduced/ascii/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -3987,7 +3987,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5e01b9cf635059e9
+style=27f6458cae5cd0d9
 === catppuccin/reduced/ascii/blocked/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -4103,7 +4103,7 @@ style=b928373ef38f1305
    pane_5               «│                                                                                                                                                                              |
 style=8fd9d7197d351a3a
 === catppuccin/reduced/ascii/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       !2 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -4139,7 +4139,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=6a6d589401643fd2
+style=02d3a2048350e8ea
 === catppuccin/reduced/ascii/empty/80
  spaces                  │*  1     #. !2 *3  +                             !2 *3|
                          │LIVE                                                  |
@@ -4255,7 +4255,7 @@ style=8b2d36229625860b
    pane_5               «│                                                                                                                                                                              |
 style=750aa0fa746da049
 === catppuccin/off/unicode/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -4291,7 +4291,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b293983fff8e8e34
+style=4a3954ba40b93464
 === catppuccin/off/unicode/relay/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -4407,7 +4407,7 @@ style=29b42c4d3762e9ad
    pane_5               «│                                                                                                                                                                              |
 style=c7a1e6d312c9929c
 === catppuccin/off/unicode/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -4443,7 +4443,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=289751431e3ab957
+style=8bc74f951116ce47
 === catppuccin/off/unicode/parallel-two/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -4559,7 +4559,7 @@ style=512bf56e6d09787b
    pane_5               «│                                                                                                                                                                              |
 style=c245bbade705c750
 === catppuccin/off/unicode/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -4595,7 +4595,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=f019b414286a84ee
+style=a9a61f069bfd04de
 === catppuccin/off/unicode/parallel-four/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -4711,7 +4711,7 @@ style=d69180ba9739d970
    pane_5               «│                                                                                                                                                                              |
 style=3cdc20e7bc4d75d5
 === catppuccin/off/unicode/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -4747,7 +4747,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=4010a517b3d5235b
+style=dee24e8e48d37fcb
 === catppuccin/off/unicode/integrating-notes/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -4863,7 +4863,7 @@ style=7c2cf604085c899c
    pane_5               «│                                                                                                                                                                              |
 style=d436f113d4c941a9
 === catppuccin/off/unicode/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -4899,7 +4899,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=da74c8e0eea289c5
+style=15b79cb0b44f92b5
 === catppuccin/off/unicode/approval-blocked/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -5015,7 +5015,7 @@ style=d5fd6915e42264c5
    pane_5               «│                                                                                                                                                                              |
 style=54b3c101c856505a
 === catppuccin/off/unicode/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5051,7 +5051,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5e01b9cf635059e9
+style=27f6458cae5cd0d9
 === catppuccin/off/unicode/blocked/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -5167,7 +5167,7 @@ style=b928373ef38f1305
    pane_5               «│                                                                                                                                                                              |
 style=8fd9d7197d351a3a
 === catppuccin/off/unicode/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       ▲2 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5203,7 +5203,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=6a6d589401643fd2
+style=02d3a2048350e8ea
 === catppuccin/off/unicode/empty/80
  spaces                  │   1     ▪▫ ▲2 ◐3  +                             ▲2 ◐3|
                          │LIVE                                                  |
@@ -5319,7 +5319,7 @@ style=8b2d36229625860b
    pane_5               «│                                                                                                                                                                              |
 style=750aa0fa746da049
 === catppuccin/off/ascii/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5355,7 +5355,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b293983fff8e8e34
+style=4a3954ba40b93464
 === catppuccin/off/ascii/relay/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -5471,7 +5471,7 @@ style=29b42c4d3762e9ad
    pane_5               «│                                                                                                                                                                              |
 style=c7a1e6d312c9929c
 === catppuccin/off/ascii/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5507,7 +5507,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=289751431e3ab957
+style=8bc74f951116ce47
 === catppuccin/off/ascii/parallel-two/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -5623,7 +5623,7 @@ style=512bf56e6d09787b
    pane_5               «│                                                                                                                                                                              |
 style=c245bbade705c750
 === catppuccin/off/ascii/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5659,7 +5659,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=f019b414286a84ee
+style=a9a61f069bfd04de
 === catppuccin/off/ascii/parallel-four/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -5775,7 +5775,7 @@ style=d69180ba9739d970
    pane_5               «│                                                                                                                                                                              |
 style=3cdc20e7bc4d75d5
 === catppuccin/off/ascii/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5811,7 +5811,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=4010a517b3d5235b
+style=dee24e8e48d37fcb
 === catppuccin/off/ascii/integrating-notes/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -5927,7 +5927,7 @@ style=7c2cf604085c899c
    pane_5               «│                                                                                                                                                                              |
 style=d436f113d4c941a9
 === catppuccin/off/ascii/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -5963,7 +5963,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=da74c8e0eea289c5
+style=15b79cb0b44f92b5
 === catppuccin/off/ascii/approval-blocked/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -6079,7 +6079,7 @@ style=d5fd6915e42264c5
    pane_5               «│                                                                                                                                                                              |
 style=54b3c101c856505a
 === catppuccin/off/ascii/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -6115,7 +6115,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5e01b9cf635059e9
+style=27f6458cae5cd0d9
 === catppuccin/off/ascii/blocked/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -6231,7 +6231,7 @@ style=b928373ef38f1305
    pane_5               «│                                                                                                                                                                              |
 style=8fd9d7197d351a3a
 === catppuccin/off/ascii/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       !2 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -6267,7 +6267,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=6a6d589401643fd2
+style=02d3a2048350e8ea
 === catppuccin/off/ascii/empty/80
  spaces                  │   1     #. !2 *3  +                             !2 *3|
                          │LIVE                                                  |
@@ -6383,7 +6383,7 @@ style=8b2d36229625860b
    pane_5               «│                                                                                                                                                                              |
 style=750aa0fa746da049
 === catppuccin-latte/full/unicode/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -6419,7 +6419,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ea6857b8ee8759e9
+style=10d573933f553f65
 === catppuccin-latte/full/unicode/relay/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -6535,7 +6535,7 @@ style=8baeb880ff0b3470
    pane_5               «│                                                                                                                                                                              |
 style=36eaa1c4b5970a23
 === catppuccin-latte/full/unicode/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -6571,7 +6571,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=14a03bd1e8f6a87e
+style=0c4946e72201934a
 === catppuccin-latte/full/unicode/parallel-two/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -6687,7 +6687,7 @@ style=fbc544f90c1b3322
    pane_5               «│                                                                                                                                                                              |
 style=e692c0b084ceeab5
 === catppuccin-latte/full/unicode/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -6723,7 +6723,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=c603e2c96b501eeb
+style=accd4319c1450647
 === catppuccin-latte/full/unicode/parallel-four/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -6839,7 +6839,7 @@ style=c30e6f3fe6304f8f
    pane_5               «│                                                                                                                                                                              |
 style=2e1319ed48bee796
 === catppuccin-latte/full/unicode/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -6875,7 +6875,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5d688af973381d94
+style=6c232f9d67d4a078
 === catppuccin-latte/full/unicode/integrating-notes/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -6991,7 +6991,7 @@ style=3672664d7d6d4f4b
    pane_5               «│                                                                                                                                                                              |
 style=8d92d25c871d063e
 === catppuccin-latte/full/unicode/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7027,7 +7027,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ca47a239edf50130
+style=8f849faae4b8b99c
 === catppuccin-latte/full/unicode/approval-blocked/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -7143,7 +7143,7 @@ style=f5556955d9869624
    pane_5               «│                                                                                                                                                                              |
 style=70c78c17af5892df
 === catppuccin-latte/full/unicode/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7179,7 +7179,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b94a25d1526fc1e4
+style=618c719cc24baf08
 === catppuccin-latte/full/unicode/blocked/80
  spaces                  │⠹  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -7295,7 +7295,7 @@ style=ccbe0fd096661970
    pane_5               «│                                                                                                                                                                              |
 style=b1af3bbcd612415b
 === catppuccin-latte/full/unicode/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       ▲2 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7331,7 +7331,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=96a61185bc20a9b5
+style=830e483f6b151f2d
 === catppuccin-latte/full/unicode/empty/80
  spaces                  │⠹  1     ▪▫ ▲2 ◐3  +                             ▲2 ◐3|
                          │LIVE                                                  |
@@ -7447,7 +7447,7 @@ style=ca16c86d10660ce8
    pane_5               «│                                                                                                                                                                              |
 style=401e8dcf571e1bf6
 === catppuccin-latte/full/ascii/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7483,7 +7483,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ea6857b8ee8759e9
+style=10d573933f553f65
 === catppuccin-latte/full/ascii/relay/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -7599,7 +7599,7 @@ style=8baeb880ff0b3470
    pane_5               «│                                                                                                                                                                              |
 style=36eaa1c4b5970a23
 === catppuccin-latte/full/ascii/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7635,7 +7635,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=14a03bd1e8f6a87e
+style=0c4946e72201934a
 === catppuccin-latte/full/ascii/parallel-two/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -7751,7 +7751,7 @@ style=fbc544f90c1b3322
    pane_5               «│                                                                                                                                                                              |
 style=e692c0b084ceeab5
 === catppuccin-latte/full/ascii/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7787,7 +7787,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=c603e2c96b501eeb
+style=accd4319c1450647
 === catppuccin-latte/full/ascii/parallel-four/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -7903,7 +7903,7 @@ style=c30e6f3fe6304f8f
    pane_5               «│                                                                                                                                                                              |
 style=2e1319ed48bee796
 === catppuccin-latte/full/ascii/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -7939,7 +7939,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5d688af973381d94
+style=6c232f9d67d4a078
 === catppuccin-latte/full/ascii/integrating-notes/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -8055,7 +8055,7 @@ style=3672664d7d6d4f4b
    pane_5               «│                                                                                                                                                                              |
 style=8d92d25c871d063e
 === catppuccin-latte/full/ascii/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -8091,7 +8091,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ca47a239edf50130
+style=8f849faae4b8b99c
 === catppuccin-latte/full/ascii/approval-blocked/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -8207,7 +8207,7 @@ style=f5556955d9869624
    pane_5               «│                                                                                                                                                                              |
 style=70c78c17af5892df
 === catppuccin-latte/full/ascii/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -8243,7 +8243,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b94a25d1526fc1e4
+style=618c719cc24baf08
 === catppuccin-latte/full/ascii/blocked/80
  spaces                  │-  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -8359,7 +8359,7 @@ style=ccbe0fd096661970
    pane_5               «│                                                                                                                                                                              |
 style=b1af3bbcd612415b
 === catppuccin-latte/full/ascii/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       !2 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -8395,7 +8395,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=96a61185bc20a9b5
+style=830e483f6b151f2d
 === catppuccin-latte/full/ascii/empty/80
  spaces                  │-  1     #. !2 *3  +                             !2 *3|
                          │LIVE                                                  |
@@ -8511,7 +8511,7 @@ style=ca16c86d10660ce8
    pane_5               «│                                                                                                                                                                              |
 style=401e8dcf571e1bf6
 === catppuccin-latte/reduced/unicode/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -8547,7 +8547,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ea6857b8ee8759e9
+style=10d573933f553f65
 === catppuccin-latte/reduced/unicode/relay/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -8663,7 +8663,7 @@ style=a58c86cc95a96add
    pane_5               «│                                                                                                                                                                              |
 style=78651f581d3a1440
 === catppuccin-latte/reduced/unicode/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -8699,7 +8699,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=14a03bd1e8f6a87e
+style=0c4946e72201934a
 === catppuccin-latte/reduced/unicode/parallel-two/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -8815,7 +8815,7 @@ style=d26fe6e4d03f4d87
    pane_5               «│                                                                                                                                                                              |
 style=63487f2540d61e2a
 === catppuccin-latte/reduced/unicode/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -8851,7 +8851,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=c603e2c96b501eeb
+style=accd4319c1450647
 === catppuccin-latte/reduced/unicode/parallel-four/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -8967,7 +8967,7 @@ style=9e6ddc347fa8dc0a
    pane_5               «│                                                                                                                                                                              |
 style=c384267f2959fa41
 === catppuccin-latte/reduced/unicode/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9003,7 +9003,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5d688af973381d94
+style=6c232f9d67d4a078
 === catppuccin-latte/reduced/unicode/integrating-notes/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -9119,7 +9119,7 @@ style=2705e323897fc5fe
    pane_5               «│                                                                                                                                                                              |
 style=0b6146497fe1da29
 === catppuccin-latte/reduced/unicode/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9155,7 +9155,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ca47a239edf50130
+style=8f849faae4b8b99c
 === catppuccin-latte/reduced/unicode/approval-blocked/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -9271,7 +9271,7 @@ style=c74fc0b9eb4f7911
    pane_5               «│                                                                                                                                                                              |
 style=91753cc07d61f3a4
 === catppuccin-latte/reduced/unicode/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9307,7 +9307,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b94a25d1526fc1e4
+style=618c719cc24baf08
 === catppuccin-latte/reduced/unicode/blocked/80
  spaces                  │◐  1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -9423,7 +9423,7 @@ style=b3374d5fcff3d5ad
    pane_5               «│                                                                                                                                                                              |
 style=eaeab8b244720568
 === catppuccin-latte/reduced/unicode/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       ▲2 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9459,7 +9459,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=96a61185bc20a9b5
+style=830e483f6b151f2d
 === catppuccin-latte/reduced/unicode/empty/80
  spaces                  │◐  1     ▪▫ ▲2 ◐3  +                             ▲2 ◐3|
                          │LIVE                                                  |
@@ -9575,7 +9575,7 @@ style=7f7f09d369c6cf54
    pane_5               «│                                                                                                                                                                              |
 style=c28f25e7294c7578
 === catppuccin-latte/reduced/ascii/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9611,7 +9611,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ea6857b8ee8759e9
+style=10d573933f553f65
 === catppuccin-latte/reduced/ascii/relay/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -9727,7 +9727,7 @@ style=a58c86cc95a96add
    pane_5               «│                                                                                                                                                                              |
 style=78651f581d3a1440
 === catppuccin-latte/reduced/ascii/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9763,7 +9763,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=14a03bd1e8f6a87e
+style=0c4946e72201934a
 === catppuccin-latte/reduced/ascii/parallel-two/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -9879,7 +9879,7 @@ style=d26fe6e4d03f4d87
    pane_5               «│                                                                                                                                                                              |
 style=63487f2540d61e2a
 === catppuccin-latte/reduced/ascii/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -9915,7 +9915,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=c603e2c96b501eeb
+style=accd4319c1450647
 === catppuccin-latte/reduced/ascii/parallel-four/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -10031,7 +10031,7 @@ style=9e6ddc347fa8dc0a
    pane_5               «│                                                                                                                                                                              |
 style=c384267f2959fa41
 === catppuccin-latte/reduced/ascii/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10067,7 +10067,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5d688af973381d94
+style=6c232f9d67d4a078
 === catppuccin-latte/reduced/ascii/integrating-notes/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -10183,7 +10183,7 @@ style=2705e323897fc5fe
    pane_5               «│                                                                                                                                                                              |
 style=0b6146497fe1da29
 === catppuccin-latte/reduced/ascii/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10219,7 +10219,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ca47a239edf50130
+style=8f849faae4b8b99c
 === catppuccin-latte/reduced/ascii/approval-blocked/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -10335,7 +10335,7 @@ style=c74fc0b9eb4f7911
    pane_5               «│                                                                                                                                                                              |
 style=91753cc07d61f3a4
 === catppuccin-latte/reduced/ascii/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10371,7 +10371,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b94a25d1526fc1e4
+style=618c719cc24baf08
 === catppuccin-latte/reduced/ascii/blocked/80
  spaces                  │*  1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -10487,7 +10487,7 @@ style=b3374d5fcff3d5ad
    pane_5               «│                                                                                                                                                                              |
 style=eaeab8b244720568
 === catppuccin-latte/reduced/ascii/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       !2 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10523,7 +10523,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=96a61185bc20a9b5
+style=830e483f6b151f2d
 === catppuccin-latte/reduced/ascii/empty/80
  spaces                  │*  1     #. !2 *3  +                             !2 *3|
                          │LIVE                                                  |
@@ -10639,7 +10639,7 @@ style=7f7f09d369c6cf54
    pane_5               «│                                                                                                                                                                              |
 style=c28f25e7294c7578
 === catppuccin-latte/off/unicode/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10675,7 +10675,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ea6857b8ee8759e9
+style=10d573933f553f65
 === catppuccin-latte/off/unicode/relay/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -10791,7 +10791,7 @@ style=a58c86cc95a96add
    pane_5               «│                                                                                                                                                                              |
 style=78651f581d3a1440
 === catppuccin-latte/off/unicode/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10827,7 +10827,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=14a03bd1e8f6a87e
+style=0c4946e72201934a
 === catppuccin-latte/off/unicode/parallel-two/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -10943,7 +10943,7 @@ style=d26fe6e4d03f4d87
    pane_5               «│                                                                                                                                                                              |
 style=63487f2540d61e2a
 === catppuccin-latte/off/unicode/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -10979,7 +10979,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=c603e2c96b501eeb
+style=accd4319c1450647
 === catppuccin-latte/off/unicode/parallel-four/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -11095,7 +11095,7 @@ style=9e6ddc347fa8dc0a
    pane_5               «│                                                                                                                                                                              |
 style=c384267f2959fa41
 === catppuccin-latte/off/unicode/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -11131,7 +11131,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5d688af973381d94
+style=6c232f9d67d4a078
 === catppuccin-latte/off/unicode/integrating-notes/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -11247,7 +11247,7 @@ style=2705e323897fc5fe
    pane_5               «│                                                                                                                                                                              |
 style=0b6146497fe1da29
 === catppuccin-latte/off/unicode/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -11283,7 +11283,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ca47a239edf50130
+style=8f849faae4b8b99c
 === catppuccin-latte/off/unicode/approval-blocked/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -11399,7 +11399,7 @@ style=c74fc0b9eb4f7911
    pane_5               «│                                                                                                                                                                              |
 style=91753cc07d61f3a4
 === catppuccin-latte/off/unicode/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    ▲1 ⚑1 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -11435,7 +11435,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b94a25d1526fc1e4
+style=618c719cc24baf08
 === catppuccin-latte/off/unicode/blocked/80
  spaces                  │   1     ▪▫ ▲1 ⚑1 ◐3  +                       ▲1 ⚑1 ◐3|
                          │LIVE                                                  |
@@ -11551,7 +11551,7 @@ style=b3374d5fcff3d5ad
    pane_5               «│                                                                                                                                                                              |
 style=eaeab8b244720568
 === catppuccin-latte/off/unicode/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       ▲2 ◐3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -11587,7 +11587,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=96a61185bc20a9b5
+style=830e483f6b151f2d
 === catppuccin-latte/off/unicode/empty/80
  spaces                  │   1     ▪▫ ▲2 ◐3  +                             ▲2 ◐3|
                          │LIVE                                                  |
@@ -11703,7 +11703,7 @@ style=7f7f09d369c6cf54
    pane_5               «│                                                                                                                                                                              |
 style=c28f25e7294c7578
 === catppuccin-latte/off/ascii/relay/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -11739,7 +11739,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ea6857b8ee8759e9
+style=10d573933f553f65
 === catppuccin-latte/off/ascii/relay/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -11855,7 +11855,7 @@ style=a58c86cc95a96add
    pane_5               «│                                                                                                                                                                              |
 style=78651f581d3a1440
 === catppuccin-latte/off/ascii/parallel-two/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -11891,7 +11891,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=14a03bd1e8f6a87e
+style=0c4946e72201934a
 === catppuccin-latte/off/ascii/parallel-two/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -12007,7 +12007,7 @@ style=d26fe6e4d03f4d87
    pane_5               «│                                                                                                                                                                              |
 style=63487f2540d61e2a
 === catppuccin-latte/off/ascii/parallel-four/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -12043,7 +12043,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=c603e2c96b501eeb
+style=accd4319c1450647
 === catppuccin-latte/off/ascii/parallel-four/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -12159,7 +12159,7 @@ style=9e6ddc347fa8dc0a
    pane_5               «│                                                                                                                                                                              |
 style=c384267f2959fa41
 === catppuccin-latte/off/ascii/integrating-notes/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -12195,7 +12195,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=5d688af973381d94
+style=6c232f9d67d4a078
 === catppuccin-latte/off/ascii/integrating-notes/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -12311,7 +12311,7 @@ style=2705e323897fc5fe
    pane_5               «│                                                                                                                                                                              |
 style=0b6146497fe1da29
 === catppuccin-latte/off/ascii/approval-blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -12347,7 +12347,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=ca47a239edf50130
+style=8f849faae4b8b99c
 === catppuccin-latte/off/ascii/approval-blocked/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -12463,7 +12463,7 @@ style=c74fc0b9eb4f7911
    pane_5               «│                                                                                                                                                                              |
 style=91753cc07d61f3a4
 === catppuccin-latte/off/ascii/blocked/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell    !1 ?1 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -12499,7 +12499,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=b94a25d1526fc1e4
+style=618c719cc24baf08
 === catppuccin-latte/off/ascii/blocked/80
  spaces                  │   1     #. !1 ?1 *3  +                       !1 ?1 *3|
                          │LIVE                                                  |
@@ -12615,7 +12615,7 @@ style=b3374d5fcff3d5ad
    pane_5               «│                                                                                                                                                                              |
 style=eaeab8b244720568
 === catppuccin-latte/off/ascii/empty/44
- ● client-shell             tab 1 │        ●|
+ ● client-shell       !2 *3 tab 1 │        ●|
  ◉ 2 blocked · 3 working · 3 idle │ switch  |
 LIVE                                        |
 PA┌──────────────────────────────────────┐  |
@@ -12651,7 +12651,7 @@ PA┌─────────────────────────
                                             |
                                             |
                                             |
-style=96a61185bc20a9b5
+style=830e483f6b151f2d
 === catppuccin-latte/off/ascii/empty/80
  spaces                  │   1     #. !2 *3  +                             !2 *3|
                          │LIVE                                                  |

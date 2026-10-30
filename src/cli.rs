@@ -27,6 +27,7 @@ mod machine;
 pub(crate) mod notification;
 mod orbit;
 mod orbit_activity;
+mod orbit_activity_modern;
 mod orbit_decisions;
 mod orbit_team;
 pub(crate) mod pane;

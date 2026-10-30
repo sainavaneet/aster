@@ -30,6 +30,18 @@ pub(in crate::client::shell) fn render_sidebar_background(
     }
 }
 
+/// Below this width the modern mode bar uses the short chip names and hints.
+const COMPACT_MODE_BAR: u16 = 60;
+
+/// What the modern mode bar adds to the classic one: the shared chip colors
+/// and the attention chip at its right edge.
+#[derive(Clone, Copy)]
+pub(super) struct ModernModeBar<'a> {
+    pub(super) config: &'a ClientShellConfig,
+    pub(super) summary: super::modern::model::tabs::AttentionSummary,
+}
+
+#[allow(clippy::too_many_arguments)]
 pub(super) fn render_mode_bar(
     buffer: &mut Buffer,
     pane_area: Rect,
@@ -39,6 +51,7 @@ pub(super) fn render_mode_bar(
     update_available: bool,
     keybinds: &LiveKeybindConfig,
     palette: &Palette,
+    modern: Option<ModernModeBar<'_>>,
 ) -> Option<Rect> {
     if (mode == ClientShellMode::Terminal && endpoint_error.is_none()) || pane_area.is_empty() {
         return None;
@@ -50,13 +63,16 @@ pub(super) fn render_mode_bar(
         pane_area.width,
         1,
     );
-    let base = Style::default().fg(palette.overlay0).bg(palette.panel_bg);
+    let compact = modern.is_some() && bar.width < COMPACT_MODE_BAR;
+    let base = Style::default()
+        .fg(modern.map_or(palette.overlay0, |m| m.config.chrome.roles.text_muted))
+        .bg(palette.panel_bg);
     for x in bar.x..bar.x + bar.width {
         buffer[(x, bar.y)].set_symbol(" ").set_style(base);
     }
 
     let key = Style::default()
-        .fg(palette.accent)
+        .fg(modern.map_or(palette.accent, |m| m.config.chrome.roles.focus))
         .bg(palette.panel_bg)
         .add_modifier(Modifier::BOLD);
     let mode_style = Style::default()
@@ -85,6 +101,20 @@ pub(super) fn render_mode_bar(
         ]);
     } else {
         match mode {
+            ClientShellMode::Prefix if compact => {
+                segments.extend([
+                    (" PFX ".to_owned(), mode_style),
+                    (" ".to_owned(), base),
+                    ("esc".to_owned(), key),
+                    (" cancel  ".to_owned(), base),
+                    (prefix, key),
+                    (" send  ".to_owned(), base),
+                    (prefix_rhs(&keybinds.keybinds.workspace_picker), key),
+                    (" space  ".to_owned(), base),
+                    (prefix_rhs(&keybinds.keybinds.help), key),
+                    (" keys".to_owned(), base),
+                ]);
+            }
             ClientShellMode::Prefix => {
                 segments.extend([
                     (" PREFIX ".to_owned(), mode_style),
@@ -97,6 +127,18 @@ pub(super) fn render_mode_bar(
                     (" workspace nav  ".to_owned(), base),
                     (prefix_rhs(&keybinds.keybinds.help), key),
                     (" keybinds".to_owned(), base),
+                ]);
+            }
+            ClientShellMode::Navigate if compact => {
+                segments.extend([
+                    (" NAV ".to_owned(), mode_style),
+                    (" esc back  ".to_owned(), base),
+                    ("↑↓".to_owned(), key),
+                    (" space  ".to_owned(), base),
+                    ("tab".to_owned(), key),
+                    (" pane  ".to_owned(), base),
+                    (prefix_rhs(&keybinds.keybinds.help), key),
+                    (" keys".to_owned(), base),
                 ]);
             }
             ClientShellMode::Navigate => {
@@ -213,6 +255,7 @@ pub(super) fn render_mode_bar(
                 .min(remaining),
         );
     }
+    let mut chip_limit = bar.right();
     if update_available && mode == ClientShellMode::Navigate {
         let width = 13.min(bar.width);
         let area = Rect::new(bar.right().saturating_sub(width), bar.y, width, 1);
@@ -227,6 +270,21 @@ pub(super) fn render_mode_bar(
                 .bg(palette.panel_bg)
                 .add_modifier(Modifier::BOLD),
         );
+        chip_limit = area.x;
+    }
+    if let Some(modern) = modern {
+        // The attention chip sits against the right edge (or the update
+        // notice) and only draws when the hints leave it a free cell either side.
+        let chip = modern.summary.width();
+        let start = chip_limit.saturating_sub(chip.saturating_add(1));
+        if chip > 0 && start > x {
+            super::modern::draw::tabs::render_attention(
+                buffer,
+                Rect::new(start, bar.y, chip, 1),
+                &modern.summary,
+                modern.config,
+            );
+        }
     }
     Some(bar)
 }
@@ -274,6 +332,7 @@ pub(super) fn render_shell(
             layout.mobile_header,
             snapshot,
             config,
+            state.attention_summary,
             &mut hits,
         );
     }

@@ -359,6 +359,8 @@ status_indicators = "symbols"
 
 `ui.style` 可选 `"modern"`（默认）或 `"classic"`。modern 侧边栏显示各角色的状态、成员模型和任务，并将工作分为 needs you、working、queued、done 四个泳道；classic 保留原来的行布局。modern 还会在 Orbit 工作窗格的上边框显示角色、成员、任务和状态，并在标签栏显示各角色的活动与数量。没有上边框的窗格不显示标题。`ui.glyphs` 为 modern 界面选择 `"unicode"`（默认）或 `"ascii"`。工作完成或新出现的待处理状态会保留下划线 60 秒，即使动画已关闭。这些设置不会改变窗格尺寸。在 modern 模式下，可在设置的 **style** 标签中预览外观，按 Enter 保存，按 Esc 恢复。classic 模式不显示此标签；要返回 modern，请编辑 `ui.style`。
 
+modern 还使用带有状态颜色标记和图标的紧凑通知及剪贴板反馈，并在空间足够时于模式栏和移动端标题栏显示待处理数量。`aster orbit activity` 同样遵循 `ui.style` 和 `ui.glyphs`：modern 将任务分为 NEEDS YOU、WORKING、QUEUED 和 DONE，并使用与 TUI 相同的时间单位；classic 保留传统分区。CLI 输出仍为纯文本。
+
 ```toml
 [ui]
 style = "modern"

@@ -1400,3 +1400,117 @@ expectations remain unedited.
   166/176/182. Six benchmark profiles pass; the documented native graphics
   CoW-retention assertion still fails. These timings cover normal composition
   with the flow closed; allocation coverage exercises the open flow draw path.
+
+### Phase 5 build note (design-sonnet)
+
+Built: notifications, toasts, the mode bar, the mobile header chip and the
+`aster orbit activity` view in the modern language. All of it sits behind
+`ui.style = "modern"`; classic output is untouched (the classic goldens pass
+unedited).
+
+- **Dispatch.** `src/client/shell/modern_toasts.rs` owns the style dispatch for
+  the visible toast, mobile banner, endpoint notice, clipboard feedback, config
+  diagnostic and the mode bar's modern extras; composition calls it instead of
+  the classic functions. Classic arms call exactly the functions they called
+  before. `notifications::card_rect` is the classic placement arithmetic moved
+  into a shared function (same expressions); the modern card reuses it, so slide
+  and fade behave identically.
+- **Toast.** `modern/draw/toast.rs`: no box. A one-cell bar (`role_gutter`) in
+  the event's state color, the state glyph, a bold title and a muted body at
+  height 1 or 2, width capped at 72 and measured with `display_width`
+  (CJK/emoji sized correctly), text cut with the glyph set's ellipsis. Event
+  kind maps to a `StateKind` (`event_state`): needs attention is Blocked, or
+  Approval when the event's pane waits on an approval (one borrowed lookup in the
+  attention cache for the single visible toast, not pane-scaled); finished and
+  update ready are Done; custom is Idle. Endpoint notices map rejected and
+  unsupported to Failed, timeout and unavailable to Blocked. Nothing in the draw
+  path allocates; opacity fades blend the same colors as classic, reduced keeps toast fades without sliding, and off uses the settled phase.
+- **Mobile banner.** Same bar, glyph and title on the bottom row, body after
+  ` · ` and cut with the ellipsis.
+- **Clipboard feedback and config diagnostic (P15).** Chosen: fixed **only in the
+  modern path**. A byte-length fix is not classic-invisible (a non-ASCII message
+  gets a narrower box), so `ui/status.rs` is unchanged and the modern
+  `feedback_rect`/`draw_config_diagnostic` size by display cells. The modern
+  feedback is a one-row toast (Done bar and glyph); `feedback_offset` stacks it
+  under a visible toast.
+- **Mode bar.** `render_mode_bar` takes `Option<ModernModeBar>`; `None` is the
+  classic body byte for byte. Modern: key names in the `focus` role, hints in
+  `text_muted`, `NAV`/`PFX` chips and shortened hints below 60 columns, and the
+  attention chip (the tab bar's `render_attention`) right-aligned, left of the
+  `update ready` notice, drawn only when it fits a free cell either side. Copy
+  search prompt rows draw no chip.
+- **Mobile header.** The chip sits left of the tab counter on the header's first
+  row when the workspace name keeps at least 12 cells; classic unchanged.
+- **`aster orbit activity`.** `src/cli/orbit_activity_modern.rs`, selected by
+  `style_glyphs()` (`Config::load()`: style and `ui.glyphs`). Lanes NEEDS YOU /
+  WORKING / QUEUED / DONE are derived from the existing payload (blocked workers,
+  task submission and report outcome); a blocked worker is the single row for
+  its task or filed notice. Header line with counts, report line under DONE rows
+  (outcome, redacted summary, tests, checks), ages in the TUI's units (`s/m/h/d`
+  via `age_text`), glyphs from the selected set. Jobs, team, kinds, lead and the
+  command footer reuse the classic renderers (now `pub(super)`; classic output is
+  byte-identical, `render` is the same composition split into functions). Plain
+  text, no color and no ANSI beyond what `--watch` already emitted; JSON output
+  and the API payload are unchanged; no new server data.
+- **Test impact.** Modern fixtures (`modern-sidebar-phase2`, `modern-headers-phase3`,
+  `modern-flow-phase4`) were regenerated: the only diff is the attention chip in
+  the mobile header rows. `the_tab_bar_ends_with_an_attention_chip...` now asserts
+  the chip moves to the mobile header at 40 columns; the toast/clipboard graphics
+  test draws feedback through the dispatching method and tolerates a one-row toast
+  lying wholly over the mobile header.
+- **For design-sol.** Snapshot/unit tests wanted: toast at short areas (height
+  1-3), all four positions and six clipboard positions, reduced/off phases, CJK
+  and ZWJ titles, ascii glyphs, light/dark; allocation-counter test over
+  `draw_card`/`draw_banner`/`draw_feedback`; mode bar at 50/64/80/120 for every
+  mode with and without the update notice; CLI goldens for classic vs modern,
+  ascii glyphs, empty payload, >20 rows per lane, and `age` units; architecture
+  script lists `modern_toasts.rs` and `orbit_activity_modern.rs` as dispatch files.
+
+
+### Phase 5 validation (design-sol)
+
+- Added 564 deterministic toast/banner/clipboard scenes (light/dark, Unicode/ASCII,
+  full/reduced/off, enter/settled/fade, heights 1–3, all positions) with cell style
+  digests; 160 mode-bar scenes at 50/64/80/120 columns for every mode and update
+  notice state; 18 CLI goldens for classic/modern/ASCII, empty/lanes/>20 rows and
+  watch/non-watch. Existing classic fixture is unchanged. Older modern fixture
+  changes are confined to the intended mobile-header chip.
+- Geometry tests exercise narrow widths and oversized offsets. Three tests first
+  failed on implementation bugs: top clipboard offsets could draw beyond the
+  area (and bottom offsets overflow), the ASCII banner used a Unicode separator,
+  and config diagnostics used an allocating classic writer. Fixed all three in
+  modern paths. Allocation counting now covers card, banner, feedback and config
+  diagnostic drawing cold with CJK and long ZWJ graphemes.
+- Added copy-search exclusion, diagnostic display-width/occlusion and CLI age
+  boundary coverage. English/Japanese/Chinese draft docs describe the surfaces
+  and CLI style dispatch. No runtime data, endpoint fields or crates added.
+- Before test/review fixes, the quiet standard render-scale profile measured
+  classic 157/167/176 µs, modern 158/176/175 µs at 1/15/50 panes. The normalized
+  15:1 gap was +0.0502 (slightly over +0.05); final samples follow below.
+- First native verification: 4,703 nextest tests pass, 16 skipped; no retry was
+  needed for `active_retry_failure`. Fmt/clippy, 151 maintenance tests, integration
+  assets, architecture (14), config reference, translation parity (4), and docs
+  contract (7) pass. `just check` reaches Windows lint and stops at the missing
+  workstation Windows SDK libc configuration; no platform code changed.
+- Known retained behavior: bottom notifications and feedback can share the mode
+  bar's row, as before. This phase preserves classic placement and adds bounded
+  geometry for modern feedback; it does not redesign the overlay stacking order.
+
+- A real-payload CLI regression uses terminal ids distinct from display names.
+  Blocked-notice deduplication now joins the existing agent pane/terminal mapping
+  instead of comparing an id with a name; no server data is added.
+- The final sequential verify run passes 4,713 native tests (16 skipped), including
+  that regression and concurrently added backend tests. Fmt/clippy, maintenance,
+  integration assets and architecture pass; Windows lint remains unavailable.
+  Unrelated parallel-checkout edits briefly broke a benchmark rebuild, then were
+  completed by their owner. Those backend files are excluded from this commit.
+- Final quiet render-scale medians at 1/15/50 panes (µs): classic 166/175/177,
+  modern 166/181/185. Modern overhead is 0%/3.4%/4.5%; normalized 15:1 gap
+  +0.0361 (before +0.0502, change -0.0140), 50:1 gap +0.0482. Both fit +0.05.
+  An earlier post-review sample was noisy: classic 169/175/171, modern
+  163/186/188, 15:1 gap +0.1059; the final repeat is recorded rather than
+  claiming every sample met budget. No pane-scaled work was added by this phase:
+  the profile has no visible toast or mobile header, and the mode-bar early exit
+  remains. Cold allocation tests separately cover the new toast draw paths.
+  All completed standard bench runs pass six profiles and hit only the documented
+  native_file_render_scale_profile CoW-retention failure.

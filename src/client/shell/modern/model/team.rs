@@ -57,6 +57,11 @@ fn task_state(task: &crate::protocol::OrbitShellActiveTask) -> StateKind {
 pub(in crate::client::shell) struct PaneAttention(HashMap<String, StateKind>);
 
 impl PaneAttention {
+    /// The approval-aware state of `pane_id`, when the Orbit projection has one.
+    pub(in crate::client::shell) fn state(&self, pane_id: &str) -> Option<StateKind> {
+        self.0.get(pane_id).copied()
+    }
+
     pub(in crate::client::shell) fn build(orbit: Option<&OrbitShellView>) -> Self {
         let Some(orbit) = orbit else {
             return Self::default();
