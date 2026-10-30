@@ -326,6 +326,9 @@ impl Task {
             Ok(next) => {
                 self.delivery = next;
                 self.updated_at = now_ms;
+                if next.is_terminal() {
+                    self.fail_parallel_steps(now_ms);
+                }
                 true
             }
             Err(error) => {

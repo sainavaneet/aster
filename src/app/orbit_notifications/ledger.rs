@@ -71,7 +71,7 @@ impl Notifications {
 
     /// Checked before the worker is prompted, so a full ledger never orphans an assignment.
     pub(super) fn check_room(&self) -> Result<(), String> {
-        if self.tasks.len() < CAPACITY || self.tasks.iter().any(|t| t.delivery.is_terminal()) {
+        if self.tasks.len() < CAPACITY || self.tasks.iter().any(Task::is_evictable) {
             return Ok(());
         }
         let active = self
@@ -87,7 +87,7 @@ impl Notifications {
     /// Evicts the oldest resolved entries into the bounded tombstone ring.
     fn make_room(&mut self) {
         while self.tasks.len() >= CAPACITY {
-            let Some(index) = self.tasks.iter().position(|t| t.delivery.is_terminal()) else {
+            let Some(index) = self.tasks.iter().position(Task::is_evictable) else {
                 return;
             };
             let evicted = self.tasks.remove(index);

@@ -99,6 +99,13 @@ impl App {
                 now,
             );
         }
+        if !open {
+            // A ledger saved by an older build, or a path that resolved the
+            // task without failing its steps: nothing is left to run.
+            self.orbit_notifications
+                .task_mut(index)
+                .fail_parallel_steps(now);
+        }
         for step in 0..self.orbit_notifications.tasks[index].steps.len() {
             let task = &self.orbit_notifications.tasks[index];
             let Some(parallel) = &task.steps[step].parallel else {

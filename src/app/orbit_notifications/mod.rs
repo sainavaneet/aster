@@ -273,12 +273,20 @@ impl App {
         notifications.set_lead_absent_fail_ms(config.delivery.lead_absent_timeout_ms);
     }
 
-    /// Loads the persisted ledger once and reconciles it with live terminals.
+    /// Loads the persisted ledger once and reconciles it with live terminals;
+    /// a server that persists its session then reclaims abandoned checkouts.
     fn ensure_orbit_ledger(&mut self, now_ms: u64) {
-        let notifications = &mut self.orbit_notifications;
-        if notifications.loaded {
+        if self.orbit_notifications.loaded {
             return;
         }
+        self.load_orbit_ledger(now_ms);
+        if self.policy.persist_session {
+            self.reclaim_orphaned_checkouts(crate::parallel_checkout::RECLAIM_MIN_AGE);
+        }
+    }
+
+    fn load_orbit_ledger(&mut self, now_ms: u64) {
+        let notifications = &mut self.orbit_notifications;
         notifications.loaded = true;
         notifications.lifecycle_after = now_ms + lifecycle::STARTUP_GRACE_MS;
         // Unit tests choose a token directory explicitly; see `tests`.

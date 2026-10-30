@@ -16,11 +16,13 @@ pub(crate) mod checked;
 pub(crate) mod integrate;
 pub(crate) mod integrate_resume;
 pub(crate) mod journal;
+mod reclaim;
 mod safety;
 #[cfg(test)]
 mod tests;
 
 use checked::{git, run, run_bytes};
+pub(crate) use reclaim::{reclaim_orphans, RECLAIM_MIN_AGE};
 pub(crate) use safety::RemoveError;
 use safety::{clonable, remove_unchecked, verify_clone, write_marker};
 

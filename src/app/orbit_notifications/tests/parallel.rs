@@ -618,3 +618,137 @@ async fn a_corrupt_recorded_checkout_path_is_refused_untouched_and_not_retried()
     assert!(checkout.path.exists());
     crate::parallel_checkout::remove(&checkout, &repo.root.join("checkouts")).unwrap();
 }
+
+fn made_checkout(repo: &Repo, name: &str) -> crate::parallel_checkout::Checkout {
+    crate::parallel_checkout::create_with(
+        &repo.path(),
+        &repo.path(),
+        &repo.root.join("checkouts"),
+        "repo",
+        name,
+        &[],
+        no_clone,
+    )
+    .unwrap()
+}
+
+#[tokio::test]
+async fn a_full_ledger_never_evicts_a_task_that_still_holds_a_checkout() {
+    let (mut app, _worker, _lead) = setup();
+    let repo = Repo::new();
+    let (holder, checkout) = finished_step_with_checkout(&mut app, &repo);
+    // Resolved, but its checkout is not confirmed removed yet.
+    task_mut(&mut app, &holder).delivery = Delivery::Cancelled;
+    let template = serde_json::to_value(task(&app, &holder)).unwrap();
+    let copy = |id: &str| -> Task {
+        let mut value = template.clone();
+        value["task_id"] = json!(id);
+        value["steps"] = json!([]);
+        serde_json::from_value(value).unwrap()
+    };
+    for index in 0..CAPACITY - 1 {
+        app.orbit_notifications
+            .tasks
+            .push(copy(&format!("filler-{index}")));
+    }
+
+    app.orbit_notifications.insert(copy("newcomer"));
+
+    assert!(
+        app.orbit_notifications.find(&holder).is_some(),
+        "the task owning {} was evicted",
+        checkout.path.display()
+    );
+    assert!(app.orbit_notifications.find("filler-0").is_none());
+    crate::parallel_checkout::remove(&checkout, &repo.root.join("checkouts")).unwrap();
+}
+
+#[tokio::test]
+async fn a_task_resolved_without_its_steps_still_releases_the_active_steps_checkout() {
+    let (mut app, _worker, _lead) = setup();
+    let repo = Repo::new();
+    app.state.worktree_directory = repo.root.join("checkouts");
+    let task_id = parallel_task(&mut app, json!([step(&["a.rs"])]));
+    let checkout = made_checkout(&repo, "par-active");
+    let worker = reviewer(&app);
+    run_step(&mut app, &task_id, 0, &worker);
+    task_mut(&mut app, &task_id).steps[0]
+        .parallel
+        .as_mut()
+        .unwrap()
+        .checkout = Some(checkout.clone());
+    // A delivery path resolves the task while the step is still active.
+    let stored = task_mut(&mut app, &task_id);
+    stored.delivery = Delivery::Queued;
+    stored.set_delivery(Delivery::Failed, 1, "delivery attempts exhausted");
+
+    for _ in 0..200 {
+        pump(&mut app);
+        if !checkout.path.exists() {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+
+    assert!(
+        !checkout.path.exists(),
+        "the checkout of a step of a resolved task was left behind"
+    );
+    assert_eq!(task(&app, &task_id).steps[0].state, StepState::Failed);
+}
+
+#[tokio::test]
+async fn startup_reclaims_marked_checkouts_no_ledger_entry_owns() {
+    let (mut app, _worker, _lead) = setup();
+    let repo = Repo::new();
+    app.state.worktree_directory = repo.root.join("checkouts");
+    let orphan = made_checkout(&repo, "par-orphan");
+    let (task_id, owned) = finished_step_with_checkout(&mut app, &repo);
+    // Not ours: no marker.
+    let foreign = repo.root.join("checkouts/repo/par-foreign");
+    std::fs::create_dir_all(&foreign).unwrap();
+    std::fs::write(foreign.join("keep.txt"), "keep").unwrap();
+
+    // Too young to be sure nothing is still creating it.
+    app.reclaim_orphaned_checkouts(Duration::from_secs(3600));
+    tokio::time::sleep(Duration::from_millis(300)).await;
+    assert!(orphan.path.exists());
+
+    app.reclaim_orphaned_checkouts(Duration::ZERO);
+    for _ in 0..200 {
+        if !orphan.path.exists() {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+
+    assert!(!orphan.path.exists(), "the orphaned clone was kept");
+    assert!(owned.path.exists(), "a clone the ledger owns was removed");
+    assert!(foreign.join("keep.txt").exists());
+    assert!(task(&app, &task_id).holds_parallel_resources());
+    crate::parallel_checkout::remove(&owned, &repo.root.join("checkouts")).unwrap();
+}
+
+#[tokio::test]
+async fn a_checkout_recorded_for_a_task_the_ledger_lost_is_removed_not_dropped() {
+    let (mut app, _worker, _lead) = setup();
+    let repo = Repo::new();
+    app.state.worktree_directory = repo.root.join("checkouts");
+    let checkout = made_checkout(&repo, "par-lost");
+
+    app.record_parallel_checkout(&crate::events::ParallelLaunch {
+        task_id: "task-that-is-gone".into(),
+        step: 0,
+        label: "par-lost".into(),
+        apply: Vec::new(),
+        checkout: Some(checkout.clone()),
+    });
+
+    for _ in 0..200 {
+        if !checkout.path.exists() {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert!(!checkout.path.exists());
+}

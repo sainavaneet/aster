@@ -73,7 +73,7 @@ pub(super) fn remove_copied_lock(clone: &Path) -> bool {
 }
 
 /// The ownership marker of a checkout: a sibling file naming its canonical path.
-fn marker_path(path: &Path) -> PathBuf {
+pub(super) fn marker_path(path: &Path) -> PathBuf {
     let name = path.file_name().unwrap_or_default().to_string_lossy();
     path.with_file_name(format!("{name}.aster-checkout"))
 }
@@ -100,7 +100,7 @@ pub(super) fn remove_marker(directory: &Path, path: &Path) {
 
 /// The marker's two lines (canonical checkout path, source repository), read
 /// only from a regular file, never through a symlink.
-fn read_marker(path: &Path) -> Option<(String, String)> {
+pub(super) fn read_marker(path: &Path) -> Option<(String, String)> {
     let text = checked::read_plain(&marker_path(path)).ok()?;
     let mut lines = text.lines();
     Some((lines.next()?.to_owned(), lines.next()?.to_owned()))

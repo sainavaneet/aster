@@ -144,6 +144,26 @@ impl Task {
         open || self.holds_parallel_resources() || self.integration_in_progress()
     }
 
+    /// Resolved and nothing of it left to release, so the ledger may evict it.
+    pub(super) fn is_evictable(&self) -> bool {
+        self.delivery.is_terminal()
+            && !self.holds_parallel_resources()
+            && !self.integration_in_progress()
+    }
+
+    /// A task that ended fails the parallel steps it never finished, so their
+    /// agents and checkouts are released whichever path ended it.
+    pub(super) fn fail_parallel_steps(&mut self, now: u64) {
+        for step in &mut self.steps {
+            if step.parallel.is_some()
+                && matches!(step.state, StepState::Active | StepState::Pending)
+            {
+                step.state = StepState::Failed;
+                step.finished_at = Some(now);
+            }
+        }
+    }
+
     /// An agent or checkout of a parallel step is still to be released.
     pub(super) fn holds_parallel_resources(&self) -> bool {
         self.steps
