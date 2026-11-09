@@ -20,7 +20,7 @@ use crate::detect::AgentState;
 /// Detection and runtimes may lag a restored session; lifecycle checks wait this long.
 pub(super) const STARTUP_GRACE_MS: u64 = 15_000;
 /// Continuous worker idleness without a report before one reminder, and again before
-/// the assignment is declared unreported.
+/// Polaris receives a nonterminal missing-report notice.
 pub(super) const NUDGE_AFTER: Duration = Duration::from_secs(5 * 60);
 const NUDGE_AFTER_MS: u64 = NUDGE_AFTER.as_millis() as u64;
 const NUDGE_RETRY_MS: u64 = 5_000;
@@ -47,6 +47,7 @@ pub(super) struct BlockedEpisode {
 }
 
 enum WorkerFate {
+    IdleNotice,
     Resolve {
         to: Delivery,
         summary: String,
@@ -294,14 +295,10 @@ impl App {
         match task.nudged_at {
             None if now >= task.live.retry_at => Some(WorkerFate::Nudge),
             None => None,
-            Some(_) => Some(WorkerFate::Resolve {
-                to: Delivery::Unreported,
-                summary: format!(
-                    "Worker {} stayed idle without reporting after a reminder",
-                    task.worker_id
-                ),
-                reason: "idle without report after reminder".into(),
-            }),
+            Some(_) if !task.live.idle_notice_sent && now >= task.live.retry_at => {
+                Some(WorkerFate::IdleNotice)
+            }
+            Some(_) => None,
         }
     }
 
@@ -328,11 +325,35 @@ impl App {
     fn apply_worker_fate(&mut self, task_id: &str, fate: WorkerFate, now: u64) {
         match fate {
             WorkerFate::Nudge => self.nudge_orbit_worker(task_id, now),
+            WorkerFate::IdleNotice => self.notify_idle_assignment(task_id, now),
             WorkerFate::Resolve {
                 to,
                 summary,
                 reason,
             } => self.resolve_unreported_assignment(task_id, to, summary, &reason, now),
+        }
+    }
+
+    /// An idle chat does not establish the state of detached background work.
+    fn notify_idle_assignment(&mut self, task_id: &str, now: u64) {
+        let Some(index) = self.orbit_notifications.find(task_id) else {
+            return;
+        };
+        let notice_id = format!("{task_id}/idle-notice");
+        self.orbit_notifications.tasks[index].live.idle_notice_sent = true;
+        // The queued/delivered notice also deduplicates after server restoration.
+        if self.orbit_notifications.find(&notice_id).is_some() {
+            return;
+        }
+        let task = &self.orbit_notifications.tasks[index];
+        let summary = format!(
+            "Worker {} has not reported after an idle reminder. Background work may still be running. The assignment remains open until its report or deadline; inspect existing work before reassigning to avoid duplicate jobs.",
+            task.worker_id
+        );
+        let notice = server_notice(task, notice_id, OrbitOutcome::Blocked, summary, now);
+        if !self.orbit_notifications.insert_notice(notice) {
+            self.orbit_notifications.tasks[index].live.idle_notice_sent = false;
+            self.orbit_notifications.tasks[index].live.retry_at = now + NUDGE_RETRY_MS;
         }
     }
 

@@ -213,6 +213,8 @@ pub(super) struct LiveState {
     pub(super) batch: Option<u64>,
     pub(super) retry_at: u64,
     pub(super) idle_since: Option<u64>,
+    /// Suppresses repeated idle notices during this server lifetime.
+    pub(super) idle_notice_sent: bool,
     pub(super) uncertain_since: Option<u64>,
     /// Since when this queued report has waited for an absent lead.
     pub(super) lead_absent_since: Option<u64>,

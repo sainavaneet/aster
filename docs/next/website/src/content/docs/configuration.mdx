@@ -1325,7 +1325,9 @@ lead_absent_timeout_ms = 1800000
 Aster watches workers that have not reported. A worker whose terminal or agent
 disappears becomes `worker_lost`. A worker idle for 5 minutes receives one
 reminder restating its report command; still idle and unreported 5 minutes
-later, the assignment becomes `unreported`. `orbit_agent_assign` accepts an
+later, Polaris receives a missing-report warning while the assignment remains open.
+An idle agent may have background work running; inspect that work before
+reassigning to avoid duplicate jobs. `orbit_agent_assign` accepts an
 optional `timeout_ms` (default 2 hours, maximum 24 hours) after which it becomes
 `timed_out`. In each case Polaris receives a notice marked `origin: server`,
 showing that Aster, not the worker, produced it.

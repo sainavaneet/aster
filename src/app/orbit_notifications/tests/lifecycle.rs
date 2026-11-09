@@ -1,4 +1,4 @@
-//! Worker loss, timeout, and the single idle reminder before "unreported".
+//! Worker loss, timeout, and nonterminal idle reporting warnings.
 use super::super::lifecycle::{NUDGE_AFTER, STARTUP_GRACE_MS};
 use super::*;
 
@@ -71,7 +71,7 @@ async fn worker_that_stops_hosting_an_agent_is_lost() {
 }
 
 #[tokio::test]
-async fn idle_worker_gets_one_reminder_then_is_unreported() {
+async fn idle_worker_warns_once_keeps_assignment_open_and_accepts_report() {
     let (mut app, mut worker, mut lead) = setup();
     let result = assign(&mut app).await;
     drain(&mut worker);
@@ -98,11 +98,40 @@ async fn idle_worker_gets_one_reminder_then_is_unreported() {
         Delivery::AwaitingReport
     );
     pump_at(&mut app, resumed + NUDGE_AFTER);
-    assert_eq!(task(&app, &result.task_id).delivery, Delivery::Unreported);
+    assert_eq!(
+        task(&app, &result.task_id).delivery,
+        Delivery::AwaitingReport
+    );
     tokio::time::sleep(Duration::from_millis(50)).await;
     assert!(!drain(&mut worker).contains("reminder"));
-    let summary = "stayed idle without reporting after a reminder";
-    assert_notice_delivered(&mut app, &mut lead, &result.task_id, summary).await;
+    let notice = format!("{}/idle-notice", result.task_id);
+    assert_eq!(task(&app, &notice).origin, Some(ReportOrigin::Server));
+    pump_until(&mut app, &notice, Delivery::Submitted).await;
+    let text = drain(&mut lead);
+    assert!(
+        text.contains("Background work may still be running"),
+        "{text}"
+    );
+    assert!(text.contains("not evidence that the job failed"), "{text}");
+    assert!(!text.contains("worker is waiting on a prompt"), "{text}");
+    let count = app.orbit_notifications.tasks.len();
+    pump_at(&mut app, resumed + NUDGE_AFTER * 3);
+    assert_eq!(app.orbit_notifications.tasks.len(), count);
+    assert_eq!(
+        task(&app, &result.task_id).delivery,
+        Delivery::AwaitingReport
+    );
+    assert!(task(&app, &result.task_id).error.is_none());
+    // A restored runtime still deduplicates against the persisted notice.
+    let index = app.orbit_notifications.find(&result.task_id).unwrap();
+    app.orbit_notifications.tasks[index].live.idle_notice_sent = false;
+    pump_at(&mut app, resumed + NUDGE_AFTER * 4);
+    assert_eq!(app.orbit_notifications.tasks.len(), count);
+    assert!(app.orbit_notifications.tasks[index].live.idle_notice_sent);
+    let response = report(&mut app, result.clone());
+    assert!(response.get("error").is_none(), "{response}");
+    assert_ne!(response["result"]["late"], true);
+    pump_until(&mut app, &result.task_id, Delivery::Submitted).await;
 }
 
 #[tokio::test]
@@ -130,6 +159,37 @@ async fn assignment_times_out_and_notifies_lead() {
     assert_eq!(task(&app, &result.task_id).delivery, Delivery::TimedOut);
     let summary = "did not report before the assignment timeout";
     assert_notice_delivered(&mut app, &mut lead, &result.task_id, summary).await;
+}
+
+#[tokio::test]
+async fn idle_warning_does_not_disable_assignment_deadline() {
+    let (mut app, _worker, mut lead) = setup();
+    let result = assign_with(&mut app, Some(20 * 60 * 1_000)).await;
+    let start = Instant::now() + AFTER_GRACE;
+    pump_at(&mut app, start);
+    pump_at(&mut app, start + NUDGE_AFTER);
+    pump_at(&mut app, start + NUDGE_AFTER + Duration::from_secs(1));
+    pump_at(&mut app, start + NUDGE_AFTER * 2 + Duration::from_secs(1));
+    assert_eq!(
+        task(&app, &result.task_id).delivery,
+        Delivery::AwaitingReport
+    );
+    assert!(app
+        .orbit_notifications
+        .find(&format!("{}/idle-notice", result.task_id))
+        .is_some());
+    let warning = format!("{}/idle-notice", result.task_id);
+    pump_until(&mut app, &warning, Delivery::Submitted).await;
+    drain(&mut lead);
+    pump_at(&mut app, start + Duration::from_secs(21 * 60));
+    assert_eq!(task(&app, &result.task_id).delivery, Delivery::TimedOut);
+    assert_notice_delivered(
+        &mut app,
+        &mut lead,
+        &result.task_id,
+        "did not report before the assignment timeout",
+    )
+    .await;
 }
 
 #[tokio::test]
